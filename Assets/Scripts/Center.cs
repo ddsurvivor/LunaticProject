@@ -29,23 +29,27 @@ public class Center : MonoBehaviour
 
     #region Plots
 
-    public static string Command_background="CG";
-    public static string Command_SpeakerSet="SPEAK";
-    public static string Command_Check="CHECK";
-    public static string Command_Set="SET";
-    public static string Command_Choice="ISCHOICE";
-    public static string Command_Debug="DEBUG";
-    public static string Command_Setspace="SETSPACE";
-    public static string Command_Next="NEXT";
-    public static string Command_If="IF";
-    public static string Command_End = "END";
-    public static string Command_Skip="SKIP";
-    public static string Command_Jump="JUMPTO";
+    public static string Command_background="CG";//CG修改
+    public static string Command_SpeakerSet="SPEAK";//说话人修改
+    public static string Command_Check="CHECK";//鉴定
+    public static string Command_Set="SET";//修改变量
+    public static string Command_Choice="ISCHOICE";//设置分支
+    public static string Command_Debug="DEBUG";//输出debug信息
+    public static string Command_Setspace="SETSPACE";//设置空格
+    public static string Command_Next="NEXT";//下一段
+    public static string Command_If="IF";//检查分支
+    public static string Command_End = "END";//结束
+    public static string Command_Skip="SKIP";//跳过本行
+    public static string Command_Jump="JUMPTO";//跳转到行
     public static string Command_Refresh="REFRESH";
     public static string Command_Clear="CLEAR";
+    public static string Command_Sound = "SOUND";
+    public static string Command_Music = "MUSIC";
     public static string Command_Modify="MODIFY";
+    public static string Command_Shake="SHAKE";//震动
     public static string Tag_checkview = "!CHECKVIEW";
     public static string Tag_notspawn = "!DONTSPAWN";
+ 
     public static readonly char Plot指令分隔符 = '+';
 
     #endregion

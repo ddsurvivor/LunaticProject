@@ -6,6 +6,7 @@ using OfficeOpenXml;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
+using DG.Tweening;
 
 
 public class 剧本System: MonoBehaviour
@@ -26,6 +27,10 @@ public class 剧本System: MonoBehaviour
     public event Action 当文本更新时;
     public event Action 当检定开始时,当检定结束时;
     public string 测试剧本;
+    
+    [Header("特效设置")]
+    public float CG淡入淡出时间 = 0.5f; // CG切换的淡入淡出时间
+    public RectTransform 震动目标; // 震动的目标对象，在Inspector中设置
 
     private string 储存的检定结果;
     public string[][] 已储存剧本;
@@ -186,6 +191,9 @@ public class 剧本System: MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 加载图片（无淡入淡出效果）
+    /// </summary>
     public void LoadImage(string imageName, Image targetimg)
     {
         Texture2D texture = Resources.Load<Texture2D>("CG/" + imageName);
@@ -197,7 +205,85 @@ public class 剧本System: MonoBehaviour
         }
 
         Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-         targetimg   .sprite = sprite;
+        targetimg.sprite = sprite;
+    }
+    
+    /// <summary>
+    /// 加载图片（带淡入淡出效果）
+    /// </summary>
+    /// <param name="imageName">图片名称</param>
+    /// <param name="targetimg">目标Image</param>
+    /// <param name="fadeType">淡入淡出类型：0=无效果, 1=淡入, 2=淡出, 3=淡出后淡入</param>
+    /// <param name="duration">淡入淡出时间（秒），-1表示使用默认时间</param>
+    public void LoadImageWithFade(string imageName, Image targetimg, int fadeType = 3, float duration = -1)
+    {
+        if (duration < 0)
+        {
+            duration = CG淡入淡出时间;
+        }
+        
+        Texture2D texture = Resources.Load<Texture2D>("CG/" + imageName);
+
+        if (texture == null)
+        {
+            Debug.LogError("无法加载图片: " + imageName);
+            return;
+        }
+
+        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+        
+        // 根据淡入淡出类型执行不同的效果
+        switch (fadeType)
+        {
+            case 0: // 无效果，直接切换
+                targetimg.sprite = sprite;
+                break;
+                
+            case 1: // 仅淡入
+                targetimg.sprite = sprite;
+                targetimg.color = new Color(1, 1, 1, 0);
+                targetimg.DOFade(1f, duration);
+                break;
+                
+            case 2: // 仅淡出
+                targetimg.DOFade(0f, duration).OnComplete(() =>
+                {
+                    targetimg.sprite = sprite;
+                    targetimg.color = new Color(1, 1, 1, 1);
+                });
+                break;
+                
+            case 3: // 淡出后淡入（默认）
+                targetimg.DOFade(0f, duration / 2).OnComplete(() =>
+                {
+                    targetimg.sprite = sprite;
+                    targetimg.DOFade(1f, duration / 2);
+                });
+                break;
+        }
+    }
+    
+    /// <summary>
+    /// 震动效果
+    /// </summary>
+    /// <param name="strength">震动强度</param>
+    /// <param name="duration">震动持续时间（秒）</param>
+    /// <param name="vibrato">震动次数</param>
+    public void 执行震动(float strength = 20f, float duration = 0.5f, int vibrato = 10)
+    {
+        if (震动目标 == null)
+        {
+            Debug.LogWarning("震动目标未设置，请在Inspector中设置震动目标");
+            // 尝试震动整个gameObject
+            transform.DOShakePosition(duration, strength, vibrato);
+        }
+        else
+        {
+            // 震动指定的目标
+            震动目标.DOShakePosition(duration, strength, vibrato);
+        }
+        
+        Debug.Log($"执行震动: 强度={strength}, 时长={duration}秒, 次数={vibrato}");
     }
     
       public void 进行指令(string tar){
@@ -213,7 +299,26 @@ public class 剧本System: MonoBehaviour
                     if (key.Contains(Center.Command_background))
                     {
                         var prams = 指令切割(key);
-                      LoadImage(prams[0],BG);
+                        
+                        // 支持可选参数：CG(图片名) 或 CG(图片名,淡入淡出类型) 或 CG(图片名,淡入淡出类型,时长)
+                        if (prams.Length >= 3)
+                        {
+                            // 有淡入淡出类型和自定义时长
+                            int fadeType = Convert.ToInt32(prams[1]);
+                            float duration = float.Parse(prams[2]);
+                            LoadImageWithFade(prams[0], BG, fadeType, duration);
+                        }
+                        else if (prams.Length >= 2)
+                        {
+                            // 有淡入淡出类型，使用默认时长
+                            int fadeType = Convert.ToInt32(prams[1]);
+                            LoadImageWithFade(prams[0], BG, fadeType);
+                        }
+                        else
+                        {
+                            // 使用默认淡出后淡入效果
+                            LoadImageWithFade(prams[0], BG, 3);
+                        }
                     }
                     if (key.Contains(Center.Command_SpeakerSet))
                     {
@@ -381,6 +486,72 @@ public class 剧本System: MonoBehaviour
                     if (key.Contains(Center.Command_Clear))
                     {   
                         清空文本();
+                    }
+                    if (key.Contains(Center.Command_Sound))
+                    {
+                        var prams = 指令切割(key);
+                        if (AudioManager.instance != null)
+                        {
+                            // 检查是否有第二个参数
+                            if (prams.Length >= 2)
+                            {
+                                int loopParam = Convert.ToInt32(prams[1]);
+                                AudioManager.instance.播放音效(prams[0], loopParam);
+                            }
+                            else
+                            {
+                                // 没有第二个参数，默认播放一次
+                                AudioManager.instance.播放音效(prams[0]);
+                            }
+                        }
+                        else
+                        {
+                            Debug.LogWarning("AudioManager未初始化，无法播放音效");
+                        }
+                    }
+                    if (key.Contains(Center.Command_Music))
+                    {
+                        var prams = 指令切割(key);
+                        if (AudioManager.instance != null)
+                        {
+                            AudioManager.instance.播放音乐(prams[0]);
+                        }
+                        else
+                        {
+                            Debug.LogWarning("AudioManager未初始化，无法播放音乐");
+                        }
+                    }
+                    if (key.Contains(Center.Command_Shake))
+                    {
+                        var prams = 指令切割(key);
+                        
+                        // 支持可选参数：SHAKE() 或 SHAKE(强度) 或 SHAKE(强度,时长) 或 SHAKE(强度,时长,次数)
+                        if (prams == null || prams.Length == 0 || string.IsNullOrEmpty(prams[0]))
+                        {
+                            // 无参数，使用默认值
+                            执行震动();
+                        }
+                        else if (prams.Length >= 3)
+                        {
+                            // 完整参数：强度、时长、次数
+                            float strength = float.Parse(prams[0]);
+                            float duration = float.Parse(prams[1]);
+                            int vibrato = Convert.ToInt32(prams[2]);
+                            执行震动(strength, duration, vibrato);
+                        }
+                        else if (prams.Length >= 2)
+                        {
+                            // 强度和时长
+                            float strength = float.Parse(prams[0]);
+                            float duration = float.Parse(prams[1]);
+                            执行震动(strength, duration);
+                        }
+                        else
+                        {
+                            // 仅强度
+                            float strength = float.Parse(prams[0]);
+                            执行震动(strength);
+                        }
                     }
                 }
       }
