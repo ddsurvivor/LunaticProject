@@ -10,6 +10,7 @@ public class 大地图System : MonoBehaviour
     public 剧本System 剧情;
     public GameObject[] 地图;
     public GameObject 当前地图;
+    public GameObject 失败Obj;
 
     public static bool 是可以点击地图事件;
     #region 进入剧情视觉反馈
@@ -18,6 +19,10 @@ public class 大地图System : MonoBehaviour
     public float 点击进入剧情编辑器等待时间=0.8f;
     #endregion
 
+    public void 失败()
+    {
+        失败Obj.SetActive(true);
+    }
 
     public void 开始剧情(string t)
     {

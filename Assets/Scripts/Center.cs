@@ -41,6 +41,7 @@ public class Center : MonoBehaviour
     public static string Command_End = "END";//结束
     public static string Command_Skip="SKIP";//跳过本行
     public static string Command_Jump="JUMPTO";//跳转到行
+    public static string Command_Gameover="GAMEOVER";//失败
     public static string Command_Refresh="REFRESH";
     public static string Command_Clear="CLEAR";
     public static string Command_Sound = "SOUND";

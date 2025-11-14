@@ -58,7 +58,9 @@ public class 剧本System: MonoBehaviour
     public void 设置新剧本(string t)
     {
         刷新();
+       
         已储存剧本 = 读取表格数据(t, Center.Languageint);
+        记录上段剧情 = 已储存剧本;
     }
 
     public void Awake()
@@ -76,8 +78,9 @@ public class 剧本System: MonoBehaviour
     {
         已阅读 = 0;
       清空文本();
-      
     }
+
+
 
     void 清空文本()
     {
@@ -272,6 +275,8 @@ public class 剧本System: MonoBehaviour
             震动目标.DOShakePosition(duration, strength, vibrato);
         }
     }
+
+    private  string[][] 记录上段剧情;
     
       public void 进行指令(string tar){
           Debug.Log($"进行指令{tar}");
@@ -393,6 +398,7 @@ public class 剧本System: MonoBehaviour
                     {
                         var prams = 指令切割(key);
                         已储存剧本 = 读取表格数据(prams[0], Center.Languageint);
+                        记录上段剧情 = 已储存剧本;
                         try
                         {
                             已阅读 = Convert.ToInt32( prams[1])-2;
@@ -405,6 +411,13 @@ public class 剧本System: MonoBehaviour
                         已阅读 = 已阅读 > 1 ? 已阅读 : 0;
                         Debug.Log($"跳转到表格{prams[0]}");
                         Next();
+                    }
+
+                    if (key.Contains(Center.Command_Gameover))
+                    {
+                        大地图System.instance.失败();
+                        已储存剧本 = 记录上段剧情;
+                        刷新();
                     }
                     if (key.Contains(Center.Command_If))
                     {
