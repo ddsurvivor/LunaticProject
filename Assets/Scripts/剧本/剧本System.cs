@@ -506,7 +506,7 @@ public class 剧本System: MonoBehaviour
                         {
                             Debug.LogWarning("AudioManager未初始化，无法播放音效");
                         }
-                    }
+                    }  
                     if (key.Contains(Center.Command_Music))
                     {
                         var prams = 指令切割(key);
