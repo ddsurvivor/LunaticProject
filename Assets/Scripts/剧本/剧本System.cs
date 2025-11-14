@@ -398,6 +398,7 @@ public class 剧本System: MonoBehaviour
                     {
                         var prams = 指令切割(key);
                         已储存剧本 = 读取表格数据(prams[0], Center.Languageint);
+                        进度System.存档("cache");
                         记录上段剧情 = 已储存剧本;
                         try
                         {
@@ -416,6 +417,7 @@ public class 剧本System: MonoBehaviour
                     if (key.Contains(Center.Command_Gameover))
                     {
                         大地图System.instance.失败();
+                        进度System.存档("读档");
                         已储存剧本 = 记录上段剧情;
                         刷新();
                     }
