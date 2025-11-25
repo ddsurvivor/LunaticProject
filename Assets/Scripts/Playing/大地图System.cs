@@ -24,6 +24,21 @@ public class 大地图System : MonoBehaviour
         失败Obj.SetActive(true);
     }
 
+    private void OnEnable()
+    {
+        进入大地图调用特殊剧情();
+    }
+
+    public void 进入大地图调用特殊剧情()
+    {
+        switch (PlayingSystem.特殊剧情)
+        {
+            case "新游戏":
+                大地图System.instance.开始剧情 ("PR1");
+                break;
+        }
+    }
+
     public void 开始剧情(string t)
     {
         if (!是可以点击地图事件)
