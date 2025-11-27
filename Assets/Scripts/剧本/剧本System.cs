@@ -371,6 +371,7 @@ public class 剧本System: MonoBehaviour
                             string 事件=当前事件;
                             text.GetComponent<Button>().onClick.AddListener(() =>
                             {
+                                AudioManager.instance.播放音效("Key");
                                 if (事件 != null) 进行指令(事件);
                             
                                 foreach (var VARIABLE in 选项按钮)

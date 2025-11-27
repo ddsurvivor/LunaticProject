@@ -43,6 +43,10 @@ public class AudioManager : MonoBehaviour
         StartCoroutine(加载并播放BGM(audioName));
     }
 
+    public void 播放按键音(string audioname)
+    {
+        播放音效(audioname);
+    }
     /// <summary>
     /// 播放音效
     /// </summary>
