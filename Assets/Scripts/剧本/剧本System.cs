@@ -513,7 +513,15 @@ public class 剧本System: MonoBehaviour
                         var prams = 指令切割(key);
                         if (AudioManager.instance != null)
                         {
-                            AudioManager.instance.播放音乐(prams[0]);
+                            if (prams[0]!="STOP")
+                            {
+                                AudioManager.instance.播放音乐(prams[0]);
+                            }
+                            else
+                            {
+                                AudioManager.instance.停止音乐();
+                            }
+        
                         }
                         else
                         {
