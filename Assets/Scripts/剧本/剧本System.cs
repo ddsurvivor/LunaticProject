@@ -495,8 +495,16 @@ public class 剧本System: MonoBehaviour
                         {
                             if (prams.Length >= 2)
                             {
-                                int loopParam = Convert.ToInt32(prams[1]);
-                                AudioManager.instance.播放音效(prams[0], loopParam);
+                                // 检查是否为STOP命令
+                                if (prams[1].ToUpper() == "STOP")
+                                {
+                                    AudioManager.instance.停止音效(prams[0]);
+                                }
+                                else
+                                {
+                                    int loopParam = Convert.ToInt32(prams[1]);
+                                    AudioManager.instance.播放音效(prams[0], loopParam);
+                                }
                             }
                             else
                             {

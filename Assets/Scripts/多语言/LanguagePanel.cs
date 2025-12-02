@@ -13,25 +13,88 @@ public class LanguagePanel : MonoBehaviour{
         if (Info==null) {
             Info = name;
         }
+        
+        // 检查 LanguageSYSTEM 是否已初始化
+        if (LanguageSYSTEM.languageENV == null || LanguageSYSTEM.languageENV.Global == null) {
+            Debug.LogWarning("LanguageSYSTEM.languageENV 尚未初始化，延迟执行");
+            StartCoroutine(DelayedEnable());
+            return;
+        }
+        
         Component component;
         TryGetComponent(typeof(Image), out component);
         if (component!=null) {
-            string path = LanguageSYSTEM.languageENV.Global.Get<string>(Info);
-            Debug.Log(path);
-            GetComponent<Image>().sprite = GetSpriteFromAssets(path);
+            Image imageComponent = GetComponent<Image>();
+            if (imageComponent != null) {
+                string path = LanguageSYSTEM.languageENV.Global.Get<string>(Info);
+                if (path != null) {
+                    Debug.Log(path);
+                    imageComponent.sprite = GetSpriteFromAssets(path);
+                }
+            }
             return;
         }
 
         TryGetComponent(typeof(Text), out component);
         if (component!=null) {
-            string text = LanguageSYSTEM.languageENV.Global.Get<string>(Info);
-            Text textcomponent= GetComponent<Text>();
-            textcomponent.text= text;
-            textcomponent.font = Center.instance.GetFont();
-            
+            Text textcomponent = GetComponent<Text>();
+            if (textcomponent != null) {
+                string text = LanguageSYSTEM.languageENV.Global.Get<string>(Info);
+                if (text != null) {
+                    textcomponent.text = text;
+                }
+                
+                // 检查 Center.instance 是否已初始化
+                if (Center.instance != null) {
+                    Font font = Center.instance.GetFont();
+                    if (font != null) {
+                        textcomponent.font = font;
+                    }
+                }
+            }
             return;
         }
 
+    }
+    
+    private IEnumerator DelayedEnable() {
+        // 等待 LanguageSYSTEM 初始化完成
+        while (LanguageSYSTEM.languageENV == null || LanguageSYSTEM.languageENV.Global == null) {
+            yield return null;
+        }
+        
+        // 重新执行初始化逻辑
+        Component component;
+        TryGetComponent(typeof(Image), out component);
+        if (component!=null) {
+            Image imageComponent = GetComponent<Image>();
+            if (imageComponent != null) {
+                string path = LanguageSYSTEM.languageENV.Global.Get<string>(Info);
+                if (path != null) {
+                    Debug.Log(path);
+                    imageComponent.sprite = GetSpriteFromAssets(path);
+                }
+            }
+            yield break;
+        }
+
+        TryGetComponent(typeof(Text), out component);
+        if (component!=null) {
+            Text textcomponent = GetComponent<Text>();
+            if (textcomponent != null) {
+                string text = LanguageSYSTEM.languageENV.Global.Get<string>(Info);
+                if (text != null) {
+                    textcomponent.text = text;
+                }
+                
+                if (Center.instance != null) {
+                    Font font = Center.instance.GetFont();
+                    if (font != null) {
+                        textcomponent.font = font;
+                    }
+                }
+            }
+        }
     }
     
     public static Sprite GetSpriteFromAssets(string ImgPath){

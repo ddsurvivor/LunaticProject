@@ -14,6 +14,7 @@ public class AudioManager : MonoBehaviour
     private GameObject seAudioSourcePool;
     
     private Dictionary<string, GameObject> 循环音效字典 = new Dictionary<string, GameObject>();
+    private Dictionary<string, List<GameObject>> 所有音效字典 = new Dictionary<string, List<GameObject>>();
     private void Awake()
     {
         if (instance == null)
@@ -88,10 +89,19 @@ public class AudioManager : MonoBehaviour
                     循环音效字典.Remove(audioName);
                     // 计算剩余播放时间并在播放完后销毁
                     float remainingTime = seSource.clip.length - seSource.time;
-                    Destroy(seObject, remainingTime + 0.1f);
+                    StartCoroutine(等待播放完成并清理(audioName, seObject, remainingTime + 0.1f));
                 }
                 else
                 {
+                    // 如果不在播放，立即清理
+                    if (所有音效字典.ContainsKey(audioName) && 所有音效字典[audioName].Contains(seObject))
+                    {
+                        所有音效字典[audioName].Remove(seObject);
+                        if (所有音效字典[audioName].Count == 0)
+                        {
+                            所有音效字典.Remove(audioName);
+                        }
+                    }
                     Destroy(seObject);
                     循环音效字典.Remove(audioName);
                 }
@@ -105,6 +115,7 @@ public class AudioManager : MonoBehaviour
 
     public void 停止音效(string audioName)
     {
+        // 停止循环音效
         if (循环音效字典.ContainsKey(audioName))
         {
             GameObject seObject = 循环音效字典[audioName];
@@ -113,6 +124,25 @@ public class AudioManager : MonoBehaviour
                 Destroy(seObject);
             }
             循环音效字典.Remove(audioName);
+        }
+        
+        // 停止所有正在播放的该音效（包括只播放一次的）
+        if (所有音效字典.ContainsKey(audioName))
+        {
+            List<GameObject> seObjects = new List<GameObject>(所有音效字典[audioName]);
+            foreach (GameObject seObject in seObjects)
+            {
+                if (seObject != null)
+                {
+                    AudioSource seSource = seObject.GetComponent<AudioSource>();
+                    if (seSource != null && seSource.isPlaying)
+                    {
+                        seSource.Stop();
+                    }
+                    Destroy(seObject);
+                }
+            }
+            所有音效字典.Remove(audioName);
         }
     }
     
@@ -159,11 +189,38 @@ public class AudioManager : MonoBehaviour
             seSource.playOnAwake = false;
             seSource.Play();
             
-            Destroy(seObject, clip.length + 0.1f);
+            // 添加到跟踪字典
+            if (!所有音效字典.ContainsKey(audioName))
+            {
+                所有音效字典[audioName] = new List<GameObject>();
+            }
+            所有音效字典[audioName].Add(seObject);
+            
+            // 播放完成后从字典中移除并销毁
+            StartCoroutine(等待播放完成并清理(audioName, seObject, clip.length + 0.1f));
         }
         else
         {
             Debug.LogWarning($"无法加载音效: {audioName}");
+        }
+    }
+    
+    private IEnumerator 等待播放完成并清理(string audioName, GameObject seObject, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        
+        if (所有音效字典.ContainsKey(audioName) && seObject != null)
+        {
+            所有音效字典[audioName].Remove(seObject);
+            if (所有音效字典[audioName].Count == 0)
+            {
+                所有音效字典.Remove(audioName);
+            }
+            
+            if (seObject != null)
+            {
+                Destroy(seObject);
+            }
         }
     }
     
@@ -188,6 +245,13 @@ public class AudioManager : MonoBehaviour
             seSource.playOnAwake = false;
             seSource.Play();
             循环音效字典[audioName] = seObject;
+            
+            // 也添加到所有音效字典中
+            if (!所有音效字典.ContainsKey(audioName))
+            {
+                所有音效字典[audioName] = new List<GameObject>();
+            }
+            所有音效字典[audioName].Add(seObject);
         }
         else
         {
