@@ -19,4 +19,5 @@ public enum ActionType
     Defend = 4,// 防御
     Idle = 5,// 待机
     Scan = 6,// 扫描
+    Range_ATK = 7,// 远程攻击
 }

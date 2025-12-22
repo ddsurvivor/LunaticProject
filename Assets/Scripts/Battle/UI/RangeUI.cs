@@ -6,21 +6,40 @@ public class RangeUI : MonoBehaviour
 {
     public GameObject circle;
     public GameObject moveIcon;
+    public GameObject attackCircle;
+    public GameObject attackIcon;
     private bool _isShowMoveIcon = false;
 
     private float circleRadius = 8.39f / 5f;
-    private float _curMoveRange;
+    private float _curRange;
     public void ShowCircleRange(float radius)
     {
         circle.SetActive(true);
         circle.transform.localScale = radius * circleRadius * Vector3.one;
-        _curMoveRange = radius;
+        _curRange = radius;
+    }
+    public void ShowAttackRange(float radius)
+    {
+        attackCircle.SetActive(true);
+        attackCircle.transform.localScale = radius * circleRadius * Vector3.one;
+        attackIcon.SetActive(true);
+        _curRange = radius;
+    }
+    
+    public void ShowSkillRange(float radius)
+    {
+        
     }
 
     public void CloseRange()
     {
         circle.SetActive(false);
+        moveIcon.SetActive(false);
+        attackCircle.SetActive(false);
+        attackIcon.SetActive(false);
     }
+    
+    
     
     public void ShowMoveIcon(bool option)
     {
@@ -30,33 +49,31 @@ public class RangeUI : MonoBehaviour
 
     public void Update()
     {
-        if (_isShowMoveIcon)
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            // 假设地面Layer为"Ground"
-            int groundLayer = LayerMask.GetMask("Ground");
-            if (Physics.Raycast(ray, out hit, 100f, groundLayer))
+          // attackIcon跟随鼠标移动
+            if (attackIcon.activeInHierarchy)
             {
-                // Vector3 point = hit.point;
-                // moveIcon.transform.position = new Vector3(point.x, moveIcon.transform.position.y, point.z);
-                
-                Vector3 point = hit.point;
-                Vector3 centerPos = transform.position;
-                Vector3 flatPoint = new Vector3(point.x, centerPos.y, point.z);
-                float dist = Vector3.Distance(flatPoint, centerPos);
-                Vector3 targetPos;
-                if (dist <= _curMoveRange)
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+                if (groundPlane.Raycast(ray, out float enter))
                 {
-                    targetPos = flatPoint;
+                    Vector3 hitPoint = ray.GetPoint(enter);
+                    Vector3 direction = hitPoint - transform.position;
+                    float distance = direction.magnitude;
+                    if (distance > _curRange)
+                    {
+                        direction = direction.normalized * _curRange;
+                    }
+                    attackIcon.transform.position = transform.position + direction + Vector3.up * 0.1f;
                 }
-                else
-                {
-                    Vector3 dir = (flatPoint - centerPos).normalized;
-                    targetPos = centerPos + dir * _curMoveRange;
-                }
-                moveIcon.transform.position = targetPos;
             }
-        }   
+    }
+
+    public Vector3 GetAtkPos()
+    {
+        if (attackIcon.activeInHierarchy)
+        {
+            return attackIcon.transform.position;
+        }
+        return Vector3.zero;
     }
 }
