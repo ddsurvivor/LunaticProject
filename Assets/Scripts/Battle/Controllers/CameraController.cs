@@ -16,7 +16,7 @@
             {
                 Vector3 delta = Input.mousePosition - _lastMousePosition;
                 Vector3 move = new Vector3(-delta.x, 0, -delta.y) * panSpeed * Time.deltaTime;
-                transform.Translate(move, Space.World);
+                transform.Translate(move, Space.Self);
                 _lastMousePosition = Input.mousePosition;
             }
         }

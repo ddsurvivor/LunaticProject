@@ -14,7 +14,17 @@ public class UnitAttrCenter: SerializedMonoBehaviour
     public AttrCenter attr => _attr;
     
     // 生命值 hp
+    [SerializeField][ReadOnly]
     private int _curHealth;
+
+    public int CurHealth => _curHealth;
+
+    public int MaxHealth => _maxHealth;
+
+    public int CurMovePoint => _curMovePoint;
+
+    public int MaxMovePoint => _maxMovePoint;
+
     [SerializeField]
     private int _maxHealth;
     
@@ -23,7 +33,9 @@ public class UnitAttrCenter: SerializedMonoBehaviour
     private int _maxAP;
     
     // 行动点数 MP
+    [SerializeField][ReadOnly]
     private int _curMovePoint;
+    [SerializeField]
     private int _maxMovePoint;
 
     private int _tempShield;
@@ -31,6 +43,11 @@ public class UnitAttrCenter: SerializedMonoBehaviour
     public void Init()
     {
         _curHealth = _maxHealth;
+    }
+
+    public void FullMovePoint()
+    {
+        _curMovePoint = _maxMovePoint;
     }
     public void TakeDamage(int atk, DamageType damageType, int addAtk)
     {
@@ -46,7 +63,18 @@ public class UnitAttrCenter: SerializedMonoBehaviour
         if (_curHealth <= 0)
         {
             // 触发单位死亡事件
+            gameObject.SetActive(false);// 临时死亡
         }
-        Debug.Log($"造成{damageType}伤害{realDamage}");
+        Debug.Log($"受到{damageType}伤害{realDamage}");
+    }
+    
+    public bool CostMP()
+    {
+        if (_curMovePoint>=1)
+        {
+            _curMovePoint--;
+            return true;
+        }
+        return false;
     }
 }

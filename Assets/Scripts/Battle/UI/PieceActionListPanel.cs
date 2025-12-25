@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 
@@ -9,8 +10,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
 {
     public PieceController pc;
     public Dictionary<ActionType, Button> actionButtonDic = new();
-    
-    
+    public Dictionary<ActionType, UnityAction> actionDic = new();
 
     public void Start()
     {
@@ -19,7 +19,24 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             pair.Value.onClick.AddListener(() => OnActionButtonClicked(pair.Key));
         }
     }
-    
+
+    private void OnEnable()
+    {
+        foreach (var button in actionButtonDic)
+        {
+            button.Value.gameObject.SetActive(
+                pc.unitAttrCenter.CurMovePoint>=1 && pc.availableActions.Contains(button.Key));
+        }
+        foreach (var interactArea in pc.interactAreas)
+        {
+            if (actionButtonDic.ContainsKey(interactArea.actionType))
+            {
+                actionButtonDic[interactArea.actionType].gameObject.SetActive(true);
+                actionButtonDic[interactArea.actionType].onClick.AddListener(interactArea.TriggerAction);
+            }
+        }
+    }
+
     private void OnActionButtonClicked(ActionType actionType)
     {
         gameObject.SetActive(false);

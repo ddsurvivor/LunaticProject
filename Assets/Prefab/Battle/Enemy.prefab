@@ -178,6 +178,7 @@ GameObject:
   - component: {fileID: 2820315917553685405}
   - component: {fileID: 2820315917553685406}
   - component: {fileID: 3435330606817873377}
+  - component: {fileID: 1976601876}
   m_Layer: 11
   m_Name: Enemy
   m_TagString: Untagged
@@ -372,4 +373,29 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+  _curHealth: 0
   _maxHealth: 100
+  _curMovePoint: 0
+  _maxMovePoint: 1
+--- !u!114 &1976601876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2820315917553685404}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb4f1bba508e44a8ae54d9e577f101f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pieceName: 
+  unitAttrCenter: {fileID: 3435330606817873377}
+  _rangeUI: {fileID: 0}
+  _actionListPanel: {fileID: 0}
+  isPlayerPiece: 0
+  _damage: 5
+  _damageType: 2
+  interactAreas: []
+  availableActions: 
+  isActived: 0

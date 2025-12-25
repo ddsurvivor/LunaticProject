@@ -4,10 +4,12 @@ using UnityEngine;
 
 public class ClickManager : MonoBehaviour
 {
+    // 正在拖动的棋子
     private PieceController _selectedPiece;
 
     private void Update()
     {
+        if(! BattleScene.Ins.BM.PlayerController.isInTurn) return;
         // 鼠标左键点击时发射射线检测
         if (Input.GetMouseButtonDown(0))
         {
@@ -33,7 +35,7 @@ public class ClickManager : MonoBehaviour
         foreach (var hit in hits)
         {
             PieceController piece = hit.collider.GetComponent<PieceController>();
-            if (piece == null) continue;
+            if (piece == null || !piece.isPlayerPiece) continue;
             _selectedPiece = piece;
             _selectedPiece.StartDrag();
         }

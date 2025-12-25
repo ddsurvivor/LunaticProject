@@ -1,14 +1,17 @@
 using System;
+using System.Collections.Generic;
 using DG.Tweening;
+using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// 棋子控制器
 /// </summary>
 public class PieceController : MonoBehaviour
 {
-    [SerializeField]
-    private UnitAttrCenter _attrCenter;// 单位属性中心
+    //public string pieceName;
+    public UnitAttrCenter unitAttrCenter;// 单位属性中心
 
     [SerializeField]
     private RangeUI _rangeUI;// 范围UI
@@ -22,20 +25,30 @@ public class PieceController : MonoBehaviour
     
     private Vector3 _originalPosition;// 原始位置
 
-    private ActionSlot _curActionSlot; // 当前绑定的点位
+    private CaverSlot _curCaverSlot; // 当前绑定的点位
     
+    // 当前攻击数据
     private bool _isAttacking = false;// 是否正在攻击
-    private int _damage;
-    private DamageType _damageType;
+    [SerializeField][ReadOnly]private int _damage;
+    [SerializeField][ReadOnly]private DamageType _damageType;
+    
+    public List<InteractArea> interactAreas = new();// 可交互区域列表
+    
+    public List<ActionType> availableActions = new();// 可用动作列表
+    
+    public bool isActived = false;// 是否被激活
 
-    public void Start()
+    public void Init()
     {
-        _attrCenter.Init();
+        unitAttrCenter.Init();
+        availableActions.Add(ActionType.Move);
+        availableActions.Add(ActionType.Attack);
+        availableActions.Add(ActionType.Range_ATK);
     }
 
     private void Update()
     {
-        if (_isAttacking)
+        if (_isAttacking && isPlayerPiece)
         {
             if (Input.GetMouseButtonDown(0))
             {
@@ -50,6 +63,15 @@ public class PieceController : MonoBehaviour
         }
     }
 
+    public void TurnStart()
+    {
+        unitAttrCenter.FullMovePoint();
+    }
+    public void TurnEnd()
+    {
+        if(_actionListPanel!=null) {_actionListPanel.gameObject.SetActive(false);}    
+    }
+
     private void OnMouseEnter()
     {
         //_rangeUI.ShowCircleRange(3);
@@ -61,81 +83,52 @@ public class PieceController : MonoBehaviour
         _rangeUI.CloseRange();*/
     }
 
-    // private void OnMouseDown()
-    // {
-    //     _originalPosition = transform.position;
-    // }
-
-    // private void OnMouseDrag()
-    // {
-    //     if (!isPlayerPiece) return;
-    //     
-    //     _isDragging = true;
-    //     _actionListPanel.gameObject.SetActive(false);
-    //     if (_curActionSlot != null)
-    //     {
-    //         _curActionSlot.LeaveSlot(transform);
-    //         _curActionSlot = null;
-    //     }
-    //     // 鼠标拖拽时，节点跟随鼠标位置移动
-    //     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-    //     RaycastHit hit;
-    //     // 假设地面Layer为"Ground"
-    //     int groundLayer = LayerMask.GetMask("Ground");
-    //     if (Physics.Raycast(ray, out hit, 100f, groundLayer))
-    //     {
-    //         Vector3 point = hit.point;
-    //         transform.position = new Vector3(point.x, transform.position.y, point.z);
-    //     }
-    //
-    //     //_rangeUI.ShowMoveIcon(true);
-    // }
 
     private void OnMouseUp()
     {
+        BattleScene.Ins.UM.infoBox.ShowInfo(this);
+        if(!isPlayerPiece) return;
         _isDragging = false;
-        _actionListPanel.gameObject.SetActive(true);
-        if(CheckActionPos()) return;
-        //transform.DOMove(_originalPosition, 0.5f);
-        // _rangeUI.ShowMoveIcon(false);
-        // _rangeUI.CloseRange();
-        // MoveTo(new Vector3(_rangeUI.moveIcon.transform.position.x, 
-        //     transform.position.y, _rangeUI.moveIcon.transform.position.z) );
+        CheckActionPos();
+        _actionListPanel.gameObject.SetActive(true);              
     }
 
     public void StartDrag()
     {
+        if(!isPlayerPiece) return;
         _actionListPanel.gameObject.SetActive(false);
-        if (_curActionSlot != null)
+        if (_curCaverSlot != null)
         {
-            _curActionSlot.LeaveSlot(transform);
-            _curActionSlot = null;
+            _curCaverSlot.LeaveSlot(transform);
+            _curCaverSlot = null;
         }
     }
     public void StopDrag()
     {
+        if(!isPlayerPiece) return;
+        CheckActionPos();
         _actionListPanel.gameObject.SetActive(true);
-        if(CheckActionPos()) return;
     }
-
-    // private void MoveTo(Vector3 targetPosition)
-    // {
-    //     // 实现棋子移动的逻辑
-    //     transform.DOMove(targetPosition, 0.5f);
-    // }
+    
 
     private bool CheckActionPos()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        // 假设地面Layer为"Ground"
-        if (Physics.Raycast(ray, out hit, 100f))
+        interactAreas.Clear();
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, 1f);
+        foreach (var collider in hitColliders)
         {
-            ActionSlot actionSlot = hit.transform.GetComponent<ActionSlot>();
-            if (actionSlot!=null && !actionSlot.isFull)
+            CaverSlot caverSlot = collider.transform.GetComponent<CaverSlot>();
+            if (caverSlot!=null && !caverSlot.isFull)
             {
-                actionSlot.AddToSlot(transform);
-                _curActionSlot = actionSlot;
+                caverSlot.AddToSlot(transform);
+                _curCaverSlot = caverSlot;
+                return true;
+            }
+            
+            InteractArea interactArea = collider.transform.GetComponent<InteractArea>();
+            if (interactArea != null)
+            {
+                interactAreas.Add(interactArea);
                 return true;
             }
         }
@@ -147,15 +140,15 @@ public class PieceController : MonoBehaviour
         _isAttacking = true;
         if (!range)
         {
-            _rangeUI.ShowAttackRange(_attrCenter.attr.GetRange(true));
+            _rangeUI?.ShowAttackRange(unitAttrCenter.attr.GetRange(true));
             _damageType = DamageType.Melee;
-            _damage = _attrCenter.attr.GetAtk(DamageType.Melee);
+            _damage = unitAttrCenter.attr.GetAtk(DamageType.Melee);
         }
         else
         {
-            _rangeUI.ShowAttackRange(_attrCenter.attr.GetRange(false));
+            _rangeUI?.ShowAttackRange(unitAttrCenter.attr.GetRange(false));
             _damageType = DamageType.Ranged;
-            _damage = _attrCenter.attr.GetAtk(DamageType.Ranged);
+            _damage = unitAttrCenter.attr.GetAtk(DamageType.Ranged);
         }
     }
 
@@ -169,28 +162,30 @@ public class PieceController : MonoBehaviour
         // 检测球体范围内的所有敌人
         Collider[] hitColliders = Physics.OverlapSphere(atkPos, attackRadius, enemyLayer);
 
-        if (hitColliders.Length > 0)
+        if (hitColliders.Length <= 0) return;
+        foreach (var collider in hitColliders)
         {
-            foreach (var collider in hitColliders)
+            // 在这里处理攻击逻辑，比如对collider.transform进行伤害计算
+            Debug.Log($"Attacked target: {collider.transform.name}");
+            PieceController enemy = collider.transform.GetComponent<PieceController>();
+            if (enemy != null && !enemy.isPlayerPiece)
             {
-                // 在这里处理攻击逻辑，比如对collider.transform进行伤害计算
-                Debug.Log($"Attacked target: {collider.transform.name}");
-                UnitAttrCenter enemyAttrCenter = collider.transform.GetComponent<UnitAttrCenter>();
-                if (enemyAttrCenter != null)
-                {
-                        
-                    Attack(enemyAttrCenter);
-                }
+                if(!unitAttrCenter.CostMP()) return;
+                Attack(enemy);
+                // 结束攻击状态
+                _isAttacking = false;
+                _rangeUI.CloseRange();
+                return;
             }
-            // 结束攻击状态
-            _isAttacking = false;
-            _rangeUI.CloseRange();
         }
     }
 
-    private void Attack(UnitAttrCenter enemy)
+    public void Attack(PieceController enemy)
     {
-        enemy.TakeDamage(_damage,_damageType,0);
+        Debug.Log("棋子攻击");
+        enemy.unitAttrCenter.TakeDamage(_damage,_damageType,0);
     }
+
+    
     
 }

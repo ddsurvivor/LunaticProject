@@ -4,9 +4,9 @@
     using UnityEngine;
 
     /// <summary>
-    /// 可交互点位
+    /// 掩体点位
     /// </summary>
-    public class ActionSlot: MonoBehaviour
+    public class CaverSlot: MonoBehaviour
     {
         public Transform[] slotTransforms;
         private Dictionary<Transform, Transform> piecesDic = new();
