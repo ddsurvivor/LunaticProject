@@ -47,12 +47,14 @@
      <Compile Include="Assets\XLua\Src\LuaDLL.cs" />
      <Compile Include="Assets\Scripts\Playing\地图拖拽.cs" />
      <Compile Include="Assets\XLua\Tutorial\LoadLuaScript\ByFile\ByFile.cs" />
+     <Compile Include="Assets\Scripts\Battle\Controllers\EnemyController.cs" />
      <Compile Include="Assets\XLua\Tutorial\LoadLuaScript\Loader\CustomLoader.cs" />
      <Compile Include="Assets\Scripts\Battle\Data&amp;Config\AttrCenter.cs" />
      <Compile Include="Assets\XLua\Src\Utils.cs" />
      <Compile Include="Assets\XLua\Src\RawObject.cs" />
      <Compile Include="Assets\Scripts\玩家系统\PLAYERPROFILE.cs" />
      <Compile Include="Assets\Scripts\Playing\大地图System.cs" />
+     <Compile Include="Assets\Scripts\Battle\UI\InfoBox.cs" />
      <Compile Include="Assets\XLua\Src\TemplateEngine\TemplateEngine.cs" />
      <Compile Include="Assets\Scripts\Playing\任务节点.cs" />
      <Compile Include="Assets\Scripts\Playing\AudioManager.cs" />
@@ -60,6 +62,7 @@
      <Compile Include="Assets\Scripts\Center\SceneLoader.cs" />
      <Compile Include="Assets\XLua\Src\MethodWarpsCache.cs" />
      <Compile Include="Assets\Scripts\Center\新游戏初始化.cs" />
+     <Compile Include="Assets\Scripts\Battle\UI\TurnPanel.cs" />
      <Compile Include="Assets\ThirdParty\LuaPerfect\ObjectFormater.cs" />
      <Compile Include="Assets\XLua\Src\ObjectPool.cs" />
      <Compile Include="Assets\Scripts\多语言\LanguagePanel.cs" />
@@ -72,7 +75,9 @@
      <Compile Include="Assets\XLua\Src\LuaBase.cs" />
      <Compile Include="Assets\Scripts\Center\Center.cs" />
      <Compile Include="Assets\Scripts\Battle\UI\RangeUI.cs" />
+     <Compile Include="Assets\Scripts\Battle\Controllers\FogArea.cs" />
      <Compile Include="Assets\XLua\Tutorial\LuaCallCSharp\LuaCallCs.cs" />
+     <Compile Include="Assets\Scripts\Battle\Managers\UIManager.cs" />
      <Compile Include="Assets\Scripts\Center\Playing聚合.cs" />
      <Compile Include="Assets\Scripts\玩家系统\背包\背包系统.cs" />
      <Compile Include="Assets\XLua\Src\GenAttributes.cs" />
@@ -107,12 +112,7 @@
      <Compile Include="Assets\Scripts\Battle\Controllers\PieceController.cs" />
      <Compile Include="Assets\XLua\Src\InternalGlobals.cs" />
      <Compile Include="Assets\Scripts\Battle\Controllers\CameraController.cs" />
-     <Compile Include="Assets\Scripts\Battle\Controllers\FogArea.cs" />
      <Compile Include="Assets\Scripts\Battle\Controllers\InteractArea.cs" />
-     <Compile Include="Assets\Scripts\Battle\Controllers\EnemyController.cs" />
-     <Compile Include="Assets\Scripts\Battle\Managers\UIManager.cs" />
-     <Compile Include="Assets\Scripts\Battle\UI\TurnPanel.cs" />
-     <Compile Include="Assets\Scripts\Battle\UI\InfoBox.cs" />
      <Folder Include="Assets" />
      <Folder Include="Assets\Scripts\多语言" />
      <Folder Include="Assets\ProBuilder Data" />
@@ -179,6 +179,7 @@
      <Folder Include="Assets\XLua" />
      <Folder Include="Assets\StreamingAssets\Language" />
      <Folder Include="Assets\Scripts\玩家系统\背包" />
+     <Folder Include="Assets\A美术\BattleSprites\Enemy" />
      <Folder Include="Assets\StreamingAssets\Skill" />
      <Folder Include="Assets\Scenes" />
      <Folder Include="Assets\A美术\UI素材包，第一份 - 副本\对话界面用\使用例参考" />
@@ -196,6 +197,7 @@
      <Folder Include="Assets\A美术\UI素材包，第一份 - 副本\骰子样式2" />
      <None Include="Assets\StreamingAssets\SOUND\README.txt" />
      <Folder Include="Assets\XLua\Tutorial" />
+     <Folder Include="Assets\A美术\BattleSprites" />
      <Reference Include="UnityEngine">
      <HintPath>D:\Applications\Unity\Unity 2021.3.23f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
      </Reference>
