@@ -9,6 +9,8 @@ using UnityEngine;
 /// </summary>
 public class UnitAttrCenter: SerializedMonoBehaviour
 {
+    public PieceController pc;
+    
     [OdinSerialize]
     private AttrCenter _attr = new();
     public AttrCenter attr => _attr;
@@ -62,8 +64,19 @@ public class UnitAttrCenter: SerializedMonoBehaviour
         _curHealth -= realDamage;
         if (_curHealth <= 0)
         {
-            // 触发单位死亡事件
-            gameObject.SetActive(false);// 临时死亡
+            if (pc != null)
+            {
+                pc.Dead();
+            }
+            else
+            {
+                // 触发单位死亡事件
+                gameObject.SetActive(false);// 临时死亡
+            }
+        }
+        else
+        {
+            pc.Hurt();
         }
         Debug.Log($"受到{damageType}伤害{realDamage}");
     }

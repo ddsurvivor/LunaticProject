@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -45,6 +46,13 @@ public class AIController : PlayerController
                 }
             }
         }
+        foreach (var piece in pieces)
+        {
+            if (piece.isActived)
+            {
+                piece.StartNormalAttack(true);
+            }
+        }
     }
 
     public void Update()
@@ -69,7 +77,7 @@ public class AIController : PlayerController
         // 简单AI逻辑：依次让每个敌人棋子行动，然后结束回合
         foreach (var piece in pieces)
         {
-            if (piece.isActived)
+            if (piece.isActived && !piece.isDead)
             {
                 if(!piece.unitAttrCenter.CostMP()) continue;
                 piece.Attack(GetRandomTarget());
@@ -101,7 +109,9 @@ public class AIController : PlayerController
     {
         // 获取一个随机的玩家棋子
         if (BattleScene.Ins.BM.PlayerController.pieces.Count == 0) return null;
-        int randomIndex = UnityEngine.Random.Range(0, BattleScene.Ins.BM.PlayerController.pieces.Count);
+        // 玩家棋子中所有活着的棋子
+        List<PieceController> pieces = BattleScene.Ins.BM.PlayerController.pieces.Where(t=> !t.isDead).ToList();
+        int randomIndex = UnityEngine.Random.Range(0, pieces.Count);
         return BattleScene.Ins.BM.PlayerController.pieces[randomIndex];
     }
 }

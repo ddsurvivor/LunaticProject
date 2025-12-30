@@ -10,33 +10,37 @@ using UnityEngine.Serialization;
 /// </summary>
 public class PieceController : MonoBehaviour
 {
+    [Header("引用")]
     //public string pieceName;
-    public UnitAttrCenter unitAttrCenter;// 单位属性中心
+    public UnitAttrCenter unitAttrCenter; // 单位属性中心
 
-    [SerializeField]
-    private RangeUI _rangeUI;// 范围UI
-    
-    [SerializeField]
-    private PieceActionListPanel _actionListPanel;// 棋子动作列表面板
-    
-    public bool isPlayerPiece;// 是否是玩家棋子
-    
-    private bool _isDragging = false;// 是否正在拖拽
-    
-    private Vector3 _originalPosition;// 原始位置
+    [SerializeField] private RangeUI _rangeUI; // 范围UI
+
+    [SerializeField] private PieceActionListPanel _actionListPanel; // 棋子动作列表面板
+
+    [SerializeField] private PieceDisplay _pieceDisplay;
+
+
+    [Header("状态")] public bool isPlayerPiece; // 是否是玩家棋子
+
+    public bool isDead => unitAttrCenter.CurHealth <= 0; // 是否死亡
+
+    private bool _isDragging = false; // 是否正在拖拽
+
+    private Vector3 _originalPosition; // 原始位置
 
     private CaverSlot _curCaverSlot; // 当前绑定的点位
-    
+
     // 当前攻击数据
-    private bool _isAttacking = false;// 是否正在攻击
-    [SerializeField][ReadOnly]private int _damage;
-    [SerializeField][ReadOnly]private DamageType _damageType;
-    
-    public List<InteractArea> interactAreas = new();// 可交互区域列表
-    
-    public List<ActionType> availableActions = new();// 可用动作列表
-    
-    public bool isActived = false;// 是否被激活
+    private bool _isAttacking = false; // 是否正在攻击
+    [SerializeField] [ReadOnly] private int _damage;
+    [SerializeField] [ReadOnly] private DamageType _damageType;
+
+    public List<InteractArea> interactAreas = new(); // 可交互区域列表
+
+    public List<ActionType> availableActions = new(); // 可用动作列表
+
+    public bool isActived = false; // 是否被激活
 
     public void Init()
     {
@@ -44,6 +48,8 @@ public class PieceController : MonoBehaviour
         availableActions.Add(ActionType.Move);
         availableActions.Add(ActionType.Attack);
         availableActions.Add(ActionType.Range_ATK);
+        //Debug.Log(_pieceDisplay.name);
+        _pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
     }
 
     private void Update()
@@ -54,6 +60,7 @@ public class PieceController : MonoBehaviour
             {
                 CheckEnemy();
             }
+
             // 点击右键取消
             if (Input.GetMouseButtonDown(1))
             {
@@ -67,9 +74,13 @@ public class PieceController : MonoBehaviour
     {
         unitAttrCenter.FullMovePoint();
     }
+
     public void TurnEnd()
     {
-        if(_actionListPanel!=null) {_actionListPanel.gameObject.SetActive(false);}    
+        if (_actionListPanel != null)
+        {
+            _actionListPanel.gameObject.SetActive(false);
+        }
     }
 
     private void OnMouseEnter()
@@ -87,29 +98,32 @@ public class PieceController : MonoBehaviour
     private void OnMouseUp()
     {
         BattleScene.Ins.UM.infoBox.ShowInfo(this);
-        if(!isPlayerPiece) return;
+        if (!isPlayerPiece) return;
         _isDragging = false;
         CheckActionPos();
-        _actionListPanel.gameObject.SetActive(true);              
+        _actionListPanel.gameObject.SetActive(true);
     }
 
     public void StartDrag()
     {
-        if(!isPlayerPiece) return;
+        if (!isPlayerPiece) return;
         _actionListPanel.gameObject.SetActive(false);
+        _pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
         if (_curCaverSlot != null)
         {
             _curCaverSlot.LeaveSlot(transform);
             _curCaverSlot = null;
         }
     }
+
     public void StopDrag()
     {
-        if(!isPlayerPiece) return;
+        if (!isPlayerPiece) return;
         CheckActionPos();
+        _pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
         _actionListPanel.gameObject.SetActive(true);
     }
-    
+
 
     private bool CheckActionPos()
     {
@@ -118,13 +132,13 @@ public class PieceController : MonoBehaviour
         foreach (var collider in hitColliders)
         {
             CaverSlot caverSlot = collider.transform.GetComponent<CaverSlot>();
-            if (caverSlot!=null && !caverSlot.isFull)
+            if (caverSlot != null && !caverSlot.isFull)
             {
                 caverSlot.AddToSlot(transform);
                 _curCaverSlot = caverSlot;
                 return true;
             }
-            
+
             InteractArea interactArea = collider.transform.GetComponent<InteractArea>();
             if (interactArea != null)
             {
@@ -132,6 +146,7 @@ public class PieceController : MonoBehaviour
                 return true;
             }
         }
+
         return false;
     }
 
@@ -170,7 +185,7 @@ public class PieceController : MonoBehaviour
             PieceController enemy = collider.transform.GetComponent<PieceController>();
             if (enemy != null && !enemy.isPlayerPiece)
             {
-                if(!unitAttrCenter.CostMP()) return;
+                if (!unitAttrCenter.CostMP()) return;
                 Attack(enemy);
                 // 结束攻击状态
                 _isAttacking = false;
@@ -183,9 +198,37 @@ public class PieceController : MonoBehaviour
     public void Attack(PieceController enemy)
     {
         Debug.Log("棋子攻击");
-        enemy.unitAttrCenter.TakeDamage(_damage,_damageType,0);
+        if (_damageType == DamageType.Melee)
+        {
+            _pieceDisplay.ChangeDisplayState(PieceDisplayState.Attack, false, 1f);
+        }
+        else if (_damageType == DamageType.Ranged)
+        {
+            _pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
+        }
+
+        enemy.unitAttrCenter.TakeDamage(_damage, _damageType, 0);
     }
 
-    
-    
+    public void Hurt()
+    {
+        // int atk, DamageType damageType, int addAtk
+        //unitAttrCenter.TakeDamage(atk,damageType,addAtk);
+        _pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
+    }
+
+    public void Dead()
+    {
+        Debug.Log($"{this.name} 死亡");
+        _pieceDisplay.ChangeDisplayState(PieceDisplayState.Death, false, -1, () =>
+        {
+            if (!isPlayerPiece)
+            {
+                _pieceDisplay.pieceSpriteRenderer.DOFade(0f, 0.5f).OnComplete(() =>
+                {
+                    this.gameObject.SetActive(false);
+                });
+            }
+        });
+    }
 }

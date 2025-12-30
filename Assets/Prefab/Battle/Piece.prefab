@@ -853,6 +853,7 @@ GameObject:
   - component: {fileID: 8316052724586748497}
   - component: {fileID: 8316052724586748498}
   - component: {fileID: 8316052724586748499}
+  - component: {fileID: 9066005200974287038}
   m_Layer: 0
   m_Name: Piece
   m_TagString: Untagged
@@ -895,7 +896,10 @@ MonoBehaviour:
   unitAttrCenter: {fileID: 8316052724586748498}
   _rangeUI: {fileID: 8316052726254654752}
   _actionListPanel: {fileID: 1933915504802351383}
+  _pieceDisplay: {fileID: 9066005200974287038}
   isPlayerPiece: 1
+  _damage: 0
+  _damageType: 0
   interactAreas: []
   availableActions: 
   isActived: 0
@@ -951,7 +955,7 @@ MonoBehaviour:
       Data: 1
     - Name: $v
       Entry: 3
-      Data: 15
+      Data: 30
     - Name: 
       Entry: 8
       Data: 
@@ -963,7 +967,7 @@ MonoBehaviour:
       Data: 2
     - Name: $v
       Entry: 3
-      Data: 5
+      Data: 60
     - Name: 
       Entry: 8
       Data: 
@@ -1056,6 +1060,7 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+  pc: {fileID: 8316052724586748497}
   _curHealth: 0
   _maxHealth: 100
   _curMovePoint: 0
@@ -1073,6 +1078,36 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 2, z: 1}
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &9066005200974287038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8316052724586748503}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56f2af82d91b5174789152dc9ad9d86a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pieceSpriteRenderer: {fileID: 8316052725672642768}
+  idleSprite: {fileID: 21300000, guid: b6b12bc80f28fc84a92127c3da9fed45, type: 3}
+  moveSprite: {fileID: 21300000, guid: 0949c6f7be186d34d90bb6cc470498f8, type: 3}
+  attackSprite: {fileID: 21300000, guid: 89c913697d2f69143bd169c2e144095a, type: 3}
+  shootSprite:
+  - {fileID: 21300000, guid: 8a5248fdcdc55a842a630dc2148f1384, type: 3}
+  - {fileID: 21300000, guid: fac2d69d3389a254cbaa3018598a359b, type: 3}
+  dodgeSprite: {fileID: 21300000, guid: 7cfb03be92d4fc34bb3a0df156e1a452, type: 3}
+  hitSprite: {fileID: 21300000, guid: 179f2f585d6961a4293cf9cac27c5aef, type: 3}
+  deathSprite:
+  - {fileID: 21300000, guid: 068a6814a27be9c4c9891e160effec3b, type: 3}
+  - {fileID: 21300000, guid: 0ee313303a9ad804bb205c5168c1725a, type: 3}
+  idleBackSprite: {fileID: 21300000, guid: d32a099818069e448893cf70b44306bc, type: 3}
+  moveBackSprite: {fileID: 21300000, guid: 458ec508e2f7b1e44afa8e57cee86688, type: 3}
+  attackBackSprite: {fileID: 21300000, guid: 89c913697d2f69143bd169c2e144095a, type: 3}
+  shootBackSprite: {fileID: 21300000, guid: fac2d69d3389a254cbaa3018598a359b, type: 3}
+  dodgeBackSprite: {fileID: 0}
+  hitBackSprite: {fileID: 0}
 --- !u!1 &8316052725186485447
 GameObject:
   m_ObjectHideFlags: 0
@@ -1168,7 +1203,7 @@ GameObject:
   - component: {fileID: 8316052725672642775}
   - component: {fileID: 8316052725672642768}
   m_Layer: 0
-  m_Name: 91387A4DC8B448F62BD19012F153E342
+  m_Name: sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

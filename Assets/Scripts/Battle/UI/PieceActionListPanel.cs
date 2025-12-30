@@ -10,7 +10,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
 {
     public PieceController pc;
     public Dictionary<ActionType, Button> actionButtonDic = new();
-    public Dictionary<ActionType, UnityAction> actionDic = new();
+    //public Dictionary<ActionType, UnityAction> actionDic = new();
 
     public void Start()
     {
