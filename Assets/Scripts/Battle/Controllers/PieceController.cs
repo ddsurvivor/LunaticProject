@@ -18,7 +18,8 @@ public class PieceController : MonoBehaviour
 
     [SerializeField] private PieceActionListPanel _actionListPanel; // 棋子动作列表面板
 
-    [SerializeField] private PieceDisplay _pieceDisplay;
+    [FormerlySerializedAs("_pieceDisplay")] [SerializeField] 
+    public PieceDisplay pieceDisplay;
 
 
     [Header("状态")] public bool isPlayerPiece; // 是否是玩家棋子
@@ -49,7 +50,7 @@ public class PieceController : MonoBehaviour
         availableActions.Add(ActionType.Attack);
         availableActions.Add(ActionType.Range_ATK);
         //Debug.Log(_pieceDisplay.name);
-        _pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
+        pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
     }
 
     private void Update()
@@ -108,7 +109,7 @@ public class PieceController : MonoBehaviour
     {
         if (!isPlayerPiece) return;
         _actionListPanel.gameObject.SetActive(false);
-        _pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
+        pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
         if (_curCaverSlot != null)
         {
             _curCaverSlot.LeaveSlot(transform);
@@ -120,7 +121,7 @@ public class PieceController : MonoBehaviour
     {
         if (!isPlayerPiece) return;
         CheckActionPos();
-        _pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
+        pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
         _actionListPanel.gameObject.SetActive(true);
     }
 
@@ -200,11 +201,11 @@ public class PieceController : MonoBehaviour
         Debug.Log("棋子攻击");
         if (_damageType == DamageType.Melee)
         {
-            _pieceDisplay.ChangeDisplayState(PieceDisplayState.Attack, false, 1f);
+            pieceDisplay.ChangeDisplayState(PieceDisplayState.Attack, false, 1f);
         }
         else if (_damageType == DamageType.Ranged)
         {
-            _pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
+            pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
         }
 
         enemy.unitAttrCenter.TakeDamage(_damage, _damageType, 0);
@@ -214,17 +215,17 @@ public class PieceController : MonoBehaviour
     {
         // int atk, DamageType damageType, int addAtk
         //unitAttrCenter.TakeDamage(atk,damageType,addAtk);
-        _pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
+        pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
     }
 
     public void Dead()
     {
         Debug.Log($"{this.name} 死亡");
-        _pieceDisplay.ChangeDisplayState(PieceDisplayState.Death, false, -1, () =>
+        pieceDisplay.ChangeDisplayState(PieceDisplayState.Death, false, -1, () =>
         {
             if (!isPlayerPiece)
             {
-                _pieceDisplay.pieceSpriteRenderer.DOFade(0f, 0.5f).OnComplete(() =>
+                pieceDisplay.pieceSpriteRenderer.DOFade(0f, 0.5f).OnComplete(() =>
                 {
                     this.gameObject.SetActive(false);
                 });

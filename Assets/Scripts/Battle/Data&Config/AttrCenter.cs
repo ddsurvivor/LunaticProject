@@ -16,9 +16,9 @@ public class AttrCenter
     [OdinSerialize]
     private Dictionary<DamageType, int> _armorDic = new();// 护甲值
     [OdinSerialize]
-    private int _normalAtkRange;// 近战攻击距离
+    private int _meleeAtkRange;// 近战攻击距离
     [OdinSerialize]
-    private int _atkRange;// 远程攻击距离
+    private int _shootAtkRange;// 远程攻击距离
 
     
     public int GetAtk(DamageType damageType)
@@ -39,6 +39,6 @@ public class AttrCenter
     }
     public int GetRange(bool isNormalAtk)
     {
-        return isNormalAtk ? _normalAtkRange : _atkRange;
+        return isNormalAtk ? _meleeAtkRange : _shootAtkRange;
     }
 }
