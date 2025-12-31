@@ -209,6 +209,7 @@ public class PieceController : MonoBehaviour
         }
 
         enemy.unitAttrCenter.TakeDamage(_damage, _damageType, 0);
+        BattleScene.Ins.BM.camera.FocusShake(enemy.transform);
     }
 
     public void Hurt()

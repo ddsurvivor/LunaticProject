@@ -6,6 +6,7 @@
         public AIController AIController;
 
         public PlayerController PlayerController;
+        public CameraController camera;
 
         public void Init()
         {

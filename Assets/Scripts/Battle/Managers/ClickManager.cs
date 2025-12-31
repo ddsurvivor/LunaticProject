@@ -36,6 +36,8 @@ public class ClickManager : MonoBehaviour
         {
             PieceController piece = hit.collider.GetComponent<PieceController>();
             if (piece == null || !piece.isPlayerPiece) continue;
+            
+            //BattleScene.Ins.BM.camera.SetFollow(piece.transform);
             _selectedPiece = piece;
             _selectedPiece.StartDrag();
         }
@@ -66,6 +68,7 @@ public class ClickManager : MonoBehaviour
     {
         if (_selectedPiece != null)
         {
+            BattleScene.Ins.BM.camera.SetFollow(_selectedPiece.transform);
             _selectedPiece.StopDrag();
             _selectedPiece = null;
         }
