@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DG.Tweening;
 using UnityEngine;
 
 /// <summary>
@@ -66,13 +67,14 @@ public class AIController : PlayerController
             }
             else
             {
-                EnemyAction();
+                //EnemyAction_AttackRandom();
+                EnemyAction_AttackNearestTarget();
                 _timer = 0f;
             }
         }
     }
 
-    private void EnemyAction()
+    private void EnemyAction_AttackRandom()
     {
         // 简单AI逻辑：依次让每个敌人棋子行动，然后结束回合
         foreach (var piece in pieces)
@@ -85,27 +87,73 @@ public class AIController : PlayerController
             }
         }
 
-        // // 检查是否所有敌人棋子都已行动
-        // bool allActed = true;
-        // foreach (var piece in pieces)
-        // {
-        //     if (piece.unitAttrCenter.CurMovePoint>0)
-        //     {
-        //         allActed = false;
-        //         break;
-        //     }
-        // }
-        //
-        // // 如果所有敌人棋子都已行动，结束敌人回合
-        // if (allActed)
-        // {
-        //     BattleScene.Ins.BM.ChangeTurn();
-        // }
-        
         BattleScene.Ins.BM.ChangeTurn();
     }
+    
+    // 敌人攻击距离最近目标的行动模式
+    // 查找最近的玩家棋子，如果在近战范围内则近战攻击，如果在远程范围内则远程攻击，
+    // 否则移动到最近的玩家棋子附近，到能够远程攻击的位置，然后远程攻击
+    private void EnemyAction_AttackNearestTarget()
+    {
+        foreach (var aiPiece in pieces)
+        {
+            if (!aiPiece.isActived || aiPiece.isDead) continue;
+            if(!aiPiece.unitAttrCenter.CostMP()) continue;
+                
+            // 获取最近的玩家棋子
+            PieceController target = null;
+            float minDistance = float.MaxValue;
+            foreach (var piece in BattleScene.Ins.BM.PlayerController.pieces)
+            {
+                if (piece.isDead) continue;
+                float distance = Vector3.Distance(piece.transform.position, aiPiece.transform.position);
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    target = piece;
+                }
+            }
 
-    public PieceController GetRandomTarget()
+            if (target == null) continue;
+
+            float meleeRange = aiPiece.unitAttrCenter.attr.GetRange(true); // 近战攻击范围
+            float rangedRange = aiPiece.unitAttrCenter.attr.GetRange(false); // 远程攻击范围
+
+            float distanceToTarget = Vector3.Distance(target.transform.position, aiPiece.transform.position);
+
+            if (distanceToTarget <= meleeRange)
+            {
+                // 近战攻击
+                aiPiece.StartNormalAttack();
+                aiPiece.Attack(target);
+            }
+            else if (distanceToTarget <=  rangedRange)
+            {
+                // 远程攻击
+                aiPiece.StartNormalAttack(true);
+                aiPiece.Attack(target);
+            }
+            else
+            {
+                // 移动到能够远程攻击的位置
+                Vector3 direction = (target.transform.position - aiPiece.transform.position).normalized;
+                Vector3 newPosition = target.transform.position - direction * (rangedRange - 0.5f);
+                aiPiece.transform.DOMove(newPosition, 1.0f).OnComplete(() =>
+                {
+                    // 远程攻击
+                    aiPiece.StartNormalAttack(true);
+                    aiPiece.Attack(target);
+                });
+                aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
+                
+            }
+            return;
+        }
+        BattleScene.Ins.BM.ChangeTurn();
+        
+    }
+    
+    private PieceController GetRandomTarget()
     {
         // 获取一个随机的玩家棋子
         if (BattleScene.Ins.BM.PlayerController.pieces.Count == 0) return null;
@@ -114,4 +162,5 @@ public class AIController : PlayerController
         int randomIndex = UnityEngine.Random.Range(0, pieces.Count);
         return BattleScene.Ins.BM.PlayerController.pieces[randomIndex];
     }
+
 }

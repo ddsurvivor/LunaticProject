@@ -72,7 +72,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 100
   m_Sprite: {fileID: 21300000, guid: fee01cbc57e72f144badc598208ec976, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -450,12 +450,12 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: _normalAtkRange
+    - Name: _meleeAtkRange
       Entry: 3
-      Data: 0
-    - Name: _atkRange
+      Data: 3
+    - Name: _shootAtkRange
       Entry: 3
-      Data: 0
+      Data: 8
     - Name: 
       Entry: 8
       Data: 
@@ -479,7 +479,7 @@ MonoBehaviour:
   unitAttrCenter: {fileID: 3435330606817873377}
   _rangeUI: {fileID: 0}
   _actionListPanel: {fileID: 0}
-  _pieceDisplay: {fileID: 190077875118252175}
+  pieceDisplay: {fileID: 190077875118252175}
   isPlayerPiece: 0
   _damage: 5
   _damageType: 2
