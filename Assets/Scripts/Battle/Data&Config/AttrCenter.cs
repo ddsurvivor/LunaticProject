@@ -19,8 +19,10 @@ public class AttrCenter
     private int _meleeAtkRange;// 近战攻击距离
     [OdinSerialize]
     private int _shootAtkRange;// 远程攻击距离
+    [OdinSerialize]
+    private Dictionary<PieceElementType, int> _elementAddDamage = new();// 元素克制加成伤害
 
-    
+
     public int GetAtk(DamageType damageType)
     {
         if (_atkDic.ContainsKey(damageType))
@@ -40,5 +42,13 @@ public class AttrCenter
     public int GetRange(bool isNormalAtk)
     {
         return isNormalAtk ? _meleeAtkRange : _shootAtkRange;
+    }
+    public int GetAddDamage(PieceElementType targetElement)
+    {
+        if (_elementAddDamage.ContainsKey(targetElement))
+        {
+            return _elementAddDamage[targetElement];
+        }
+        return 0;
     }
 }

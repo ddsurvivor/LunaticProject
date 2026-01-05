@@ -47,15 +47,21 @@ public class CameraController : MonoBehaviour
     }
 
     // 相机震动
-    [FormerlySerializedAs("shakeDuration")] public float shakeDelay = 0.5f;
+    public float shakeDelay = 0.5f;
     // 震动力度 
     //public float shakeMagnitude;
     public Cinemachine.CinemachineImpulseSource impulse;
     public void FocusShake(Transform transform)
     {
         virtualCamera.Follow = transform;
-        virtualCamera.m_Lens.OrthographicSize = minZoom;
-        DOVirtual.DelayedCall(shakeDelay, () =>
+        //virtualCamera.m_Lens.OrthographicSize = minZoom;
+        float currentSize = virtualCamera.m_Lens.OrthographicSize;
+        DOTween.To(
+            () => virtualCamera.m_Lens.OrthographicSize,
+            x => virtualCamera.m_Lens.OrthographicSize = x,
+            minZoom,
+            shakeDelay
+        ).OnComplete(() =>
         {
             virtualCamera.Follow = null;
             // 调用impulse的方法让相机震动
@@ -64,6 +70,12 @@ public class CameraController : MonoBehaviour
                 impulse.GenerateImpulse();
                 Debug.Log("相机震动");
             }
+
+            DOTween.To(
+                () => virtualCamera.m_Lens.OrthographicSize,
+                x => virtualCamera.m_Lens.OrthographicSize = x,
+                currentSize,
+                shakeDelay).SetDelay(0.8f);
         });
     }
 }

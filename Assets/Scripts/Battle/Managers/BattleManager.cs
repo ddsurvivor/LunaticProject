@@ -46,4 +46,20 @@
             BattleScene.Ins.UM.endTurnButton.gameObject.SetActive(true);
             BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家回合");
         }
+
+        public void PieceAttack(PieceController attacker, PieceController defender, AttackPack attackPack)
+        {
+            int addAtk =  attacker.unitAttrCenter.attr.GetAddDamage(defender.unitAttrCenter.elementType);
+            int realDamage = attackPack.damage + addAtk;
+            realDamage -=  defender.unitAttrCenter.attr.GetArmor(attackPack.damageType);
+            if (realDamage < 0) realDamage = 0;
+            // TODO: 临时护盾功能
+            defender.unitAttrCenter.TakeDamage(realDamage);
+            BattleScene.Ins.BM.camera.FocusShake(defender.transform);
+
+            if (defender is EnemyController enemy)
+            {
+                enemy.AddDamageRecord(attacker, realDamage);
+            }
+        }
     }

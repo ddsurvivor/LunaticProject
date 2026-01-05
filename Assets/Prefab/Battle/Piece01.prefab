@@ -70,8 +70,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -478206025
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_Sprite: {fileID: -850740472, guid: b42d5aecf0ce97146ba91bf572207233, type: 3}
   m_Color: {r: 0.9339623, g: 0.2613919, b: 0.2613919, a: 1}
@@ -316,7 +316,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_Sprite: {fileID: 21300000, guid: a8f4589c17c2c9444afc2be85fcce22e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -589,8 +589,8 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 0
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingLayerID: -478206025
+  m_SortingOrder: 100
   m_TargetDisplay: 0
 --- !u!114 &5129657035548040877
 MonoBehaviour:
@@ -855,7 +855,7 @@ GameObject:
   - component: {fileID: 8316052724586748499}
   - component: {fileID: 9066005200974287038}
   m_Layer: 0
-  m_Name: Piece
+  m_Name: Piece01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -898,11 +898,11 @@ MonoBehaviour:
   _actionListPanel: {fileID: 1933915504802351383}
   pieceDisplay: {fileID: 9066005200974287038}
   isPlayerPiece: 1
-  _damage: 0
-  _damageType: 0
+  _attackPack:
+    damage: 0
+    damageType: 0
   interactAreas: []
   availableActions: 
-  isActived: 0
 --- !u!114 &8316052724586748498
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1053,18 +1053,45 @@ MonoBehaviour:
       Data: 
     - Name: _meleeAtkRange
       Entry: 3
-      Data: 1
+      Data: 3
     - Name: _shootAtkRange
       Entry: 3
       Data: 5
+    - Name: _elementAddDamage
+      Entry: 7
+      Data: 5|System.Collections.Generic.Dictionary`2[[PieceElementType, Assembly-CSharp],[System.Int32,
+        mscorlib]], mscorlib
+    - Name: comparer
+      Entry: 7
+      Data: 6|System.Collections.Generic.EnumEqualityComparer`1[[PieceElementType,
+        Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: 
       Entry: 8
       Data: 
   pc: {fileID: 8316052724586748497}
+  elementType: 2
   _curHealth: 0
   _maxHealth: 100
   _curMovePoint: 0
-  _maxMovePoint: 0
+  _maxMovePoint: 3
 --- !u!65 &8316052724586748499
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1091,21 +1118,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pieceSpriteRenderer: {fileID: 8316052725672642768}
-  idleSprite: {fileID: 21300000, guid: b6b12bc80f28fc84a92127c3da9fed45, type: 3}
-  moveSprite: {fileID: 21300000, guid: 0949c6f7be186d34d90bb6cc470498f8, type: 3}
-  attackSprite: {fileID: 21300000, guid: 89c913697d2f69143bd169c2e144095a, type: 3}
-  shootSprite:
-  - {fileID: 21300000, guid: 8a5248fdcdc55a842a630dc2148f1384, type: 3}
-  - {fileID: 21300000, guid: fac2d69d3389a254cbaa3018598a359b, type: 3}
-  dodgeSprite: {fileID: 21300000, guid: 7cfb03be92d4fc34bb3a0df156e1a452, type: 3}
-  hitSprite: {fileID: 21300000, guid: 179f2f585d6961a4293cf9cac27c5aef, type: 3}
-  deathSprite:
-  - {fileID: 21300000, guid: 068a6814a27be9c4c9891e160effec3b, type: 3}
-  - {fileID: 21300000, guid: 0ee313303a9ad804bb205c5168c1725a, type: 3}
-  idleBackSprite: {fileID: 21300000, guid: d32a099818069e448893cf70b44306bc, type: 3}
-  moveBackSprite: {fileID: 21300000, guid: 458ec508e2f7b1e44afa8e57cee86688, type: 3}
-  attackBackSprite: {fileID: 21300000, guid: 89c913697d2f69143bd169c2e144095a, type: 3}
-  shootBackSprite: {fileID: 21300000, guid: fac2d69d3389a254cbaa3018598a359b, type: 3}
+  idleSprite: {fileID: 21300000, guid: e6046fdc00c400c48a3caa59ee99c8ff, type: 3}
+  moveSprite: {fileID: 21300000, guid: dbe6f829ebe806f48b7f2e667d960c50, type: 3}
+  attackSprite:
+  - {fileID: 21300000, guid: 853864d11f94fce43b717cdc9c548da8, type: 3}
+  - {fileID: 21300000, guid: ca2ff2df8e87be8459b0fed6aa5a6af1, type: 3}
+  shootSprite: []
+  dodgeSprite: {fileID: 0}
+  hitSprite: {fileID: 0}
+  deathSprite: []
+  idleBackSprite: {fileID: 0}
+  moveBackSprite: {fileID: 0}
+  attackBackSprite: {fileID: 0}
+  shootBackSprite: {fileID: 0}
   dodgeBackSprite: {fileID: 0}
   hitBackSprite: {fileID: 0}
 --- !u!1 &8316052725186485447
@@ -1178,8 +1203,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -478206025
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_Sprite: {fileID: -850740472, guid: b42d5aecf0ce97146ba91bf572207233, type: 3}
   m_Color: {r: 0.50853425, g: 0.990566, b: 0.46413308, a: 1}
@@ -1265,7 +1290,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 100
-  m_Sprite: {fileID: 21300000, guid: 5db2d72c76c8f1245b07c039ba7fa353, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e6046fdc00c400c48a3caa59ee99c8ff, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1346,8 +1371,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -478206025
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_Sprite: {fileID: -835065633, guid: b42d5aecf0ce97146ba91bf572207233, type: 3}
   m_Color: {r: 0.7868305, g: 0.9150943, b: 0.7827222, a: 1}
@@ -1580,8 +1605,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -478206025
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_Sprite: {fileID: -835065633, guid: b42d5aecf0ce97146ba91bf572207233, type: 3}
   m_Color: {r: 0.9339623, g: 0.2613919, b: 0.2613919, a: 1}
@@ -1612,7 +1637,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &5324331418272781653
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1629,9 +1654,9 @@ RectTransform:
   m_Father: {fileID: 4382934084206209657}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 50, y: -75}
   m_SizeDelta: {x: 100, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2685963455318463149

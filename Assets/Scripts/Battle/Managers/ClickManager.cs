@@ -29,9 +29,10 @@ public class ClickManager : MonoBehaviour
 
     private void StartDarg()
     {
+        BattleScene.Ins.BM.camera.SetFollow(null);
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit[] hits = Physics.RaycastAll(ray);
-
+        
         foreach (var hit in hits)
         {
             PieceController piece = hit.collider.GetComponent<PieceController>();

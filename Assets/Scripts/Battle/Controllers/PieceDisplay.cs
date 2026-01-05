@@ -12,7 +12,7 @@ public class PieceDisplay : MonoBehaviour
     // 有一系列按照规定命名的Sprite资源用于显示不同的棋子图片，分别为idel、move、attack、shoot
     public Sprite idleSprite;
     public Sprite moveSprite;
-    public Sprite attackSprite;
+    public List<Sprite> attackSprite;
     public List<Sprite> shootSprite;
     // 闪避
     public Sprite dodgeSprite;
@@ -45,7 +45,7 @@ public class PieceDisplay : MonoBehaviour
                 pieceSpriteRenderer.sprite = back ? moveBackSprite : moveSprite;
                 break;
             case PieceDisplayState.Attack:
-                pieceSpriteRenderer.sprite = back ? attackBackSprite : attackSprite;
+                StartCoroutine(PlaySpriteAnimation(attackSprite, 0.3f));
                 break;
             case PieceDisplayState.Shoot:
                 StartCoroutine(PlaySpriteAnimation(shootSprite, 0.3f));

@@ -21,3 +21,13 @@ public enum ActionType
     Scan = 6,// 扫描
     Range_ATK = 7,// 远程攻击
 }
+
+// 棋子属性种类
+public enum PieceElementType
+{
+    None = 0,
+    // 机械
+    Mechanical = 1,
+    // 生物
+    Biological = 2,
+}

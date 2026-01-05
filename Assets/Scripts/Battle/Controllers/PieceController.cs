@@ -18,7 +18,7 @@ public class PieceController : MonoBehaviour
 
     [SerializeField] private PieceActionListPanel _actionListPanel; // 棋子动作列表面板
 
-    [FormerlySerializedAs("_pieceDisplay")] [SerializeField] 
+    [SerializeField] 
     public PieceDisplay pieceDisplay;
 
 
@@ -34,14 +34,15 @@ public class PieceController : MonoBehaviour
 
     // 当前攻击数据
     private bool _isAttacking = false; // 是否正在攻击
-    [SerializeField] [ReadOnly] private int _damage;
-    [SerializeField] [ReadOnly] private DamageType _damageType;
+    [SerializeField] [ReadOnly]  private AttackPack _attackPack;
+    //[SerializeField] [ReadOnly] private int _damage;
+    //[SerializeField] [ReadOnly] private DamageType _damageType;
 
     public List<InteractArea> interactAreas = new(); // 可交互区域列表
 
     public List<ActionType> availableActions = new(); // 可用动作列表
 
-    public bool isActived = false; // 是否被激活
+    //public bool isActived = false; // 是否被激活
 
     public void Init()
     {
@@ -157,14 +158,12 @@ public class PieceController : MonoBehaviour
         if (!range)
         {
             _rangeUI?.ShowAttackRange(unitAttrCenter.attr.GetRange(true));
-            _damageType = DamageType.Melee;
-            _damage = unitAttrCenter.attr.GetAtk(DamageType.Melee);
+            _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Melee),DamageType.Melee);
         }
         else
         {
             _rangeUI?.ShowAttackRange(unitAttrCenter.attr.GetRange(false));
-            _damageType = DamageType.Ranged;
-            _damage = unitAttrCenter.attr.GetAtk(DamageType.Ranged);
+            _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Ranged),DamageType.Ranged);
         }
     }
 
@@ -199,24 +198,26 @@ public class PieceController : MonoBehaviour
     public void Attack(PieceController enemy)
     {
         Debug.Log("棋子攻击");
-        if (_damageType == DamageType.Melee)
+        if (_attackPack.damageType == DamageType.Melee)
         {
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Attack, false, 1f);
         }
-        else if (_damageType == DamageType.Ranged)
+        else if (_attackPack.damageType == DamageType.Ranged)
         {
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
         }
 
-        enemy.unitAttrCenter.TakeDamage(_damage, _damageType, 0);
-        BattleScene.Ins.BM.camera.FocusShake(enemy.transform);
+        BattleScene.Ins.BM.PieceAttack(this, enemy, _attackPack);
     }
 
     public void Hurt()
     {
-        // int atk, DamageType damageType, int addAtk
-        //unitAttrCenter.TakeDamage(atk,damageType,addAtk);
-        pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
+        // 延迟0.3f
+        DOVirtual.DelayedCall(0.3f, () =>
+        {
+            Debug.Log($"{this.name} 受伤");
+            pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
+        });
     }
 
     public void Dead()

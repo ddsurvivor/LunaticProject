@@ -11,6 +11,8 @@ public class UnitAttrCenter: SerializedMonoBehaviour
 {
     public PieceController pc;
     
+    public PieceElementType elementType;
+    
     [OdinSerialize]
     private AttrCenter _attr = new();
     public AttrCenter attr => _attr;
@@ -41,6 +43,10 @@ public class UnitAttrCenter: SerializedMonoBehaviour
     private int _maxMovePoint;
 
     private int _tempShield;
+    
+    // 嘲讽值
+    private int _tauntValue;
+    public  int TauntValue => _tauntValue;
 
     public void Init()
     {
@@ -51,15 +57,8 @@ public class UnitAttrCenter: SerializedMonoBehaviour
     {
         _curMovePoint = _maxMovePoint;
     }
-    public void TakeDamage(int atk, DamageType damageType, int addAtk)
+    public void TakeDamage(int realDamage)
     {
-        int realDamage = atk;
-        if (_tempShield>0)
-        {
-            realDamage -= _tempShield;
-            _tempShield = 0;
-        }
-        realDamage -= addAtk + _attr.GetArmor(damageType);
         if (realDamage <= 0) return;
         _curHealth -= realDamage;
         if (_curHealth <= 0)
@@ -76,9 +75,9 @@ public class UnitAttrCenter: SerializedMonoBehaviour
         }
         else
         {
-            pc.Hurt();
+            if (pc != null) pc.Hurt();
         }
-        Debug.Log($"受到{damageType}伤害{realDamage}");
+        Debug.Log($"受到伤害{realDamage}");
     }
     
     public bool CostMP()

@@ -262,8 +262,8 @@ GameObject:
   - component: {fileID: 2820315917553685405}
   - component: {fileID: 2820315917553685406}
   - component: {fileID: 3435330606817873377}
-  - component: {fileID: 1976601876}
   - component: {fileID: 190077875118252175}
+  - component: {fileID: 439568009330001271}
   m_Layer: 11
   m_Name: Enemy01
   m_TagString: Untagged
@@ -456,36 +456,41 @@ MonoBehaviour:
     - Name: _shootAtkRange
       Entry: 3
       Data: 8
+    - Name: _elementAddDamage
+      Entry: 7
+      Data: 5|System.Collections.Generic.Dictionary`2[[PieceElementType, Assembly-CSharp],[System.Int32,
+        mscorlib]], mscorlib
+    - Name: comparer
+      Entry: 7
+      Data: 6|System.Collections.Generic.EnumEqualityComparer`1[[PieceElementType,
+        Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
     - Name: 
       Entry: 8
       Data: 
-  pc: {fileID: 1976601876}
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+  pc: {fileID: 439568009330001271}
+  elementType: 1
   _curHealth: 0
   _maxHealth: 100
   _curMovePoint: 0
   _maxMovePoint: 1
---- !u!114 &1976601876
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2820315917553685404}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb4f1bba508e44a8ae54d9e577f101f2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  unitAttrCenter: {fileID: 3435330606817873377}
-  _rangeUI: {fileID: 0}
-  _actionListPanel: {fileID: 0}
-  pieceDisplay: {fileID: 190077875118252175}
-  isPlayerPiece: 0
-  _damage: 5
-  _damageType: 2
-  interactAreas: []
-  availableActions: 
-  isActived: 0
 --- !u!114 &190077875118252175
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -501,7 +506,8 @@ MonoBehaviour:
   pieceSpriteRenderer: {fileID: 4377983920536472043}
   idleSprite: {fileID: 21300000, guid: fee01cbc57e72f144badc598208ec976, type: 3}
   moveSprite: {fileID: 21300000, guid: 7bf6d24286f0a304891a1e019290aeba, type: 3}
-  attackSprite: {fileID: 21300000, guid: cfb2cf164973b264ba8938a466573209, type: 3}
+  attackSprite:
+  - {fileID: 21300000, guid: cfb2cf164973b264ba8938a466573209, type: 3}
   shootSprite:
   - {fileID: 21300000, guid: 541a3d153dcf3d646a43789da39abb1f, type: 3}
   - {fileID: 21300000, guid: b28a8cf6bca7cb44eb8926b5db0e134d, type: 3}
@@ -511,9 +517,32 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 26f8ad661ba653f478d0004c53670ef0, type: 3}
   - {fileID: 21300000, guid: 796c672c6dcd3174bbca7a239be0e11e, type: 3}
   - {fileID: 21300000, guid: 917cdb31f9a69d54e82df1d5376aead5, type: 3}
-  idleBackSprite: {fileID: 21300000, guid: d32a099818069e448893cf70b44306bc, type: 3}
+  idleBackSprite: {fileID: 0}
   moveBackSprite: {fileID: 21300000, guid: d26e0a20a0efb3d4fba9d9f948f988d7, type: 3}
   attackBackSprite: {fileID: 0}
   shootBackSprite: {fileID: 0}
   dodgeBackSprite: {fileID: 0}
   hitBackSprite: {fileID: 0}
+--- !u!114 &439568009330001271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2820315917553685404}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b1e7d779d214926abba2429cfaba477, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitAttrCenter: {fileID: 3435330606817873377}
+  _rangeUI: {fileID: 0}
+  _actionListPanel: {fileID: 0}
+  pieceDisplay: {fileID: 190077875118252175}
+  isPlayerPiece: 0
+  _attackPack:
+    damage: 0
+    damageType: 0
+  interactAreas: []
+  availableActions: 
+  isActived: 0
