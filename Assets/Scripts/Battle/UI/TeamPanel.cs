@@ -22,10 +22,14 @@ public class TeamPanel : SerializedMonoBehaviour
     [OdinSerialize]
     private int currentSelectedId = -1;
 
-    private void Start()
+    public void Init()
     {
-        //InitializeLayout();
+        foreach (var head in headTransforms)
+        {
+            head.Init();
+        }
         OnSelectPiece(1);
+        
     }
     
     // 初始化布局
@@ -88,8 +92,9 @@ public class TeamPanel : SerializedMonoBehaviour
             // 如果是选中状态，调整位置以保持间距不变
             if (headTransforms[i].pieceId == currentSelectedId)
             {
+                posX += spacing; 
                 rect.localPosition = new Vector3(posX, 150f*0.1f, 0f);
-                posX += (originWidth*1.1f+spacing);
+                posX += (originWidth*0.6f + originWidth *0.5f +spacing);
             }
             else
             {

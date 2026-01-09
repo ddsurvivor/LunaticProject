@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -24,11 +25,7 @@ public class PlayerController : SerializedMonoBehaviour
     public virtual void Init()
     {
         burstCharge = 0f;
-        if (burstChargeBarFill != null)
-        {
-            // 设置宽度
-            burstChargeBarFill.sizeDelta = new Vector2(0f, burstChargeBarFill.sizeDelta.y);
-        }
+        UpdateBurstBar();
         foreach (var piece in pieces)
         {
             piece.Init();
@@ -70,11 +67,7 @@ public class PlayerController : SerializedMonoBehaviour
             BattleScene.Ins.UM.ShowBurstReady(true);
         }
 
-        if (burstChargeBarFill != null)
-        {
-            burstChargeBarFill.sizeDelta = new Vector2(originWidth * (burstCharge / maxBurstCharge),
-                burstChargeBarFill.sizeDelta.y);
-        }
+        UpdateBurstBar();
     }
 
     // 聚能拼点结果
@@ -87,11 +80,7 @@ public class PlayerController : SerializedMonoBehaviour
     {
         isBursting = true;
         burstCharge = 0f;
-        if (burstChargeBarFill != null)
-        {
-            burstChargeBarFill.sizeDelta = new Vector2(originWidth * (burstCharge / maxBurstCharge),
-                burstChargeBarFill.sizeDelta.y);
-        }
+        UpdateBurstBar();
         totalDamage = 0;
         burstTarget = null;
         // 所有棋子重置状态
@@ -126,5 +115,19 @@ public class PlayerController : SerializedMonoBehaviour
         BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家聚能发动！");
         // 进入聚能
         EnterBurstMode();
+    }
+
+    private void UpdateBurstBar()
+    {
+        if (burstChargeBarFill != null)
+        {
+            float endWidth = originWidth * (burstCharge / maxBurstCharge);
+            DOVirtual.Float(burstCharge, endWidth, 0.3f, (value) =>
+            {
+                burstChargeBarFill.sizeDelta = new Vector2(value, burstChargeBarFill.sizeDelta.y);
+            }).SetDelay(0.3f);
+            /*burstChargeBarFill.sizeDelta = new Vector2(originWidth * (burstCharge / maxBurstCharge),
+                burstChargeBarFill.sizeDelta.y);*/
+        }
     }
 }

@@ -16,5 +16,6 @@ using System;
         public void Start()
         {
             BM.Init();
+            UM.Init();
         }
     }

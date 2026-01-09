@@ -47,6 +47,10 @@ public class UnitAttrCenter: SerializedMonoBehaviour
     // 嘲讽值
     private int _tauntValue;
     public  int TauntValue => _tauntValue;
+    
+    
+    [Header("UI")]
+    public Transform hpBarFill;
 
     public void Init()
     {
@@ -61,6 +65,8 @@ public class UnitAttrCenter: SerializedMonoBehaviour
     {
         if (realDamage <= 0) return;
         _curHealth -= realDamage;
+        if (_curHealth <= 0) _curHealth = 0;
+        if(hpBarFill!=null)hpBarFill.localScale = new Vector3((float)_curHealth / _maxHealth, 1f,1f);
         if (_curHealth <= 0)
         {
             if (pc != null)

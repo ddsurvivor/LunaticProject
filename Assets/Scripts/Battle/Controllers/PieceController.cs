@@ -29,9 +29,9 @@ public class PieceController : MonoBehaviour
 
     public bool isDead => unitAttrCenter.CurHealth <= 0; // 是否死亡
 
-    private bool _isDragging = false; // 是否正在拖拽
+    //private bool _isDragging = false; // 是否正在拖拽
 
-    private Vector3 _originalPosition; // 原始位置
+    //private Vector3 _originalPosition; // 原始位置
 
     private CaverSlot _curCaverSlot; // 当前绑定的点位
 
@@ -46,6 +46,7 @@ public class PieceController : MonoBehaviour
     public List<ActionType> availableActions = new(); // 可用动作列表
 
     //public bool isActived = false; // 是否被激活
+    
 
     public void Init()
     {
@@ -101,6 +102,7 @@ public class PieceController : MonoBehaviour
             _curCaverSlot.LeaveSlot(transform);
             _curCaverSlot = null;
         }
+        BattleScene.Ins.UM.teamPanel.OnSelectPiece(pieceID);
     }
 
     public void StopDrag()
@@ -246,6 +248,7 @@ public class PieceController : MonoBehaviour
         {
             Debug.Log($"{this.name} 受伤");
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
+            transform.DOShakePosition(0.3f, 0.8f);
         });
     }
 

@@ -20,11 +20,8 @@ public class PieceHeadUI : MonoBehaviour
     private Vector3 normalScale = Vector3.one;
     private Vector3 selectedScale = new Vector3(1.2f, 1.2f, 1.2f);
     
-    private void Start()
+    public void Init()
     {
-        if (pieceIcon == null)
-            pieceIcon = GetComponent<Image>();
-            
         UpdateHealthDisplay();
         SetSelected(false);
     }
@@ -60,14 +57,6 @@ public class PieceHeadUI : MonoBehaviour
         if (healthBar != null)
         {
             healthBar.fillAmount = healthPercent;
-            
-            // 根据血量改变颜色
-            if (healthPercent > 0.6f)
-                healthBar.color = Color.green;
-            else if (healthPercent > 0.3f)
-                healthBar.color = Color.yellow;
-            else
-                healthBar.color = Color.red;
         }
         
         if (healthText != null)
