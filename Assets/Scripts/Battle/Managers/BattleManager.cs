@@ -10,15 +10,8 @@
 
         public void Init()
         {
-            foreach (var piece in PlayerController.pieces)
-            {
-                piece.Init();
-            }
-
-            foreach (var piece in AIController.pieces)   
-            {
-                piece.Init();
-            }
+            PlayerController.Init();
+            AIController.Init();
             PlayerStart();
         }
         public void ChangeTurn()

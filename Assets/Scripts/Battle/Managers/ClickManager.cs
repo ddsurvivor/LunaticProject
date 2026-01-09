@@ -10,14 +10,24 @@ public class ClickManager : MonoBehaviour
     private void Update()
     {
         if(! BattleScene.Ins.BM.PlayerController.isInTurn) return;
+        
         // 鼠标左键点击时发射射线检测
         if (Input.GetMouseButtonDown(0))
         {
+            // 判定是否点击到UI
+            if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
             StartDarg();
         }
 
         if (Input.GetMouseButton(0))
         {
+            if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
             DragPiece();
         }
 
@@ -29,6 +39,7 @@ public class ClickManager : MonoBehaviour
 
     private void StartDarg()
     {
+        Debug.Log("开始拖动");
         BattleScene.Ins.BM.camera.SetFollow(null);
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit[] hits = Physics.RaycastAll(ray);
@@ -37,19 +48,24 @@ public class ClickManager : MonoBehaviour
         {
             PieceController piece = hit.collider.GetComponent<PieceController>();
             if (piece == null || !piece.isPlayerPiece) continue;
-            
+            _selectedPiece?.CancelSelect();
             //BattleScene.Ins.BM.camera.SetFollow(piece.transform);
             _selectedPiece = piece;
             _selectedPiece.StartDrag();
+            return;
         }
+        
+        _selectedPiece?.CancelSelect();
+        _selectedPiece = null;
     }
 
+    Vector3 point = Vector3.zero;
     private void DragPiece()
     {
         if (_selectedPiece == null) return;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit[] hits = Physics.RaycastAll(ray);
-        Vector3 point = Vector3.zero;
+        
         foreach (var hit in hits)
         {
             if (hit.collider.CompareTag("Mask")) return;
@@ -71,7 +87,7 @@ public class ClickManager : MonoBehaviour
         {
             BattleScene.Ins.BM.camera.SetFollow(_selectedPiece.transform);
             _selectedPiece.StopDrag();
-            _selectedPiece = null;
+            //_selectedPiece = null;
         }
     }
 }

@@ -32,7 +32,7 @@ public class PieceDisplay : MonoBehaviour
     // 如果传入back则显示背面图片
     public void ChangeDisplayState(PieceDisplayState state, bool back = false, float duration = -1f, UnityAction finish = null)
     {
-        Debug.Log($"ChangeDisplayState: {state}, back: {back}, duration: {duration}");
+        //Debug.Log($"ChangeDisplayState: {state}, back: {back}, duration: {duration}");
         if(pieceSpriteRenderer== null) return;
         finishAction = finish;
         StopAllCoroutines();

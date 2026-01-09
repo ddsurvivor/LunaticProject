@@ -17,6 +17,8 @@
         public void AddToSlot(Transform target)
         {
             if(isFull) return;
+            if(piecesDic.ContainsValue(target))return;
+            Debug.Log($" Adding {target.name} to CaverSlot");
             foreach (var slotTransform in slotTransforms)
             {
                 if (!piecesDic.ContainsKey(slotTransform))

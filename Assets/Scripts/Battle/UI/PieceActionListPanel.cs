@@ -12,8 +12,9 @@ public class PieceActionListPanel : SerializedMonoBehaviour
     public Dictionary<ActionType, Button> actionButtonDic = new();
     //public Dictionary<ActionType, UnityAction> actionDic = new();
 
-    public void Start()
+    public void Init(PieceController pc)
     {
+        this.pc = pc;
         foreach (var pair in actionButtonDic)
         {
             pair.Value.onClick.AddListener(() => OnActionButtonClicked(pair.Key));

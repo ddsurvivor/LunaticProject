@@ -8,7 +8,32 @@ public class PlayerController : SerializedMonoBehaviour
 {
     public List<PieceController> pieces = new();
     public bool isInTurn;
+    public bool isBursting; // 是否处于聚能状态
+
+    public float burstCharge = 0f; // 聚能值
+    public float maxBurstCharge = 100f; // 最大聚能值
+    public bool ableBurst => burstCharge >= maxBurstCharge && !isBursting; // 是否可以发动聚能
     
+    public int totalDamage; // 对单一敌人造成的总伤害数值
+    public PieceController burstTarget; // 当前聚能回合攻击的单一目标敌人
+
+    [Header("UI")] 
+    public RectTransform burstChargeBarFill; // 聚能条填充部分
+    private float originWidth = 500f;
+
+    public virtual void Init()
+    {
+        burstCharge = 0f;
+        if (burstChargeBarFill != null)
+        {
+            // 设置宽度
+            burstChargeBarFill.sizeDelta = new Vector2(0f, burstChargeBarFill.sizeDelta.y);
+        }
+        foreach (var piece in pieces)
+        {
+            piece.Init();
+        }
+    }
     public virtual void TurnStart()
     {
         // 所有棋子重置状态
@@ -16,8 +41,10 @@ public class PlayerController : SerializedMonoBehaviour
         {
             piece.TurnStart();
         }
+
         BattleScene.Ins.UM.endTurnButton.gameObject.SetActive(false);
     }
+
     public virtual void TurnEnd()
     {
         // 可以在这里添加玩家回合结束时的逻辑
@@ -26,10 +53,78 @@ public class PlayerController : SerializedMonoBehaviour
             piece.TurnEnd();
         }
     }
+
+    /// <summary>
+    /// 聚能充能
+    /// </summary>
+    /// <param name="amount"></param>
+    public void ChargeBurst(float amount)
+    {
+        if (isBursting) return;
+
+        burstCharge += amount;
+        if (burstCharge >= maxBurstCharge)
+        {
+            burstCharge = maxBurstCharge;
+            Debug.Log("聚能已满，可以发动聚能！");
+            BattleScene.Ins.UM.ShowBurstReady(true);
+        }
+
+        if (burstChargeBarFill != null)
+        {
+            burstChargeBarFill.sizeDelta = new Vector2(originWidth * (burstCharge / maxBurstCharge),
+                burstChargeBarFill.sizeDelta.y);
+        }
+    }
+
+    // 聚能拼点结果
+    public bool CheckBurstSuccess()
+    {
+        return true;
+    }
+
+    public void EnterBurstMode()
+    {
+        isBursting = true;
+        burstCharge = 0f;
+        if (burstChargeBarFill != null)
+        {
+            burstChargeBarFill.sizeDelta = new Vector2(originWidth * (burstCharge / maxBurstCharge),
+                burstChargeBarFill.sizeDelta.y);
+        }
+        totalDamage = 0;
+        burstTarget = null;
+        // 所有棋子重置状态
+        foreach (var piece in pieces)
+        {
+            piece.TurnStart();
+        }
+    }
+
+
+    // UI
     public void OnClickTurnEnd()
     {
         BattleScene.Ins.BM.ChangeTurn();
-        
         BattleScene.Ins.UM.endTurnButton.gameObject.SetActive(false);
+    }
+
+    public void OnClickBurst()
+    {
+        Debug.Log("发动聚能");
+        BattleScene.Ins.UM.ShowBurstReady(false);
+        if (BattleScene.Ins.BM.AIController.ableBurst)
+        {
+            Debug.Log("敌人也准备发动聚能，进入拼点环节");
+            if (!CheckBurstSuccess())
+            {
+                Debug.Log("玩家聚能拼点失败，无法发动聚能");
+                return;
+            }
+        }
+
+        BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家聚能发动！");
+        // 进入聚能
+        EnterBurstMode();
     }
 }

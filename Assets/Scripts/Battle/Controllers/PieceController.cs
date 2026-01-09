@@ -20,6 +20,9 @@ public class PieceController : MonoBehaviour
 
     [SerializeField] 
     public PieceDisplay pieceDisplay;
+    
+    [Header("配置")]
+    public int pieceID; // 棋子ID
 
 
     [Header("状态")] public bool isPlayerPiece; // 是否是玩家棋子
@@ -52,6 +55,7 @@ public class PieceController : MonoBehaviour
         availableActions.Add(ActionType.Range_ATK);
         //Debug.Log(_pieceDisplay.name);
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
+        if(_actionListPanel!=null)_actionListPanel.Init(this);
     }
 
     private void Update()
@@ -85,26 +89,7 @@ public class PieceController : MonoBehaviour
         }
     }
 
-    private void OnMouseEnter()
-    {
-        //_rangeUI.ShowCircleRange(3);
-    }
-
-    private void OnMouseExit()
-    {
-        /*if(_isDragging) return;
-        _rangeUI.CloseRange();*/
-    }
-
-
-    private void OnMouseUp()
-    {
-        BattleScene.Ins.UM.infoBox.ShowInfo(this);
-        if (!isPlayerPiece) return;
-        _isDragging = false;
-        CheckActionPos();
-        _actionListPanel.gameObject.SetActive(true);
-    }
+    
 
     public void StartDrag()
     {
@@ -120,17 +105,27 @@ public class PieceController : MonoBehaviour
 
     public void StopDrag()
     {
+        BattleScene.Ins.UM.infoBox.ShowInfo(this);
         if (!isPlayerPiece) return;
         CheckActionPos();
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
         _actionListPanel.gameObject.SetActive(true);
     }
 
+    public void CancelSelect()
+    {
+        Debug.Log("取消选择棋子");
+        _isAttacking = false;
+        _rangeUI.CloseRange();
+        _actionListPanel.gameObject.SetActive(false);
+    }
+
 
     private bool CheckActionPos()
     {
+        bool result = false;
         interactAreas.Clear();
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, 1f);
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, 3f);
         foreach (var collider in hitColliders)
         {
             CaverSlot caverSlot = collider.transform.GetComponent<CaverSlot>();
@@ -138,18 +133,18 @@ public class PieceController : MonoBehaviour
             {
                 caverSlot.AddToSlot(transform);
                 _curCaverSlot = caverSlot;
-                return true;
+                result = true;
             }
 
             InteractArea interactArea = collider.transform.GetComponent<InteractArea>();
             if (interactArea != null)
             {
                 interactAreas.Add(interactArea);
-                return true;
+                result = true;
             }
         }
 
-        return false;
+        return result;
     }
 
     public void StartNormalAttack(bool range = false)
@@ -207,11 +202,45 @@ public class PieceController : MonoBehaviour
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
         }
 
+        
+        // 聚能充能
+        if (isPlayerPiece)
+        {
+            if (!BattleScene.Ins.BM.PlayerController.isBursting)
+            {
+                // 攻击充能
+                BattleScene.Ins.BM.PlayerController.ChargeBurst(GameConst.attackBurstCharge);
+            }
+            else
+            {
+                // 爆发状态下攻击同一目标增加额外伤害
+                if (BattleScene.Ins.BM.PlayerController.burstTarget == enemy)
+                {
+                    _attackPack.damage += (int)(BattleScene.Ins.BM.PlayerController.totalDamage *
+                                          GameConst.burstAddDamageRate);
+                    BattleScene.Ins.BM.PlayerController.totalDamage += _attackPack.damage;
+                }
+                else
+                {
+                    BattleScene.Ins.BM.PlayerController.burstTarget = enemy;
+                    BattleScene.Ins.BM.PlayerController.totalDamage = _attackPack.damage;
+                }
+            }
+        }
+        
+        // 执行攻击
         BattleScene.Ins.BM.PieceAttack(this, enemy, _attackPack);
+        
     }
 
     public void Hurt()
     {
+        // 聚能充能
+        if (isPlayerPiece)
+        {
+            // 受伤充能
+            BattleScene.Ins.BM.PlayerController.ChargeBurst(GameConst.hurtBurstCharge);
+        }
         // 延迟0.3f
         DOVirtual.DelayedCall(0.3f, () =>
         {

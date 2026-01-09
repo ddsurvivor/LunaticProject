@@ -12,7 +12,7 @@ public class FogArea : InteractArea
     public override void TriggerAction()
     {
         base.TriggerAction();
-        fogEffect.SetActive(false);
+        fogEffect?.SetActive(false);
         gameObject.SetActive(false);
         BattleScene.Ins.BM.AIController.OnScanFog(fogEffect);
     }

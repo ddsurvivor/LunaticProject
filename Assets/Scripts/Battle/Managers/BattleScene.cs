@@ -10,6 +10,8 @@ using System;
     {
         public BattleManager BM;
         public UIManager UM;
+        
+        
 
         public void Start()
         {
