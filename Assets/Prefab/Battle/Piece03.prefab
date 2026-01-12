@@ -231,6 +231,7 @@ MonoBehaviour:
     damageType: 0
   interactAreas: []
   availableActions: 
+  isIdle: 0
 --- !u!114 &8316052724586748498
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -414,12 +415,26 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: buffStates
+      Entry: 7
+      Data: 7|System.Collections.Generic.List`1[[BuffState, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
   pc: {fileID: 8316052724586748497}
   elementType: 2
   _curHealth: 0
   _maxHealth: 40
   _curMovePoint: 0
-  _maxMovePoint: 2
+  _maxMovePoint: 3
+  _moveRange: 10
+  _ammoCount: 3
   hpBarFill: {fileID: 0}
 --- !u!65 &8316052724586748499
 BoxCollider:

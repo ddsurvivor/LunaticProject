@@ -46,6 +46,8 @@ public class PieceController : MonoBehaviour
     public List<ActionType> availableActions = new(); // 可用动作列表
 
     //public bool isActived = false; // 是否被激活
+
+    public bool isIdle;// 是否处于待机状态
     
 
     public void Init()
@@ -54,9 +56,12 @@ public class PieceController : MonoBehaviour
         availableActions.Add(ActionType.Move);
         availableActions.Add(ActionType.Attack);
         availableActions.Add(ActionType.Range_ATK);
+        availableActions.Add(ActionType.Idle);// 待机
+        availableActions.Add(ActionType.Reload);// 装填
         //Debug.Log(_pieceDisplay.name);
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
         if(_actionListPanel!=null)_actionListPanel.Init(this);
+        isIdle = true;
     }
 
     private void Update()
@@ -80,6 +85,7 @@ public class PieceController : MonoBehaviour
     public void TurnStart()
     {
         unitAttrCenter.FullMovePoint();
+        isIdle = false;
     }
 
     public void TurnEnd()
@@ -265,5 +271,14 @@ public class PieceController : MonoBehaviour
                 });
             }
         });
+    }
+
+    /// <summary>
+    /// 重新装填弹药
+    /// </summary>
+    public void ReloadAmmo()
+    {
+        if (!unitAttrCenter.CostMP()) return;
+        unitAttrCenter.FullAmmo();
     }
 }

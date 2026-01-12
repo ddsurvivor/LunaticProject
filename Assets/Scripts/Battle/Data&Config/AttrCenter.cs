@@ -22,7 +22,6 @@ public class AttrCenter
     [OdinSerialize]
     private Dictionary<PieceElementType, int> _elementAddDamage = new();// 元素克制加成伤害
 
-
     public int GetAtk(DamageType damageType)
     {
         if (_atkDic.ContainsKey(damageType))

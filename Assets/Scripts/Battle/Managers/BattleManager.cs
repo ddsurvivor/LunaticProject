@@ -4,9 +4,9 @@
     public class BattleManager: MonoBehaviour
     {
         public AIController AIController;
-
         public PlayerController PlayerController;
         public CameraController camera;
+        public BuffManager buffManager;
 
         public void Init()
         {

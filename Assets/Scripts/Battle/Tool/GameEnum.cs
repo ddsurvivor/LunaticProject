@@ -20,6 +20,7 @@ public enum ActionType
     Idle = 5,// 待机
     Scan = 6,// 扫描
     Range_ATK = 7,// 远程攻击
+    Reload = 8,// 装填
 }
 
 // 棋子属性种类
@@ -31,3 +32,24 @@ public enum PieceElementType
     // 生物
     Biological = 2,
 }
+
+public enum BuffType
+{
+    // 充能
+    Charge = 1,
+    // 自动治疗
+    AutoHeal = 2,
+    // 防护
+    Shield = 3,
+    
+    // 100以后为Debuff
+    // 干扰
+    Disrupt = 101,
+    // 过载
+    Overload = 102,
+    // 束缚
+    Bind = 103,
+    // 燃烧
+    Burn = 104,
+}
+

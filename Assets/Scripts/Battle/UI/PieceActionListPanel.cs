@@ -55,11 +55,17 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             case ActionType.Defend:
                 break;
             case ActionType.Idle:
+                pc.isIdle = true;
+                // 清除剩余行动力
+                pc.unitAttrCenter.CostMP(pc.unitAttrCenter.CurMovePoint);
                 break;
             case ActionType.Scan:
                 break;
             case ActionType.Range_ATK:
                 pc.StartNormalAttack(true);
+                break;
+            case ActionType.Reload:
+                pc.ReloadAmmo();
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);

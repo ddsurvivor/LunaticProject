@@ -6,6 +6,10 @@ public class ClickManager : MonoBehaviour
 {
     // 正在拖动的棋子
     private PieceController _selectedPiece;
+    
+    [SerializeField] private RangeUI _rangeUI; // 范围UI
+    private float _dragRange = 10f; // 拖动范围限制
+    private Vector3 _dragStartPos; // 拖动起始位置
 
     private void Update()
     {
@@ -48,15 +52,23 @@ public class ClickManager : MonoBehaviour
         {
             PieceController piece = hit.collider.GetComponent<PieceController>();
             if (piece == null || !piece.isPlayerPiece) continue;
+            if(piece.unitAttrCenter.CurMovePoint<=0) continue;
             _selectedPiece?.CancelSelect();
             //BattleScene.Ins.BM.camera.SetFollow(piece.transform);
             _selectedPiece = piece;
             _selectedPiece.StartDrag();
+            
+            // 显示移动范围
+            _dragStartPos = _selectedPiece.transform.position;
+            _dragRange = _selectedPiece.unitAttrCenter.MoveRange;
+            _rangeUI.ShowCircleRange(_dragStartPos, _dragRange);
             return;
         }
         
         _selectedPiece?.CancelSelect();
         _selectedPiece = null;
+        
+        
     }
 
     Vector3 point = Vector3.zero;
@@ -76,6 +88,14 @@ public class ClickManager : MonoBehaviour
                 point = hit.point;
             }
         }
+        
+        // 限制拖动范围
+        Vector3 offset = point - _dragStartPos;
+        if (offset.magnitude > _dragRange)
+        {
+            offset = offset.normalized * _dragRange;
+            point = _dragStartPos + offset;
+        }
 
         _selectedPiece.transform.position = (new Vector3(point.x
             , _selectedPiece.transform.position.y, point.z));
@@ -87,6 +107,8 @@ public class ClickManager : MonoBehaviour
         {
             BattleScene.Ins.BM.camera.SetFollow(_selectedPiece.transform);
             _selectedPiece.StopDrag();
+            _selectedPiece.unitAttrCenter.CostMP();
+            _rangeUI.CloseRange();
             //_selectedPiece = null;
         }
     }

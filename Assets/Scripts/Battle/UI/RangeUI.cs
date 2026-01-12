@@ -18,6 +18,13 @@ public class RangeUI : MonoBehaviour
         circle.transform.localScale = radius * circleRadius * Vector3.one;
         _curRange = radius;
     }
+    public void ShowCircleRange(Vector3 position, float radius)
+    {
+        circle.SetActive(true);
+        transform.position = position;
+        circle.transform.localScale = radius * circleRadius * Vector3.one;
+        _curRange = radius;
+    }
     public void ShowAttackRange(float radius)
     {
         attackCircle.SetActive(true);

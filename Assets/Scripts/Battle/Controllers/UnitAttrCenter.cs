@@ -43,23 +43,41 @@ public class UnitAttrCenter: SerializedMonoBehaviour
     private int _maxMovePoint;
 
     private int _tempShield;
-    
+
+    [SerializeField]
+    private float _moveRange;
+    public float MoveRange => _moveRange;
     // 嘲讽值
     private int _tauntValue;
     public  int TauntValue => _tauntValue;
     
-    
+    [SerializeField]
+    // 弹药数量
+    private int _ammoCount;
+    public int AmmoCount => _ammoCount;
+    private int _maxAmmoCount = 3;
+    public int MaxAmmoCount => _maxAmmoCount;
+
+    [Header("Buff")] 
+    public List<BuffState> buffStates = new();
+
+
     [Header("UI")]
     public Transform hpBarFill;
 
     public void Init()
     {
         _curHealth = _maxHealth;
+        FullAmmo();
     }
 
     public void FullMovePoint()
     {
         _curMovePoint = _maxMovePoint;
+    }
+    public void FullAmmo()
+    {
+        _ammoCount = _maxAmmoCount;
     }
     public void TakeDamage(int realDamage)
     {
@@ -86,13 +104,15 @@ public class UnitAttrCenter: SerializedMonoBehaviour
         Debug.Log($"受到伤害{realDamage}");
     }
     
-    public bool CostMP()
+    public bool CostMP(int costPoint=1)
     {
-        if (_curMovePoint>=1)
+        if (_curMovePoint>=costPoint)
         {
-            _curMovePoint--;
+            _curMovePoint -= costPoint;
             return true;
         }
         return false;
     }
+    
+    
 }

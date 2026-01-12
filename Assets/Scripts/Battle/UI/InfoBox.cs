@@ -12,11 +12,14 @@ public class InfoBox : MonoBehaviour
     {
         infoText.text = $"{piece.name}\nHP: {piece.unitAttrCenter.CurHealth}/{piece.unitAttrCenter.MaxHealth}" +
                         $"\n MP: {piece.unitAttrCenter.CurMovePoint}/{piece.unitAttrCenter.MaxMovePoint}";
+        infoText.text += $"\n Element: {piece.unitAttrCenter.elementType}";
         foreach (var damageType in Enum.GetValues(typeof(DamageType)))
         {
             infoText.text += $"\n {damageType} Armor: {piece.unitAttrCenter.attr.GetArmor((DamageType)damageType)}";
             infoText.text += $"\n {damageType} Atk: {piece.unitAttrCenter.attr.GetAtk((DamageType)damageType)}";
         }
+        // 弹药数量
+        infoText.text += $"\n Ammo: {piece.unitAttrCenter.AmmoCount}/ {piece.unitAttrCenter.MaxAmmoCount}";
     }
     // Start is called before the first frame update
     void Start()

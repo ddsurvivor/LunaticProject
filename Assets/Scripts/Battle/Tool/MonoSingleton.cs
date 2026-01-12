@@ -1,8 +1,8 @@
-using System.Collections;
+/*using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-/*/// <summary>
+/// <summary>
 /// Mono单例模板
 /// </summary>
 /// <typeparam name="T">单例类型</typeparam>
