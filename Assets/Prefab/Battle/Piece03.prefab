@@ -283,7 +283,7 @@ MonoBehaviour:
       Data: 1
     - Name: $v
       Entry: 3
-      Data: 10
+      Data: 15
     - Name: 
       Entry: 8
       Data: 
@@ -295,7 +295,7 @@ MonoBehaviour:
       Data: 2
     - Name: $v
       Entry: 3
-      Data: 20
+      Data: 15
     - Name: 
       Entry: 8
       Data: 
@@ -381,10 +381,10 @@ MonoBehaviour:
       Data: 
     - Name: _meleeAtkRange
       Entry: 3
-      Data: 3
+      Data: 5
     - Name: _shootAtkRange
       Entry: 3
-      Data: 8
+      Data: 20
     - Name: _elementAddDamage
       Entry: 7
       Data: 5|System.Collections.Generic.Dictionary`2[[PieceElementType, Assembly-CSharp],[System.Int32,
@@ -417,9 +417,10 @@ MonoBehaviour:
   pc: {fileID: 8316052724586748497}
   elementType: 2
   _curHealth: 0
-  _maxHealth: 100
+  _maxHealth: 40
   _curMovePoint: 0
-  _maxMovePoint: 3
+  _maxMovePoint: 2
+  hpBarFill: {fileID: 0}
 --- !u!65 &8316052724586748499
 BoxCollider:
   m_ObjectHideFlags: 0
