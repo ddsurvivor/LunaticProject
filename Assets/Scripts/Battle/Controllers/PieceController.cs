@@ -158,13 +158,19 @@ public class PieceController : MonoBehaviour
     public void StartNormalAttack(bool range = false)
     {
         _isAttacking = true;
-        if (!range)
+        if (!range) // 近战攻击
         {
             _rangeUI?.ShowAttackRange(unitAttrCenter.attr.GetRange(true));
             _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Melee),DamageType.Melee);
         }
-        else
+        else // 远程攻击
         {
+            if(unitAttrCenter.AmmoCount<=0)
+            {
+                Debug.Log("弹药不足，无法进行远程攻击");
+                _isAttacking = false;
+                return;
+            }
             _rangeUI?.ShowAttackRange(unitAttrCenter.attr.GetRange(false));
             _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Ranged),DamageType.Ranged);
         }
@@ -208,6 +214,8 @@ public class PieceController : MonoBehaviour
         else if (_attackPack.damageType == DamageType.Ranged)
         {
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
+            // 消耗弹药
+            unitAttrCenter.CostAmmo();
         }
 
         
@@ -224,6 +232,7 @@ public class PieceController : MonoBehaviour
                 // 爆发状态下攻击同一目标增加额外伤害
                 if (BattleScene.Ins.BM.PlayerController.burstTarget == enemy)
                 {
+                    _attackPack.damage = (int)(GameConst.burstDamageRate * _attackPack.damage );
                     _attackPack.damage += (int)(BattleScene.Ins.BM.PlayerController.totalDamage *
                                           GameConst.burstAddDamageRate);
                     BattleScene.Ins.BM.PlayerController.totalDamage += _attackPack.damage;

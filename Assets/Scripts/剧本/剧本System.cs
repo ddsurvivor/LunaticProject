@@ -565,6 +565,23 @@ public class 剧本System: MonoBehaviour
                             执行震动(strength);
                         }
                     }
+
+                    if (key.Contains(Center.Command_Battle))// 进入战斗
+                    {
+                        var prams = 指令切割(key);
+                        if (prams.Length >= 2)
+                        {
+                            string battleScene = prams[0];
+                            string endLog = prams[1];
+                            GM.Ins.StartBattle(battleScene, endLog);
+                        }
+                        else if(prams.Length >= 1)
+                        {
+                            string battleScene = prams[0];
+                            string endLog = "";
+                            GM.Ins.StartBattle(battleScene, endLog);
+                        }
+                    }
                 }
       }
       public static string[] 指令切割(string command)

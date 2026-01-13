@@ -55,4 +55,11 @@
                 enemy.AddDamageRecord(attacker, realDamage);
             }
         }
+        
+        
+        // ===== Test ======//
+        public void OnClickQuitBattle()
+        {
+            GM.Ins.BattleEnd();
+        }
     }

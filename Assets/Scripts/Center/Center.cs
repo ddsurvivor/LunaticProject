@@ -50,6 +50,8 @@ public class Center : MonoBehaviour
     public static string Command_Shake="SHAKE";//震动
     public static string Tag_checkview = "!CHECKVIEW";
     public static string Tag_notspawn = "!DONTSPAWN";
+    
+    public static string Command_Battle="BATTLE";//战斗
  
     public static readonly char Plot指令分隔符 = '+';
 

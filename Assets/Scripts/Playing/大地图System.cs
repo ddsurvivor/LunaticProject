@@ -19,6 +19,11 @@ public class 大地图System : MonoBehaviour
     public float 点击进入剧情编辑器等待时间=0.8f;
     #endregion
 
+    public 任务节点[] 任务节点列表;
+
+    
+    
+    
     public void 失败()
     {
         失败Obj.SetActive(true);
@@ -83,9 +88,19 @@ public class 大地图System : MonoBehaviour
                 当前地图 = VARIABLE;
                 当前地图.transform.localScale=Vector3.one;
                 VARIABLE.SetActive(true);
+
+                任务节点列表 = VARIABLE.GetComponentsInChildren<任务节点>();
+
+                // if (endLog != "")
+                // {
+                //     大地图System.instance.开始剧情(endLog);
+                //     endLog = "";
+                // }
                 break;
             }
         }
 
     }
+
+    
 }

@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
-public class PLAYERPROFILE : MonoBehaviour
+public class PLAYERPROFILE : SerializedMonoBehaviour
 {
     public static PLAYERPROFILE instance;
     public Dictionary<string, int> 已完成任务=new Dictionary<string, int>();
@@ -211,11 +212,11 @@ public class PLAYERPROFILE : MonoBehaviour
         }
         catch (IndexOutOfRangeException e)
         {
-            Debug.LogError("此任务没有做过或者任务名输入错误"+e);
+            //Debug.LogError("此任务没有做过或者任务名输入错误"+e);
         }
         catch (KeyNotFoundException e)
         {
-            Debug.LogError("此任务没有做过或者任务名输入错误"+e);
+            //Debug.LogError("此任务没有做过或者任务名输入错误"+e);
         }
 
         return rt;

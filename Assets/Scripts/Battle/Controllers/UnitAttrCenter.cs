@@ -114,5 +114,13 @@ public class UnitAttrCenter: SerializedMonoBehaviour
         return false;
     }
     
-    
+    public bool CostAmmo(int costCount=1)
+    {
+        if (_ammoCount>=costCount)
+        {
+            _ammoCount -= costCount;
+            return true;
+        }
+        return false;
+    }
 }
