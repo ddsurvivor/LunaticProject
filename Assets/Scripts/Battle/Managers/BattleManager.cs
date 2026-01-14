@@ -1,4 +1,5 @@
 
+    using DG.Tweening;
     using UnityEngine;
 
     public class BattleManager: MonoBehaviour
@@ -7,6 +8,7 @@
         public PlayerController PlayerController;
         public CameraController camera;
         public BuffManager buffManager;
+        
 
         public void Init()
         {
@@ -54,6 +56,23 @@
             {
                 enemy.AddDamageRecord(attacker, realDamage);
             }
+        }
+
+        public void PlayerCheckWin()
+        {
+            foreach (var piece in AIController.pieces)
+            {
+                if (!piece.isDead)
+                {
+                    return;
+                }
+            }
+            // 敌方棋子全灭，玩家胜利
+            BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家胜利！");
+            DOVirtual.DelayedCall(1.0f, () =>
+            {
+                BattleScene.Ins.BM.OnClickQuitBattle();
+            });
         }
         
         

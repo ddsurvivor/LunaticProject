@@ -46,6 +46,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
         switch (actionType)
         {
             case ActionType.Move:
+                BattleScene.Ins.CM.StartDarg(pc);
                 break;
             case ActionType.Attack:
                 pc.StartNormalAttack();

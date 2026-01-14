@@ -10,7 +10,7 @@ using System;
     {
         public BattleManager BM;
         public UIManager UM;
-        
+        public ClickManager CM;
         
 
         public void Start()

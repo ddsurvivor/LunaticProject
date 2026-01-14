@@ -52,6 +52,8 @@ public class AIController : PlayerController
             if (piece.isActived)
             {
                 piece.StartNormalAttack(true);
+                // 每回合清空仇恨值
+                // piece.damageDic = new();
             }
         }
     }

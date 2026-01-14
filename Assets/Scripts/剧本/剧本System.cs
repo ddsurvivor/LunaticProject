@@ -463,10 +463,11 @@ public class 剧本System: MonoBehaviour
                     if (key.Contains(Center.Command_End))
                     {
                         var prams = 指令切割(key);
+                        int.TryParse(prams[1], out int result);
                        大地图System.instance.剧情结束();
                        try
                        {
-                           PLAYERPROFILE.instance.保存任务进度(prams[0], Convert.ToInt32(prams[1]));
+                           PLAYERPROFILE.instance.保存任务进度(prams[0], result);
                        }
                        catch (IndexOutOfRangeException e)
                        {

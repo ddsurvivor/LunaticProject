@@ -96,7 +96,12 @@ public class PieceController : MonoBehaviour
         }
     }
 
-    
+    public void ShowActionList()
+    {
+        if (!isPlayerPiece) return;
+        _actionListPanel.gameObject.SetActive(true);
+        BattleScene.Ins.UM.infoBox.ShowInfo(this);
+    }
 
     public void StartDrag()
     {
@@ -274,9 +279,10 @@ public class PieceController : MonoBehaviour
         {
             if (!isPlayerPiece)
             {
-                pieceDisplay.pieceSpriteRenderer.DOFade(0f, 0.5f).OnComplete(() =>
+                pieceDisplay.pieceSpriteRenderer.DOFade(0f, 0.8f).OnComplete(() =>
                 {
                     this.gameObject.SetActive(false);
+                    BattleScene.Ins.BM.PlayerCheckWin();
                 });
             }
         });
