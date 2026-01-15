@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class AudioManager : MonoBehaviour
+public class AudioManager : SerializedMonoBehaviour
 {
     public static AudioManager instance;
     public float BGM音量 => Options.Volume_BGM;
@@ -13,7 +15,9 @@ public class AudioManager : MonoBehaviour
     private AudioSource bgmAudioSource;  
     private GameObject seAudioSourcePool;
     
+    [OdinSerialize]
     private Dictionary<string, GameObject> 循环音效字典 = new Dictionary<string, GameObject>();
+    [OdinSerialize]
     private Dictionary<string, List<GameObject>> 所有音效字典 = new Dictionary<string, List<GameObject>>();
     private void Awake()
     {

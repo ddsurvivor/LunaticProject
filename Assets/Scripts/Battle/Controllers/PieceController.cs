@@ -185,7 +185,7 @@ public class PieceController : MonoBehaviour
     {
         // 获取攻击目标点
         Vector3 atkPos = _rangeUI.GetAtkPos();
-        float attackRadius = 1f; // 可根据需要调整攻击半径
+        float attackRadius = 3f; // 可根据需要调整攻击半径
         int enemyLayer = LayerMask.GetMask("Enemy");
 
         // 检测球体范围内的所有敌人

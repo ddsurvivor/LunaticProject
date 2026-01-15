@@ -107,6 +107,7 @@ public class 剧本System: MonoBehaviour
         }
         当文本更新时?.Invoke();
    
+        AudioManager.instance.播放音效("Key");
         进行指令(当前事件);
         生成剧本预制体();
         已阅读++;
