@@ -189,7 +189,7 @@ public class PieceController : MonoBehaviour
         int enemyLayer = LayerMask.GetMask("Enemy");
 
         // 检测球体范围内的所有敌人
-        Collider[] hitColliders = Physics.OverlapSphere(atkPos, attackRadius, enemyLayer);
+        Collider[] hitColliders = Physics.OverlapSphere(atkPos, attackRadius);
 
         if (hitColliders.Length <= 0) return;
         foreach (var collider in hitColliders)

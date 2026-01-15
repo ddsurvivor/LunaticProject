@@ -25,7 +25,11 @@ public class ClickManager : MonoBehaviour
             {
                 return;
             }
-            ClickPiece();
+
+            if (!_isDragging)
+            {
+                ClickPiece();
+            }
         }
 
         if (_selectedPiece != null && _isDragging)
@@ -79,8 +83,8 @@ public class ClickManager : MonoBehaviour
             return;
         }
         
-        _selectedPiece?.CancelSelect();
-        _selectedPiece = null;
+        //_selectedPiece?.CancelSelect();
+        //_selectedPiece = null;
     }
 
     public void StartDarg(PieceController piece)
@@ -108,7 +112,7 @@ public class ClickManager : MonoBehaviour
             if (hit.collider.CompareTag("Mask")) return;
             if (hit.collider.CompareTag("Ground"))
             {
-                Debug.Log("点击地面，移动棋子");
+                //Debug.Log("点击地面，移动棋子");
                 // 移动选中的棋子到地面点击位置
                 point = hit.point;
             }
