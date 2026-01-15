@@ -14105,6 +14105,7 @@ GameObject:
   - component: {fileID: 1713777228}
   - component: {fileID: 1713777227}
   - component: {fileID: 1713777229}
+  - component: {fileID: 1713777230}
   m_Layer: 0
   m_Name: BattleScene
   m_TagString: Untagged
@@ -14144,7 +14145,7 @@ MonoBehaviour:
   AIController: {fileID: 1713777227}
   PlayerController: {fileID: 1713777229}
   camera: {fileID: 2059231694}
-  buffManager: {fileID: 0}
+  buffManager: {fileID: 1713777230}
 --- !u!114 &1713777225
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14281,6 +14282,18 @@ MonoBehaviour:
   totalDamage: 0
   burstTarget: {fileID: 0}
   burstChargeBarFill: {fileID: 1372463332}
+--- !u!114 &1713777230
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1713777222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a17aaeea4804a3fb7fdeac2e9da6515, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!43 &1724754703
 Mesh:
   m_ObjectHideFlags: 0

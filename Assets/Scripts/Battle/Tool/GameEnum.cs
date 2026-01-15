@@ -41,6 +41,8 @@ public enum BuffType
     AutoHeal = 2,
     // 防护
     Shield = 3,
+    // 隐蔽
+    Conceal = 4,
     
     // 100以后为Debuff
     // 干扰
@@ -51,5 +53,23 @@ public enum BuffType
     Bind = 103,
     // 燃烧
     Burn = 104,
+}
+
+/// <summary>
+/// buff加成属性类型
+/// </summary>
+public enum BuffAttrType
+{
+    None = 0,
+    // 闪避率
+    EvasionRate = 1,
+    // 命中率
+    HitRate = 2,
+    // 伤害减免
+    DamageReduction = 3,
+    // 伤害增加
+    DamageIncrease = 4,
+    // 移动范围百分比
+    MoveRangePercent = 5,
 }
 

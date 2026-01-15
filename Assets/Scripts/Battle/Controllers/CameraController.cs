@@ -67,7 +67,7 @@ public class CameraController : MonoBehaviour
             // 调用impulse的方法让相机震动
             if (impulse != null)
             {
-                //impulse.GenerateImpulse();
+                impulse.GenerateImpulse();
                 Debug.Log("相机震动");
             }
 

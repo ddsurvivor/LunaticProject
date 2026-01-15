@@ -60,6 +60,8 @@ public class UnitAttrCenter: SerializedMonoBehaviour
 
     [Header("Buff")] 
     public List<BuffState> buffStates = new();
+    
+    public Dictionary<BuffAttrType, float> buffAttrDic = new();
 
 
     [Header("UI")]
@@ -68,8 +70,38 @@ public class UnitAttrCenter: SerializedMonoBehaviour
     public void Init()
     {
         _curHealth = _maxHealth;
+        InitBuffAttrDic();
         FullAmmo();
     }
+    
+    private void InitBuffAttrDic()
+    {
+        buffAttrDic.Clear();
+        foreach (BuffAttrType type in System.Enum.GetValues(typeof(BuffAttrType)))
+        {
+            if (type is BuffAttrType.HitRate or 
+                        BuffAttrType.MoveRangePercent)// 默认为100
+            {
+                buffAttrDic[type] = 100f;
+            }
+            else if (type != BuffAttrType.None)// 其余数值默认为0
+            {
+                buffAttrDic[type] = 0f;
+            }
+        }
+    }
+    public void AddBuffAttr(BuffAttrType type, float value)
+    {
+        if (buffAttrDic.ContainsKey(type))
+        {
+            buffAttrDic[type] += value;
+        }
+        else
+        {
+            buffAttrDic[type] = value;
+        }
+    }
+    
 
     public void FullMovePoint()
     {
@@ -103,6 +135,14 @@ public class UnitAttrCenter: SerializedMonoBehaviour
         }
         Debug.Log($"受到伤害{realDamage}");
     }
+    public void Heal(int healAmount)
+    {
+        if (healAmount <= 0) return;
+        _curHealth += healAmount;
+        if (_curHealth > _maxHealth) _curHealth = _maxHealth;
+        if(hpBarFill!=null)hpBarFill.localScale = new Vector3((float)_curHealth / _maxHealth, 1f,1f);
+        Debug.Log($"恢复生命{healAmount}");
+    }
     
     public bool CostMP(int costPoint=1)
     {
@@ -123,5 +163,17 @@ public class UnitAttrCenter: SerializedMonoBehaviour
             return true;
         }
         return false;
+    }
+    
+    public int GetBuffStacks(BuffType buffType)
+    {
+        foreach (var buff in buffStates)
+        {
+            if (buff.buffType == buffType)
+            {
+                return buff.stacks;
+            }
+        }
+        return 0;
     }
 }

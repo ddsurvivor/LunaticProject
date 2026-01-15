@@ -25,6 +25,10 @@
                 {
                     piecesDic[slotTransform] = target;
                     target.position = slotTransform.position;
+                    // 添加buff，减伤、加闪避
+                    UnitAttrCenter unit = target.GetComponent<UnitAttrCenter>();
+                    BattleScene.Ins.BM.buffManager.AddBuff(unit, BuffType.Shield, -1);
+                    BattleScene.Ins.BM.buffManager.AddBuff(unit, BuffType.Conceal, -1);
                     return;
                 }
             }
@@ -37,6 +41,10 @@
                 if (kvp.Value == target)
                 {
                     piecesDic.Remove(kvp.Key);
+                    // 移除buff，减伤、加闪避
+                    UnitAttrCenter unit = target.GetComponent<UnitAttrCenter>();
+                    BattleScene.Ins.BM.buffManager.RemoveBuff(unit, BuffType.Shield, -1);
+                    BattleScene.Ins.BM.buffManager.RemoveBuff(unit, BuffType.Conceal, -1);
                     return;
                 }
             }

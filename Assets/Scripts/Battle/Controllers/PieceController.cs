@@ -24,6 +24,9 @@ public class PieceController : MonoBehaviour
     [Header("配置")]
     public int pieceID; // 棋子ID
 
+    [HideInInspector]
+    public PlayerController player;
+
 
     [Header("状态")] public bool isPlayerPiece; // 是否是玩家棋子
 
@@ -50,8 +53,9 @@ public class PieceController : MonoBehaviour
     public bool isIdle;// 是否处于待机状态
     
 
-    public void Init()
+    public void Init(PlayerController player)
     {
+        this.player = player;
         unitAttrCenter.Init();
         availableActions.Add(ActionType.Move);
         availableActions.Add(ActionType.Attack);
@@ -268,7 +272,7 @@ public class PieceController : MonoBehaviour
         {
             Debug.Log($"{this.name} 受伤");
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
-            transform.DOShakePosition(0.3f, 0.8f);
+            transform.DOShakePosition(0.5f, 0.8f);
         });
     }
 

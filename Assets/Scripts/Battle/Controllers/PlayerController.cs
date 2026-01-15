@@ -28,7 +28,7 @@ public class PlayerController : SerializedMonoBehaviour
         UpdateBurstBar();
         foreach (var piece in pieces)
         {
-            piece.Init();
+            piece.Init(this);
         }
     }
     public virtual void TurnStart()
@@ -48,7 +48,9 @@ public class PlayerController : SerializedMonoBehaviour
         foreach (var piece in pieces)
         {
             piece.TurnEnd();
+            BattleScene.Ins.BM.buffManager.ProcessBuffs(piece.unitAttrCenter);
         }
+        
     }
 
     /// <summary>
