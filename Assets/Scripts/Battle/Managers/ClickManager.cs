@@ -137,8 +137,8 @@ public class ClickManager : MonoBehaviour
             Debug.Log("停止拖动棋子");
             _isDragging = false;
             BattleScene.Ins.BM.camera.SetFollow(_selectedPiece.transform);
-            _selectedPiece.StopDrag();
             _selectedPiece.unitAttrCenter.CostMP();
+            _selectedPiece.StopDrag();
             _rangeUI.CloseRange();
             //_selectedPiece = null;
         }

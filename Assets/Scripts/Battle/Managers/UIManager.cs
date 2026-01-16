@@ -9,14 +9,16 @@ public class UIManager : MonoBehaviour
         public InfoBox infoBox;
         public Button burstButton;
         public TeamPanel teamPanel;
+        public PieceInfoPanel pieceInfoPanel;
 
         public void Init()
         {
-            teamPanel.gameObject.SetActive(true);
-            teamPanel.Init();
+            //teamPanel.gameObject.SetActive(true);
+            //teamPanel.Init();
         }
         public void ShowBurstReady(bool option)
         {
-            burstButton.gameObject.SetActive(option);
+            burstButton.enabled = option;
+            //burstButton.gameObject.SetActive(option);
         }
     }

@@ -38,7 +38,7 @@ public class BattleManager : MonoBehaviour
         PlayerController.isInTurn = true;
         AIController.TurnEnd();
         PlayerController.TurnStart();
-        BattleScene.Ins.UM.endTurnButton.gameObject.SetActive(true);
+        BattleScene.Ins.UM.endTurnButton.enabled = true;
         BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家回合");
     }
 

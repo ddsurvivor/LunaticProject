@@ -30,6 +30,8 @@ public class PlayerController : SerializedMonoBehaviour
         {
             piece.Init(this);
         }
+        BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(pieces[0]);
+        BattleScene.Ins.UM.ShowBurstReady(false);
     }
     public virtual void TurnStart()
     {
@@ -39,7 +41,7 @@ public class PlayerController : SerializedMonoBehaviour
             piece.TurnStart();
         }
 
-        BattleScene.Ins.UM.endTurnButton.gameObject.SetActive(false);
+        BattleScene.Ins.UM.endTurnButton.enabled = false;
     }
 
     public virtual void TurnEnd()
@@ -97,7 +99,7 @@ public class PlayerController : SerializedMonoBehaviour
     public void OnClickTurnEnd()
     {
         BattleScene.Ins.BM.ChangeTurn();
-        BattleScene.Ins.UM.endTurnButton.gameObject.SetActive(false);
+        BattleScene.Ins.UM.endTurnButton.enabled  = false;
     }
 
     public void OnClickBurst()

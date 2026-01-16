@@ -104,7 +104,8 @@ public class PieceController : MonoBehaviour
     {
         if (!isPlayerPiece) return;
         _actionListPanel.gameObject.SetActive(true);
-        BattleScene.Ins.UM.infoBox.ShowInfo(this);
+        BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(this);
+        //BattleScene.Ins.UM.infoBox.ShowInfo(this);
     }
 
     public void StartDrag()
@@ -117,16 +118,18 @@ public class PieceController : MonoBehaviour
             _curCaverSlot.LeaveSlot(transform);
             _curCaverSlot = null;
         }
-        BattleScene.Ins.UM.teamPanel.OnSelectPiece(pieceID);
+        //BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(this);
+        //BattleScene.Ins.UM.teamPanel.OnSelectPiece(pieceID);
     }
 
     public void StopDrag()
     {
-        BattleScene.Ins.UM.infoBox.ShowInfo(this);
+        //BattleScene.Ins.UM.infoBox.ShowInfo(this);
         if (!isPlayerPiece) return;
         CheckActionPos();
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
         _actionListPanel.gameObject.SetActive(true);
+        BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
     }
 
     public void CancelSelect()
@@ -273,6 +276,7 @@ public class PieceController : MonoBehaviour
             Debug.Log($"{this.name} 受伤");
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
             transform.DOShakePosition(0.5f, 0.8f);
+            BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
         });
     }
 
