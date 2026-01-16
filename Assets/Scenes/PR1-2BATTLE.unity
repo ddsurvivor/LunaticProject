@@ -4267,14 +4267,13 @@ GameObject:
   m_Component:
   - component: {fileID: 535713041}
   - component: {fileID: 535713040}
-  - component: {fileID: 535713042}
   m_Layer: 0
   m_Name: "PR\u5929\u7A7A\u76D21_001"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!212 &535713040
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -4340,22 +4339,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 14
+  m_RootOrder: 15
   m_LocalEulerAnglesHint: {x: 45, y: -45, z: 0}
---- !u!114 &535713042
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 535713039}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e8a3b3d71e45419abbf2ecef1adb57aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cameraTransform: {fileID: 1734752372}
-  parallaxRatio: 0.528
 --- !u!43 &582975196
 Mesh:
   m_ObjectHideFlags: 0
@@ -8769,7 +8754,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 13
+  m_RootOrder: 14
   m_LocalEulerAnglesHint: {x: 45, y: -45, z: -30.349}
 --- !u!43 &1122283272
 Mesh:
@@ -16879,6 +16864,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2027748270}
   - component: {fileID: 2027748269}
+  - component: {fileID: 2027748271}
   m_Layer: 0
   m_Name: PRB1BK
   m_TagString: Untagged
@@ -16951,8 +16937,22 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 14
+  m_RootOrder: 16
   m_LocalEulerAnglesHint: {x: 450, y: -45, z: 0}
+--- !u!114 &2027748271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2027748268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8a3b3d71e45419abbf2ecef1adb57aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraTransform: {fileID: 1734752372}
+  parallaxRatio: 0.6
 --- !u!1 &2042560644
 GameObject:
   m_ObjectHideFlags: 0
