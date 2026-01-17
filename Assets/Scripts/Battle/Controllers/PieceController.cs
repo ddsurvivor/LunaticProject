@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 /// <summary>
@@ -51,21 +52,27 @@ public class PieceController : MonoBehaviour
     //public bool isActived = false; // 是否被激活
 
     public bool isIdle;// 是否处于待机状态
+
+    [Header("事件")] 
+    public UnityEvent OnInit;
+    public UnityEvent OnTurnStart;
+    public UnityEvent OnTurnEnd;
     
 
     public void Init(PlayerController player)
     {
         this.player = player;
         unitAttrCenter.Init();
-        availableActions.Add(ActionType.Move);
-        availableActions.Add(ActionType.Attack);
-        availableActions.Add(ActionType.Range_ATK);
-        availableActions.Add(ActionType.Idle);// 待机
-        availableActions.Add(ActionType.Reload);// 装填
+        availableActions.Add(ActionType.移动);
+        availableActions.Add(ActionType.近战攻击);
+        availableActions.Add(ActionType.远程攻击);
+        availableActions.Add(ActionType.待机);// 待机
+        availableActions.Add(ActionType.重新装填);// 装填
         //Debug.Log(_pieceDisplay.name);
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
         if(_actionListPanel!=null)_actionListPanel.Init(this);
         isIdle = true;
+        OnInit?.Invoke();
     }
 
     private void Update()
@@ -90,6 +97,7 @@ public class PieceController : MonoBehaviour
     {
         unitAttrCenter.FullMovePoint();
         isIdle = false;
+        OnTurnStart?.Invoke();
     }
 
     public void TurnEnd()
@@ -98,6 +106,8 @@ public class PieceController : MonoBehaviour
         {
             _actionListPanel.gameObject.SetActive(false);
         }
+        isIdle = true;
+        OnTurnEnd?.Invoke();
     }
 
     public void ShowActionList()
