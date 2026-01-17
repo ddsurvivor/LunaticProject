@@ -111,6 +111,11 @@ public class UnitAttrCenter: SerializedMonoBehaviour
     {
         _ammoCount = _maxAmmoCount;
     }
+    public void FullHealth()
+    {
+        _curHealth = _maxHealth;
+        if(hpBarFill!=null)hpBarFill.localScale = new Vector3(1f, 1f,1f);
+    }
     public void TakeDamage(int realDamage)
     {
         if (realDamage <= 0) return;

@@ -13,14 +13,14 @@ public enum DamageType
 /// </summary>
 public enum ActionType
 {
-    Move = 1,// 移动
-    Attack = 2,// 攻击
-    Skill = 3,// 技能
-    Defend = 4,// 防御
-    Idle = 5,// 待机
-    Scan = 6,// 扫描
-    Range_ATK = 7,// 远程攻击
-    Reload = 8,// 装填
+    移动 = 1,// 移动
+    近战攻击 = 2,// 攻击
+    远程攻击 = 3,// 远程攻击
+    重新装填 = 4,// 装填
+    待机 = 5,// 待机
+    扫描 = 6,// 扫描
+    技能 = 10,// 技能
+    道具 = 11,// 道具
 }
 
 // 棋子属性种类
@@ -53,6 +53,7 @@ public enum BuffType
     Bind = 103,
     // 燃烧
     Burn = 104,
+    脆弱 = 105,
 }
 
 /// <summary>
