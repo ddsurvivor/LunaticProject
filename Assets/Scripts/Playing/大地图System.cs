@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class 大地图System : MonoBehaviour
 {
@@ -18,8 +19,7 @@ public class 大地图System : MonoBehaviour
     public float 点击后放大进行时间;
     public float 点击进入剧情编辑器等待时间=0.8f;
     #endregion
-
-    public 任务节点[] 任务节点列表;
+    public 任务节点[] NodeList;//任务节点列表
 
     
     
@@ -76,7 +76,11 @@ public class 大地图System : MonoBehaviour
     public void 剧情结束()
     {
         剧情.gameObject.SetActive(false);
-        当前地图.transform.DOScale(Vector3.one, 点击后放大进行时间);
+        //当前地图.transform.DOScale(Vector3.one, 点击后放大进行时间);
+        foreach (var node in NodeList)
+        {
+            node.UpdateState();
+        }
     }
 
     public void 打开地图(string t)
@@ -89,13 +93,17 @@ public class 大地图System : MonoBehaviour
                 当前地图.transform.localScale=Vector3.one;
                 VARIABLE.SetActive(true);
 
-                任务节点列表 = VARIABLE.GetComponentsInChildren<任务节点>();
+                NodeList = VARIABLE.GetComponentsInChildren<任务节点>(true);
 
                 // if (endLog != "")
                 // {
                 //     大地图System.instance.开始剧情(endLog);
                 //     endLog = "";
                 // }
+                foreach (var node in NodeList)
+                {
+                    node.UpdateState();
+                }
                 break;
             }
         }

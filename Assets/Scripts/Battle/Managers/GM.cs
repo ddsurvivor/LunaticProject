@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
         // 战斗切换
         public string battleScene;
         public string endLog;
+        public PLAYERPROFILE PLAYERPROFILE;
         
         
         public void StartBattle(string battleScene, string endLog)

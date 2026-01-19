@@ -6,8 +6,8 @@ using UnityEngine;
 
 public class PLAYERPROFILE : SerializedMonoBehaviour
 {
-    public static PLAYERPROFILE instance;
-    public Dictionary<string, int> 已完成任务=new Dictionary<string, int>();
+    //public static PLAYERPROFILE instance;
+    public Dictionary<string, int> finishNodeDic=new Dictionary<string, int>();
     public struct Player
     {
         private string name;
@@ -80,7 +80,7 @@ public class PLAYERPROFILE : SerializedMonoBehaviour
 
     private void Awake()
     {
-        instance = this;
+        //instance = this;
         新游戏初始化数值();
     }
 
@@ -127,7 +127,14 @@ public class PLAYERPROFILE : SerializedMonoBehaviour
 
     public void 保存任务进度(string 任务, int 进度)
     {
-        已完成任务[任务] = 进度;
+        if (finishNodeDic.ContainsKey(任务))
+        {
+            finishNodeDic[任务] = 进度;
+        }
+        else
+        {
+            finishNodeDic.Add(任务, 进度);
+        }
     }
     
     public static void 修改属性(int index, string fieldName, int value)
@@ -206,18 +213,21 @@ public class PLAYERPROFILE : SerializedMonoBehaviour
     public int 获取任务进度(string t)
     {
         int rt = 0;
-        try
+        if (finishNodeDic.ContainsKey(t))
         {
-            rt = 已完成任务[t];
+            rt = finishNodeDic[t];  
         }
-        catch (IndexOutOfRangeException e)
-        {
-            //Debug.LogError("此任务没有做过或者任务名输入错误"+e);
-        }
-        catch (KeyNotFoundException e)
-        {
-            //Debug.LogError("此任务没有做过或者任务名输入错误"+e);
-        }
+        // try
+        // {
+        // }
+        // catch (IndexOutOfRangeException e)
+        // {
+        //     Debug.LogError("此任务没有做过或者任务名输入错误"+e);
+        // }
+        // catch (KeyNotFoundException e)
+        // {
+        //     Debug.LogError("此任务没有做过或者任务名输入错误"+e);
+        // }
 
         return rt;
     }

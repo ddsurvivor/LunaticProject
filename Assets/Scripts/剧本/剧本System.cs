@@ -465,17 +465,9 @@ public class 剧本System: MonoBehaviour
                     {
                         var prams = 指令切割(key);
                         int.TryParse(prams[1], out int result);
+                       GM.Ins.PLAYERPROFILE.保存任务进度(prams[0], result);
                        大地图System.instance.剧情结束();
-                       try
-                       {
-                           PLAYERPROFILE.instance.保存任务进度(prams[0], result);
-                       }
-                       catch (IndexOutOfRangeException e)
-                       {
-                           
-                       }
-                    
-                 
+                       大地图System.instance.剧情结束();
                     }
                     if (key.Contains(Center.Command_Jump))
                     {   

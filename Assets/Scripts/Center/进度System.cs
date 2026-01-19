@@ -10,7 +10,7 @@ public class 进度System : MonoBehaviour
   public static void 存档(string 位置)
   {
     位置 = 位置前缀 + 位置;
-    ES3.Save<Dictionary<string, int>>("EventFinish",PLAYERPROFILE.instance.已完成任务,位置);
+    ES3.Save<Dictionary<string, int>>("EventFinish",GM.Ins.PLAYERPROFILE.finishNodeDic,位置);
     ES3.Save("Player",PLAYERPROFILE.player,位置);
     ES3.Save("MySkill",剧本技能.当前技能,位置);
     ES3.Save("Bag", 背包系统.当前背包,位置);
@@ -19,7 +19,7 @@ public class 进度System : MonoBehaviour
   public static void 读档(string 位置,bool 重载=true)
   {
     位置 = 位置前缀 + 位置;
-    PLAYERPROFILE.instance.已完成任务 = ES3.Load<Dictionary<string, int>>("EventFinish",位置);
+    GM.Ins.PLAYERPROFILE.finishNodeDic = ES3.Load<Dictionary<string, int>>("EventFinish",位置);
     PLAYERPROFILE.player=ES3.Load<PLAYERPROFILE.Player[]>("Player",位置);
     剧本技能.当前技能=ES3.Load<Dictionary<string, int>>("EventFinish",位置);
     背包系统.当前背包=ES3.Load<Dictionary<string, int>>("Bag",位置);
