@@ -1,0 +1,129 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e503d9200bf54f53809d3e37dcb305a4, type: 3}
+  m_Name: PieceDataListSO
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes: []
+  pieceDataList:
+  - pieceId: 1
+    skillPacks:
+    - skillName: "\u9AD8\u9891\u9707\u8361"
+      description: "\u53D1\u52A8\u9488\u5BF9\u88C5\u7532\u6676\u4F53\u7ED3\u6784\u7684\u9AD8\u9891\u632F\u52A8\u653B\u51FB\uFF0C\u7834\u574F\u88C5\u7532\u5E76\u5BF9\u654C\u65B9\u65BD\u52A0\u7269\u7406\u7ED3\u6784\u5C42\u9762\u7684\u6253\u51FB\u3002
+        \u9020\u621035\u70B9\u52A8\u80FD\u4F24\u5BB3\uFF0C\u65BD\u52A02\u5C42\u8106\u5F31\u3002"
+      mpCost: 1
+      cooldown: 0
+      target: 1
+      rangeType: 1
+      rangeValue: 5
+      rangeAgle: 0
+      explodeRadius: 0
+      attackPacks:
+      - damage: 35
+        damageType: 1
+      buffPacks:
+      - buffType: 105
+        stacks: 2
+        rate: 100
+        target: 1
+      skillEffects: 
+    - skillName: "\u8FDC\u7A0B\u653B\u51FB"
+      description: "\u670935%\u7684\u6982\u7387\u5BF9\u654C\u4EBA\u65BD\u52A03\u5C42\u71C3\u70E7\uFF0C\u662FAOE\uFF08\u9700\u8981\u505A\u4E00\u4E2A\u6247\u5F62\u7684\u7784\u51C6\u8303\u56F4\uFF09\uFF0C\u4F1A\u5BF9\u653B\u51FB\u8303\u56F4\u5185\u7684\u6240\u6709\u5355\u4F4D\uFF08\u5305\u62EC\u53CB\u519B\uFF09\u9020\u6210\u4F24\u5BB3\u3002"
+      mpCost: 1
+      cooldown: 0
+      target: 6
+      rangeType: 2
+      rangeValue: 8
+      rangeAgle: 90
+      explodeRadius: 0
+      attackPacks:
+      - damage: 20
+        damageType: 2
+      buffPacks:
+      - buffType: 104
+        stacks: 3
+        rate: 35
+        target: 4
+      skillEffects: 
+  - pieceId: 2
+    skillPacks:
+    - skillName: "\u5149\u77DB"
+      description: "\u8FD1\u6218\u6280\u80FD\u8303\u56F4\u6280\u80FD\uFF0C\u901A\u8FC7\u5BF9\u65E0\u4EBA\u673A\u8FDB\u884C\u5145\u80FD\uFF0C\u53D1\u52A8\u8303\u56F4\u66F4\u8FDC\u7684\u653B\u51FB\uFF0C\u5E76\u901A\u8FC7\u7269\u7406\u63A5\u53E3\u5BF9\u654C\u65B9\u88C5\u5907\u690D\u5165\u6076\u610F\u4EE3\u7801\u3002"
+      mpCost: 1
+      cooldown: 0
+      target: 4
+      rangeType: 2
+      rangeValue: 5
+      rangeAgle: 60
+      explodeRadius: 0
+      attackPacks:
+      - damage: 10
+        damageType: 1
+      - damage: 20
+        damageType: 2
+      buffPacks:
+      - buffType: 101
+        stacks: 3
+        rate: 100
+        target: 4
+      - buffType: 102
+        stacks: 2
+        rate: 100
+        target: 4
+      - buffType: 1
+        stacks: 1
+        rate: 100
+        target: 3
+      skillEffects: 
+  - pieceId: 3
+    skillPacks:
+    - skillName: "\u6CBB\u7597\u5F39"
+      description: "\u5411\u573A\u5730\u5185\u91CA\u653E\u8303\u56F4\u6CBB\u6108\u533A\u57DF\u3002\u5F53\u6211\u65B9\u68CB\u5B50\u5438\u9644\u5728\u8FD9\u7247\u533A\u57DF\u5E76\u505C\u7559\u65F6\uFF0C\u4F1A\u83B7\u5F973\u5C42\u81EA\u52A8\u6CBB\u7597"
+      mpCost: 1
+      cooldown: 0
+      target: 5
+      rangeType: 3
+      rangeValue: 8
+      rangeAgle: 0
+      explodeRadius: 3
+      attackPacks: []
+      buffPacks: []
+      skillEffects: 01000000
+    - skillName: "\u7B49\u79BB\u5B50\u69B4\u5F39"
+      description: "\u8303\u56F4\u6740\u4F24\uFF0C\u5BF9\u8303\u56F4\u5185\u6240\u6709\u5355\u4F4D"
+      mpCost: 1
+      cooldown: 0
+      target: 6
+      rangeType: 3
+      rangeValue: 8
+      rangeAgle: 0
+      explodeRadius: 4
+      attackPacks:
+      - damage: 28
+        damageType: 2
+      buffPacks:
+      - buffType: 105
+        stacks: 2
+        rate: 100
+        target: 6
+      - buffType: 104
+        stacks: 4
+        rate: 100
+        target: 6
+      skillEffects: 

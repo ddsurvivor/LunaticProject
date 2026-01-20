@@ -48,6 +48,8 @@ public class PieceController : MonoBehaviour
     public List<InteractArea> interactAreas = new(); // 可交互区域列表
 
     public List<ActionType> availableActions = new(); // 可用动作列表
+    
+    public List<SkillPack> availableSkills = new(); // 可用技能列表
 
     //public bool isActived = false; // 是否被激活
 
@@ -73,6 +75,7 @@ public class PieceController : MonoBehaviour
         if(_actionListPanel!=null)_actionListPanel.Init(this);
         isIdle = true;
         OnInit?.Invoke();
+        availableSkills = BattleScene.Ins.BM.pieceDataListSO.GetPieceData(pieceID)?.skillPacks;
     }
 
     private void Update()

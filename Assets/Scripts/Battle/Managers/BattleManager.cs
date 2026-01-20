@@ -7,6 +7,9 @@ public class BattleManager : MonoBehaviour
     public PlayerController PlayerController;
     public CameraController camera;
     public BuffManager buffManager;
+    
+    public PieceDataListSO pieceDataListSO;
+    
 
 
     public void Init()

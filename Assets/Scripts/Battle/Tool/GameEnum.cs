@@ -1,11 +1,14 @@
+using Sirenix.OdinInspector;
+
 /// <summary>
 /// 伤害类别
 /// </summary>
 public enum DamageType
 {
+    [LabelText("动能")]
     Melee = 1,// 近战
-    Ranged = 2,// 远程
-    Electric = 3,// 电子
+    [LabelText("热能")]Ranged = 2,// 远程
+    [LabelText("火能")]Electric = 3,// 电子
 }
 
 /// <summary>
@@ -19,8 +22,10 @@ public enum ActionType
     重新装填 = 4,// 装填
     待机 = 5,// 待机
     扫描 = 6,// 扫描
+    解除束缚 = 7,// 解除束缚
     技能 = 10,// 技能
     道具 = 11,// 道具
+    
 }
 
 // 棋子属性种类
@@ -35,25 +40,26 @@ public enum PieceElementType
 
 public enum BuffType
 {
-    // 充能
+    [LabelText("充能")]// 充能
     Charge = 1,
-    // 自动治疗
+    [LabelText("自动治疗")]// 自动治疗
     AutoHeal = 2,
-    // 防护
+    [LabelText("防护")]// 防护
     Shield = 3,
-    // 隐蔽
+    [LabelText("隐蔽")]// 隐蔽
     Conceal = 4,
     
     // 100以后为Debuff
-    // 干扰
+    [LabelText("干扰")]// 干扰
     Disrupt = 101,
-    // 过载
+    [LabelText("过载")]// 过载
     Overload = 102,
-    // 束缚
+    [LabelText("束缚")]// 束缚
     Bind = 103,
-    // 燃烧
+    [LabelText("燃烧")]
     Burn = 104,
-    脆弱 = 105,
+    [LabelText("脆弱")]
+    Frail = 105,
 }
 
 /// <summary>
@@ -73,4 +79,41 @@ public enum BuffAttrType
     // 移动范围百分比
     MoveRangePercent = 5,
 }
+
+public enum BattleItemType
+{
+    HealKit = 1,// 治疗包
+    // 能量包
+    EnergyPack = 2,
+}
+
+#region 技能枚举
+
+public enum SkillTarget
+{
+    Enemy = 1,// 单体敌人
+    Ally = 2,// 单体友军
+    Self = 3,// 自身
+    EnemyAll = 4,// 全体敌人
+    Area = 5,// 区域
+    All = 6,// 全体单位
+}
+
+public enum RangeType
+{
+    [LabelText("圆形")]
+    Circle = 1,// 圆形
+    
+    [LabelText("扇形")]// 扇形
+    Fan = 2,
+    [LabelText("手雷")]// 手雷
+    Grenade = 3,
+}
+
+public enum SkillEffect
+{
+    HealArea = 1,// 区域治疗
+}
+
+#endregion
 
