@@ -12,6 +12,8 @@ public class PieceActionListPanel : SerializedMonoBehaviour
     private PieceController pc;
     public List<Button> actionButtons;
     private Dictionary<ActionType, Button> actionButtonDic = new();
+    public GameObject skillListPanel;
+    public List<Button> skillButtons;
     //public Dictionary<ActionType, UnityAction> actionDic = new();
 
     public void Init(PieceController pc)
@@ -32,6 +34,25 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 button.GetComponentInChildren<Text>().text = actionType.ToString();
             }
         }
+        foreach (var skillButton in skillButtons)
+        {
+            skillButton.gameObject.SetActive(false);
+            skillButton.onClick.RemoveAllListeners();
+        }
+        for (int j = 0; j < pc.availableSkills.Count; j++)
+        {
+            // 更新所有技能按钮
+            if (j<skillButtons.Count)
+            {
+                skillButtons[j].gameObject.SetActive(true);
+                skillButtons[j].GetComponentInChildren<Text>().text = pc.availableSkills[j].skillName;
+                int capturedIndex = j; // 捕获当前索引
+                skillButtons[j].onClick.AddListener(() => {
+                    gameObject.SetActive(false);
+                    pc.StartSkillAttack(pc.availableSkills[capturedIndex]);
+                });
+            }
+        }
     }
 
     private void OnEnable()
@@ -49,11 +70,12 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 actionButtonDic[interactArea.actionType].onClick.AddListener(interactArea.TriggerAction);
             }
         }
+        skillListPanel.SetActive(false);
     }
 
     private void OnActionButtonClicked(ActionType actionType)
     {
-        gameObject.SetActive(false);
+        
         Debug.Log($"Action Button Clicked: {actionType}");
         // 在这里处理按钮点击事件
         switch (actionType)
@@ -65,6 +87,8 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 pc.StartNormalAttack();
                 break;
             case ActionType.技能:
+                skillListPanel.SetActive(true);
+                return;
                 break;
             case ActionType.待机:
                 pc.isIdle = true;
@@ -84,5 +108,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             default:
                 throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
         }
+        gameObject.SetActive(false);
     }
+    
 }

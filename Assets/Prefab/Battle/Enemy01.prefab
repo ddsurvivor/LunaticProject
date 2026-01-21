@@ -154,9 +154,9 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 50
+  m_SortingLayerID: 2062317405
+  m_SortingLayer: 3
+  m_SortingOrder: 100
   m_Sprite: {fileID: -835065633, guid: b42d5aecf0ce97146ba91bf572207233, type: 3}
   m_Color: {r: 0.9245283, g: 0.27252164, b: 0.25875157, a: 1}
   m_FlipX: 0
@@ -486,12 +486,52 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: buffStates
+      Entry: 7
+      Data: 7|System.Collections.Generic.List`1[[BuffState, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: buffAttrDic
+      Entry: 7
+      Data: 8|System.Collections.Generic.Dictionary`2[[BuffAttrType, Assembly-CSharp],[System.Single,
+        mscorlib]], mscorlib
+    - Name: comparer
+      Entry: 7
+      Data: 9|System.Collections.Generic.EnumEqualityComparer`1[[BuffAttrType, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
   pc: {fileID: 439568009330001271}
   elementType: 1
   _curHealth: 0
   _maxHealth: 70
   _curMovePoint: 0
   _maxMovePoint: 2
+  _moveRange: 0
+  _ammoCount: 0
   hpBarFill: {fileID: 7612674177862844641}
 --- !u!114 &190077875118252175
 MonoBehaviour:
@@ -538,16 +578,41 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unitAttrCenter: {fileID: 3435330606817873377}
-  _rangeUI: {fileID: 0}
+  rangeUI: {fileID: 0}
   _actionListPanel: {fileID: 0}
   pieceDisplay: {fileID: 190077875118252175}
   pieceID: 0
+  player: {fileID: 0}
   isPlayerPiece: 0
   _attackPack:
     damage: 0
     damageType: 0
+  _skillPack:
+    skillName: 
+    description: 
+    mpCost: 0
+    cooldown: 0
+    target: 0
+    rangeType: 0
+    rangeValue: 0
+    rangeAgle: 0
+    explodeRadius: 0
+    attackPacks: []
+    buffPacks: []
+    skillEffects: 
   interactAreas: []
   availableActions: 
+  availableSkills: []
+  isIdle: 0
+  OnInit:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTurnStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTurnEnd:
+    m_PersistentCalls:
+      m_Calls: []
   isActived: 0
 --- !u!1 &2999851906171813230
 GameObject:

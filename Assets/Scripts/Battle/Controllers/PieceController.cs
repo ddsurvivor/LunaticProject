@@ -15,7 +15,7 @@ public class PieceController : MonoBehaviour
     //public string pieceName;
     public UnitAttrCenter unitAttrCenter; // 单位属性中心
 
-    [SerializeField] private RangeUI _rangeUI; // 范围UI
+    [FormerlySerializedAs("_rangeUI")] [SerializeField] public RangeUI rangeUI; // 范围UI
 
     [SerializeField] private PieceActionListPanel _actionListPanel; // 棋子动作列表面板
 
@@ -41,7 +41,9 @@ public class PieceController : MonoBehaviour
 
     // 当前攻击数据
     private bool _isAttacking = false; // 是否正在攻击
+    private bool _isUsingSkill = false; // 是否正在使用技能
     [SerializeField] [ReadOnly]  private AttackPack _attackPack;
+    [SerializeField] [ReadOnly]  private SkillPack _skillPack;
     //[SerializeField] [ReadOnly] private int _damage;
     //[SerializeField] [ReadOnly] private DamageType _damageType;
 
@@ -70,12 +72,13 @@ public class PieceController : MonoBehaviour
         availableActions.Add(ActionType.远程攻击);
         availableActions.Add(ActionType.待机);// 待机
         availableActions.Add(ActionType.重新装填);// 装填
+        availableActions.Add(ActionType.技能);// 技能
         //Debug.Log(_pieceDisplay.name);
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
+        availableSkills = BattleScene.Ins.BM.pieceDataListSO.GetPieceData(pieceID)?.skillPacks;
         if(_actionListPanel!=null)_actionListPanel.Init(this);
         isIdle = true;
         OnInit?.Invoke();
-        availableSkills = BattleScene.Ins.BM.pieceDataListSO.GetPieceData(pieceID)?.skillPacks;
     }
 
     private void Update()
@@ -91,7 +94,23 @@ public class PieceController : MonoBehaviour
             if (Input.GetMouseButtonDown(1))
             {
                 _isAttacking = false;
-                _rangeUI.CloseRange();
+                rangeUI.CloseRange();
+            }
+        }
+
+        if (_isUsingSkill)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                //CheckEnemy();
+                CheckSkill();
+            }
+
+            // 点击右键取消
+            if (Input.GetMouseButtonDown(1))
+            {
+                _isUsingSkill = false;
+                rangeUI.CloseRange();
             }
         }
     }
@@ -149,7 +168,7 @@ public class PieceController : MonoBehaviour
     {
         Debug.Log("取消选择棋子");
         _isAttacking = false;
-        _rangeUI.CloseRange();
+        rangeUI.CloseRange();
         _actionListPanel.gameObject.SetActive(false);
     }
 
@@ -185,7 +204,7 @@ public class PieceController : MonoBehaviour
         _isAttacking = true;
         if (!range) // 近战攻击
         {
-            _rangeUI?.ShowAttackRange(unitAttrCenter.attr.GetRange(true));
+            rangeUI?.ShowAttackRange(unitAttrCenter.attr.GetRange(true));
             _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Melee),DamageType.Melee);
         }
         else // 远程攻击
@@ -196,7 +215,7 @@ public class PieceController : MonoBehaviour
                 _isAttacking = false;
                 return;
             }
-            _rangeUI?.ShowAttackRange(unitAttrCenter.attr.GetRange(false));
+            rangeUI?.ShowAttackRange(unitAttrCenter.attr.GetRange(false));
             _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Ranged),DamageType.Ranged);
         }
     }
@@ -204,7 +223,7 @@ public class PieceController : MonoBehaviour
     private void CheckEnemy()
     {
         // 获取攻击目标点
-        Vector3 atkPos = _rangeUI.GetAtkPos();
+        Vector3 atkPos = rangeUI.GetAtkPos();
         float attackRadius = 3f; // 可根据需要调整攻击半径
         int enemyLayer = LayerMask.GetMask("Enemy");
 
@@ -223,11 +242,13 @@ public class PieceController : MonoBehaviour
                 Attack(enemy);
                 // 结束攻击状态
                 _isAttacking = false;
-                _rangeUI.CloseRange();
+                rangeUI.CloseRange();
                 return;
             }
         }
     }
+
+    
 
     public void Attack(PieceController enemy)
     {
@@ -316,5 +337,24 @@ public class PieceController : MonoBehaviour
     {
         if (!unitAttrCenter.CostMP()) return;
         unitAttrCenter.FullAmmo();
+    }
+
+    public void StartSkillAttack(SkillPack skillPack)
+    {
+        _isUsingSkill = true;
+        rangeUI?.ShowSkillRange(skillPack);
+        _skillPack = skillPack;
+    }
+    private void CheckSkill()
+    {
+        
+        // 根据范围获取所有棋子
+        List<PieceController> targets = rangeUI.GetCurTargets;
+        BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack);
+
+        // 播放技能动画
+        pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
+        
+        // 技能聚能充能
     }
 }
