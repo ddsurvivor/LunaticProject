@@ -355,6 +355,9 @@ public class PieceController : MonoBehaviour
         // 播放技能动画
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
         
+        // 结束攻击状态
+        _isUsingSkill = false;
+        rangeUI.CloseRange();
         // 技能聚能充能
     }
 }

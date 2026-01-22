@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 public class RangeUI : MonoBehaviour
@@ -13,6 +14,10 @@ public class RangeUI : MonoBehaviour
     public GameObject skillCircle;
     public GameObject grenadeCircle;// 爆炸范围圈
     public GameObject highlightCircle;
+    public GameObject fanRoot;// 扇形范围根节点
+    public Image fanCircle;// 扇形范围圈
+    public GameObject fanLine1;
+    public GameObject fanLine2;
     private bool _isShowMoveIcon = false;
 
     private float circleRadius = 8.39f / 5f;
@@ -56,6 +61,15 @@ public class RangeUI : MonoBehaviour
         else if (skillPack.rangeType == RangeType.Fan)
         {
             // todo 显示扇形范围
+            fanRoot.SetActive(true);
+            fanCircle.transform.localScale = skillPack.rangeValue * circleRadius * Vector3.one;
+            fanCircle.fillAmount = skillPack.rangeAgle / 360f;
+            float halfAngle = skillPack.rangeAgle / 2f;
+            fanCircle.transform.localRotation = Quaternion.Euler(90,0, 180f -  skillPack.rangeAgle +skillPack.rangeAgle+halfAngle);
+            fanLine1.transform.localScale = skillPack.rangeValue * circleRadius * Vector3.one;
+            fanLine2.transform.localScale = skillPack.rangeValue * circleRadius * Vector3.one;
+            fanLine1.transform.localRotation = Quaternion.Euler(90, 0,halfAngle +90);
+            fanLine2.transform.localRotation = Quaternion.Euler(90, 0, -halfAngle +90);
         }
         else if (skillPack.rangeType == RangeType.Grenade)
         {
@@ -78,6 +92,7 @@ public class RangeUI : MonoBehaviour
         skillCircle.SetActive(false);
         grenadeCircle.SetActive(false);
         highlightCircle.SetActive(false);
+        fanRoot.SetActive(false);
         foreach (var piece in _curTargets)
         {
             piece.rangeUI.ShowHighlight(false);
@@ -146,6 +161,19 @@ public class RangeUI : MonoBehaviour
                     grenadeCircle.transform.position = transform.position + direction + Vector3.up * 0.1f;
                 }
             }
+
+            if (fanRoot.activeInHierarchy)// 扇形范围锁定
+            {
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+                if (groundPlane.Raycast(ray, out float enter))
+                {
+                    Vector3 hitPoint = ray.GetPoint(enter);
+                    Vector3 direction = hitPoint - transform.position;
+                    direction.y = 0f; // 忽略y轴，只在xz平面
+                    fanRoot.transform.localRotation = Quaternion.LookRotation(direction, Vector3.up);
+                }
+            }
     }
 
     private void FixedUpdate()
@@ -155,49 +183,12 @@ public class RangeUI : MonoBehaviour
 
     private void HighlightTarget()
     {
-        List<PieceController> newTargets = new();
         if (skillIcon.activeInHierarchy) // 单体敌人锁定
         {
             // 检测球体范围内的所有敌人
             Collider[] hitColliders = Physics.OverlapSphere(skillIcon.transform.position, 3f);
         
-            if (hitColliders.Length <= 0) return;
-            foreach (var collider in hitColliders)
-            {
-                PieceController piece = collider.transform.GetComponent<PieceController>();
-                if (piece == null) continue;
-                if (_curSkillPack.target == SkillTarget.All)
-                {
-                    piece.rangeUI.ShowHighlight(true);
-                    newTargets.Add(piece);
-                }
-                else if (_curSkillPack.target == SkillTarget.EnemyAll)
-                {
-                    if (!piece.isPlayerPiece)
-                    {
-                        piece.rangeUI.ShowHighlight(true);
-                        newTargets.Add(piece);
-                    }
-                }
-                else if (_curSkillPack.target == SkillTarget.Enemy)
-                {
-                    if (!piece.isPlayerPiece)
-                    {
-                        piece.rangeUI.ShowHighlight(true);
-                        newTargets.Add(piece);
-                        return;
-                    }
-                }
-                else if (_curSkillPack.target == SkillTarget.Ally)
-                {
-                    if (piece.isPlayerPiece)
-                    {
-                        piece.rangeUI.ShowHighlight(true);
-                        newTargets.Add(piece);
-                        return;
-                    }
-                }
-            }
+            CheckTarget(hitColliders);
         }
         else if (grenadeCircle.activeInHierarchy) // 爆炸范围锁定
         {
@@ -205,44 +196,125 @@ public class RangeUI : MonoBehaviour
             // 检测球体范围内的所有敌人
             Collider[] hitColliders = Physics.OverlapSphere(grenadeCircle.transform.position, explodeRadius);
         
-            if (hitColliders.Length <= 0) return;
-            foreach (var collider in hitColliders)
+            CheckTarget(hitColliders);
+        }
+        else if (fanRoot.activeInHierarchy)
+        {
+            // 进行扇形有限距离的穿透射线检测
+            // 根据扇形角度，等间距的发射多根射线进行检测，结果需要去掉重复
+            float halfAngle = _curSkillPack.rangeAgle / 2f;
+            int rayCount = Mathf.CeilToInt(_curSkillPack.rangeAgle / 5f); // 每5度发射一根射线
+            HashSet<PieceController> hitPieces = new HashSet<PieceController>();
+            for (int i = 0; i <= rayCount; i++)
             {
-                PieceController piece = collider.transform.GetComponent<PieceController>();
-                if (piece == null) continue;
-                if (_curSkillPack.target == SkillTarget.All)
+                float angle = -halfAngle + i * (_curSkillPack.rangeAgle / rayCount);
+                Vector3 direction = Quaternion.Euler(0, angle, 0) * fanRoot.transform.forward;
+                Ray ray = new Ray(fanRoot.transform.position, direction);
+                if (Physics.Raycast(ray, out RaycastHit hitInfo, _curSkillPack.rangeValue))
+                {
+                    PieceController piece = hitInfo.collider.GetComponent<PieceController>();
+                    if (piece != null)
+                    {
+                        hitPieces.Add(piece);
+                    }
+                }
+            }
+
+            CheckTarget(hitPieces);
+        }
+        
+    }
+
+    private void CheckTarget(Collider[] hitColliders)
+    {
+        List<PieceController> newTargets = new();
+        if (hitColliders.Length <= 0) return;
+        foreach (var collider in hitColliders)
+        {
+            PieceController piece = collider.transform.GetComponent<PieceController>();
+            if (piece == null) continue;
+            if (_curSkillPack.target == SkillTarget.All)
+            {
+                piece.rangeUI.ShowHighlight(true);
+                newTargets.Add(piece);
+            }
+            else if (_curSkillPack.target == SkillTarget.EnemyAll)
+            {
+                if (!piece.isPlayerPiece)
                 {
                     piece.rangeUI.ShowHighlight(true);
                     newTargets.Add(piece);
                 }
-                else if (_curSkillPack.target == SkillTarget.EnemyAll)
+            }
+            else if (_curSkillPack.target == SkillTarget.Enemy)
+            {
+                if (!piece.isPlayerPiece)
                 {
-                    if (!piece.isPlayerPiece)
-                    {
-                        piece.rangeUI.ShowHighlight(true);
-                        newTargets.Add(piece);
-                    }
+                    piece.rangeUI.ShowHighlight(true);
+                    newTargets.Add(piece);
+                    return;
                 }
-                else if (_curSkillPack.target == SkillTarget.Enemy)
+            }
+            else if (_curSkillPack.target == SkillTarget.Ally)
+            {
+                if (piece.isPlayerPiece)
                 {
-                    if (!piece.isPlayerPiece)
-                    {
-                        piece.rangeUI.ShowHighlight(true);
-                        newTargets.Add(piece);
-                        return;
-                    }
-                }
-                else if (_curSkillPack.target == SkillTarget.Ally)
-                {
-                    if (piece.isPlayerPiece)
-                    {
-                        piece.rangeUI.ShowHighlight(true);
-                        newTargets.Add(piece);
-                        return;
-                    }
+                    piece.rangeUI.ShowHighlight(true);
+                    newTargets.Add(piece);
+                    return;
                 }
             }
         }
+        
+        foreach (var piece in _curTargets)
+        {
+            if (newTargets.Contains(piece))
+            {
+                continue;
+            }
+            piece.rangeUI.ShowHighlight(false);
+        }
+        _curTargets = newTargets;
+    }
+    private void CheckTarget(HashSet<PieceController> hitPieces)
+    {
+        Debug.Log("Hit Pieces Count: " + hitPieces.Count);
+        List<PieceController> newTargets = new();
+        foreach (var piece in hitPieces)
+        {
+            if (_curSkillPack.target == SkillTarget.All)
+            {
+                piece.rangeUI.ShowHighlight(true);
+                newTargets.Add(piece);
+            }
+            else if (_curSkillPack.target == SkillTarget.EnemyAll)
+            {
+                if (!piece.isPlayerPiece)
+                {
+                    piece.rangeUI.ShowHighlight(true);
+                    newTargets.Add(piece);
+                }
+            }
+            else if (_curSkillPack.target == SkillTarget.Enemy)
+            {
+                if (!piece.isPlayerPiece)
+                {
+                    piece.rangeUI.ShowHighlight(true);
+                    newTargets.Add(piece);
+                    return;
+                }
+            }
+            else if (_curSkillPack.target == SkillTarget.Ally)
+            {
+                if (piece.isPlayerPiece)
+                {
+                    piece.rangeUI.ShowHighlight(true);
+                    newTargets.Add(piece);
+                    return;
+                }
+            }
+        }
+        
         foreach (var piece in _curTargets)
         {
             if (newTargets.Contains(piece))
@@ -267,5 +339,43 @@ public class RangeUI : MonoBehaviour
             return attackIcon.transform.position;
         }
         return Vector3.zero;
+    }
+    
+    
+    private void OnDrawGizmos()
+    {
+        // 只在编辑器和运行时显示
+        if (fanRoot == null || !fanRoot.activeInHierarchy || _curSkillPack == null)
+            return;
+        if (_curSkillPack.rangeType != RangeType.Fan)
+            return;
+
+        // 设置射线颜色
+        Gizmos.color = Color.cyan;
+
+        float halfAngle = _curSkillPack.rangeAgle / 2f;
+        int rayCount = Mathf.CeilToInt(_curSkillPack.rangeAgle / 5f);
+        Vector3 origin = fanRoot.transform.position;
+        Vector3 forward = fanRoot.transform.forward;
+
+        for (int i = 0; i <= rayCount; i++)
+        {
+            float angle = -halfAngle + i * (_curSkillPack.rangeAgle / rayCount);
+            Vector3 dir = Quaternion.Euler(0, angle, 0) * forward;
+            Vector3 end = origin + dir.normalized * _curSkillPack.rangeValue;
+
+            // 射线可视化
+            Gizmos.DrawRay(origin, dir.normalized * _curSkillPack.rangeValue);
+
+            // 可选：命中目标时画球
+#if UNITY_EDITOR
+            if (Physics.Raycast(origin, dir, out RaycastHit hit, _curSkillPack.rangeValue))
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawSphere(hit.point, 0.15f);
+                Gizmos.color = Color.cyan;
+            }
+#endif
+        }
     }
 }
