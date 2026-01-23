@@ -8,6 +8,7 @@ public class CameraController : MonoBehaviour
     private Vector3 _lastMousePosition;
     public float panSpeed = 20f;
 
+    Tweener shakeTweener;
     void Update()
     {
         if (Input.GetMouseButtonDown(2))
@@ -56,7 +57,8 @@ public class CameraController : MonoBehaviour
         virtualCamera.Follow = transform;
         //virtualCamera.m_Lens.OrthographicSize = minZoom;
         float currentSize = virtualCamera.m_Lens.OrthographicSize;
-        DOTween.To(
+        shakeTweener?.Kill();
+        shakeTweener = DOTween.To(
             () => virtualCamera.m_Lens.OrthographicSize,
             x => virtualCamera.m_Lens.OrthographicSize = x,
             minZoom,

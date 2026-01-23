@@ -12,10 +12,10 @@ public class RangeUI : MonoBehaviour
     public GameObject attackIcon;
     public GameObject skillIcon;
     public GameObject skillCircle;
-    public GameObject grenadeCircle;// 爆炸范围圈
+    public GameObject grenadeCircle; // 爆炸范围圈
     public GameObject highlightCircle;
-    public GameObject fanRoot;// 扇形范围根节点
-    public Image fanCircle;// 扇形范围圈
+    public GameObject fanRoot; // 扇形范围根节点
+    public Image fanCircle; // 扇形范围圈
     public GameObject fanLine1;
     public GameObject fanLine2;
     private bool _isShowMoveIcon = false;
@@ -23,22 +23,26 @@ public class RangeUI : MonoBehaviour
     private float circleRadius = 8.39f / 5f;
     private float _curRange;
 
-    private List<PieceController> _curTargets = new ();
+    private List<PieceController> _curTargets = new();
     public List<PieceController> GetCurTargets => _curTargets;
     private SkillPack _curSkillPack;
+
     public void ShowCircleRange(float radius)
     {
         circle.SetActive(true);
         circle.transform.localScale = radius * circleRadius * Vector3.one;
         _curRange = radius;
     }
+
     public void ShowCircleRange(Vector3 position, float radius)
     {
         circle.SetActive(true);
-        transform.position = position;
+        transform.position =
+            new Vector3(position.x, transform.position.y, position.z); // 只改变x,z轴位置，y轴保持不变
         circle.transform.localScale = radius * circleRadius * Vector3.one;
         _curRange = radius;
     }
+
     public void ShowAttackRange(float radius)
     {
         attackCircle.SetActive(true);
@@ -46,7 +50,7 @@ public class RangeUI : MonoBehaviour
         attackIcon.SetActive(true);
         _curRange = radius;
     }
-    
+
     public void ShowSkillRange(SkillPack skillPack)
     {
         _curSkillPack = skillPack;
@@ -65,11 +69,12 @@ public class RangeUI : MonoBehaviour
             fanCircle.transform.localScale = skillPack.rangeValue * circleRadius * Vector3.one;
             fanCircle.fillAmount = skillPack.rangeAgle / 360f;
             float halfAngle = skillPack.rangeAgle / 2f;
-            fanCircle.transform.localRotation = Quaternion.Euler(90,0, 180f -  skillPack.rangeAgle +skillPack.rangeAgle+halfAngle);
+            fanCircle.transform.localRotation = Quaternion.Euler(90, 0
+                , 180f - skillPack.rangeAgle + skillPack.rangeAgle + halfAngle);
             fanLine1.transform.localScale = skillPack.rangeValue * circleRadius * Vector3.one;
             fanLine2.transform.localScale = skillPack.rangeValue * circleRadius * Vector3.one;
-            fanLine1.transform.localRotation = Quaternion.Euler(90, 0,halfAngle +90);
-            fanLine2.transform.localRotation = Quaternion.Euler(90, 0, -halfAngle +90);
+            fanLine1.transform.localRotation = Quaternion.Euler(90, 0, halfAngle + 90);
+            fanLine2.transform.localRotation = Quaternion.Euler(90, 0, -halfAngle + 90);
         }
         else if (skillPack.rangeType == RangeType.Grenade)
         {
@@ -77,7 +82,8 @@ public class RangeUI : MonoBehaviour
             skillCircle.SetActive(true);
             skillCircle.transform.localScale = skillPack.rangeValue * circleRadius * Vector3.one;
             grenadeCircle.SetActive(true);
-            grenadeCircle.transform.localScale = skillPack.explodeRadius * circleRadius * Vector3.one;
+            grenadeCircle.transform.localScale =
+                skillPack.explodeRadius * circleRadius * Vector3.one;
             _curRange = skillPack.rangeValue;
         }
     }
@@ -97,11 +103,11 @@ public class RangeUI : MonoBehaviour
         {
             piece.rangeUI.ShowHighlight(false);
         }
+
         _curTargets.Clear();
     }
-    
-    
-    
+
+
     public void ShowMoveIcon(bool option)
     {
         _isShowMoveIcon = option;
@@ -110,70 +116,74 @@ public class RangeUI : MonoBehaviour
 
     public void Update()
     {
-          // attackIcon跟随鼠标移动
-            if (attackIcon.activeInHierarchy)
+        // attackIcon跟随鼠标移动
+        if (attackIcon.activeInHierarchy)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+            if (groundPlane.Raycast(ray, out float enter))
             {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
-                if (groundPlane.Raycast(ray, out float enter))
+                Vector3 hitPoint = ray.GetPoint(enter);
+                Vector3 direction = hitPoint - transform.position;
+                float distance = direction.magnitude;
+                if (distance > _curRange)
                 {
-                    Vector3 hitPoint = ray.GetPoint(enter);
-                    Vector3 direction = hitPoint - transform.position;
-                    float distance = direction.magnitude;
-                    if (distance > _curRange)
-                    {
-                        direction = direction.normalized * _curRange;
-                    }
-                    attackIcon.transform.position = transform.position + direction + Vector3.up * 0.1f;
+                    direction = direction.normalized * _curRange;
                 }
-            }
 
-            if (skillIcon.activeInHierarchy)// 单体敌人锁定
-            {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
-                if (groundPlane.Raycast(ray, out float enter))
-                {
-                    Vector3 hitPoint = ray.GetPoint(enter);
-                    Vector3 direction = hitPoint - transform.position;
-                    float distance = direction.magnitude;
-                    if (distance > _curRange)
-                    {
-                        direction = direction.normalized * _curRange;
-                    }
-                    skillIcon.transform.position = transform.position + direction + Vector3.up * 0.1f;
-                }
+                attackIcon.transform.position = transform.position + direction + Vector3.up * 0.1f;
             }
+        }
 
-            if (grenadeCircle.activeInHierarchy)// 爆炸范围锁定
+        if (skillIcon.activeInHierarchy) // 单体敌人锁定
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+            if (groundPlane.Raycast(ray, out float enter))
             {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
-                if (groundPlane.Raycast(ray, out float enter))
+                Vector3 hitPoint = ray.GetPoint(enter);
+                Vector3 direction = hitPoint - transform.position;
+                float distance = direction.magnitude;
+                if (distance > _curRange)
                 {
-                    Vector3 hitPoint = ray.GetPoint(enter);
-                    Vector3 direction = hitPoint - transform.position;
-                    float distance = direction.magnitude;
-                    if (distance > _curRange)
-                    {
-                        direction = direction.normalized * _curRange;
-                    }
-                    grenadeCircle.transform.position = transform.position + direction + Vector3.up * 0.1f;
+                    direction = direction.normalized * _curRange;
                 }
-            }
 
-            if (fanRoot.activeInHierarchy)// 扇形范围锁定
-            {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
-                if (groundPlane.Raycast(ray, out float enter))
-                {
-                    Vector3 hitPoint = ray.GetPoint(enter);
-                    Vector3 direction = hitPoint - transform.position;
-                    direction.y = 0f; // 忽略y轴，只在xz平面
-                    fanRoot.transform.localRotation = Quaternion.LookRotation(direction, Vector3.up);
-                }
+                skillIcon.transform.position = transform.position + direction + Vector3.up * 0.1f;
             }
+        }
+
+        if (grenadeCircle.activeInHierarchy) // 爆炸范围锁定
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+            if (groundPlane.Raycast(ray, out float enter))
+            {
+                Vector3 hitPoint = ray.GetPoint(enter);
+                Vector3 direction = hitPoint - transform.position;
+                float distance = direction.magnitude;
+                if (distance > _curRange)
+                {
+                    direction = direction.normalized * _curRange;
+                }
+
+                grenadeCircle.transform.position =
+                    transform.position + direction + Vector3.up * 0.1f;
+            }
+        }
+
+        if (fanRoot.activeInHierarchy) // 扇形范围锁定
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+            if (groundPlane.Raycast(ray, out float enter))
+            {
+                Vector3 hitPoint = ray.GetPoint(enter);
+                Vector3 direction = hitPoint - transform.position;
+                direction.y = 0f; // 忽略y轴，只在xz平面
+                fanRoot.transform.localRotation = Quaternion.LookRotation(direction, Vector3.up);
+            }
+        }
     }
 
     private void FixedUpdate()
@@ -187,15 +197,16 @@ public class RangeUI : MonoBehaviour
         {
             // 检测球体范围内的所有敌人
             Collider[] hitColliders = Physics.OverlapSphere(skillIcon.transform.position, 3f);
-        
+
             CheckTarget(hitColliders);
         }
         else if (grenadeCircle.activeInHierarchy) // 爆炸范围锁定
         {
             float explodeRadius = _curSkillPack.explodeRadius;
             // 检测球体范围内的所有敌人
-            Collider[] hitColliders = Physics.OverlapSphere(grenadeCircle.transform.position, explodeRadius);
-        
+            Collider[] hitColliders =
+                Physics.OverlapSphere(grenadeCircle.transform.position, explodeRadius);
+
             CheckTarget(hitColliders);
         }
         else if (fanRoot.activeInHierarchy)
@@ -222,7 +233,6 @@ public class RangeUI : MonoBehaviour
 
             CheckTarget(hitPieces);
         }
-        
     }
 
     private void CheckTarget(Collider[] hitColliders)
@@ -265,17 +275,20 @@ public class RangeUI : MonoBehaviour
                 }
             }
         }
-        
+
         foreach (var piece in _curTargets)
         {
             if (newTargets.Contains(piece))
             {
                 continue;
             }
+
             piece.rangeUI.ShowHighlight(false);
         }
+
         _curTargets = newTargets;
     }
+
     private void CheckTarget(HashSet<PieceController> hitPieces)
     {
         Debug.Log("Hit Pieces Count: " + hitPieces.Count);
@@ -314,19 +327,21 @@ public class RangeUI : MonoBehaviour
                 }
             }
         }
-        
+
         foreach (var piece in _curTargets)
         {
             if (newTargets.Contains(piece))
             {
                 continue;
             }
+
             piece.rangeUI.ShowHighlight(false);
         }
+
         _curTargets = newTargets;
     }
-    
-    
+
+
     public void ShowHighlight(bool option)
     {
         highlightCircle.SetActive(option);
@@ -338,10 +353,11 @@ public class RangeUI : MonoBehaviour
         {
             return attackIcon.transform.position;
         }
+
         return Vector3.zero;
     }
-    
-    
+
+
     private void OnDrawGizmos()
     {
         // 只在编辑器和运行时显示

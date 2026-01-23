@@ -13,16 +13,16 @@ public class AIController : PlayerController
     /// <summary>
     /// 敌人解锁顺序
     /// </summary>
-    public Dictionary<GameObject, List<EnemyController>> enemyPiecesDict = new();
+    public FogController fogController;
 
     private float _timer;
     private float _actionInterval = 2.0f; // 每个动作之间的间隔时间
 
     public void OnScanFog(GameObject fog)
     {
-        if (enemyPiecesDict.ContainsKey(fog))
+        if (fogController.enemyPiecesDict.ContainsKey(fog))
         {
-            foreach (var piece in enemyPiecesDict[fog])
+            foreach (var piece in fogController.enemyPiecesDict[fog])
             {
                 piece.isActived = true;
                 piece.gameObject.SetActive(true);
@@ -35,7 +35,7 @@ public class AIController : PlayerController
         base.TurnStart();
         
         // 激活敌人棋子
-        foreach (var pair in enemyPiecesDict)
+        foreach (var pair in fogController.enemyPiecesDict)
         {
             if (!pair.Key.gameObject.activeInHierarchy)
             {
