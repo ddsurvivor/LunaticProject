@@ -87,6 +87,16 @@ public enum BattleItemType
     EnergyPack = 2,
 }
 
+public enum EnemyAIType
+{
+    // 优先攻击最近的单位
+    [LabelText("攻击型")]
+    AttackNearest = 1,
+    // 远离目标
+    [LabelText("射击型")]
+    Shoot = 2,
+}
+
 #region 技能枚举
 
 public enum SkillTarget

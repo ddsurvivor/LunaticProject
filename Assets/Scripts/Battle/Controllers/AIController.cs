@@ -30,10 +30,11 @@ public class AIController : PlayerController
             }
         }
     }
+
     public override void TurnStart()
     {
         base.TurnStart();
-        
+
         // 激活敌人棋子
         foreach (var pair in fogController.enemyPiecesDict)
         {
@@ -47,6 +48,7 @@ public class AIController : PlayerController
                 }
             }
         }
+
         foreach (EnemyController piece in pieces)
         {
             if (piece.isActived)
@@ -84,7 +86,7 @@ public class AIController : PlayerController
         {
             if (piece.isActived && !piece.isDead)
             {
-                if(!piece.unitAttrCenter.CostMP()) continue;
+                if (!piece.unitAttrCenter.CostMP()) continue;
                 piece.Attack(GetRandomTarget());
                 return;
             }
@@ -92,7 +94,7 @@ public class AIController : PlayerController
 
         BattleScene.Ins.BM.ChangeTurn();
     }
-    
+
     // 敌人攻击距离最近目标的行动模式
     // 查找最近的玩家棋子，如果在近战范围内则近战攻击，如果在远程范围内则远程攻击，
     // 否则移动到最近的玩家棋子附近，到能够远程攻击的位置，然后远程攻击
@@ -101,15 +103,16 @@ public class AIController : PlayerController
         foreach (EnemyController aiPiece in pieces)
         {
             if (!aiPiece.isActived || aiPiece.isDead) continue;
-            if(!aiPiece.unitAttrCenter.CostMP()) continue;
-                
+            if (!aiPiece.unitAttrCenter.CostMP()) continue;
+
             // 获取最近的玩家棋子
             PieceController target = null;
             float minDistance = float.MaxValue;
             foreach (var piece in BattleScene.Ins.BM.PlayerController.pieces)
             {
                 if (piece.isDead) continue;
-                float distance = Vector3.Distance(piece.transform.position, aiPiece.transform.position);
+                float distance =
+                    Vector3.Distance(piece.transform.position, aiPiece.transform.position);
                 if (distance < minDistance)
                 {
                     minDistance = distance;
@@ -122,7 +125,8 @@ public class AIController : PlayerController
             float meleeRange = aiPiece.unitAttrCenter.attr.GetRange(true); // 近战攻击范围
             float rangedRange = aiPiece.unitAttrCenter.attr.GetRange(false); // 远程攻击范围
 
-            float distanceToTarget = Vector3.Distance(target.transform.position, aiPiece.transform.position);
+            float distanceToTarget =
+                Vector3.Distance(target.transform.position, aiPiece.transform.position);
 
             if (distanceToTarget <= meleeRange)
             {
@@ -130,7 +134,7 @@ public class AIController : PlayerController
                 aiPiece.StartNormalAttack();
                 aiPiece.Attack(target);
             }
-            else if (distanceToTarget <=  rangedRange)
+            else if (distanceToTarget <= rangedRange)
             {
                 // 远程攻击
                 aiPiece.StartNormalAttack(true);
@@ -139,7 +143,8 @@ public class AIController : PlayerController
             else
             {
                 // 移动到能够远程攻击的位置
-                Vector3 direction = (target.transform.position - aiPiece.transform.position).normalized;
+                Vector3 direction = (target.transform.position - aiPiece.transform.position)
+                    .normalized;
                 Vector3 newPosition = target.transform.position - direction * (rangedRange - 0.5f);
                 aiPiece.transform.DOMove(newPosition, 1.0f).OnComplete(() =>
                 {
@@ -148,55 +153,123 @@ public class AIController : PlayerController
                     aiPiece.Attack(target);
                 });
                 aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
-                
             }
+
             return;
         }
+
         BattleScene.Ins.BM.ChangeTurn();
-        
     }
-    
+
     private PieceController GetRandomTarget()
     {
         // 获取一个随机的玩家棋子
         if (BattleScene.Ins.BM.PlayerController.pieces.Count == 0) return null;
         // 玩家棋子中所有活着的棋子
-        List<PieceController> pieces = BattleScene.Ins.BM.PlayerController.pieces.Where(t=> !t.isDead).ToList();
+        List<PieceController> pieces =
+            BattleScene.Ins.BM.PlayerController.pieces.Where(t => !t.isDead).ToList();
         int randomIndex = UnityEngine.Random.Range(0, pieces.Count);
         return BattleScene.Ins.BM.PlayerController.pieces[randomIndex];
     }
-    
+
     private void EnemyAttack(PieceController aiPiece, PieceController target)
     {
         if (target == null) return;
 
         float meleeRange = aiPiece.unitAttrCenter.attr.GetRange(true); // 近战攻击范围
         float rangedRange = aiPiece.unitAttrCenter.attr.GetRange(false); // 远程攻击范围
+        float moveRange = aiPiece.unitAttrCenter.MoveRange; // 移动范围
 
-        float distanceToTarget = Vector3.Distance(target.transform.position, aiPiece.transform.position);
+        float distanceToTarget =
+            Vector3.Distance(target.transform.position, aiPiece.transform.position);
+        EnemyAIType enemyAIType = ((EnemyController)aiPiece).enemyAIType;
 
-        if (distanceToTarget <= meleeRange)
+        if (enemyAIType == EnemyAIType.AttackNearest)
         {
-            // 近战攻击
-            aiPiece.StartNormalAttack();
-            aiPiece.Attack(target);
-        }
-        else if (distanceToTarget <=  rangedRange)
-        {
-            // 远程攻击
-            aiPiece.StartNormalAttack(true);
-            aiPiece.Attack(target);
-        }
-        else
-        {
-            // 移动到能够远程攻击的位置
-            Vector3 direction = (target.transform.position - aiPiece.transform.position).normalized;
-            Vector3 newPosition = target.transform.position - direction * (rangedRange - 0.5f);
-            aiPiece.transform.DOMove(newPosition, 1.0f).OnComplete(() =>
+            if (distanceToTarget <= meleeRange)
+            {
+                // 近战攻击
+                aiPiece.StartNormalAttack();
+                aiPiece.Attack(target);
+            }
+            else if (distanceToTarget <= rangedRange)
             {
                 // 远程攻击
                 aiPiece.StartNormalAttack(true);
                 aiPiece.Attack(target);
+            }
+            else
+            {
+                /// 计算目标方向
+                Vector3 direction = (target.transform.position - aiPiece.transform.position)
+                    .normalized;
+                // 计算理想攻击位置（距离目标 rangedRange - 0.5f）
+                Vector3 idealAttackPos =
+                    target.transform.position - direction * (rangedRange - 0.5f);
+                // 计算自身到理想攻击位置的距离
+                float distanceToIdeal =
+                    Vector3.Distance(aiPiece.transform.position, idealAttackPos);
+
+                Vector3 moveTargetPos;
+                if (distanceToIdeal <= moveRange)
+                {
+                    // 可以直接到达理想攻击位置
+                    moveTargetPos = idealAttackPos;
+                }
+                else
+                {
+                    // 只能移动到最大移动距离
+                    moveTargetPos = aiPiece.transform.position + direction * moveRange;
+                }
+
+                aiPiece.transform.DOMove(moveTargetPos, 1.0f).OnComplete(() =>
+                {
+                    // 移动后再次判断是否在远程攻击范围内
+                    float newDistance =
+                        Vector3.Distance(target.transform.position, aiPiece.transform.position);
+                    if (newDistance <= rangedRange)
+                    {
+                        aiPiece.StartNormalAttack(true);
+                        aiPiece.Attack(target);
+                    }
+                });
+                aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
+            }
+        }
+        else if (enemyAIType == EnemyAIType.Shoot)
+        {
+            /// 计算目标方向
+            Vector3 direction = (target.transform.position - aiPiece.transform.position)
+                .normalized;
+            // 计算理想攻击位置（距离目标 rangedRange - 0.5f）
+            Vector3 idealAttackPos =
+                target.transform.position - direction * (rangedRange - 0.5f);
+            // 计算自身到理想攻击位置的距离
+            float distanceToIdeal =
+                Vector3.Distance(aiPiece.transform.position, idealAttackPos);
+
+            Vector3 moveTargetPos;
+            if (distanceToIdeal <= moveRange)
+            {
+                // 可以直接到达理想攻击位置
+                moveTargetPos = idealAttackPos;
+            }
+            else
+            {
+                // 只能移动到最大移动距离
+                moveTargetPos = aiPiece.transform.position + direction * moveRange;
+            }
+
+            aiPiece.transform.DOMove(moveTargetPos, 1.0f).OnComplete(() =>
+            {
+                // 移动后再次判断是否在远程攻击范围内
+                float newDistance =
+                    Vector3.Distance(target.transform.position, aiPiece.transform.position);
+                if (newDistance <= rangedRange)
+                {
+                    aiPiece.StartNormalAttack(true);
+                    aiPiece.Attack(target);
+                }
             });
             aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
         }
@@ -210,10 +283,11 @@ public class AIController : PlayerController
         foreach (EnemyController aiPiece in pieces)
         {
             if (!aiPiece.isActived || aiPiece.isDead) continue;
-            if(!aiPiece.unitAttrCenter.CostMP()) continue;
+            if (!aiPiece.unitAttrCenter.CostMP()) continue;
             CheckEnemyAction(aiPiece);
             return;
         }
+
         BattleScene.Ins.BM.ChangeTurn();
     }
 
@@ -225,19 +299,19 @@ public class AIController : PlayerController
     {
         // 计算所有目标棋子的威胁值
         Dictionary<PieceController, int> threatValues = new();
-        
-        PieceController nearTarget = null;// 距离最近的棋子
+
+        PieceController nearTarget = null; // 距离最近的棋子
         // 伤害最高的棋子
         PieceController highDamageTarget = null;
         float minDistance = float.MaxValue;
         int maxDamage = -1;
-        
+
         foreach (var playerPiece in BattleScene.Ins.BM.PlayerController.pieces)
         {
             if (playerPiece.isDead) continue;
             threatValues.Add(playerPiece, 0);
-            
-            
+
+
             // 获取最近的玩家棋子
             float distance =
                 Vector3.Distance(playerPiece.transform.position, aiPiece.transform.position);
@@ -246,7 +320,7 @@ public class AIController : PlayerController
                 minDistance = distance;
                 nearTarget = playerPiece;
             }
-            
+
             // 伤害最高的玩家棋子
             if (aiPiece.damageDic.ContainsKey(playerPiece))
             {
@@ -257,18 +331,19 @@ public class AIController : PlayerController
                     highDamageTarget = playerPiece;
                 }
             }
-            
+
             // 计算嘲讽值
             threatValues[playerPiece] += playerPiece.unitAttrCenter.TauntValue;
         }
-        if(nearTarget!=null) threatValues[nearTarget] += 1;// 距离最近的地方棋子威胁值+1
+
+        if (nearTarget != null) threatValues[nearTarget] += 1; // 距离最近的地方棋子威胁值+1
         if (highDamageTarget != null)
         {
-            threatValues[highDamageTarget] += 2;// 伤害最高的玩家棋子威胁值+2
+            threatValues[highDamageTarget] += 2; // 伤害最高的玩家棋子威胁值+2
         }
-        
+
         // 选择威胁值最高的目标进行攻击
-        PieceController target = threatValues.Aggregate((l, r) 
+        PieceController target = threatValues.Aggregate((l, r)
             => l.Value > r.Value ? l : r).Key;
         EnemyAttack(aiPiece, target);
     }

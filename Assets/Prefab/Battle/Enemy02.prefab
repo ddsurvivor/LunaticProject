@@ -115,7 +115,6 @@ GameObject:
   - component: {fileID: 2068541439121932266}
   - component: {fileID: 3583487980011262596}
   - component: {fileID: 3819608013901936508}
-  - component: {fileID: 3681782335264401066}
   m_Layer: 11
   m_Name: Enemy02
   m_TagString: Untagged
@@ -220,7 +219,7 @@ MonoBehaviour:
       Data: 2
     - Name: $v
       Entry: 3
-      Data: 0
+      Data: 10
     - Name: 
       Entry: 8
       Data: 
@@ -306,7 +305,7 @@ MonoBehaviour:
       Data: 
     - Name: _meleeAtkRange
       Entry: 3
-      Data: 0
+      Data: 3
     - Name: _shootAtkRange
       Entry: 3
       Data: 12
@@ -468,32 +467,9 @@ MonoBehaviour:
       m_Calls: []
   OnTurnEnd:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 3681782335264401066}
-        m_TargetAssemblyTypeName: SelfHeal, Assembly-CSharp
-        m_MethodName: FullHp
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
+  enemyAIType: 2
   isActived: 1
---- !u!114 &3681782335264401066
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1457925912296907159}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f21bf67604dfd714f8ed70d4a4024bc9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1457925914143748292
 GameObject:
   m_ObjectHideFlags: 0

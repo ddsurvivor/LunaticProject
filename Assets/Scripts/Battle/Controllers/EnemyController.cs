@@ -6,7 +6,8 @@ using UnityEngine;
 /// </summary>
 public class EnemyController : PieceController
 {
-   public bool isActived = false;// 是否被激活
+    public EnemyAIType enemyAIType;
+    public bool isActived = false;// 是否被激活
    
    public Dictionary<PieceController, int> damageDic = new();// 记录各个单位造成的伤害
 
