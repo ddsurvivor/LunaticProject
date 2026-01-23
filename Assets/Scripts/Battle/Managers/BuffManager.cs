@@ -92,7 +92,7 @@
                     case BuffType.Burn:
                         // 持续掉血
                         int burnDamage = unit.GetBuffStacks(BuffType.Burn);
-                        unit.TakeDamage(burnDamage);
+                        unit.TakeDamage(new AttackPack(burnDamage, DamageType.Electric));
                         RemoveBuff(unit, BuffType.Burn, 3); // 每回合减少3层燃烧效果
                         return;
                     default:

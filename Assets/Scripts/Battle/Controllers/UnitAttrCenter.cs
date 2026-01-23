@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using UnityEngine;
@@ -116,10 +117,16 @@ public class UnitAttrCenter: SerializedMonoBehaviour
         _curHealth = _maxHealth;
         if(hpBarFill!=null)hpBarFill.localScale = new Vector3(1f, 1f,1f);
     }
-    public void TakeDamage(int realDamage)
+    public void TakeDamage(AttackPack attackPack)
     {
-        if (realDamage <= 0) return;
-        _curHealth -= realDamage;
+        if (attackPack.damage <= 0) return;
+        _curHealth -= attackPack.damage;
+        // 伤害跳字
+        DamageText damageText = ObjectPool.Ins.GenerateObject(
+            ItemType.DAMAGE_TEXT,
+            transform.position, transform.rotation
+        ).GetComponent<DamageText>();
+        damageText.JumpOutNum(attackPack.damage);
         if (_curHealth <= 0) _curHealth = 0;
         if(hpBarFill!=null)hpBarFill.localScale = new Vector3((float)_curHealth / _maxHealth, 1f,1f);
         if (_curHealth <= 0)
@@ -136,9 +143,18 @@ public class UnitAttrCenter: SerializedMonoBehaviour
         }
         else
         {
-            if (pc != null) pc.Hurt();
+            if (pc == null) return; 
+                
+                    pc.Hurt();
+                    ObjectPool.Ins.GenerateObject(
+                        attackPack.damageType == DamageType.Melee
+                            ? ItemType.KINETIC_ATTACK
+                            : ItemType.ENERGY_ATTACK,
+                        this.transform.position + Vector3.up*5f
+                        , Quaternion.identity);
+                
         }
-        Debug.Log($"受到伤害{realDamage}");
+        Debug.Log($"受到{attackPack.damageType}伤害{attackPack.damage}");
     }
     public void Heal(int healAmount)
     {

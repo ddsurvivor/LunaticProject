@@ -20,6 +20,10 @@ public class AIController : PlayerController
 
     public void OnScanFog(GameObject fog)
     {
+        if (fogController == null)
+        {
+            return;
+        }
         if (fogController.enemyPiecesDict.ContainsKey(fog))
         {
             foreach (var piece in fogController.enemyPiecesDict[fog])
@@ -35,6 +39,9 @@ public class AIController : PlayerController
     {
         base.TurnStart();
 
+        if (fogController != null)
+        {
+            
         // 激活敌人棋子
         foreach (var pair in fogController.enemyPiecesDict)
         {
@@ -47,6 +54,7 @@ public class AIController : PlayerController
                     piece.StartNormalAttack(true);
                 }
             }
+        }
         }
 
         foreach (EnemyController piece in pieces)

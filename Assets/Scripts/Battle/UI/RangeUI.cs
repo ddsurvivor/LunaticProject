@@ -101,7 +101,7 @@ public class RangeUI : MonoBehaviour
         fanRoot.SetActive(false);
         foreach (var piece in _curTargets)
         {
-            piece.rangeUI.ShowHighlight(false);
+            piece.rangeUI?.ShowHighlight(false);
         }
 
         _curTargets.Clear();
@@ -245,14 +245,14 @@ public class RangeUI : MonoBehaviour
             if (piece == null) continue;
             if (_curSkillPack.target == SkillTarget.All)
             {
-                piece.rangeUI.ShowHighlight(true);
+                piece.rangeUI?.ShowHighlight(true);
                 newTargets.Add(piece);
             }
             else if (_curSkillPack.target == SkillTarget.EnemyAll)
             {
                 if (!piece.isPlayerPiece)
                 {
-                    piece.rangeUI.ShowHighlight(true);
+                    piece.rangeUI?.ShowHighlight(true);
                     newTargets.Add(piece);
                 }
             }
@@ -260,7 +260,7 @@ public class RangeUI : MonoBehaviour
             {
                 if (!piece.isPlayerPiece)
                 {
-                    piece.rangeUI.ShowHighlight(true);
+                    piece.rangeUI?.ShowHighlight(true);
                     newTargets.Add(piece);
                     return;
                 }
@@ -269,7 +269,7 @@ public class RangeUI : MonoBehaviour
             {
                 if (piece.isPlayerPiece)
                 {
-                    piece.rangeUI.ShowHighlight(true);
+                    piece.rangeUI?.ShowHighlight(true);
                     newTargets.Add(piece);
                     return;
                 }
@@ -283,7 +283,7 @@ public class RangeUI : MonoBehaviour
                 continue;
             }
 
-            piece.rangeUI.ShowHighlight(false);
+            piece.rangeUI?.ShowHighlight(false);
         }
 
         _curTargets = newTargets;
@@ -297,14 +297,14 @@ public class RangeUI : MonoBehaviour
         {
             if (_curSkillPack.target == SkillTarget.All)
             {
-                piece.rangeUI.ShowHighlight(true);
+                piece.rangeUI?.ShowHighlight(true);
                 newTargets.Add(piece);
             }
             else if (_curSkillPack.target == SkillTarget.EnemyAll)
             {
                 if (!piece.isPlayerPiece)
                 {
-                    piece.rangeUI.ShowHighlight(true);
+                    piece.rangeUI?.ShowHighlight(true);
                     newTargets.Add(piece);
                 }
             }
@@ -312,7 +312,7 @@ public class RangeUI : MonoBehaviour
             {
                 if (!piece.isPlayerPiece)
                 {
-                    piece.rangeUI.ShowHighlight(true);
+                    piece.rangeUI?.ShowHighlight(true);
                     newTargets.Add(piece);
                     return;
                 }
@@ -321,7 +321,7 @@ public class RangeUI : MonoBehaviour
             {
                 if (piece.isPlayerPiece)
                 {
-                    piece.rangeUI.ShowHighlight(true);
+                    piece.rangeUI?.ShowHighlight(true);
                     newTargets.Add(piece);
                     return;
                 }
@@ -335,7 +335,7 @@ public class RangeUI : MonoBehaviour
                 continue;
             }
 
-            piece.rangeUI.ShowHighlight(false);
+            piece.rangeUI?.ShowHighlight(false);
         }
 
         _curTargets = newTargets;
@@ -355,6 +355,23 @@ public class RangeUI : MonoBehaviour
         }
 
         return Vector3.zero;
+    }
+
+    public Transform GetSkillTransform()
+    {
+        if (grenadeCircle.activeInHierarchy)
+        {
+            return grenadeCircle.transform;
+        }
+        else if (skillIcon.activeInHierarchy)
+        {
+            return skillIcon.transform;
+        }
+        else if (fanRoot.activeInHierarchy)
+        {
+            return fanRoot.transform;
+        }
+        return null;
     }
 
 

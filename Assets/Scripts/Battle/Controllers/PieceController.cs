@@ -15,18 +15,16 @@ public class PieceController : MonoBehaviour
     //public string pieceName;
     public UnitAttrCenter unitAttrCenter; // 单位属性中心
 
-    [FormerlySerializedAs("_rangeUI")] [SerializeField] public RangeUI rangeUI; // 范围UI
+    [FormerlySerializedAs("_rangeUI")] [SerializeField]
+    public RangeUI rangeUI; // 范围UI
 
     [SerializeField] private PieceActionListPanel _actionListPanel; // 棋子动作列表面板
 
-    [SerializeField] 
-    public PieceDisplay pieceDisplay;
-    
-    [Header("配置")]
-    public int pieceID; // 棋子ID
+    [SerializeField] public PieceDisplay pieceDisplay;
 
-    [HideInInspector]
-    public PlayerController player;
+    [Header("配置")] public int pieceID; // 棋子ID
+
+    [HideInInspector] public PlayerController player;
 
 
     [Header("状态")] public bool isPlayerPiece; // 是否是玩家棋子
@@ -42,26 +40,26 @@ public class PieceController : MonoBehaviour
     // 当前攻击数据
     private bool _isAttacking = false; // 是否正在攻击
     private bool _isUsingSkill = false; // 是否正在使用技能
-    [SerializeField] [ReadOnly]  private AttackPack _attackPack;
-    [SerializeField] [ReadOnly]  private SkillPack _skillPack;
+    [SerializeField] [ReadOnly] private AttackPack _attackPack;
+
+    [SerializeField] [ReadOnly] private SkillPack _skillPack;
     //[SerializeField] [ReadOnly] private int _damage;
     //[SerializeField] [ReadOnly] private DamageType _damageType;
 
     public List<InteractArea> interactAreas = new(); // 可交互区域列表
 
     public List<ActionType> availableActions = new(); // 可用动作列表
-    
+
     public List<SkillPack> availableSkills = new(); // 可用技能列表
 
     //public bool isActived = false; // 是否被激活
 
-    public bool isIdle;// 是否处于待机状态
+    public bool isIdle; // 是否处于待机状态
 
-    [Header("事件")] 
-    public UnityEvent OnInit;
+    [Header("事件")] public UnityEvent OnInit;
     public UnityEvent OnTurnStart;
     public UnityEvent OnTurnEnd;
-    
+
 
     public void Init(PlayerController player)
     {
@@ -70,13 +68,13 @@ public class PieceController : MonoBehaviour
         availableActions.Add(ActionType.移动);
         availableActions.Add(ActionType.近战攻击);
         availableActions.Add(ActionType.远程攻击);
-        availableActions.Add(ActionType.待机);// 待机
-        availableActions.Add(ActionType.重新装填);// 装填
-        availableActions.Add(ActionType.技能);// 技能
+        availableActions.Add(ActionType.待机); // 待机
+        availableActions.Add(ActionType.重新装填); // 装填
+        availableActions.Add(ActionType.技能); // 技能
         //Debug.Log(_pieceDisplay.name);
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
         availableSkills = BattleScene.Ins.BM.pieceDataListSO.GetPieceData(pieceID)?.skillPacks;
-        if(_actionListPanel!=null)_actionListPanel.Init(this);
+        if (_actionListPanel != null) _actionListPanel.Init(this);
         isIdle = true;
         OnInit?.Invoke();
     }
@@ -128,6 +126,7 @@ public class PieceController : MonoBehaviour
         {
             _actionListPanel.gameObject.SetActive(false);
         }
+
         isIdle = true;
         OnTurnEnd?.Invoke();
     }
@@ -205,18 +204,21 @@ public class PieceController : MonoBehaviour
         if (!range) // 近战攻击
         {
             rangeUI?.ShowAttackRange(unitAttrCenter.attr.GetRange(true));
-            _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Melee),DamageType.Melee);
+            _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Melee)
+                , DamageType.Melee);
         }
         else // 远程攻击
         {
-            if(unitAttrCenter.AmmoCount<=0)
+            if (unitAttrCenter.AmmoCount <= 0)
             {
                 Debug.Log("弹药不足，无法进行远程攻击");
                 _isAttacking = false;
                 return;
             }
+
             rangeUI?.ShowAttackRange(unitAttrCenter.attr.GetRange(false));
-            _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Ranged),DamageType.Ranged);
+            _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Ranged)
+                , DamageType.Ranged);
         }
     }
 
@@ -248,7 +250,6 @@ public class PieceController : MonoBehaviour
         }
     }
 
-    
 
     public void Attack(PieceController enemy)
     {
@@ -264,7 +265,7 @@ public class PieceController : MonoBehaviour
             unitAttrCenter.CostAmmo();
         }
 
-        
+
         // 聚能充能
         if (isPlayerPiece)
         {
@@ -278,9 +279,9 @@ public class PieceController : MonoBehaviour
                 // 爆发状态下攻击同一目标增加额外伤害
                 if (BattleScene.Ins.BM.PlayerController.burstTarget == enemy)
                 {
-                    _attackPack.damage = (int)(GameConst.burstDamageRate * _attackPack.damage );
+                    _attackPack.damage = (int)(GameConst.burstDamageRate * _attackPack.damage);
                     _attackPack.damage += (int)(BattleScene.Ins.BM.PlayerController.totalDamage *
-                                          GameConst.burstAddDamageRate);
+                                                GameConst.burstAddDamageRate);
                     BattleScene.Ins.BM.PlayerController.totalDamage += _attackPack.damage;
                 }
                 else
@@ -290,10 +291,14 @@ public class PieceController : MonoBehaviour
                 }
             }
         }
-        
-        // 执行攻击
-        BattleScene.Ins.BM.PieceAttack(this, enemy, _attackPack);
-        
+
+        BattleScene.Ins.BM.camera.FocusShake(enemy.transform);
+        // 延迟0.3f
+        DOVirtual.DelayedCall(0.3f, () =>
+        {
+            // 执行攻击
+            BattleScene.Ins.BM.PieceAttack(this, enemy, _attackPack);
+        }, false);
     }
 
     public void Hurt()
@@ -304,14 +309,11 @@ public class PieceController : MonoBehaviour
             // 受伤充能
             BattleScene.Ins.BM.PlayerController.ChargeBurst(GameConst.hurtBurstCharge);
         }
-        // 延迟0.3f
-        DOVirtual.DelayedCall(0.3f, () =>
-        {
-            Debug.Log($"{this.name} 受伤");
-            pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
-            transform.DOShakePosition(0.5f, 0.8f);
-            BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
-        });
+
+        Debug.Log($"{this.name} 受伤");
+        pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
+        transform.DOShakePosition(0.5f, 0.8f);
+        BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
     }
 
     public void Dead()
@@ -345,16 +347,29 @@ public class PieceController : MonoBehaviour
         rangeUI?.ShowSkillRange(skillPack);
         _skillPack = skillPack;
     }
+
     private void CheckSkill()
     {
-        
         // 根据范围获取所有棋子
         List<PieceController> targets = rangeUI.GetCurTargets;
-        BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack);
+        Transform atkPos = rangeUI.GetSkillTransform();
+        if (atkPos != null && _skillPack.skillVFXType != 0)
+        {
+            ObjectPool.Ins.GenerateObject(
+                _skillPack.skillVFXType,
+                atkPos.position+Vector3.up*3f,
+                atkPos.localRotation);
+        }
+        
 
         // 播放技能动画
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
-        
+
+        // 延迟0.3f
+        DOVirtual.DelayedCall(0.3f, () =>
+        {
+            BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack);
+        }, false);
         // 结束攻击状态
         _isUsingSkill = false;
         rangeUI.CloseRange();

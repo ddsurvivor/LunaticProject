@@ -17,6 +17,14 @@ using UnityEngine.SceneManagement;
             SceneManager.LoadScene(battleScene);
             PlayingSystem.特殊剧情 = "";
         }
+
+        public void StartBattle(string battleScene)
+        {
+            this.battleScene = battleScene;
+            this.endLog = "";
+            SceneManager.LoadScene(battleScene);
+            PlayingSystem.特殊剧情 = "";
+        }
         public  void BattleEnd()
         {
             StartCoroutine(LoadSceneCoroutine());

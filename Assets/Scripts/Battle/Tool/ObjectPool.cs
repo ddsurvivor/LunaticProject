@@ -6,17 +6,25 @@ using Vector3 = UnityEngine.Vector3;
 
 public enum ItemType
 {
-    EMO_HAPPY=1,
+    NONE=0,
+    /*EMO_HAPPY=1,
     EMO_NORMAL=2,
-    EMO_SAD=3,
+    EMO_SAD=3,*/
+    
+    // 爆炸特效
+    EXPLOSION=10,
+    // 伤害跳字
+    DAMAGE_TEXT=11,
+    // 能量攻击特效
+    ENERGY_ATTACK=12,
+    // 动能攻击特效
+    KINETIC_ATTACK=13,
 }
 /// <summary>
 /// 对象池
 /// </summary>
 public class ObjectPool : MonoSingleton<ObjectPool>
 {
-
-
     [HideInInspector]
     /// <summary>
     /// 对象池

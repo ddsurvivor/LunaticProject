@@ -85,8 +85,9 @@ public class BattleManager : MonoBehaviour
                                BuffAttrType.DamageReduction])/100f);
         if (realDamage < 0) realDamage = 0;
         // TODO: 临时护盾功能
-        defender.unitAttrCenter.TakeDamage(realDamage);
-        BattleScene.Ins.BM.camera.FocusShake(defender.transform);
+        defender.unitAttrCenter.TakeDamage(new AttackPack(realDamage, attackPack.damageType));
+        
+        
 
         if (defender is EnemyController enemy)
         {
@@ -136,13 +137,15 @@ public class BattleManager : MonoBehaviour
                         BuffAttrType.DamageReduction])/100f);
                 if (realDamage < 0) realDamage = 0;
                 // TODO: 临时护盾功能
-                target.unitAttrCenter.TakeDamage(realDamage);
+                target.unitAttrCenter.TakeDamage(new AttackPack(realDamage, attackPack.damageType));
 
                 if (target is EnemyController enemy)
                 {
                     enemy.AddDamageRecord(attacker, realDamage);
                 }
             }
+
+            
         }
         //BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
     }
