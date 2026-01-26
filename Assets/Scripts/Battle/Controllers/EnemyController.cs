@@ -45,4 +45,32 @@ public class EnemyController : PieceController
            }
        });
    }
+   
+   public void CastSkillOnTarget(PieceController targetPc, SkillPack skill)
+   {
+       if (skill == null || targetPc == null) return;
+       Debug.Log($"{this.name} 对 {targetPc.name} 施放技能 {skill.skillName}");
+       
+       // 根据范围获取所有棋子
+       List<PieceController> targets = rangeUI.GetCurTargets;
+       Transform atkPos = rangeUI.GetSkillTransform();
+       if (atkPos != null && skill.skillVFXType != 0)
+       {
+           ObjectPool.Ins.GenerateObject(
+               skill.skillVFXType,
+               atkPos.position+Vector3.up*3f,
+               atkPos.localRotation);
+       }
+       // 播放技能动画
+       pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
+       PlayAudio(skill);
+       
+       // 延迟0.3f
+       DOVirtual.DelayedCall(0.3f, () =>
+       {
+           BattleScene.Ins.BM.PieceSkill(this, targets, skill);
+       }, false);
+       rangeUI.CloseRange();
+       // 技能聚能充能
+   }
 }
