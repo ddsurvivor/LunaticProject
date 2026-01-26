@@ -48,6 +48,7 @@ public class UnitAttrCenter: SerializedMonoBehaviour
     [SerializeField]
     private float _moveRange;
     public float MoveRange => _moveRange;
+    [SerializeField][ReadOnly]
     // 嘲讽值
     private int _tauntValue;
     public  int TauntValue => _tauntValue;
@@ -60,8 +61,9 @@ public class UnitAttrCenter: SerializedMonoBehaviour
     public int MaxAmmoCount => _maxAmmoCount;
 
     [Header("Buff")] 
+    [SerializeField][ReadOnly]
     public List<BuffState> buffStates = new();
-    
+    [SerializeField][ReadOnly]
     public Dictionary<BuffAttrType, float> buffAttrDic = new();
 
 

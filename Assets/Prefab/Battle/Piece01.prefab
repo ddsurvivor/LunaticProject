@@ -140,7 +140,10 @@ MonoBehaviour:
   rangeUI: {fileID: 8316052726254654752}
   _actionListPanel: {fileID: 1246171515386722531}
   pieceDisplay: {fileID: 9066005200974287038}
-  pieceID: 0
+  _pieceData:
+    pieceId: 0
+    skillPacks: []
+  pieceID: 1
   player: {fileID: 0}
   isPlayerPiece: 1
   _attackPack:
@@ -160,6 +163,7 @@ MonoBehaviour:
     attackPacks: []
     buffPacks: []
     skillEffects: 
+    skillSound: {fileID: 0}
   interactAreas: []
   availableActions: 
   availableSkills: []
@@ -401,6 +405,7 @@ MonoBehaviour:
   _curMovePoint: 0
   _maxMovePoint: 3
   _moveRange: 20
+  _tauntValue: 0
   _ammoCount: 3
   hpBarFill: {fileID: 0}
 --- !u!65 &8316052724586748499

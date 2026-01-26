@@ -356,7 +356,7 @@ public class PieceController : MonoBehaviour
     /// <summary>
     /// 发动技能
     /// </summary>
-    private void CastSkill()
+    public virtual void CastSkill()
     {
         // 根据范围获取所有棋子
         List<PieceController> targets = rangeUI.GetCurTargets;

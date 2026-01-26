@@ -1,11 +1,15 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class DaytimeSystem : SerializedMonoBehaviour
 {
+    [OdinSerialize]
+    public DateTime startDate = new DateTime(2024, 1, 1);
     public int date = 1;// 当前日期
     public enum Daytime
     {
@@ -44,7 +48,9 @@ public class DaytimeSystem : SerializedMonoBehaviour
     
     public void UpdateDaytimeImage()
     {
-        dateText.text = "第 " + date + " 天 " + daytime.ToString();
+        // 更新日期文本
+        DateTime currentDate = startDate.AddDays(date - 1);
+        dateText.text = currentDate.ToString("yyyy年MM月dd日 ") + daytime.ToString();
         if (daytimeSprites.ContainsKey(daytime))
         {
             dateImage.sprite = daytimeSprites[daytime];
