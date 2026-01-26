@@ -20,6 +20,7 @@ public class 大地图System : MonoBehaviour
     public float 点击进入剧情编辑器等待时间=0.8f;
     #endregion
     public 任务节点[] NodeList;//任务节点列表
+    public DaytimeSystem daytimeSystem;
 
     
     

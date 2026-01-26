@@ -5742,6 +5742,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 439568009330001271, guid: 8a24279893242d54e97c1af6c2a32974, type: 3}
+      propertyPath: deadNotDelete
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 439568009330001271, guid: 8a24279893242d54e97c1af6c2a32974, type: 3}
       propertyPath: OnTurnEnd.m_PersistentCalls.m_Calls.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -14782,27 +14786,7 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes:
-    - Name: enemyPiecesDict
-      Entry: 7
-      Data: 0|System.Collections.Generic.Dictionary`2[[UnityEngine.GameObject, UnityEngine.CoreModule],[System.Collections.Generic.List`1[[EnemyController,
-        Assembly-CSharp]], mscorlib]], mscorlib
-    - Name: comparer
-      Entry: 7
-      Data: 1|System.Collections.Generic.ObjectEqualityComparer`1[[UnityEngine.GameObject,
-        UnityEngine.CoreModule]], mscorlib
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
+    SerializationNodes: []
   pieces:
   - {fileID: 699182334}
   isInTurn: 0
@@ -14812,6 +14796,7 @@ MonoBehaviour:
   totalDamage: 0
   burstTarget: {fileID: 0}
   burstChargeBarFill: {fileID: 0}
+  fogController: {fileID: 0}
 --- !u!114 &1713777228
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14830,6 +14815,7 @@ MonoBehaviour:
   burstButton: {fileID: 588414090}
   teamPanel: {fileID: 208797652}
   pieceInfoPanel: {fileID: 0}
+  restartButton: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18385,6 +18371,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 106691963638292477, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 106691963638292477, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
     - target: {fileID: 6793405397411858530, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: serializationData.Prefab
       value: 

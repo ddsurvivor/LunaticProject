@@ -28,7 +28,7 @@ public class PlayerController : SerializedMonoBehaviour
         UpdateBurstBar();
         foreach (var piece in pieces)
         {
-            piece.Init(this);
+            piece.Init(this, BattleScene.Ins.BM.pieceDataListSO.GetPieceData(piece.pieceID));
         }
         BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(pieces[0]);
         BattleScene.Ins.UM.ShowBurstReady(false);

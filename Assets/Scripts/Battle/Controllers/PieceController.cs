@@ -22,7 +22,9 @@ public class PieceController : MonoBehaviour
 
     [SerializeField] public PieceDisplay pieceDisplay;
 
-    [Header("配置")] public int pieceID; // 棋子ID
+    [Header("配置")] 
+    [SerializeField][ReadOnly]private PieceData _pieceData;
+    public int pieceID; // 棋子ID
 
     [HideInInspector] public PlayerController player;
 
@@ -40,9 +42,9 @@ public class PieceController : MonoBehaviour
     // 当前攻击数据
     private bool _isAttacking = false; // 是否正在攻击
     private bool _isUsingSkill = false; // 是否正在使用技能
-    [SerializeField] [ReadOnly] private AttackPack _attackPack;
+    [SerializeField] [ReadOnly] private AttackPack _attackPack;// 当前正在使用的攻击
 
-    [SerializeField] [ReadOnly] private SkillPack _skillPack;
+    [SerializeField] [ReadOnly] private SkillPack _skillPack;// 当前正在使用的技能
     //[SerializeField] [ReadOnly] private int _damage;
     //[SerializeField] [ReadOnly] private DamageType _damageType;
 
@@ -61,7 +63,7 @@ public class PieceController : MonoBehaviour
     public UnityEvent OnTurnEnd;
 
 
-    public void Init(PlayerController player)
+    public void Init(PlayerController player, PieceData pieceData = null)
     {
         this.player = player;
         unitAttrCenter.Init();
@@ -73,7 +75,8 @@ public class PieceController : MonoBehaviour
         availableActions.Add(ActionType.技能); // 技能
         //Debug.Log(_pieceDisplay.name);
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
-        availableSkills = BattleScene.Ins.BM.pieceDataListSO.GetPieceData(pieceID)?.skillPacks;
+        _pieceData = pieceData;
+        availableSkills = pieceData?.skillPacks;
         if (_actionListPanel != null) _actionListPanel.Init(this);
         isIdle = true;
         OnInit?.Invoke();
@@ -101,7 +104,7 @@ public class PieceController : MonoBehaviour
             if (Input.GetMouseButtonDown(0))
             {
                 //CheckEnemy();
-                CheckSkill();
+                CastSkill();
             }
 
             // 点击右键取消
@@ -257,12 +260,14 @@ public class PieceController : MonoBehaviour
         if (_attackPack.damageType == DamageType.Melee)
         {
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Attack, false, 1f);
+            PlayAudio(ActionType.近战攻击);
         }
         else if (_attackPack.damageType == DamageType.Ranged)
         {
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
             // 消耗弹药
             unitAttrCenter.CostAmmo();
+            PlayAudio(ActionType.远程攻击);
         }
 
 
@@ -316,7 +321,7 @@ public class PieceController : MonoBehaviour
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
     }
 
-    public void Dead()
+    public virtual void Dead()
     {
         Debug.Log($"{this.name} 死亡");
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Death, false, -1, () =>
@@ -348,7 +353,10 @@ public class PieceController : MonoBehaviour
         _skillPack = skillPack;
     }
 
-    private void CheckSkill()
+    /// <summary>
+    /// 发动技能
+    /// </summary>
+    private void CastSkill()
     {
         // 根据范围获取所有棋子
         List<PieceController> targets = rangeUI.GetCurTargets;
@@ -360,10 +368,10 @@ public class PieceController : MonoBehaviour
                 atkPos.position+Vector3.up*3f,
                 atkPos.localRotation);
         }
-        
 
         // 播放技能动画
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
+        PlayAudio(_skillPack);
 
         // 延迟0.3f
         DOVirtual.DelayedCall(0.3f, () =>
@@ -374,5 +382,27 @@ public class PieceController : MonoBehaviour
         _isUsingSkill = false;
         rangeUI.CloseRange();
         // 技能聚能充能
+    }
+
+    public void PlayAudio(ActionType actionType)
+    {
+        if (_pieceData== null)
+        {
+            return;
+        }
+
+        if (_pieceData.actionSounds.ContainsKey(actionType))
+        {
+            AudioClip clip = _pieceData.actionSounds[actionType];
+            AudioSource.PlayClipAtPoint(clip, Camera.main.transform.position);
+        }
+    }
+
+    public void PlayAudio(SkillPack skillPack)
+    {
+        if (skillPack.skillSound != null)
+        {
+            AudioSource.PlayClipAtPoint(skillPack.skillSound, Camera.main.transform.position);
+        }
     }
 }

@@ -152,17 +152,46 @@ public class BattleManager : MonoBehaviour
 
     public void PlayerCheckWin()
     {
+        // 检查敌方是否全灭
+        bool allEnemyDead = true;
         foreach (var piece in AIController.pieces)
         {
             if (!piece.isDead)
             {
-                return;
+                allEnemyDead = false;
+                break;
             }
         }
 
-        // 敌方棋子全灭，玩家胜利
-        BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家胜利！");
-        DOVirtual.DelayedCall(1.0f, () => { BattleScene.Ins.BM.OnClickQuitBattle(); });
+        if (allEnemyDead)
+        {
+            // 敌方棋子全灭，玩家胜利
+            BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家胜利！");
+            DOVirtual.DelayedCall(1.0f, () => { BattleScene.Ins.BM.OnClickQuitBattle(); });
+            return;
+        }
+
+        // 检查我方是否全灭
+        bool allPlayerDead = true;
+        foreach (var piece in PlayerController.pieces)
+        {
+            if (!piece.isDead)
+            {
+                allPlayerDead = false;
+                break;
+            }
+        }
+
+        if (allPlayerDead)
+        {
+            // 我方棋子全灭，玩家失败
+            BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家失败！");
+            // 激活重新开始按钮
+            if (BattleScene.Ins.UM.restartButton != null)
+            {
+                BattleScene.Ins.UM.restartButton.gameObject.SetActive(true);
+            }
+        }
     }
 
 

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
+using UnityEngine;
 
 [System.Serializable]
 public class SkillPack
@@ -16,7 +17,7 @@ public class SkillPack
     public ItemType skillVFXType;// 技能特效类型
     public List<AttackPack> attackPacks = new();// 伤害列表
     public List<BuffPack> buffPacks = new();    // 附加效果列表
-
     public List<SkillEffect> skillEffects = new(); // 技能特殊效果列表
+    public AudioClip skillSound;// 施放音效
     
 }

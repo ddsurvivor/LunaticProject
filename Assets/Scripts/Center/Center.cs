@@ -38,7 +38,7 @@ public class Center : MonoBehaviour
     public static string Command_Setspace="SETSPACE";//设置空格
     public static string Command_Next="NEXT";//下一段
     public static string Command_If="IF";//检查分支
-    public static string Command_End = "END";//结束
+    public static string Command_End = "END";//结束 （保存任务进度）
     public static string Command_Skip="SKIP";//跳过本行
     public static string Command_Jump="JUMPTO";//跳转到行
     public static string Command_Gameover="GAMEOVER";//失败
@@ -50,8 +50,9 @@ public class Center : MonoBehaviour
     public static string Command_Shake="SHAKE";//震动
     public static string Tag_checkview = "!CHECKVIEW";
     public static string Tag_notspawn = "!DONTSPAWN";
-    
+    // new
     public static string Command_Battle="BATTLE";//战斗
+    public static string Command_Daytime="DAYTIME";//时间推进
  
     public static readonly char Plot指令分隔符 = '+';
 

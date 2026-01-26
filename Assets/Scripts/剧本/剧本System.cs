@@ -576,6 +576,15 @@ public class 剧本System: MonoBehaviour
                             GM.Ins.StartBattle(battleScene, endLog);
                         }
                     }
+                    if (key.Contains(Center.Command_Daytime)) //时间推进
+                    {
+                        var prams = 指令切割(key);
+                        if (prams.Length >= 1)
+                        {
+                            int.TryParse(prams[0], out int dayTimes);
+                            大地图System.instance.daytimeSystem.CostDaytime(dayTimes);
+                        }
+                    }
                 }
       }
       public static string[] 指令切割(string command)

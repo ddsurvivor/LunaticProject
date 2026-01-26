@@ -10,6 +10,7 @@ public class UIManager : MonoBehaviour
         public Button burstButton;
         public TeamPanel teamPanel;
         public PieceInfoPanel pieceInfoPanel;
+        public Button restartButton;// 重启战斗
 
         public void Init()
         {
