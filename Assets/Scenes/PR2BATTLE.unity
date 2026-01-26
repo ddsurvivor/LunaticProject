@@ -14284,7 +14284,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 21
+  orthographic size: 22
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -14705,7 +14705,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8316052724586748498, guid: a59b42c47b8928140bf5b5e2ec8e0086, type: 3}
       propertyPath: _maxHealth
-      value: 40
+      value: 47
       objectReference: {fileID: 0}
     - target: {fileID: 8316052724586748498, guid: a59b42c47b8928140bf5b5e2ec8e0086, type: 3}
       propertyPath: _moveRange
@@ -14718,7 +14718,7 @@ PrefabInstance:
     - target: {fileID: 8316052724586748498, guid: a59b42c47b8928140bf5b5e2ec8e0086, type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 8316052724586748498, guid: a59b42c47b8928140bf5b5e2ec8e0086, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 8316052724586748498, guid: a59b42c47b8928140bf5b5e2ec8e0086, type: 3}
       propertyPath: serializationData.PrefabModifications.Array.size
       value: 5
@@ -14760,6 +14760,22 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: e6046fdc00c400c48a3caa59ee99c8ff, type: 3}
+    - target: {fileID: 9066005200974287038, guid: a59b42c47b8928140bf5b5e2ec8e0086, type: 3}
+      propertyPath: deathSprite.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 9066005200974287038, guid: a59b42c47b8928140bf5b5e2ec8e0086, type: 3}
+      propertyPath: deathSprite.Array.data[0]
+      value: 
+      objectReference: {fileID: 21300000, guid: fd2e4830f312c474d89c7206a3643a4f, type: 3}
+    - target: {fileID: 9066005200974287038, guid: a59b42c47b8928140bf5b5e2ec8e0086, type: 3}
+      propertyPath: deathSprite.Array.data[1]
+      value: 
+      objectReference: {fileID: 21300000, guid: 73d1e7627983a6543ac25f1ae0b487cc, type: 3}
+    - target: {fileID: 9066005200974287038, guid: a59b42c47b8928140bf5b5e2ec8e0086, type: 3}
+      propertyPath: deathSprite.Array.data[2]
+      value: 
+      objectReference: {fileID: 21300000, guid: 8d43e5631695146458ba6db836b2197e, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a59b42c47b8928140bf5b5e2ec8e0086, type: 3}
 --- !u!1001 &1813268888
@@ -16987,7 +17003,7 @@ MonoBehaviour:
   m_Follow: {fileID: 320141619}
   m_Lens:
     FieldOfView: 60
-    OrthographicSize: 21
+    OrthographicSize: 22
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
