@@ -94,8 +94,10 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 pc.isIdle = true;
                 // 清除剩余行动力
                 pc.unitAttrCenter.CostMP(pc.unitAttrCenter.CurMovePoint);
+                pc.PlayAudio(actionType);
                 break;
             case ActionType.扫描:
+                pc.PlayAudio(actionType);
                 break;
             case ActionType.攀爬:
                 break;
@@ -106,6 +108,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 pc.ReloadAmmo();
                 break;
             case ActionType.道具:
+                pc.PlayAudio(actionType);
                 break;
             default:
                 Debug.LogWarning($"{actionType} 未实现");

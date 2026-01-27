@@ -8,10 +8,10 @@ public class BattleManager : MonoBehaviour
     public PlayerController PlayerController;
     public CameraController camera;
     public BuffManager buffManager;
-    
-    public PieceDataListSO pieceDataListSO;
-    
 
+    public PieceDataListSO pieceDataListSO;
+
+    public List<LadderArea> ladderAreas = new();
 
     public void Init()
     {
@@ -34,6 +34,8 @@ public class BattleManager : MonoBehaviour
         {
             PlayerStart();
         }
+
+        CheckAllLadderMove(PlayerController.isInTurn);
     }
 
     public void PlayerStart()
@@ -76,18 +78,25 @@ public class BattleManager : MonoBehaviour
         }
 
 
+        // 伤害计算公式
         int addAtk = attacker.unitAttrCenter.attr.GetAddDamage(defender.unitAttrCenter.elementType);
         int realDamage = attackPack.damage + addAtk;
-        realDamage -= defender.unitAttrCenter.attr.GetArmor(attackPack.damageType);
+        int armor = defender.unitAttrCenter.attr.GetArmor(attackPack.damageType);
+        if (attackPack.damageType == DamageType.Melee)
+        {
+            armor = (int)(armor*(1f - defender.unitAttrCenter.buffAttrDic[BuffAttrType.MeleeArmorPercent]/100f));
+        }
+        realDamage -= armor;
         // 减伤
-        realDamage = (int)(realDamage *
-                           (100 - defender.unitAttrCenter.buffAttrDic[
-                               BuffAttrType.DamageReduction])/100f);
+        realDamage = (int)(realDamage
+            * (100 - attacker.unitAttrCenter.buffAttrDic[
+                BuffAttrType.DamageIncrease]) / 100f * // 伤害增加
+            (100 - defender.unitAttrCenter.buffAttrDic[
+                BuffAttrType.DamageReduction]) / 100f);// 伤害减免
         if (realDamage < 0) realDamage = 0;
         // TODO: 临时护盾功能
         defender.unitAttrCenter.TakeDamage(new AttackPack(realDamage, attackPack.damageType));
-        
-        
+
 
         if (defender is EnemyController enemy)
         {
@@ -116,8 +125,8 @@ public class BattleManager : MonoBehaviour
                 {
                     isHit = true;
                 }
-                
             }
+
             if (isHit == false)
             {
                 // 未命中
@@ -125,16 +134,24 @@ public class BattleManager : MonoBehaviour
                 //BattleScene.Ins.BM.camera.FocusShake(defender.transform);
                 return;
             }
-            
-            int addAtk = attacker.unitAttrCenter.attr.GetAddDamage(target.unitAttrCenter.elementType);
+
+            int addAtk =
+                attacker.unitAttrCenter.attr.GetAddDamage(target.unitAttrCenter.elementType);
             foreach (var attackPack in skillPack.attackPacks)
             {
                 int realDamage = attackPack.damage + addAtk;
-                realDamage -= target.unitAttrCenter.attr.GetArmor(attackPack.damageType);
+                int armor = target.unitAttrCenter.attr.GetArmor(attackPack.damageType);
+                if (attackPack.damageType == DamageType.Melee)
+                {
+                    armor = (int)(armor*(1f - target.unitAttrCenter.buffAttrDic[BuffAttrType.MeleeArmorPercent]/100f));
+                }
+                realDamage -= armor;
                 // 减伤
-                realDamage = (int)(realDamage *
+                realDamage = (int)(realDamage
+                    * (100 - attacker.unitAttrCenter.buffAttrDic[
+                        BuffAttrType.DamageIncrease]) / 100f * // 伤害增加
                     (100 - target.unitAttrCenter.buffAttrDic[
-                        BuffAttrType.DamageReduction])/100f);
+                        BuffAttrType.DamageReduction]) / 100f);// 伤害减免
                 if (realDamage < 0) realDamage = 0;
                 // TODO: 临时护盾功能
                 target.unitAttrCenter.TakeDamage(new AttackPack(realDamage, attackPack.damageType));
@@ -144,8 +161,6 @@ public class BattleManager : MonoBehaviour
                     enemy.AddDamageRecord(attacker, realDamage);
                 }
             }
-
-            
         }
         //BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
     }
@@ -191,6 +206,14 @@ public class BattleManager : MonoBehaviour
             {
                 BattleScene.Ins.UM.restartButton.gameObject.SetActive(true);
             }
+        }
+    }
+
+    public void CheckAllLadderMove(bool isPlayerTurn)
+    {
+        foreach (var ladder in ladderAreas)
+        {
+            ladder.StartMove(isPlayerTurn);
         }
     }
 

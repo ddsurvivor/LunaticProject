@@ -70,6 +70,11 @@
                     // 闪避率增加30%
                     unit.AddBuffAttr(BuffAttrType.EvasionRate, value*30);
                     break;
+                case BuffType.Frail:
+                    unit.AddBuffAttr(BuffAttrType.MeleeArmorPercent, value*-30);
+                    // 伤害增加30%
+                    unit.AddBuffAttr(BuffAttrType.DamageIncrease,  value*-20);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(buff), buff, null);
             }

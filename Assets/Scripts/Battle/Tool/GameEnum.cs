@@ -79,6 +79,8 @@ public enum BuffAttrType
     DamageIncrease = 4,
     // 移动范围百分比
     MoveRangePercent = 5,
+    // 动能护甲百分比
+    MeleeArmorPercent = 6,
 }
 
 public enum BattleItemType

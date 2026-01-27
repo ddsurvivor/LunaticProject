@@ -30,6 +30,7 @@ public class AttrCenter
     }
     public int GetArmor(DamageType damageType)
     {
+        // 获取变量所在的脚本UnitAttrCenter
         if (_armorDic.ContainsKey(damageType))
         {
             return _armorDic[damageType];

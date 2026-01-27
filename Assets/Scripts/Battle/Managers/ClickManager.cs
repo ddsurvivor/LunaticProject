@@ -13,7 +13,7 @@ public class ClickManager : MonoBehaviour
     
     private bool _isDragging = false;
     
-    
+    Vector3 point = Vector3.zero;
 
     private void Update()
     {
@@ -27,15 +27,18 @@ public class ClickManager : MonoBehaviour
             {
                 return;
             }
-
             if (!_isDragging)
             {
                 ClickPiece();
             }
         }
-
         if (_selectedPiece != null && _isDragging)
         {
+            // 判定是否点击到UI
+            if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
             DragPiece();
         }
 
@@ -59,9 +62,10 @@ public class ClickManager : MonoBehaviour
         }
         
         // 点击右键取消
-        if (Input.GetMouseButtonDown(1))
+        if (_isDragging && Input.GetMouseButtonDown(1))
         {
             _selectedPiece.transform.position = _dragStartPos;
+            _selectedPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
             _selectedPiece = null;
             _isDragging = false;
             _rangeUI.CloseRange();
@@ -104,14 +108,14 @@ public class ClickManager : MonoBehaviour
         _selectedPiece = piece;
         _selectedPiece.StartDrag();
         _isDragging = true;
-            
         // 显示移动范围
         _dragStartPos = _selectedPiece.transform.position;
+        point = _dragStartPos;     
         _dragRange = _selectedPiece.unitAttrCenter.MoveRange;
         _rangeUI.ShowCircleRange(_dragStartPos, _dragRange);
     }
 
-    Vector3 point = Vector3.zero;
+    
     public void DragPiece()
     {
         if (_selectedPiece == null) {return;}

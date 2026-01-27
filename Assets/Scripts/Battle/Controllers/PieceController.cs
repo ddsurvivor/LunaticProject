@@ -38,6 +38,7 @@ public class PieceController : MonoBehaviour
     //private Vector3 _originalPosition; // 原始位置
 
     private CaverSlot _curCaverSlot; // 当前绑定的点位
+    private LadderArea _curLadderArea; // 当前绑定的梯子区域
 
     // 当前攻击数据
     private bool _isAttacking = false; // 是否正在攻击
@@ -153,6 +154,11 @@ public class PieceController : MonoBehaviour
             _curCaverSlot.LeaveSlot(transform);
             _curCaverSlot = null;
         }
+        if (_curLadderArea!=null)
+        {
+            _curLadderArea.LeaveSlot(this);
+            _curLadderArea = null;
+        }
         //BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(this);
         //BattleScene.Ins.UM.teamPanel.OnSelectPiece(pieceID);
     }
@@ -161,6 +167,7 @@ public class PieceController : MonoBehaviour
     {
         //BattleScene.Ins.UM.infoBox.ShowInfo(this);
         if (!isPlayerPiece) return;
+        PlayAudio(ActionType.移动);
         CheckActionPos();
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
         _actionListPanel.gameObject.SetActive(true);
@@ -195,6 +202,13 @@ public class PieceController : MonoBehaviour
             if (interactArea != null)
             {
                 interactAreas.Add(interactArea);
+                result = true;
+            }
+            
+            LadderArea ladderSlot = collider.transform.GetComponent<LadderArea>();
+            if (ladderSlot != null)
+            {
+                interactAreas.Add(ladderSlot);
                 result = true;
             }
         }
@@ -315,7 +329,7 @@ public class PieceController : MonoBehaviour
             // 受伤充能
             BattleScene.Ins.BM.PlayerController.ChargeBurst(GameConst.hurtBurstCharge);
         }
-
+        
         Debug.Log($"{this.name} 受伤");
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
         transform.DOShakePosition(0.5f, 0.8f);
@@ -345,6 +359,7 @@ public class PieceController : MonoBehaviour
     {
         if (!unitAttrCenter.CostMP()) return;
         unitAttrCenter.FullAmmo();
+        PlayAudio(ActionType.重新装填);
     }
 
     public void StartSkillAttack(SkillPack skillPack)
@@ -384,6 +399,15 @@ public class PieceController : MonoBehaviour
         rangeUI.CloseRange();
         // 技能聚能充能
     }
+
+
+    // 更新朝向
+    private void CheckFace()
+    {
+        
+    }
+    
+    // ======= 音效 ======= //
 
     public void PlayAudio(ActionType actionType)
     {

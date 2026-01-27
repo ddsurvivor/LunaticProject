@@ -6324,6 +6324,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b03e8b34b78d714f9d76f25976eb558, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &767753531 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2981874500963083581, guid: f8d3c2bae24f1404aaaf9baa0e64ca54, type: 3}
+  m_PrefabInstance: {fileID: 2981874501047643997}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e3d1a6166214e7d87c601b37618109e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &770097595
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17048,6 +17059,7 @@ MonoBehaviour:
   camera: {fileID: 2059231694}
   buffManager: {fileID: 1713777230}
   pieceDataListSO: {fileID: 0}
+  ladderAreas: []
 --- !u!114 &1713777225
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22180,6 +22192,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 106691963638292477, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 106691963638292477, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
     - target: {fileID: 6793405397411858530, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: serializationData.Prefab
       value: 
@@ -22303,7 +22319,7 @@ PrefabInstance:
     - target: {fileID: 6793405397572969132, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 6793405397572969132, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
     - target: {fileID: 6793405397572969134, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: serializationData.Prefab
       value: 
@@ -22312,6 +22328,14 @@ PrefabInstance:
       propertyPath: camera
       value: 
       objectReference: {fileID: 2059231694}
+    - target: {fileID: 6793405397572969135, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: ladderAreas.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6793405397572969135, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: ladderAreas.Array.data[0]
+      value: 
+      objectReference: {fileID: 767753531}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
 --- !u!1001 &2136668760
@@ -22424,22 +22448,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 171875391}
     m_Modifications:
-    - target: {fileID: 2981874499469733360, guid: f8d3c2bae24f1404aaaf9baa0e64ca54, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -2.99
-      objectReference: {fileID: 0}
-    - target: {fileID: 2981874499469733360, guid: f8d3c2bae24f1404aaaf9baa0e64ca54, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 10.495997
-      objectReference: {fileID: 0}
-    - target: {fileID: 2981874499469733360, guid: f8d3c2bae24f1404aaaf9baa0e64ca54, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0.96
-      objectReference: {fileID: 0}
-    - target: {fileID: 2981874499469733361, guid: f8d3c2bae24f1404aaaf9baa0e64ca54, type: 3}
-      propertyPath: m_Name
-      value: UpPos
-      objectReference: {fileID: 0}
     - target: {fileID: 2981874500963083522, guid: f8d3c2bae24f1404aaaf9baa0e64ca54, type: 3}
       propertyPath: m_RootOrder
       value: 16

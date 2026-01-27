@@ -83,7 +83,8 @@ public class UnitAttrCenter: SerializedMonoBehaviour
         foreach (BuffAttrType type in System.Enum.GetValues(typeof(BuffAttrType)))
         {
             if (type is BuffAttrType.HitRate or 
-                        BuffAttrType.MoveRangePercent)// 默认为100
+                        BuffAttrType.MoveRangePercent or 
+                        BuffAttrType.MeleeArmorPercent)// 默认为100
             {
                 buffAttrDic[type] = 100f;
             }
