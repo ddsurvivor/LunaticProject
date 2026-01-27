@@ -67,7 +67,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             if (actionButtonDic.ContainsKey(interactArea.actionType))
             {
                 actionButtonDic[interactArea.actionType].gameObject.SetActive(true);
-                actionButtonDic[interactArea.actionType].onClick.AddListener(interactArea.TriggerAction);
+                actionButtonDic[interactArea.actionType].onClick.AddListener(()=>interactArea.TriggerAction(pc));
             }
         }
         skillListPanel.SetActive(false);
@@ -97,6 +97,8 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 break;
             case ActionType.扫描:
                 break;
+            case ActionType.攀爬:
+                break;
             case ActionType.远程攻击:
                 pc.StartNormalAttack(true);
                 break;
@@ -106,7 +108,8 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             case ActionType.道具:
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(actionType), actionType, null);
+                Debug.LogWarning($"{actionType} 未实现");
+                break;
         }
         gameObject.SetActive(false);
     }

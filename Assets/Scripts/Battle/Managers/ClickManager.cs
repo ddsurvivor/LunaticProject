@@ -12,6 +12,8 @@ public class ClickManager : MonoBehaviour
     private Vector3 _dragStartPos; // 拖动起始位置
     
     private bool _isDragging = false;
+    
+    
 
     private void Update()
     {
@@ -54,6 +56,15 @@ public class ClickManager : MonoBehaviour
                 return;
             }
             StopDrag();
+        }
+        
+        // 点击右键取消
+        if (Input.GetMouseButtonDown(1))
+        {
+            _selectedPiece.transform.position = _dragStartPos;
+            _selectedPiece = null;
+            _isDragging = false;
+            _rangeUI.CloseRange();
         }
     }
 

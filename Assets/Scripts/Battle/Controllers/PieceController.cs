@@ -84,7 +84,8 @@ public class PieceController : MonoBehaviour
 
     private void Update()
     {
-        if (_isAttacking && isPlayerPiece)
+        if(!isPlayerPiece) return;
+        if (_isAttacking)
         {
             if (Input.GetMouseButtonDown(0))
             {

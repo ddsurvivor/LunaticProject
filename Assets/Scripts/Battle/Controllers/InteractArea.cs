@@ -7,5 +7,5 @@ using UnityEngine;
 {
     public ActionType actionType;
     
-    public virtual void TriggerAction() {}
+    public virtual void TriggerAction(PieceController piece = null) {}
 }

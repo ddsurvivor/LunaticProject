@@ -9,7 +9,7 @@ public class FogArea : InteractArea
     /// <summary>
     /// 关闭迷雾效果
     /// </summary>
-    public override void TriggerAction()
+    public override void TriggerAction(PieceController piece = null)
     {
         base.TriggerAction();
         fogEffect?.SetActive(false);

@@ -38,7 +38,7 @@ public class RangeUI : MonoBehaviour
     {
         circle.SetActive(true);
         transform.position =
-            new Vector3(position.x, transform.position.y, position.z); // 只改变x,z轴位置，y轴保持不变
+            new Vector3(position.x, position.y +0.1f, position.z); // 只改变x,z轴位置，y轴保持不变
         circle.transform.localScale = radius * circleRadius * Vector3.one;
         _curRange = radius;
     }
@@ -120,11 +120,12 @@ public class RangeUI : MonoBehaviour
         if (attackIcon.activeInHierarchy)
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+            Plane groundPlane = new Plane(Vector3.up, new Vector3(0, transform.position.y, 0));
             if (groundPlane.Raycast(ray, out float enter))
             {
                 Vector3 hitPoint = ray.GetPoint(enter);
                 Vector3 direction = hitPoint - transform.position;
+                direction.y = 0;// 忽略y轴，只在xz平面
                 float distance = direction.magnitude;
                 if (distance > _curRange)
                 {
@@ -143,6 +144,7 @@ public class RangeUI : MonoBehaviour
             {
                 Vector3 hitPoint = ray.GetPoint(enter);
                 Vector3 direction = hitPoint - transform.position;
+                direction.y = 0;// 忽略y轴，只在xz平面
                 float distance = direction.magnitude;
                 if (distance > _curRange)
                 {
@@ -161,6 +163,7 @@ public class RangeUI : MonoBehaviour
             {
                 Vector3 hitPoint = ray.GetPoint(enter);
                 Vector3 direction = hitPoint - transform.position;
+                direction.y = 0;// 忽略y轴，只在xz平面
                 float distance = direction.magnitude;
                 if (distance > _curRange)
                 {
