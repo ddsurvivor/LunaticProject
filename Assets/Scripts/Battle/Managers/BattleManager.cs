@@ -12,9 +12,13 @@ public class BattleManager : MonoBehaviour
     public PieceDataListSO pieceDataListSO;
 
     public List<LadderArea> ladderAreas = new();
+    
+    public int TunrNumber => _turnNumber;
+    private int _turnNumber = 0;
 
     public void Init()
     {
+        _turnNumber = 0;
         PlayerController.Init();
         AIController.Init();
         PlayerStart();
@@ -46,6 +50,8 @@ public class BattleManager : MonoBehaviour
         PlayerController.TurnStart();
         BattleScene.Ins.UM.endTurnButton.enabled = true;
         BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家回合");
+        _turnNumber++;
+        BattleScene.Ins.UM.turnNumberText.text = TunrNumber.ToString();
     }
 
     public void PieceAttack(PieceController attacker, PieceController defender
@@ -96,8 +102,7 @@ public class BattleManager : MonoBehaviour
         if (realDamage < 0) realDamage = 0;
         // TODO: 临时护盾功能
         defender.unitAttrCenter.TakeDamage(new AttackPack(realDamage, attackPack.damageType));
-
-
+        
         if (defender is EnemyController enemy)
         {
             enemy.AddDamageRecord(attacker, realDamage);

@@ -10,10 +10,14 @@ using UnityEngine;
 /// </summary>
 public class AIController : PlayerController
 {
+    [Header("敌人解锁顺序")]
     /// <summary>
-    /// 敌人解锁顺序
+    /// 战争迷雾管理
     /// </summary>
     public FogController fogController;
+
+    // 增援波次管理
+    public WaveController waveController;
 
     private float _timer;
     private float _actionInterval = 2.0f; // 每个动作之间的间隔时间
@@ -24,6 +28,7 @@ public class AIController : PlayerController
         {
             return;
         }
+
         if (fogController.enemyPiecesDict.ContainsKey(fog))
         {
             foreach (var piece in fogController.enemyPiecesDict[fog])
@@ -41,20 +46,25 @@ public class AIController : PlayerController
 
         if (fogController != null)
         {
-            
-        // 激活敌人棋子
-        foreach (var pair in fogController.enemyPiecesDict)
-        {
-            if (!pair.Key.gameObject.activeInHierarchy)
+            // 激活迷雾敌人棋子
+            foreach (var pair in fogController.enemyPiecesDict)
             {
-                foreach (var piece in pair.Value)
+                if (!pair.Key.gameObject.activeInHierarchy)
                 {
-                    piece.isActived = true;
-                    piece.gameObject.SetActive(true);
-                    piece.StartNormalAttack(true);
+                    foreach (var piece in pair.Value)
+                    {
+                        piece.isActived = true;
+                        piece.gameObject.SetActive(true);
+                        piece.StartNormalAttack(true);
+                    }
                 }
             }
         }
+
+        if (waveController != null)
+        {
+            // 刷新增援波次敌人棋子
+            waveController.RefreshEnemies(BattleScene.Ins.BM.TunrNumber);
         }
 
         foreach (EnemyController piece in pieces)
@@ -87,6 +97,7 @@ public class AIController : PlayerController
         }
     }
 
+    /*
     private void EnemyAction_AttackRandom()
     {
         // 简单AI逻辑：依次让每个敌人棋子行动，然后结束回合
@@ -178,9 +189,9 @@ public class AIController : PlayerController
             BattleScene.Ins.BM.PlayerController.pieces.Where(t => !t.isDead).ToList();
         int randomIndex = UnityEngine.Random.Range(0, pieces.Count);
         return BattleScene.Ins.BM.PlayerController.pieces[randomIndex];
-    }
+    }*/
 
-    private void EnemyAttack(PieceController aiPiece, PieceController target)
+    private void EnemyAttack(EnemyController aiPiece, PieceController target)
     {
         if (target == null) return;
 
@@ -208,6 +219,22 @@ public class AIController : PlayerController
             }
             else
             {
+                // 1. 获取当前脚下的ground物体
+                RaycastHit hit;
+                GameObject groundObj = null;
+                if (Physics.Raycast(aiPiece.transform.position + Vector3.up, Vector3.down, out hit
+                        , 5f))
+                {
+                    if (hit.collider.CompareTag("Ground"))
+                    {
+                        groundObj = hit.collider.gameObject;
+                    }
+                }
+
+                if (groundObj == null) return;
+                // 2. 获取ground的边界
+                var groundBounds = groundObj.GetComponent<Collider>().bounds;
+
                 /// 计算目标方向
                 Vector3 direction = (target.transform.position - aiPiece.transform.position)
                     .normalized;
@@ -230,9 +257,18 @@ public class AIController : PlayerController
                     moveTargetPos = aiPiece.transform.position + direction * moveRange;
                 }
 
+                // 4. 保证目标点在ground边界内
+                moveTargetPos.x =
+                    Mathf.Clamp(moveTargetPos.x, groundBounds.min.x, groundBounds.max.x);
+                //moveTargetPos.y = Mathf.Clamp(moveTargetPos.y, groundBounds.min.y, groundBounds.max.y);
+                moveTargetPos.z =
+                    Mathf.Clamp(moveTargetPos.z, groundBounds.min.z, groundBounds.max.z);
+
+
                 aiPiece.transform.DOMove(moveTargetPos, 1.0f).OnComplete(() =>
                 {
                     // 移动后再次判断是否在远程攻击范围内
+                    // TODO 行为判定，使用远程攻击或者释放技能
                     float newDistance =
                         Vector3.Distance(target.transform.position, aiPiece.transform.position);
                     if (newDistance <= rangedRange)
@@ -280,6 +316,161 @@ public class AIController : PlayerController
                 }
             });
             aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
+        }
+        else if (enemyAIType == EnemyAIType.SkillUser) // 技能型AI
+        {
+            // 优先计算是否使用技能
+            int skillRoll = UnityEngine.Random.Range(1, 101);
+            if (aiPiece.availableSkills.Count > 0 && skillRoll <= GameConst.enemySkillRate)
+            {
+                // 随机选择一个技能
+                int randomIndex = UnityEngine.Random.Range(0, aiPiece.availableSkills.Count);
+                SkillPack skillPack = aiPiece.availableSkills[randomIndex];
+
+                float skillRange = skillPack.rangeValue;
+
+                if (distanceToTarget <= skillRange)
+                {
+                    // 释放技能
+                    aiPiece.StartSkillAttack(skillPack);
+                    aiPiece.CastSkillOnTarget(target, skillPack);
+                    return;
+                }
+                else
+                {
+                    // 1. 获取当前脚下的ground物体
+                    RaycastHit hit;
+                    GameObject groundObj = null;
+                    if (Physics.Raycast(aiPiece.transform.position + Vector3.up, Vector3.down
+                            , out hit
+                            , 5f))
+                    {
+                        if (hit.collider.CompareTag("Ground"))
+                        {
+                            groundObj = hit.collider.gameObject;
+                        }
+                    }
+
+                    if (groundObj == null) return;
+                    // 2. 获取ground的边界
+                    var groundBounds = groundObj.GetComponent<Collider>().bounds;
+                    // 移动到能够释放技能的位置
+                    Vector3 direction = (target.transform.position - aiPiece.transform.position)
+                        .normalized;
+                    Vector3 idealSkillPos =
+                        target.transform.position - direction * (skillRange - 0.5f);
+                    float distanceToIdeal =
+                        Vector3.Distance(aiPiece.transform.position, idealSkillPos);
+
+                    Vector3 moveTargetPos;
+                    if (distanceToIdeal <= moveRange)
+                    {
+                        moveTargetPos = idealSkillPos;
+                    }
+                    else
+                    {
+                        moveTargetPos = aiPiece.transform.position + direction * moveRange;
+                    }
+
+                    // 4. 保证目标点在ground边界内
+                    moveTargetPos.x =
+                        Mathf.Clamp(moveTargetPos.x, groundBounds.min.x, groundBounds.max.x);
+                    //moveTargetPos.y = Mathf.Clamp(moveTargetPos.y, groundBounds.min.y, groundBounds.max.y);
+                    moveTargetPos.z =
+                        Mathf.Clamp(moveTargetPos.z, groundBounds.min.z, groundBounds.max.z);
+
+                    aiPiece.transform.DOMove(moveTargetPos, 1.0f).OnComplete(() =>
+                    {
+                        float newDistance =
+                            Vector3.Distance(target.transform.position, aiPiece.transform.position);
+                        if (newDistance <= skillRange)
+                        {
+                            aiPiece.StartSkillAttack(skillPack);
+                            aiPiece.CastSkillOnTarget(target, skillPack);
+                        }
+                    });
+                    aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
+                    return;
+                }
+            }
+            else
+            {
+                if (distanceToTarget <= meleeRange)
+                {
+                    // 近战攻击
+                    aiPiece.StartNormalAttack();
+                    aiPiece.Attack(target);
+                }
+                else if (distanceToTarget <= rangedRange)
+                {
+                    // 远程攻击
+                    aiPiece.StartNormalAttack(true);
+                    aiPiece.Attack(target);
+                }
+                else
+                {
+                    // 1. 获取当前脚下的ground物体
+                    RaycastHit hit;
+                    GameObject groundObj = null;
+                    if (Physics.Raycast(aiPiece.transform.position + Vector3.up, Vector3.down
+                            , out hit
+                            , 5f))
+                    {
+                        if (hit.collider.CompareTag("Ground"))
+                        {
+                            groundObj = hit.collider.gameObject;
+                        }
+                    }
+
+                    if (groundObj == null) return;
+                    // 2. 获取ground的边界
+                    var groundBounds = groundObj.GetComponent<Collider>().bounds;
+
+                    /// 计算目标方向
+                    Vector3 direction = (target.transform.position - aiPiece.transform.position)
+                        .normalized;
+                    // 计算理想攻击位置（距离目标 rangedRange - 0.5f）
+                    Vector3 idealAttackPos =
+                        target.transform.position - direction * (rangedRange - 0.5f);
+                    // 计算自身到理想攻击位置的距离
+                    float distanceToIdeal =
+                        Vector3.Distance(aiPiece.transform.position, idealAttackPos);
+
+                    Vector3 moveTargetPos;
+                    if (distanceToIdeal <= moveRange)
+                    {
+                        // 可以直接到达理想攻击位置
+                        moveTargetPos = idealAttackPos;
+                    }
+                    else
+                    {
+                        // 只能移动到最大移动距离
+                        moveTargetPos = aiPiece.transform.position + direction * moveRange;
+                    }
+
+                    // 4. 保证目标点在ground边界内
+                    moveTargetPos.x =
+                        Mathf.Clamp(moveTargetPos.x, groundBounds.min.x, groundBounds.max.x);
+                    //moveTargetPos.y = Mathf.Clamp(moveTargetPos.y, groundBounds.min.y, groundBounds.max.y);
+                    moveTargetPos.z =
+                        Mathf.Clamp(moveTargetPos.z, groundBounds.min.z, groundBounds.max.z);
+
+
+                    aiPiece.transform.DOMove(moveTargetPos, 1.0f).OnComplete(() =>
+                    {
+                        // 移动后再次判断是否在远程攻击范围内
+                        // TODO 行为判定，使用远程攻击或者释放技能
+                        float newDistance =
+                            Vector3.Distance(target.transform.position, aiPiece.transform.position);
+                        if (newDistance <= rangedRange)
+                        {
+                            aiPiece.StartNormalAttack(true);
+                            aiPiece.Attack(target);
+                        }
+                    });
+                    aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
+                }
+            }
         }
     }
 

@@ -585,6 +585,15 @@ public class 剧本System: MonoBehaviour
                             大地图System.instance.daytimeSystem.CostDaytime(dayTimes);
                         }
                     }
+                    if(key.Contains(Center.Command_Cgactive)) //开关CG
+                    {
+                        var prams = 指令切割(key);
+                        if (prams.Length >= 1)
+                        {
+                            int.TryParse(prams[0], out int cgActive);
+                            BG.gameObject.SetActive(cgActive == 1);
+                        }
+                    }
                 }
       }
       public static string[] 指令切割(string command)

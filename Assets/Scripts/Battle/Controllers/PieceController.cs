@@ -22,8 +22,9 @@ public class PieceController : MonoBehaviour
 
     [SerializeField] public PieceDisplay pieceDisplay;
 
-    [Header("配置")] 
-    [SerializeField][ReadOnly]private PieceData _pieceData;
+    [Header("配置")] [SerializeField] [ReadOnly]
+    private PieceData _pieceData;
+
     public int pieceID; // 棋子ID
 
     [HideInInspector] public PlayerController player;
@@ -43,9 +44,9 @@ public class PieceController : MonoBehaviour
     // 当前攻击数据
     private bool _isAttacking = false; // 是否正在攻击
     private bool _isUsingSkill = false; // 是否正在使用技能
-    [SerializeField] [ReadOnly] private AttackPack _attackPack;// 当前正在使用的攻击
+    [SerializeField] [ReadOnly] private AttackPack _attackPack; // 当前正在使用的攻击
 
-    [SerializeField] [ReadOnly] private SkillPack _skillPack;// 当前正在使用的技能
+    [SerializeField] [ReadOnly] private SkillPack _skillPack; // 当前正在使用的技能
     //[SerializeField] [ReadOnly] private int _damage;
     //[SerializeField] [ReadOnly] private DamageType _damageType;
 
@@ -68,16 +69,23 @@ public class PieceController : MonoBehaviour
     {
         this.player = player;
         unitAttrCenter.Init();
-        availableActions.Add(ActionType.移动);
-        availableActions.Add(ActionType.近战攻击);
-        availableActions.Add(ActionType.远程攻击);
-        availableActions.Add(ActionType.待机); // 待机
-        availableActions.Add(ActionType.重新装填); // 装填
-        availableActions.Add(ActionType.技能); // 技能
+        if (isPlayerPiece)
+        {
+            availableActions.Add(ActionType.移动);
+            availableActions.Add(ActionType.近战攻击);
+            availableActions.Add(ActionType.远程攻击);
+            availableActions.Add(ActionType.待机); // 待机
+            availableActions.Add(ActionType.重新装填); // 装填
+            availableActions.Add(ActionType.技能); // 技能
+        }
         //Debug.Log(_pieceDisplay.name);
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
-        _pieceData = pieceData;
-        availableSkills = pieceData?.skillPacks;
+        if (pieceData != null)
+        {
+            _pieceData = pieceData;
+            availableSkills = pieceData?.skillPacks;
+        }
+
         if (_actionListPanel != null) _actionListPanel.Init(this);
         isIdle = true;
         OnInit?.Invoke();
@@ -85,7 +93,7 @@ public class PieceController : MonoBehaviour
 
     private void Update()
     {
-        if(!isPlayerPiece) return;
+        if (!isPlayerPiece) return;
         if (_isAttacking)
         {
             if (Input.GetMouseButtonDown(0))
@@ -120,9 +128,10 @@ public class PieceController : MonoBehaviour
 
     public void TurnStart()
     {
+        OnTurnStart?.Invoke();
+        if(isDead) return;
         unitAttrCenter.FullMovePoint();
         isIdle = false;
-        OnTurnStart?.Invoke();
     }
 
     public void TurnEnd()
@@ -154,7 +163,8 @@ public class PieceController : MonoBehaviour
             _curCaverSlot.LeaveSlot(transform);
             _curCaverSlot = null;
         }
-        if (_curLadderArea!=null)
+
+        if (_curLadderArea != null)
         {
             _curLadderArea.LeaveSlot(this);
             _curLadderArea = null;
@@ -204,7 +214,7 @@ public class PieceController : MonoBehaviour
                 interactAreas.Add(interactArea);
                 result = true;
             }
-            
+
             LadderArea ladderSlot = collider.transform.GetComponent<LadderArea>();
             if (ladderSlot != null)
             {
@@ -329,7 +339,7 @@ public class PieceController : MonoBehaviour
             // 受伤充能
             BattleScene.Ins.BM.PlayerController.ChargeBurst(GameConst.hurtBurstCharge);
         }
-        
+
         Debug.Log($"{this.name} 受伤");
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
         transform.DOShakePosition(0.5f, 0.8f);
@@ -381,19 +391,17 @@ public class PieceController : MonoBehaviour
         {
             ObjectPool.Ins.GenerateObject(
                 _skillPack.skillVFXType,
-                atkPos.position+Vector3.up*3f,
+                atkPos.position + Vector3.up * 3f,
                 atkPos.localRotation);
         }
 
         // 播放技能动画
-        pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
+        pieceDisplay.ChangeDisplayState(PieceDisplayState.Skill, false, 1f);
         PlayAudio(_skillPack);
 
         // 延迟0.3f
-        DOVirtual.DelayedCall(0.3f, () =>
-        {
-            BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack);
-        }, false);
+        DOVirtual.DelayedCall(0.3f
+            , () => { BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack); }, false);
         // 结束攻击状态
         _isUsingSkill = false;
         rangeUI.CloseRange();
@@ -402,16 +410,26 @@ public class PieceController : MonoBehaviour
 
 
     // 更新朝向
-    private void CheckFace()
+    public void CheckFace(Vector3 direction)
     {
+        // 如果targetPos在当前棋子左侧，则朝向左侧，否则朝向右侧，更新piece display
+        // 由于棋子式斜45站立的，所以应该同时计算x轴和z轴
+        if (direction.x < 0 && Mathf.Abs(direction.x) > Mathf.Abs(direction.z))
+        {
+            pieceDisplay.FaceRight(false);
+        }
+        else if (direction.x > 0 && Mathf.Abs(direction.x) < Mathf.Abs(direction.z))
+        {
+            pieceDisplay.FaceRight(true);
+        }
         
     }
-    
+
     // ======= 音效 ======= //
 
     public void PlayAudio(ActionType actionType)
     {
-        if (_pieceData== null)
+        if (_pieceData == null)
         {
             return;
         }

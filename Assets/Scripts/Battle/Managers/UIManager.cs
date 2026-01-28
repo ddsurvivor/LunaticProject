@@ -11,6 +11,7 @@ public class UIManager : MonoBehaviour
         public TeamPanel teamPanel;
         public PieceInfoPanel pieceInfoPanel;
         public Button restartButton;// 重启战斗
+        public Text turnNumberText;
 
         public void Init()
         {

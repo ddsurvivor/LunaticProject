@@ -143,6 +143,8 @@ public class ClickManager : MonoBehaviour
 
         _selectedPiece.transform.position = (new Vector3(point.x
             , _selectedPiece.transform.position.y, point.z));
+        
+        _selectedPiece.CheckFace(_selectedPiece.transform.position - _dragStartPos);
     }
 
     private void StopDrag()

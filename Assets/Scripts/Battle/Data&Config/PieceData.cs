@@ -10,6 +10,8 @@ using System;
 public class PieceData
 {
     public int pieceId;
+    public SkillPack meleeAtk;
+    public SkillPack rangedAtk;
     [OdinSerialize]
     public Dictionary<ActionType, AudioClip> actionSounds = new();
     public List<SkillPack> skillPacks = new();

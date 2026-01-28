@@ -98,6 +98,8 @@ public enum EnemyAIType
     // 远离目标
     [LabelText("射击型")]
     Shoot = 2,
+    [LabelText("技能型")]
+    SkillUser = 3,
 }
 
 #region 技能枚举
@@ -110,6 +112,7 @@ public enum SkillTarget
     EnemyAll = 4,// 全体敌人
     Area = 5,// 区域
     All = 6,// 全体单位
+    FarthestEnemy = 7,// 最远敌人
 }
 
 public enum RangeType

@@ -18,7 +18,8 @@ public class PieceDisplay : MonoBehaviour
     public Sprite dodgeSprite;
     public Sprite hitSprite;
     public List<Sprite> deathSprite;
-    
+    public List<Sprite> skillSprites;
+ 
     // 每种图片还有背面图
     public Sprite idleBackSprite;
     public Sprite moveBackSprite;
@@ -61,6 +62,9 @@ public class PieceDisplay : MonoBehaviour
             case PieceDisplayState.Hit:
                 pieceSpriteRenderer.sprite = back ? hitBackSprite : hitSprite;
                 break;
+            case PieceDisplayState.Skill:
+                StartCoroutine(PlaySpriteAnimation(skillSprites, 0.2f));
+                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(state), state, null);
         }
@@ -92,6 +96,13 @@ public class PieceDisplay : MonoBehaviour
         }
         finishAction?.Invoke();
     }
+    
+    public void FaceRight(bool faceRight)
+    {
+        Vector3 scale = pieceSpriteRenderer.transform.localScale;
+        scale.x = Mathf.Abs(scale.x) * (faceRight ? 1 : -1);
+        pieceSpriteRenderer.transform.localScale = scale;
+    }
 }
 
 public enum PieceDisplayState
@@ -102,5 +113,6 @@ public enum PieceDisplayState
     Shoot,
     Dodge,
     Hit,
-    Death
+    Death,
+    Skill
 }
