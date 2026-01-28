@@ -129,6 +129,7 @@ public enum RangeType
 public enum SkillEffect
 {
     HealArea = 1,// 区域治疗
+    Blink = 2,// 瞬移
 }
 
 #endregion

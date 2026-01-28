@@ -105,6 +105,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 pc.StartNormalAttack(true);
                 break;
             case ActionType.重新装填:
+                pc.unitAttrCenter.CostMP();
                 pc.ReloadAmmo();
                 break;
             case ActionType.道具:

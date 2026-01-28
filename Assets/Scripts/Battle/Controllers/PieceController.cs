@@ -21,6 +21,7 @@ public class PieceController : MonoBehaviour
     [SerializeField] private PieceActionListPanel _actionListPanel; // 棋子动作列表面板
 
     [SerializeField] public PieceDisplay pieceDisplay;
+    public GameObject uiCanvas;// UI画布
 
     [Header("配置")] [SerializeField] [ReadOnly]
     private PieceData _pieceData;
@@ -344,11 +345,13 @@ public class PieceController : MonoBehaviour
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
         transform.DOShakePosition(0.5f, 0.8f);
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
+        if(uiCanvas!= null) uiCanvas.SetActive(true);
     }
 
     public virtual void Dead()
     {
         Debug.Log($"{this.name} 死亡");
+        if(uiCanvas!= null) uiCanvas.SetActive(false);
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Death, false, -1, () =>
         {
             if (!isPlayerPiece)
@@ -367,7 +370,7 @@ public class PieceController : MonoBehaviour
     /// </summary>
     public void ReloadAmmo()
     {
-        if (!unitAttrCenter.CostMP()) return;
+        Debug.Log("重新装填弹药");
         unitAttrCenter.FullAmmo();
         PlayAudio(ActionType.重新装填);
     }
@@ -386,6 +389,11 @@ public class PieceController : MonoBehaviour
     {
         // 根据范围获取所有棋子
         List<PieceController> targets = rangeUI.GetCurTargets;
+        if(targets.Count <1)
+        {
+            Debug.Log("未选中任何目标，无法发动技能");
+            return;
+        }
         Transform atkPos = rangeUI.GetSkillTransform();
         if (atkPos != null && _skillPack.skillVFXType != 0)
         {
@@ -414,15 +422,14 @@ public class PieceController : MonoBehaviour
     {
         // 如果targetPos在当前棋子左侧，则朝向左侧，否则朝向右侧，更新piece display
         // 由于棋子式斜45站立的，所以应该同时计算x轴和z轴
-        if (direction.x < 0 && Mathf.Abs(direction.x) > Mathf.Abs(direction.z))
+        if (direction.x < 0 )
         {
             pieceDisplay.FaceRight(false);
         }
-        else if (direction.x > 0 && Mathf.Abs(direction.x) < Mathf.Abs(direction.z))
+        else if (direction.x > 0)
         {
             pieceDisplay.FaceRight(true);
         }
-        
     }
 
     // ======= 音效 ======= //

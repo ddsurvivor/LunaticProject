@@ -70,8 +70,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 2062317405
+  m_SortingLayer: 3
   m_SortingOrder: 100
   m_Sprite: {fileID: 21300000, guid: fee01cbc57e72f144badc598208ec976, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -531,6 +531,7 @@ MonoBehaviour:
   _curMovePoint: 0
   _maxMovePoint: 2
   _moveRange: 5
+  _tauntValue: 0
   _ammoCount: 0
   hpBarFill: {fileID: 7612674177862844641}
 --- !u!114 &190077875118252175
@@ -559,6 +560,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 26f8ad661ba653f478d0004c53670ef0, type: 3}
   - {fileID: 21300000, guid: 796c672c6dcd3174bbca7a239be0e11e, type: 3}
   - {fileID: 21300000, guid: 917cdb31f9a69d54e82df1d5376aead5, type: 3}
+  skillSprites: []
   idleBackSprite: {fileID: 0}
   moveBackSprite: {fileID: 21300000, guid: d26e0a20a0efb3d4fba9d9f948f988d7, type: 3}
   attackBackSprite: {fileID: 0}
@@ -581,7 +583,44 @@ MonoBehaviour:
   rangeUI: {fileID: 0}
   _actionListPanel: {fileID: 0}
   pieceDisplay: {fileID: 190077875118252175}
-  pieceID: 0
+  uiCanvas: {fileID: 3583820045096354495}
+  _pieceData:
+    pieceId: 0
+    pieceName: 
+    meleeAtk:
+      skillName: 
+      description: 
+      mpCost: 0
+      cooldown: 0
+      target: 0
+      rangeType: 0
+      rangeValue: 0
+      rangeAgle: 0
+      explodeRadius: 0
+      skillVFXType: 0
+      attackPacks: []
+      atkTimes: 1
+      buffPacks: []
+      skillEffects: 
+      skillSound: {fileID: 0}
+    rangedAtk:
+      skillName: 
+      description: 
+      mpCost: 0
+      cooldown: 0
+      target: 0
+      rangeType: 0
+      rangeValue: 0
+      rangeAgle: 0
+      explodeRadius: 0
+      skillVFXType: 0
+      attackPacks: []
+      atkTimes: 1
+      buffPacks: []
+      skillEffects: 
+      skillSound: {fileID: 0}
+    skillPacks: []
+  pieceID: 1001
   player: {fileID: 0}
   isPlayerPiece: 0
   _attackPack:
@@ -597,9 +636,12 @@ MonoBehaviour:
     rangeValue: 0
     rangeAgle: 0
     explodeRadius: 0
+    skillVFXType: 0
     attackPacks: []
+    atkTimes: 1
     buffPacks: []
     skillEffects: 
+    skillSound: {fileID: 0}
   interactAreas: []
   availableActions: 
   availableSkills: []
@@ -615,6 +657,7 @@ MonoBehaviour:
       m_Calls: []
   enemyAIType: 1
   isActived: 0
+  deadNotDelete: 0
 --- !u!1 &2999851906171813230
 GameObject:
   m_ObjectHideFlags: 0
@@ -750,7 +793,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 0
-  m_SortingLayerID: 0
+  m_SortingLayerID: -478206025
   m_SortingOrder: 0
   m_TargetDisplay: 0
 --- !u!114 &1831880001355693353
@@ -775,7 +818,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!114 &7125575465904774772
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -792,7 +835,7 @@ MonoBehaviour:
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 3127
 --- !u!1 &7914783394511714226
 GameObject:
   m_ObjectHideFlags: 0

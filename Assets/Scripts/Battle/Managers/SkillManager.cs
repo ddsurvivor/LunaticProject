@@ -27,7 +27,7 @@ public class SkillManager : MonoBehaviour
         if (skill.rangeType == RangeType.Circle) // 单体敌人锁定
         {
             // 检测球体范围内的所有敌人
-            hitColliders = Physics.OverlapSphere(target.transform.position, 3f);
+            hitColliders = Physics.OverlapSphere(target.transform.position, 1f);
         }
         else if (skill.rangeType == RangeType.Grenade) // 爆炸范围锁定
         {
@@ -61,15 +61,16 @@ public class SkillManager : MonoBehaviour
             }
         }
 
+        List<PieceController> newTargets = new();
         foreach (var hitCollider in hitColliders)
         {
             PieceController pc = hitCollider.GetComponent<PieceController>();
             if (pc != null)
             {
-                List<PieceController> newTargets = new();
-                CheckTarget(newTargets);
+                newTargets.Add(pc);
             }
         }
+        CheckTarget(newTargets);
     }
 
     /// <summary>
