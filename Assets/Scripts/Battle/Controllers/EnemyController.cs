@@ -52,7 +52,8 @@ public class EnemyController : PieceController
        Debug.Log($"{this.name} 对 {targetPc.name} 施放技能 {skill.skillName}");
        
        // 根据范围获取所有棋子
-       List<PieceController> targets = rangeUI.GetCurTargets;
+       List<PieceController> targets  = BattleScene.Ins.BM.skillManager
+           .GetTargets(this, targetPc.transform, skill);
        Transform atkPos = rangeUI.GetSkillTransform();
        if (atkPos != null && skill.skillVFXType != 0)
        {
