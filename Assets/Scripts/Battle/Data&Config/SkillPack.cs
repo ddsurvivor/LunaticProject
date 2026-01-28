@@ -16,6 +16,7 @@ public class SkillPack
     [ShowIf("@this.rangeType == RangeType.Grenade")]public float explodeRadius;// 爆炸半径（仅爆炸范围有效）
     public ItemType skillVFXType;// 技能特效类型
     public List<AttackPack> attackPacks = new();// 伤害列表
+    public int atkTimes = 1; // 攻击次数
     public List<BuffPack> buffPacks = new();    // 附加效果列表
     public List<SkillEffect> skillEffects = new(); // 技能特殊效果列表
     public AudioClip skillSound;// 施放音效

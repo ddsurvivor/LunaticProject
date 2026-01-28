@@ -10,6 +10,7 @@ using System;
 public class PieceData
 {
     public int pieceId;
+    public string pieceName;
     public SkillPack meleeAtk;
     public SkillPack rangedAtk;
     [OdinSerialize]
