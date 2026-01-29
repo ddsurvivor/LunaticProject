@@ -393,16 +393,21 @@ public class PieceController : MonoBehaviour
                 atkPos.localRotation);
         }
 
+        Debug.Log($"{this.name}发动技能攻击{_skillPack.skillName}，targets数量：{targets.Count}");
         // 播放技能动画
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Skill, false, 1f);
         PlayAudio(_skillPack);
-
+        
         // 延迟0.3f
         DOVirtual.DelayedCall(0.3f
-            , () => { BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack); }, false);
-        // 结束攻击状态
-        _isUsingSkill = false;
-        rangeUI.CloseRange();
+            , () =>
+            {
+                BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack);
+                // 结束攻击状态
+                _isUsingSkill = false;
+                rangeUI.CloseRange();
+            }, false);
+        
         // 技能聚能充能
     }
 
