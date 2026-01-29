@@ -594,6 +594,16 @@ public class 剧本System: MonoBehaviour
                             BG.gameObject.SetActive(cgActive == 1);
                         }
                     }
+                    if (key.Contains(Center.Command_Smallmap))// 进入二级地图
+                    {
+                        var prams = 指令切割(key);
+                        if (prams.Length >= 2)
+                        {
+                            int.TryParse(prams[0], out int mapID);
+                            int.TryParse(prams[1], out int active);
+                            大地图System.instance.SmallMapActive(mapID, active==1);
+                        }
+                    }
                 }
       }
       public static string[] 指令切割(string command)

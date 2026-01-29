@@ -5738,7 +5738,15 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: 9e7d989445e7e764cb0aabc2314c0c2f, type: 3}
     - target: {fileID: 439568009330001271, guid: 8a24279893242d54e97c1af6c2a32974, type: 3}
+      propertyPath: pieceID
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 439568009330001271, guid: 8a24279893242d54e97c1af6c2a32974, type: 3}
       propertyPath: isActived
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 439568009330001271, guid: 8a24279893242d54e97c1af6c2a32974, type: 3}
+      propertyPath: enemyAIType
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 439568009330001271, guid: 8a24279893242d54e97c1af6c2a32974, type: 3}
@@ -14728,7 +14736,9 @@ MonoBehaviour:
   PlayerController: {fileID: 1713777229}
   camera: {fileID: 2059231694}
   buffManager: {fileID: 1713777230}
+  skillManager: {fileID: 0}
   pieceDataListSO: {fileID: 0}
+  ladderAreas: []
 --- !u!114 &1713777225
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14797,6 +14807,7 @@ MonoBehaviour:
   burstTarget: {fileID: 0}
   burstChargeBarFill: {fileID: 0}
   fogController: {fileID: 0}
+  waveController: {fileID: 0}
 --- !u!114 &1713777228
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14816,6 +14827,7 @@ MonoBehaviour:
   teamPanel: {fileID: 208797652}
   pieceInfoPanel: {fileID: 0}
   restartButton: {fileID: 0}
+  turnNumberText: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0

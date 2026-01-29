@@ -116,7 +116,7 @@ GameObject:
   - component: {fileID: 3583487980011262596}
   - component: {fileID: 3819608013901936508}
   m_Layer: 11
-  m_Name: Enemy02
+  m_Name: Enemy04
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -399,22 +399,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pieceSpriteRenderer: {fileID: 1142199792870587360}
-  idleSprite: {fileID: 21300000, guid: ab955d86836f0bd4c999facdf3fa36bf, type: 3}
-  moveSprite: {fileID: 21300000, guid: 443f1e27738fa83488db2a316863702b, type: 3}
+  idleSprite: {fileID: 21300000, guid: c8b0d8bc39ba69e4e91616b5535aa03d, type: 3}
+  moveSprite: {fileID: 21300000, guid: 08f41eab5f1b6604ab7c65136026427f, type: 3}
   attackSprite:
-  - {fileID: 21300000, guid: a2622f79f11e3964e8972ee632957123, type: 3}
+  - {fileID: 21300000, guid: eeca494b770370b41891f28e3a77f84a, type: 3}
   - {fileID: 21300000, guid: 078a0dd4f0207ba49bf4082fc11a130f, type: 3}
   - {fileID: 21300000, guid: b0c89725bb2057444aa860be66d0c6d4, type: 3}
   shootSprite:
-  - {fileID: 21300000, guid: a2622f79f11e3964e8972ee632957123, type: 3}
-  - {fileID: 21300000, guid: 078a0dd4f0207ba49bf4082fc11a130f, type: 3}
-  - {fileID: 21300000, guid: b0c89725bb2057444aa860be66d0c6d4, type: 3}
-  dodgeSprite: {fileID: 21300000, guid: 576ba2ce1833e5e4d9a39570f23a9233, type: 3}
-  hitSprite: {fileID: 21300000, guid: 1480b46133661754294e359ab4631f5d, type: 3}
+  - {fileID: 21300000, guid: 7204b1aad4cbdd148b3e7033181d7871, type: 3}
+  - {fileID: 21300000, guid: 0e5d61b09927ede49bfe985460688d0f, type: 3}
+  - {fileID: 21300000, guid: 200315e98b0ef464ea1bbd6cab38770b, type: 3}
+  - {fileID: 21300000, guid: 323a7e52d855a5745bfc39a69ec94f9e, type: 3}
+  dodgeSprite: {fileID: 21300000, guid: 14437558ce8b3f44bb99aa48f4811d85, type: 3}
+  hitSprite: {fileID: 21300000, guid: 77c2a77d07f91f1468e4a6e429e84bf1, type: 3}
   deathSprite:
-  - {fileID: 21300000, guid: 6813dab69a3a87e4493b3eee9b9ed83d, type: 3}
-  - {fileID: 21300000, guid: f8be390886e5caf4aa0075c1a06686d8, type: 3}
-  - {fileID: 21300000, guid: c502ac38fb4bb594798a2c8231dd8121, type: 3}
+  - {fileID: 21300000, guid: ae1ba9ab337d56f49b7ba3b6f83ccca6, type: 3}
+  - {fileID: 21300000, guid: 237388ec073064a41adfb448d25611b3, type: 3}
+  - {fileID: 21300000, guid: 88709199f968b2b48bde70d2dff0c43a, type: 3}
   skillSprites: []
   idleBackSprite: {fileID: 0}
   moveBackSprite: {fileID: 21300000, guid: d26e0a20a0efb3d4fba9d9f948f988d7, type: 3}
@@ -475,7 +476,7 @@ MonoBehaviour:
       skillEffects: 
       skillSound: {fileID: 0}
     skillPacks: []
-  pieceID: 1002
+  pieceID: 1004
   player: {fileID: 0}
   isPlayerPiece: 0
   _attackPack:
@@ -510,7 +511,7 @@ MonoBehaviour:
   OnTurnEnd:
     m_PersistentCalls:
       m_Calls: []
-  enemyAIType: 2
+  enemyAIType: 1
   isActived: 1
   deadNotDelete: 0
 --- !u!1 &1457925914143748292
@@ -524,7 +525,7 @@ GameObject:
   - component: {fileID: 1457925914143748291}
   - component: {fileID: 1457925914143748290}
   m_Layer: 11
-  m_Name: CardGameUI_13
+  m_Name: posUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -851,7 +852,7 @@ GameObject:
   - component: {fileID: 3616885678829869274}
   - component: {fileID: 1142199792870587360}
   m_Layer: 0
-  m_Name: E01Sprite
+  m_Name: Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -865,7 +866,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4292008241871193393}
   m_LocalRotation: {x: 0.35355338, y: -0.35355338, z: 0.1464466, w: 0.8535535}
-  m_LocalPosition: {x: -1.1, y: 4.14, z: 1.6}
+  m_LocalPosition: {x: 0.61, y: 1.72, z: -0.11}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -910,10 +911,10 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 2062317405
+  m_SortingLayer: 3
   m_SortingOrder: 100
-  m_Sprite: {fileID: 21300000, guid: ab955d86836f0bd4c999facdf3fa36bf, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c8b0d8bc39ba69e4e91616b5535aa03d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

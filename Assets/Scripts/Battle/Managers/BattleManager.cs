@@ -158,6 +158,8 @@ public class BattleManager : MonoBehaviour
                         BuffAttrType.DamageIncrease]) / 100f * // 伤害增加
                     (100 - target.unitAttrCenter.buffAttrDic[
                         BuffAttrType.DamageReduction]) / 100f);// 伤害减免
+                // 聚能伤害
+                realDamage = attacker.player.AddBurstDamage(target, realDamage);
                 if (realDamage < 0) realDamage = 0;
                 // TODO: 临时护盾功能
                 target.unitAttrCenter.TakeDamage(new AttackPack(realDamage, attackPack.damageType));
@@ -222,6 +224,8 @@ public class BattleManager : MonoBehaviour
             ladder.StartMove(isPlayerTurn);
         }
     }
+
+    
 
 
     // ===== Test ======//

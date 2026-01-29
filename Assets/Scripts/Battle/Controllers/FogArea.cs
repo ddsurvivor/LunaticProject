@@ -15,5 +15,6 @@ public class FogArea : InteractArea
         fogEffect?.SetActive(false);
         gameObject.SetActive(false);
         BattleScene.Ins.BM.AIController.OnScanFog(fogEffect);
+        piece?.interactAreas.Remove(this);
     }
 }

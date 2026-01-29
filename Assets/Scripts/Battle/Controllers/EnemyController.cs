@@ -54,7 +54,7 @@ public class EnemyController : PieceController
        // 根据范围获取所有棋子
        List<PieceController> targets  = BattleScene.Ins.BM.skillManager
            .GetTargets(this, targetPc.transform, skill);
-       Transform atkPos = rangeUI.GetSkillTransform();
+       Transform atkPos = targetPc.transform;
        if (atkPos != null && skill.skillVFXType != 0)
        {
            ObjectPool.Ins.GenerateObject(
@@ -69,9 +69,10 @@ public class EnemyController : PieceController
        // 延迟0.3f
        DOVirtual.DelayedCall(0.3f, () =>
        {
+           Debug.Log($"技能命中数量{targets.Count}");
            BattleScene.Ins.BM.PieceSkill(this, targets, skill);
        }, false);
-       rangeUI.CloseRange();
+       rangeUI?.CloseRange();
        // 技能聚能充能
    }
 }

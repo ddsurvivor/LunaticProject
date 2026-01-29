@@ -2,10 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class 大地图System : MonoBehaviour
+public class 大地图System : SerializedMonoBehaviour
 {
     public static 大地图System instance;
     public 剧本System 剧情;
@@ -22,9 +23,10 @@ public class 大地图System : MonoBehaviour
     public 任务节点[] NodeList;//任务节点列表
     public DaytimeSystem daytimeSystem;
 
-    
-    
-    
+    // 二级地图
+    public Dictionary<int, GameObject> SmallMapDict = new Dictionary<int, GameObject>();
+
+
     public void 失败()
     {
         失败Obj.SetActive(true);
@@ -108,7 +110,18 @@ public class 大地图System : MonoBehaviour
                 break;
             }
         }
+    }
 
+    /// <summary>
+    /// 点击进入二级地图
+    /// </summary>
+    /// <param name="mapID"></param>
+    public void SmallMapActive(int mapID, bool active)
+    {
+        if (SmallMapDict.ContainsKey(mapID))
+        {
+            SmallMapDict[mapID].SetActive(active);
+        }
     }
 
     
