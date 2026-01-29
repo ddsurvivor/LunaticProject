@@ -113,6 +113,12 @@ public class 剧本System: MonoBehaviour
         已阅读++;
     }
 
+    public void OnClickSkip()
+    {
+        已阅读 = 已储存剧本.Length - 1;
+        Next();
+    }
+
     public GameObject 生成剧本预制体()
     {
      //   Debug.Log("调用生成");
