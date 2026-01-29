@@ -37,10 +37,11 @@ public class AttrCenter
         }
         return 0;
     }
-    public int GetRange(bool isNormalAtk)
-    {
-        return isNormalAtk ? _meleeAtkRange : _shootAtkRange;
-    }
+
+    // public int GetRange(bool isNormalAtk)
+    // {
+    //     return isNormalAtk ? _meleeAtkRange : _shootAtkRange;
+    // }
     public int GetAddDamage(PieceElementType targetElement)
     {
         if (_elementAddDamage.ContainsKey(targetElement))

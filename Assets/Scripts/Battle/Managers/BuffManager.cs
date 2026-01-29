@@ -76,7 +76,7 @@
                     unit.AddBuffAttr(BuffAttrType.DamageIncrease,  value*-20);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(buff), buff, null);
+                    break;
             }
         }
         

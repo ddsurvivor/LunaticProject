@@ -112,6 +112,14 @@ public class 大地图System : SerializedMonoBehaviour
         }
     }
 
+    public void RefreshAllNodes()
+    {
+        foreach (var node in NodeList)
+        {
+            node.UpdateState();
+        }
+    }
+
     /// <summary>
     /// 点击进入二级地图
     /// </summary>

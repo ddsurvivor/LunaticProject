@@ -76,6 +76,17 @@ public class UnitAttrCenter: SerializedMonoBehaviour
         InitBuffAttrDic();
         FullAmmo();
     }
+
+    public void SetData(PieceData pieceData)
+    {
+        _maxAmmoCount = pieceData.maxAmmoCount;
+        _maxHealth = pieceData.maxHealth;
+        _maxMovePoint = pieceData.maxMovePoint;
+        _moveRange = pieceData.moveRange;
+        elementType = pieceData.elementType;
+        
+        Init();
+    }
     
     private void InitBuffAttrDic()
     {
@@ -177,6 +188,10 @@ public class UnitAttrCenter: SerializedMonoBehaviour
             return true;
         }
         return false;
+    }
+    public bool HasMP(int costPoint=1)
+    {
+        return _curMovePoint>=costPoint;
     }
     
     public bool CostAmmo(int costCount=1)

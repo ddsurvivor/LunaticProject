@@ -195,8 +195,8 @@ public class AIController : PlayerController
     {
         if (target == null) return;
 
-        float meleeRange = aiPiece.unitAttrCenter.attr.GetRange(true); // 近战攻击范围
-        float rangedRange = aiPiece.unitAttrCenter.attr.GetRange(false); // 远程攻击范围
+        float meleeRange = aiPiece.GetRange(true); // 近战攻击范围
+        float rangedRange = aiPiece.GetRange(false); // 远程攻击范围
         float moveRange = aiPiece.unitAttrCenter.MoveRange; // 移动范围
 
         // 计算忽略Y轴的距离（仅XZ平面）
@@ -224,7 +224,7 @@ public class AIController : PlayerController
                 {
                     // 远程攻击
                     aiPiece.StartNormalAttack(true);
-                    aiPiece.Attack(target);
+                    aiPiece.CastAttackOnTarget(target);
                 }
             }
             else
@@ -293,7 +293,7 @@ public class AIController : PlayerController
         {
             // 近战攻击
             aiPiece.StartNormalAttack();
-            aiPiece.Attack(target);
+            aiPiece.CastAttackOnTarget(target);
         }
         else if (distanceToTarget <= rangedRange)
         {
@@ -307,7 +307,7 @@ public class AIController : PlayerController
             {
                 // 远程攻击
                 aiPiece.StartNormalAttack(true);
-                aiPiece.Attack(target);
+                aiPiece.CastAttackOnTarget(target);
             }
         }
         else

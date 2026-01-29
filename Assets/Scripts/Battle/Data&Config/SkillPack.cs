@@ -20,5 +20,5 @@ public class SkillPack
     public List<BuffPack> buffPacks = new();    // 附加效果列表
     public List<SkillEffect> skillEffects = new(); // 技能特殊效果列表
     public AudioClip skillSound;// 施放音效
-    
+
 }
