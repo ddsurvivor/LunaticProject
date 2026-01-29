@@ -113,8 +113,10 @@ public class BattleManager : MonoBehaviour
     public void PieceSkill(PieceController attacker, List<PieceController> targets
         , SkillPack skillPack)
     {
+        Debug.Log($"PieceSkill: Attacker={attacker.name}, Skill={skillPack.skillName}, TargetsCount={targets.Count}");
         foreach (var target in targets)
         {
+            Debug.Log($"Skill Attack: Attacker={attacker.name}, Target={target.name}");
             // 命中判定
             bool isHit = false;
             if (attacker.player.isBursting)
@@ -138,6 +140,7 @@ public class BattleManager : MonoBehaviour
                 // 未命中
                 target.pieceDisplay.ChangeDisplayState(PieceDisplayState.Dodge, false, 0.5f);
                 //BattleScene.Ins.BM.camera.FocusShake(defender.transform);
+                Debug.Log("Skill Attack: Missed");
                 return;
             }
 
@@ -161,6 +164,8 @@ public class BattleManager : MonoBehaviour
                 // 聚能伤害
                 realDamage = attacker.player.AddBurstDamage(target, realDamage);
                 if (realDamage < 0) realDamage = 0;
+                Debug.Log(
+                    $"Skill Attack: BaseDamage={attackPack.damage}, AddAtk={addAtk}, Armor={armor}, RealDamage={realDamage}");
                 // TODO: 临时护盾功能
                 target.unitAttrCenter.TakeDamage(new AttackPack(realDamage, attackPack.damageType));
 
