@@ -96,7 +96,7 @@ public class 大地图System : SerializedMonoBehaviour
                 当前地图.transform.localScale=Vector3.one;
                 VARIABLE.SetActive(true);
 
-                NodeList = VARIABLE.GetComponentsInChildren<任务节点>(true);
+                //NodeList = VARIABLE.GetComponentsInChildren<任务节点>(true);
 
                 // if (endLog != "")
                 // {
