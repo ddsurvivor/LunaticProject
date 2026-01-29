@@ -46,6 +46,8 @@ public class PieceController : MonoBehaviour
     private bool _isAttacking = false; // 是否正在攻击
     private bool _isUsingSkill = false; // 是否正在使用技能
     [SerializeField] [ReadOnly] private AttackPack _attackPack; // 当前正在使用的攻击
+    private SkillPack _curAttackPack;
+    private ActionType _curAtkType;
 
     [SerializeField] [ReadOnly] private SkillPack _skillPack; // 当前正在使用的技能
     //[SerializeField] [ReadOnly] private int _damage;
@@ -233,8 +235,10 @@ public class PieceController : MonoBehaviour
         if (!range) // 近战攻击
         {
             rangeUI?.ShowAttackRange(unitAttrCenter.attr.GetRange(true));
-            _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Melee)
-                , DamageType.Melee);
+            _curAttackPack = _pieceData.meleeAtk;
+            _curAtkType = ActionType.近战攻击;
+            // _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Melee)
+            //     , DamageType.Melee);
         }
         else // 远程攻击
         {
@@ -246,8 +250,10 @@ public class PieceController : MonoBehaviour
             }
 
             rangeUI?.ShowAttackRange(unitAttrCenter.attr.GetRange(false));
-            _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Ranged)
-                , DamageType.Ranged);
+            _curAttackPack = _pieceData.rangedAtk;
+            _curAtkType = ActionType.远程攻击;
+            // _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Ranged)
+            //     , DamageType.Ranged);
         }
     }
 
@@ -283,12 +289,12 @@ public class PieceController : MonoBehaviour
     public void Attack(PieceController enemy)
     {
         Debug.Log("棋子攻击");
-        if (_attackPack.damageType == DamageType.Melee)
+        if (_curAtkType == ActionType.近战攻击)
         {
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Attack, false, 1f);
             PlayAudio(ActionType.近战攻击);
         }
-        else if (_attackPack.damageType == DamageType.Ranged)
+        else if (_curAtkType == ActionType.远程攻击)
         {
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
             // 消耗弹药
@@ -305,22 +311,6 @@ public class PieceController : MonoBehaviour
                 // 攻击充能
                 BattleScene.Ins.BM.PlayerController.ChargeBurst(GameConst.attackBurstCharge);
             }
-            else
-            {
-                // 爆发状态下攻击同一目标增加额外伤害
-                if (BattleScene.Ins.BM.PlayerController.burstTarget == enemy)
-                {
-                    _attackPack.damage = (int)(GameConst.burstDamageRate * _attackPack.damage);
-                    _attackPack.damage += (int)(BattleScene.Ins.BM.PlayerController.totalDamage *
-                                                GameConst.burstAddDamageRate);
-                    BattleScene.Ins.BM.PlayerController.totalDamage += _attackPack.damage;
-                }
-                else
-                {
-                    BattleScene.Ins.BM.PlayerController.burstTarget = enemy;
-                    BattleScene.Ins.BM.PlayerController.totalDamage = _attackPack.damage;
-                }
-            }
         }
 
         BattleScene.Ins.BM.camera.FocusShake(enemy.transform);
@@ -328,7 +318,7 @@ public class PieceController : MonoBehaviour
         DOVirtual.DelayedCall(0.3f, () =>
         {
             // 执行攻击
-            BattleScene.Ins.BM.PieceAttack(this, enemy, _attackPack);
+            BattleScene.Ins.BM.PieceSkill(this, new List<PieceController>(){enemy}, _curAttackPack);
         }, false);
     }
 
