@@ -265,7 +265,6 @@ public class RangeUI : MonoBehaviour
                 {
                     piece.rangeUI?.ShowHighlight(true);
                     newTargets.Add(piece);
-                    return;
                 }
             }
             else if (_curSkillPack.target == SkillTarget.Ally)
@@ -274,7 +273,6 @@ public class RangeUI : MonoBehaviour
                 {
                     piece.rangeUI?.ShowHighlight(true);
                     newTargets.Add(piece);
-                    return;
                 }
             }
         }
@@ -317,7 +315,6 @@ public class RangeUI : MonoBehaviour
                 {
                     piece.rangeUI?.ShowHighlight(true);
                     newTargets.Add(piece);
-                    return;
                 }
             }
             else if (_curSkillPack.target == SkillTarget.Ally)
@@ -326,7 +323,6 @@ public class RangeUI : MonoBehaviour
                 {
                     piece.rangeUI?.ShowHighlight(true);
                     newTargets.Add(piece);
-                    return;
                 }
             }
         }

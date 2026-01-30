@@ -55,6 +55,7 @@ public class Center : MonoBehaviour
     public static string Command_Daytime="DAYTIME";//时间推进
     public static string Command_Cgactive = "CGACTIVE";//CG开关, 0关闭，1开启
     public static string Command_Smallmap="SMALLMAP";//二级地图
+    public static string Command_Save = "SAVE";
  
     public static readonly char Plot指令分隔符 = '+';
 

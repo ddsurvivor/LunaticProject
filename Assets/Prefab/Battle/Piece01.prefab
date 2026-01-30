@@ -70,8 +70,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 2062317405
+  m_SortingLayer: 3
   m_SortingOrder: 10
   m_Sprite: {fileID: 21300000, guid: a8f4589c17c2c9444afc2be85fcce22e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -140,9 +140,50 @@ MonoBehaviour:
   rangeUI: {fileID: 8316052726254654752}
   _actionListPanel: {fileID: 1246171515386722531}
   pieceDisplay: {fileID: 9066005200974287038}
+  uiCanvas: {fileID: 0}
   _pieceData:
     pieceId: 0
+    pieceName: 
+    maxHealth: 0
+    maxMovePoint: 0
+    moveRange: 0
+    meleeAtk:
+      skillName: 
+      description: 
+      mpCost: 0
+      cooldown: 0
+      target: 0
+      rangeType: 0
+      rangeValue: 0
+      rangeAgle: 0
+      explodeRadius: 0
+      skillVFXType: 0
+      attackPacks: []
+      atkTimes: 1
+      buffPacks: []
+      skillEffects: 
+      skillSound: {fileID: 0}
+      maxAmmoCount: 3
+    rangedAtk:
+      skillName: 
+      description: 
+      mpCost: 0
+      cooldown: 0
+      target: 0
+      rangeType: 0
+      rangeValue: 0
+      rangeAgle: 0
+      explodeRadius: 0
+      skillVFXType: 0
+      attackPacks: []
+      atkTimes: 1
+      buffPacks: []
+      skillEffects: 
+      skillSound: {fileID: 0}
+      maxAmmoCount: 3
+    maxAmmoCount: 0
     skillPacks: []
+    elementType: 0
   pieceID: 1
   player: {fileID: 0}
   isPlayerPiece: 1
@@ -161,9 +202,11 @@ MonoBehaviour:
     explodeRadius: 0
     skillVFXType: 0
     attackPacks: []
+    atkTimes: 1
     buffPacks: []
     skillEffects: 
     skillSound: {fileID: 0}
+    maxAmmoCount: 3
   interactAreas: []
   availableActions: 
   availableSkills: []
@@ -445,6 +488,7 @@ MonoBehaviour:
   dodgeSprite: {fileID: 21300000, guid: 00913b9daa50d8c4887c542b317e99c9, type: 3}
   hitSprite: {fileID: 21300000, guid: 71c0c04d1f559d34e817dfce0fd0c4cc, type: 3}
   deathSprite: []
+  skillSprites: []
   idleBackSprite: {fileID: 21300000, guid: 78e9d6e99ed05774db9f4eb466b02694, type: 3}
   moveBackSprite: {fileID: 0}
   attackBackSprite: {fileID: 0}

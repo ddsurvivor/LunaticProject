@@ -75,7 +75,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
 
     private void OnActionButtonClicked(ActionType actionType)
     {
-        
+        if(!pc.unitAttrCenter.HasMP())return;
         Debug.Log($"Action Button Clicked: {actionType}");
         // 在这里处理按钮点击事件
         switch (actionType)

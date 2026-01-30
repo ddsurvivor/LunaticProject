@@ -113,7 +113,6 @@ public class BattleManager : MonoBehaviour
     public void PieceSkill(PieceController attacker, List<PieceController> targets
         , SkillPack skillPack)
     {
-        Debug.Log($"PieceSkill: Attacker={attacker.name}, Skill={skillPack.skillName}, TargetsCount={targets.Count}");
         foreach (var target in targets)
         {
             Debug.Log($"Skill Attack: Attacker={attacker.name}, Target={target.name}");
@@ -148,6 +147,7 @@ public class BattleManager : MonoBehaviour
                 attacker.unitAttrCenter.attr.GetAddDamage(target.unitAttrCenter.elementType);
             foreach (var attackPack in skillPack.attackPacks)
             {
+                Debug.Log($"依次计算伤害");
                 int realDamage = attackPack.damage + addAtk;
                 int armor = target.unitAttrCenter.attr.GetArmor(attackPack.damageType);
                 if (attackPack.damageType == DamageType.Melee)
@@ -172,6 +172,25 @@ public class BattleManager : MonoBehaviour
                 if (target is EnemyController enemy)
                 {
                     enemy.AddDamageRecord(attacker, realDamage);
+                }
+            }
+            // 处理buff
+            foreach (var buffPack in skillPack.buffPacks)   
+            {
+                if (buffPack.target == SkillTarget.Self)
+                {
+                    if (GameConst.CheckRate(buffPack.rate))
+                    {
+                        buffManager.AddBuff(attacker.unitAttrCenter, buffPack.buffType,  buffPack.stacks);
+                    }
+                }
+                else if (buffPack.target == SkillTarget.EnemyAll || buffPack.target == SkillTarget.Enemy)
+                {
+                    if (GameConst.CheckRate(buffPack.rate))
+                    {
+                        buffManager.AddBuff(target.unitAttrCenter, buffPack.buffType
+                            , buffPack.stacks);
+                    }
                 }
             }
         }

@@ -46,8 +46,8 @@ public class PieceController : MonoBehaviour
     private bool _isAttacking = false; // 是否正在攻击
     private bool _isUsingSkill = false; // 是否正在使用技能
     [SerializeField] [ReadOnly] private AttackPack _attackPack; // 当前正在使用的攻击
-    private SkillPack _curAttackPack;
-    private ActionType _curAtkType;
+    protected SkillPack _curAttackPack;
+    protected ActionType _curAtkType;
 
     [SerializeField] [ReadOnly] private SkillPack _skillPack; // 当前正在使用的技能
     //[SerializeField] [ReadOnly] private int _damage;
@@ -101,7 +101,7 @@ public class PieceController : MonoBehaviour
         {
             if (Input.GetMouseButtonDown(0))
             {
-                CheckEnemy();
+                CastAttack();
             }
 
             // 点击右键取消
@@ -234,8 +234,8 @@ public class PieceController : MonoBehaviour
         _isAttacking = true;
         if (!range) // 近战攻击
         {
-            rangeUI?.ShowAttackRange(unitAttrCenter.attr.GetRange(true));
             _curAttackPack = _pieceData.meleeAtk;
+            rangeUI?.ShowSkillRange(_curAttackPack);
             _curAtkType = ActionType.近战攻击;
             // _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Melee)
             //     , DamageType.Melee);
@@ -249,15 +249,16 @@ public class PieceController : MonoBehaviour
                 return;
             }
 
-            rangeUI?.ShowAttackRange(unitAttrCenter.attr.GetRange(false));
+            //rangeUI?.ShowAttackRange(_pieceData.rangedAtk.rangeValue);
             _curAttackPack = _pieceData.rangedAtk;
+            rangeUI?.ShowSkillRange(_curAttackPack);
             _curAtkType = ActionType.远程攻击;
             // _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Ranged)
             //     , DamageType.Ranged);
         }
     }
 
-    private void CheckEnemy()
+    /*private void CheckEnemy()
     {
         // 获取攻击目标点
         Vector3 atkPos = rangeUI.GetAtkPos();
@@ -283,10 +284,71 @@ public class PieceController : MonoBehaviour
                 return;
             }
         }
+    }*/
+
+    private void CastAttack()
+    {
+        // 根据范围获取所有棋子
+        List<PieceController> targets = rangeUI.GetCurTargets;
+        if(targets.Count <1)
+        {
+            Debug.Log("未选中任何目标，无法发动技能");
+            return;
+        }
+        Transform atkPos = rangeUI.GetSkillTransform();
+        if (atkPos != null && _curAttackPack.skillVFXType != 0)
+        {
+            ObjectPool.Ins.GenerateObject(
+                _curAttackPack.skillVFXType,
+                atkPos.position + Vector3.up * 3f,
+                atkPos.localRotation);
+        }
+
+        Debug.Log("棋子攻击");
+        CheckFace(targets[0].transform.position - transform.position);
+        if (_curAtkType == ActionType.近战攻击)
+        {
+            pieceDisplay.ChangeDisplayState(PieceDisplayState.Attack, false, 1f);
+            PlayAudio(ActionType.近战攻击);
+        }
+        else if (_curAtkType == ActionType.远程攻击)
+        {
+            pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
+            // 消耗弹药
+            unitAttrCenter.CostAmmo();
+            PlayAudio(ActionType.远程攻击);
+        }
+
+
+        // 聚能充能
+        if (isPlayerPiece)
+        {
+            if (!BattleScene.Ins.BM.PlayerController.isBursting)
+            {
+                // 攻击充能
+                BattleScene.Ins.BM.PlayerController.ChargeBurst(GameConst.attackBurstCharge);
+            }
+        }
+
+        BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
+        
+        // 延迟0.3f
+        DOVirtual.DelayedCall(0.3f
+            , () =>
+            {
+                if (!unitAttrCenter.CostMP()) return;
+                BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack);
+                
+                // 结束攻击状态
+                _isAttacking = false;
+                rangeUI.CloseRange();
+            }, false);
+        
+        // 技能聚能充能
     }
 
 
-    public void Attack(PieceController enemy)
+    /*public void Attack(PieceController enemy)
     {
         Debug.Log("棋子攻击");
         if (_curAtkType == ActionType.近战攻击)
@@ -320,7 +382,7 @@ public class PieceController : MonoBehaviour
             // 执行攻击
             BattleScene.Ins.BM.PieceSkill(this, new List<PieceController>(){enemy}, _curAttackPack);
         }, false);
-    }
+    }*/
 
     public void Hurt()
     {
@@ -393,6 +455,7 @@ public class PieceController : MonoBehaviour
                 atkPos.localRotation);
         }
 
+        CheckFace(targets[0].transform.position - transform.position);
         Debug.Log($"{this.name}发动技能攻击{_skillPack.skillName}，targets数量：{targets.Count}");
         // 播放技能动画
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Skill, false, 1f);
@@ -402,7 +465,9 @@ public class PieceController : MonoBehaviour
         DOVirtual.DelayedCall(0.3f
             , () =>
             {
+                if (!unitAttrCenter.CostMP()) return;
                 BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack);
+                
                 // 结束攻击状态
                 _isUsingSkill = false;
                 rangeUI.CloseRange();
@@ -425,6 +490,11 @@ public class PieceController : MonoBehaviour
         {
             pieceDisplay.FaceRight(true);
         }
+    }
+    
+    public float GetRange(bool isNormalAtk)
+    {
+        return isNormalAtk ? _pieceData.meleeAtk.rangeValue : _pieceData.rangedAtk.rangeValue;
     }
 
     // ======= 音效 ======= //
