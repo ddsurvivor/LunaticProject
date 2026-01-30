@@ -137,6 +137,7 @@ public enum Daytime
     上午 = 0 ,
     黄昏 = 1,
     夜晚 = 2,
+    轰炸 = 3,
 }
 
 #endregion

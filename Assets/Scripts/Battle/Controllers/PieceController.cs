@@ -71,7 +71,7 @@ public class PieceController : MonoBehaviour
     public void Init(PlayerController player, PieceData pieceData = null)
     {
         this.player = player;
-        unitAttrCenter.Init();
+        //unitAttrCenter.Init();
         if (isPlayerPiece)
         {
             availableActions.Add(ActionType.移动);
@@ -87,6 +87,11 @@ public class PieceController : MonoBehaviour
         {
             _pieceData = pieceData;
             availableSkills = pieceData?.skillPacks;
+            unitAttrCenter.SetData(_pieceData);
+        }
+        else
+        {
+            unitAttrCenter.Init();
         }
 
         if (_actionListPanel != null) _actionListPanel.Init(this);
@@ -484,11 +489,11 @@ public class PieceController : MonoBehaviour
         // 由于棋子式斜45站立的，所以应该同时计算x轴和z轴
         if (direction.x < 0 )
         {
-            pieceDisplay.FaceRight(false);
+            pieceDisplay.FaceRight(!isPlayerPiece);
         }
         else if (direction.x > 0)
         {
-            pieceDisplay.FaceRight(true);
+            pieceDisplay.FaceRight(isPlayerPiece);
         }
     }
     

@@ -122,6 +122,10 @@ public class BattleManager : MonoBehaviour
             {
                 isHit = true; // 聚能状态下必中
             }
+            else if (skillPack.target == SkillTarget.EnemyAll || skillPack.target == SkillTarget.All)
+            {
+                isHit = true; // AOE必中
+            }
             else
             {
                 // 命中率计算公式，D100 <= (攻击方.命中率 - 防御方.闪避率)
@@ -162,7 +166,10 @@ public class BattleManager : MonoBehaviour
                     (100 - target.unitAttrCenter.buffAttrDic[
                         BuffAttrType.DamageReduction]) / 100f);// 伤害减免
                 // 聚能伤害
-                realDamage = attacker.player.AddBurstDamage(target, realDamage);
+                if (attacker.player.isBursting)
+                {
+                    realDamage = attacker.player.AddBurstDamage(target, realDamage);
+                }
                 if (realDamage < 0) realDamage = 0;
                 Debug.Log(
                     $"Skill Attack: BaseDamage={attackPack.damage}, AddAtk={addAtk}, Armor={armor}, RealDamage={realDamage}");

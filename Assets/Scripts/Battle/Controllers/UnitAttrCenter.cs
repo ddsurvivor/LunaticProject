@@ -14,7 +14,7 @@ public class UnitAttrCenter: SerializedMonoBehaviour
     
     public PieceElementType elementType;
     
-    [OdinSerialize]
+    [OdinSerialize][ReadOnly]
     private AttrCenter _attr = new();
     public AttrCenter attr => _attr;
     
@@ -30,7 +30,7 @@ public class UnitAttrCenter: SerializedMonoBehaviour
 
     public int MaxMovePoint => _maxMovePoint;
 
-    [SerializeField]
+    [SerializeField][ReadOnly]
     private int _maxHealth;
     
     // 怒气值 AP
@@ -40,12 +40,12 @@ public class UnitAttrCenter: SerializedMonoBehaviour
     // 行动点数 MP
     [SerializeField][ReadOnly]
     private int _curMovePoint;
-    [SerializeField]
+    [SerializeField][ReadOnly]
     private int _maxMovePoint;
 
     private int _tempShield;
 
-    [SerializeField]
+    [SerializeField][ReadOnly]
     private float _moveRange;
     public float MoveRange => _moveRange;
     [SerializeField][ReadOnly]
@@ -53,7 +53,7 @@ public class UnitAttrCenter: SerializedMonoBehaviour
     private int _tauntValue;
     public  int TauntValue => _tauntValue;
     
-    [SerializeField]
+    [SerializeField][ReadOnly]
     // 弹药数量
     private int _ammoCount;
     public int AmmoCount => _ammoCount;
@@ -84,8 +84,8 @@ public class UnitAttrCenter: SerializedMonoBehaviour
         _maxMovePoint = pieceData.maxMovePoint;
         _moveRange = pieceData.moveRange;
         elementType = pieceData.elementType;
-        
         Init();
+        buffAttrDic[BuffAttrType.EvasionRate] = pieceData.evasionRate;
     }
     
     private void InitBuffAttrDic()

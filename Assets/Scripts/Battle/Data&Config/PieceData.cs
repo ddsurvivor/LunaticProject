@@ -18,6 +18,7 @@ public class PieceData
     [LabelText("近战攻击")]public SkillPack meleeAtk;
     [LabelText("远程攻击")]public SkillPack rangedAtk;
     [LabelText("弹药数量")]public int maxAmmoCount;
+    [LabelText("闪避率")] public int evasionRate;
     [OdinSerialize]
     [LabelText("棋子音效")]public Dictionary<ActionType, AudioClip> actionSounds = new();
     [LabelText("技能列表")]public List<SkillPack> skillPacks = new();
