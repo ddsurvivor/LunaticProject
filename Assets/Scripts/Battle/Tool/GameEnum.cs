@@ -132,5 +132,12 @@ public enum SkillEffect
     Blink = 2,// 瞬移
 }
 
+public enum Daytime
+{
+    上午 = 0 ,
+    黄昏 = 1,
+    夜晚 = 2,
+}
+
 #endregion
 

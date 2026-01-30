@@ -8,19 +8,15 @@ using UnityEngine.UI;
 
 public class DaytimeSystem : SerializedMonoBehaviour
 {
-    public DateTime startDate = new DateTime(2137, 1, 1);
-    public int date = 1;// 当前日期
-    public enum Daytime
-    {
-        早晨 = 0 ,
-        中午 = 1,
-        夜晚 = 2,
-    }
+    private int startYear = 1567;
+    private int startMonth = 1;
+    private int startDay = 45;
 
-    public Daytime daytime = Daytime.早晨;
+    
     public Text dateText;
     public Image dateImage;
     public Dictionary<Daytime, Sprite> daytimeSprites = new Dictionary<Daytime, Sprite>();
+    public Sprite specialMapSprite;
 
     private void Start()
     {
@@ -29,17 +25,22 @@ public class DaytimeSystem : SerializedMonoBehaviour
     // 推进一个时间点
     public void CostDaytime(int cost = 1)
     {
+        if (cost == 3)// 特殊差分
+        {
+            dateImage.sprite = specialMapSprite;
+            return;
+        }
         // 日期向前推进
         for (int i = 0; i < cost; i++)
         {
-            if (daytime == Daytime.夜晚)
+            if (GM.Ins.PLAYERPROFILE.daytime == Daytime.夜晚)
             {
-                date += 1;
-                daytime = Daytime.早晨;
+                GM.Ins.PLAYERPROFILE.date += 1;
+                GM.Ins.PLAYERPROFILE.daytime = Daytime.上午;
             }
             else
             {
-                daytime += 1;
+                GM.Ins.PLAYERPROFILE.daytime += 1;
             }
         }
         UpdateDaytimeImage();
@@ -48,11 +49,10 @@ public class DaytimeSystem : SerializedMonoBehaviour
     public void UpdateDaytimeImage()
     {
         // 更新日期文本
-        DateTime currentDate = startDate.AddDays(date - 1);
-        dateText.text = currentDate.ToString("yyyy / MM / dd") + daytime.ToString();
-        if (daytimeSprites.ContainsKey(daytime))
+        dateText.text = $"{startYear}  /  {startMonth}  /  {startDay + GM.Ins.PLAYERPROFILE.date} 【{GM.Ins.PLAYERPROFILE.daytime}】";
+        if (daytimeSprites.ContainsKey(GM.Ins.PLAYERPROFILE.daytime))
         {
-            dateImage.sprite = daytimeSprites[daytime];
+            dateImage.sprite = daytimeSprites[GM.Ins.PLAYERPROFILE.daytime];
         }
     }
 }

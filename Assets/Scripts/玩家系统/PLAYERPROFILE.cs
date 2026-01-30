@@ -78,6 +78,9 @@ public class PLAYERPROFILE : SerializedMonoBehaviour
 
     public static Player[] player = new Player[20];
 
+    public int date = 0;
+    public Daytime daytime = Daytime.上午;
+
     private void Awake()
     {
         //instance = this;
