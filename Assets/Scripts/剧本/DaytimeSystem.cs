@@ -8,8 +8,7 @@ using UnityEngine.UI;
 
 public class DaytimeSystem : SerializedMonoBehaviour
 {
-    [OdinSerialize]
-    public DateTime startDate = new DateTime(2024, 1, 1);
+    public DateTime startDate = new DateTime(2137, 1, 1);
     public int date = 1;// 当前日期
     public enum Daytime
     {
@@ -50,7 +49,7 @@ public class DaytimeSystem : SerializedMonoBehaviour
     {
         // 更新日期文本
         DateTime currentDate = startDate.AddDays(date - 1);
-        dateText.text = currentDate.ToString("yyyy年MM月dd日 ") + daytime.ToString();
+        dateText.text = currentDate.ToString("yyyy / MM / dd") + daytime.ToString();
         if (daytimeSprites.ContainsKey(daytime))
         {
             dateImage.sprite = daytimeSprites[daytime];

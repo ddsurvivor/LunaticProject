@@ -89,7 +89,11 @@ public class PieceDisplay : MonoBehaviour
 
     private IEnumerator PlaySpriteAnimation(List<Sprite> sprites, float frameDuration)
     {
-        if (sprites == null || sprites.Count == 0) yield break;
+        if (sprites == null || sprites.Count == 0)
+        {
+            finishAction?.Invoke();
+            yield break;
+        }
         foreach (var sprite in sprites)
         {
             pieceSpriteRenderer.sprite = sprite;

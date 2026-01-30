@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 using DG.Tweening;
+using Sirenix.OdinInspector;
 
 
 public class 剧本System: MonoBehaviour
@@ -17,7 +18,7 @@ public class 剧本System: MonoBehaviour
     public GameObject Content;
     public GameObject 剧本预制体;
     public GameObject 剧本父物体Content;
-    public Image BG,SPEAKERBG;
+    public Image BG,BG_black,SPEAKERBG;
     public Text 说话人TextObject;
     public float 起始生成偏移;
     public float 间隔;
@@ -55,10 +56,12 @@ public class 剧本System: MonoBehaviour
         }
     }
 
+    [SerializeField][ReadOnly]
+    private string curPartName;
     public void 设置新剧本(string t)
     {
         刷新();
-       
+        curPartName = t;
         已储存剧本 = 读取表格数据(t, Center.Languageint);
         记录上段剧情 = 已储存剧本;
     }
@@ -115,8 +118,11 @@ public class 剧本System: MonoBehaviour
 
     public void OnClickSkip()
     {
-        已阅读 = 已储存剧本.Length - 1;
-        Next();
+        Debug.Log($"跳过{已储存剧本.Length-已阅读}条剧本");
+        for (int i = 0; i < 2*(已储存剧本.Length-已阅读); i++)
+        {
+            Next();
+        }
     }
 
     public GameObject 生成剧本预制体()
@@ -406,6 +412,7 @@ public class 剧本System: MonoBehaviour
                     {
                         var prams = 指令切割(key);
                         已储存剧本 = 读取表格数据(prams[0], Center.Languageint);
+                        curPartName = prams[0];
                         进度System.存档("cache");
                         记录上段剧情 = 已储存剧本;
                         try
@@ -600,6 +607,7 @@ public class 剧本System: MonoBehaviour
                         {
                             int.TryParse(prams[0], out int cgActive);
                             BG.gameObject.SetActive(cgActive == 1);
+                            BG_black.gameObject.SetActive(cgActive == 1);
                         }
                     }
                     if (key.Contains(Center.Command_Smallmap))// 进入二级地图
@@ -635,11 +643,11 @@ public class 剧本System: MonoBehaviour
 
           if(match.Groups[1].Value == "")
           {
-              Debug.LogError($"指令格式错误，请检查是否有参数");
+              Debug.LogError($"{command}指令格式错误，请检查是否有参数");
           }
           else
           {
-              Debug.LogError($"指令格式错误，请检查是否有括号");
+              Debug.LogError($"{command}指令格式错误，请检查是否有括号");
           }
 
           return null;
