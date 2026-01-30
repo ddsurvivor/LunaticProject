@@ -8,18 +8,13 @@ using UnityEngine.UI;
 
 public class DaytimeSystem : SerializedMonoBehaviour
 {
-
-
     private int startYear = 1567;
     private int startMonth = 1;
     private int startDay = 45;
-
-
     
     public Text dateText;
     public Image dateImage;
     public Dictionary<Daytime, Sprite> daytimeSprites = new Dictionary<Daytime, Sprite>();
-    public Sprite specialMapSprite;
 
     private void Start()
     {
@@ -30,7 +25,8 @@ public class DaytimeSystem : SerializedMonoBehaviour
     {
         if (cost == 3)// 特殊差分
         {
-            dateImage.sprite = specialMapSprite;
+            GM.Ins.PLAYERPROFILE.daytime = Daytime.轰炸;
+            dateImage.sprite = daytimeSprites[GM.Ins.PLAYERPROFILE.daytime];
             return;
         }
         // 日期向前推进

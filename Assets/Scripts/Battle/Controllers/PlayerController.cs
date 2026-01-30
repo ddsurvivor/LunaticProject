@@ -137,19 +137,19 @@ public class PlayerController : SerializedMonoBehaviour
     
     public int AddBurstDamage(PieceController enemy,  int damage)
     {
+        //爆发状态下攻击同一目标增加额外伤害
+        if (BattleScene.Ins.BM.PlayerController.burstTarget == enemy)
+        {
+            damage = (int)(GameConst.burstDamageRate * damage);
+            damage += (int)(BattleScene.Ins.BM.PlayerController.totalDamage *
+                                        GameConst.burstAddDamageRate);
+            BattleScene.Ins.BM.PlayerController.totalDamage += damage;
+        }
+        else
+        {
+            BattleScene.Ins.BM.PlayerController.burstTarget = enemy;
+            BattleScene.Ins.BM.PlayerController.totalDamage = damage;
+        }
         return damage;
-        // 爆发状态下攻击同一目标增加额外伤害
-        // if (BattleScene.Ins.BM.PlayerController.burstTarget == enemy)
-        // {
-        //     _attackPack.damage = (int)(GameConst.burstDamageRate * _attackPack.damage);
-        //     _attackPack.damage += (int)(BattleScene.Ins.BM.PlayerController.totalDamage *
-        //                                 GameConst.burstAddDamageRate);
-        //     BattleScene.Ins.BM.PlayerController.totalDamage += _attackPack.damage;
-        // }
-        // else
-        // {
-        //     BattleScene.Ins.BM.PlayerController.burstTarget = enemy;
-        //     BattleScene.Ins.BM.PlayerController.totalDamage = _attackPack.damage;
-        // }
     }
 }
