@@ -2,10 +2,13 @@
     using System.Collections;
     using UnityEngine;
 using UnityEngine.SceneManagement;
+    using Sirenix.OdinInspector;
     public class GM: MonoSingleton<GM>
     {
         // 战斗切换
+        [ReadOnly]
         public string battleScene;
+        [ReadOnly]
         public string endLog;
         public PLAYERPROFILE PLAYERPROFILE;
         

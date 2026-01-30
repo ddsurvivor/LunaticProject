@@ -78,8 +78,12 @@ public class PLAYERPROFILE : SerializedMonoBehaviour
 
     public static Player[] player = new Player[20];
 
+    [Header("进度存档")]
     public int date = 0;
     public Daytime daytime = Daytime.上午;
+    public string currentMap = "TEST";
+    public int curSmallMapIndex = 0;
+    
 
     private void Awake()
     {

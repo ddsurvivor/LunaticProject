@@ -618,6 +618,7 @@ public class 剧本System: MonoBehaviour
                             int.TryParse(prams[0], out int mapID);
                             int.TryParse(prams[1], out int active);
                             大地图System.instance.SmallMapActive(mapID, active==1);
+                            GM.Ins.PLAYERPROFILE.curSmallMapIndex = active==1?mapID:0;
                         }
                     }
                     if (key.Contains(Center.Command_Save))// 保存任务节点进度
