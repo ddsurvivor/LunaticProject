@@ -8,20 +8,12 @@ using UnityEngine.UI;
 
 public class DaytimeSystem : SerializedMonoBehaviour
 {
-<<<<<<< HEAD
-    public DateTime startDate = new DateTime(1567, 1, 45);
-    public int date = 1;// 当前日期
-    public enum Daytime
-    {
-        早晨 = 0 ,
-        中午 = 1,
-        夜晚 = 2,
-    }
-=======
+
+
     private int startYear = 1567;
     private int startMonth = 1;
     private int startDay = 45;
->>>>>>> 7a53d3ab2db92bd9f5fe325713079c7e716bdfa7
+
 
     
     public Text dateText;
