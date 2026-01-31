@@ -72,7 +72,7 @@ public class EnemyController : PieceController
         DOVirtual.DelayedCall(0.3f, () =>
         {
             Debug.Log($"技能命中数量{targets.Count}");
-            BattleScene.Ins.BM.PieceSkill(this, targets, skill);
+            BattleScene.Ins.BM.PieceSkill(this, targets, skill, targets[0].transform.position);
             rangeUI?.CloseRange();
         }, false);
         // 技能聚能充能

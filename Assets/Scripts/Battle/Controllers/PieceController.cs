@@ -446,7 +446,7 @@ public class PieceController : MonoBehaviour
     {
         // 根据范围获取所有棋子
         List<PieceController> targets = rangeUI.GetCurTargets;
-        if(targets.Count <1)
+        if(targets.Count <1 && (_skillPack.target != SkillTarget.Area && _skillPack.target != SkillTarget.Self))
         {
             Debug.Log("未选中任何目标，无法发动技能");
             return;
@@ -459,8 +459,8 @@ public class PieceController : MonoBehaviour
                 atkPos.position + Vector3.up * 3f,
                 atkPos.localRotation);
         }
-
-        CheckFace(targets[0].transform.position - transform.position);
+        
+        CheckFace(atkPos.transform.position - transform.position);
         Debug.Log($"{this.name}发动技能攻击{_skillPack.skillName}，targets数量：{targets.Count}");
         // 播放技能动画
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Skill, false, 1f);
@@ -471,7 +471,7 @@ public class PieceController : MonoBehaviour
             , () =>
             {
                 if (!unitAttrCenter.CostMP()) return;
-                BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack);
+                BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack, atkPos.position);
                 
                 // 结束攻击状态
                 _isUsingSkill = false;

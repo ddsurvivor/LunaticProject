@@ -13,7 +13,8 @@ public class BattleManager : MonoBehaviour
     public PieceDataListSO pieceDataListSO;
 
     public List<LadderArea> ladderAreas = new();
-    
+    public List<HealArea> areaList = new();// 
+
     public int TunrNumber => _turnNumber;
     private int _turnNumber = 0;
 
@@ -41,6 +42,7 @@ public class BattleManager : MonoBehaviour
         }
 
         CheckAllLadderMove(PlayerController.isInTurn);
+        CheckAllArea();
     }
 
     public void PlayerStart()
@@ -55,7 +57,7 @@ public class BattleManager : MonoBehaviour
         BattleScene.Ins.UM.turnNumberText.text = TunrNumber.ToString();
     }
 
-    public void PieceAttack(PieceController attacker, PieceController defender
+    /*public void PieceAttack(PieceController attacker, PieceController defender
         , AttackPack attackPack)
     {
         // 命中判定
@@ -108,10 +110,10 @@ public class BattleManager : MonoBehaviour
         {
             enemy.AddDamageRecord(attacker, realDamage);
         }
-    }
+    }*/
 
     public void PieceSkill(PieceController attacker, List<PieceController> targets
-        , SkillPack skillPack)
+        , SkillPack skillPack, Vector3 targetPos = default)
     {
         foreach (var target in targets)
         {
@@ -122,7 +124,8 @@ public class BattleManager : MonoBehaviour
             {
                 isHit = true; // 聚能状态下必中
             }
-            else if (skillPack.target == SkillTarget.EnemyAll || skillPack.target == SkillTarget.All)
+            else if (skillPack.target is SkillTarget.EnemyAll
+                     or SkillTarget.All or SkillTarget.Self)
             {
                 isHit = true; // AOE必中
             }
@@ -156,20 +159,24 @@ public class BattleManager : MonoBehaviour
                 int armor = target.unitAttrCenter.attr.GetArmor(attackPack.damageType);
                 if (attackPack.damageType == DamageType.Melee)
                 {
-                    armor = (int)(armor*(1f - target.unitAttrCenter.buffAttrDic[BuffAttrType.MeleeArmorPercent]/100f));
+                    armor = (int)(armor * (1f -
+                                           target.unitAttrCenter.buffAttrDic[
+                                               BuffAttrType.MeleeArmorPercent] / 100f));
                 }
+
                 realDamage -= armor;
                 // 减伤
                 realDamage = (int)(realDamage
                     * (100 - attacker.unitAttrCenter.buffAttrDic[
                         BuffAttrType.DamageIncrease]) / 100f * // 伤害增加
                     (100 - target.unitAttrCenter.buffAttrDic[
-                        BuffAttrType.DamageReduction]) / 100f);// 伤害减免
+                        BuffAttrType.DamageReduction]) / 100f); // 伤害减免
                 // 聚能伤害
                 if (attacker.player.isBursting)
                 {
                     realDamage = attacker.player.AddBurstDamage(target, realDamage);
                 }
+
                 if (realDamage < 0) realDamage = 0;
                 Debug.Log(
                     $"Skill Attack: BaseDamage={attackPack.damage}, AddAtk={addAtk}, Armor={armor}, RealDamage={realDamage}");
@@ -181,17 +188,20 @@ public class BattleManager : MonoBehaviour
                     enemy.AddDamageRecord(attacker, realDamage);
                 }
             }
+
             // 处理buff
-            foreach (var buffPack in skillPack.buffPacks)   
+            foreach (var buffPack in skillPack.buffPacks)
             {
                 if (buffPack.target == SkillTarget.Self)
                 {
                     if (GameConst.CheckRate(buffPack.rate))
                     {
-                        buffManager.AddBuff(attacker.unitAttrCenter, buffPack.buffType,  buffPack.stacks);
+                        buffManager.AddBuff(attacker.unitAttrCenter, buffPack.buffType
+                            , buffPack.stacks);
                     }
                 }
-                else if (buffPack.target == SkillTarget.EnemyAll || buffPack.target == SkillTarget.Enemy)
+                else if (buffPack.target == SkillTarget.EnemyAll ||
+                         buffPack.target == SkillTarget.Enemy)
                 {
                     if (GameConst.CheckRate(buffPack.rate))
                     {
@@ -201,6 +211,13 @@ public class BattleManager : MonoBehaviour
                 }
             }
         }
+
+        
+            
+            // 处理附加效果
+            ApplySKillEffect(skillPack, attacker, targetPos);
+        
+    
         //BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
     }
 
@@ -256,7 +273,44 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    
+    public void ApplySKillEffect(SkillPack skillPack, PieceController caster = null
+        , Vector3 targetPos = default)
+    {
+        foreach (var effect in skillPack.skillEffects)
+        {
+            switch (effect)
+            {
+                case SkillEffect.Blink:
+                    caster.transform.position =
+                        targetPos + new Vector3(-0.5f, 0, -0.5f);
+                    break;
+                case SkillEffect.HealArea:
+                    Debug.Log("生成治疗区");
+                    HealArea healArea = ObjectPool.Ins.GenerateObject(ItemType.HEAL_AREA,
+                        targetPos,
+                        Quaternion.identity).GetComponent<HealArea>();
+                    healArea.SetData(skillPack.buffPacks[0], 1);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public void CheckAllArea()
+    {
+        for (var index = areaList.Count - 1; index >= 0; index--)
+        {
+            var area = areaList[index];
+            area.AddBuff();
+            area.turnsDuration--;
+            if (area.turnsDuration <= 0)
+            {
+                area.gameObject.SetActive(false);
+                areaList.RemoveAt(index);
+            }
+        }
+    }
 
 
     // ===== Test ======//

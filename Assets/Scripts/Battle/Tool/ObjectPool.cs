@@ -19,6 +19,9 @@ public enum ItemType
     ENERGY_ATTACK=12,
     // 动能攻击特效
     KINETIC_ATTACK=13,
+    
+    // 治疗区域
+    HEAL_AREA=20,
 }
 /// <summary>
 /// 对象池
