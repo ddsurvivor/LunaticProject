@@ -18,7 +18,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8608840785071848368
 RectTransform:
   m_ObjectHideFlags: 0
@@ -352,7 +352,7 @@ GameObject:
   - component: {fileID: 5695186063273423355}
   - component: {fileID: 3435330607207741331}
   m_Layer: 11
-  m_Name: Enemy03
+  m_Name: Enemy05
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -634,19 +634,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pieceSpriteRenderer: {fileID: 7676897098729591741}
-  idleSprite: {fileID: 21300000, guid: 8a9b48ee7094658499b00b29ddc16b7e, type: 3}
-  moveSprite: {fileID: 21300000, guid: 3bf9436d7e6a43a4fb052b83a11702c9, type: 3}
-  attackSprite:
-  - {fileID: 21300000, guid: 3bf9436d7e6a43a4fb052b83a11702c9, type: 3}
-  - {fileID: 21300000, guid: f232f3b5c71b2a14e986cbbf70221388, type: 3}
-  shootSprite:
-  - {fileID: 21300000, guid: bf61e1d5898374c47b89c3630e099850, type: 3}
-  - {fileID: 21300000, guid: 1ed8726b2223da844ad21f3a3576a7b9, type: 3}
-  dodgeSprite: {fileID: 21300000, guid: 5f274c7090248e1488f9d4e8d711b4d6, type: 3}
-  hitSprite: {fileID: 21300000, guid: e14d8285085068e47964efe4f9ed7feb, type: 3}
-  deathSprite:
-  - {fileID: 21300000, guid: d47e2d21feb72ed4b90b5635ba52a15a, type: 3}
-  - {fileID: 21300000, guid: 46a97d69d9262d94bb42d1d8d46d5420, type: 3}
+  idleSprite: {fileID: 21300000, guid: 8e04feeef0e0c484faa6131f7883b085, type: 3}
+  moveSprite: {fileID: 0}
+  attackSprite: []
+  shootSprite: []
+  dodgeSprite: {fileID: 0}
+  hitSprite: {fileID: 0}
+  deathSprite: []
   skillSprites: []
   idleBackSprite: {fileID: 21300000, guid: d32a099818069e448893cf70b44306bc, type: 3}
   moveBackSprite: {fileID: 21300000, guid: d26e0a20a0efb3d4fba9d9f948f988d7, type: 3}
@@ -713,7 +707,7 @@ MonoBehaviour:
     evasionRate: 0
     skillPacks: []
     elementType: 0
-  pieceID: 1003
+  pieceID: 1005
   player: {fileID: 0}
   isPlayerPiece: 0
   _attackPack:
@@ -824,7 +818,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 50
-  m_Sprite: {fileID: 21300000, guid: 8a9b48ee7094658499b00b29ddc16b7e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8e04feeef0e0c484faa6131f7883b085, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

@@ -111,6 +111,9 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             case ActionType.道具:
                 pc.PlayAudio(actionType);
                 break;
+            case ActionType.交互:
+                pc.PlayAudio(actionType);
+                break;
             default:
                 Debug.LogWarning($"{actionType} 未实现");
                 break;

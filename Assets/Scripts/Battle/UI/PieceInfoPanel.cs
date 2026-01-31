@@ -14,6 +14,7 @@ using UnityEngine.UI;
     public Text pieceName;
     public Transform hpBar;
     public List<GameObject> mpIcon;
+    public Text ammoNumText;
     
     public Sprite[] headSprites;
     public string[] pieceNames;// 临时用，后期改成棋子数据
@@ -51,6 +52,7 @@ using UnityEngine.UI;
                 mpIcon[i].SetActive(false);
             }
         }
+        ammoNumText.text = piece.unitAttrCenter.AmmoCount.ToString();
     }
 
 }

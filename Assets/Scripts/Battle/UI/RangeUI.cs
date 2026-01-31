@@ -20,7 +20,7 @@ public class RangeUI : MonoBehaviour
     public GameObject fanLine2;
     private bool _isShowMoveIcon = false;
 
-    private float circleRadius = 8.39f / 5f;
+    private float circleRadius = 1f/11f;
     private float _curRange;
 
     private List<PieceController> _curTargets = new();

@@ -53,9 +53,12 @@ public class AIController : PlayerController
                 {
                     foreach (var piece in pair.Value)
                     {
-                        piece.isActived = true;
-                        piece.gameObject.SetActive(true);
-                        piece.StartNormalAttack(true);
+                        if (!piece.isDead)
+                        {
+                            piece.isActived = true;
+                            piece.gameObject.SetActive(true);
+                            piece.StartNormalAttack(true);
+                        }
                     }
                 }
             }
@@ -69,7 +72,7 @@ public class AIController : PlayerController
 
         foreach (EnemyController piece in pieces)
         {
-            if (piece.isActived)
+            if (piece.isActived && !piece.isDead)
             {
                 piece.StartNormalAttack(true);
                 // 每回合清空仇恨值
@@ -386,6 +389,7 @@ public class AIController : PlayerController
             $"技能型AI{aiPiece.name}移动到 {moveTargetPos}");
         aiPiece.transform.DOMove(moveTargetPos, 1.0f);
         aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
+        aiPiece.CheckFace(moveTargetPos- aiPiece.transform.position);
     }
 
     /// <summary>
