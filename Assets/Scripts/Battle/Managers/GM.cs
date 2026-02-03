@@ -12,7 +12,10 @@ using UnityEngine.SceneManagement;
         public string endLog;
         public PLAYERPROFILE PLAYERPROFILE;
         
-        
+        // 系统
+        public MarketSystem marketSystem;
+
+
         public void StartBattle(string battleScene, string endLog)
         {
             this.battleScene = battleScene;

@@ -16,6 +16,23 @@ public class PieceActionListPanel : SerializedMonoBehaviour
     public List<Button> skillButtons;
     //public Dictionary<ActionType, UnityAction> actionDic = new();
 
+    public void Init()
+    {
+        int i = 0;
+        foreach (ActionType actionType in Enum.GetValues(typeof(ActionType)))
+        {
+            // 查找对应名称的按钮
+            Button button = actionButtons[i++];
+            if (button != null)
+            {
+                // 为按钮添加点击事件监听器
+                ActionType capturedActionType = actionType; // 捕获当前的actionType
+                actionButtonDic[actionType] = button;
+                button.onClick.AddListener(() => OnActionButtonClicked(capturedActionType));
+                button.GetComponentInChildren<Text>().text = actionType.ToString();
+            }
+        }
+    }
     public void Init(PieceController pc)
     {
         this.pc = pc;
@@ -55,8 +72,41 @@ public class PieceActionListPanel : SerializedMonoBehaviour
         }
     }
 
-    private void OnEnable()
+    public void Update()
     {
+        if (pc!= null)
+        {
+            // 计算棋子在屏幕中的位置，更新行动面板的位置
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(pc.transform.position);
+            transform.position = screenPos + new Vector3(150, 0, 0);
+        }
+    }
+
+    // private void OnEnable()
+    // {
+    //     foreach (var button in actionButtonDic)
+    //     {
+    //         button.Value.gameObject.SetActive(
+    //             pc.unitAttrCenter.CurMovePoint>=1 && pc.availableActions.Contains(button.Key));
+    //     }
+    //     foreach (var interactArea in pc.interactAreas)
+    //     {
+    //         if (actionButtonDic.ContainsKey(interactArea.actionType))
+    //         {
+    //             actionButtonDic[interactArea.actionType].gameObject.SetActive(true);
+    //             actionButtonDic[interactArea.actionType].onClick.AddListener(()=>interactArea.TriggerAction(pc));
+    //         }
+    //     }
+    //     skillListPanel.SetActive(false);
+    // }
+
+    /// <summary>
+    /// 显示特定棋子的行动面板
+    /// </summary>
+    /// <param name="pc"></param>
+    public void ShowPanel(PieceController pc)
+    {
+        this.pc = pc;
         foreach (var button in actionButtonDic)
         {
             button.Value.gameObject.SetActive(
@@ -67,10 +117,31 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             if (actionButtonDic.ContainsKey(interactArea.actionType))
             {
                 actionButtonDic[interactArea.actionType].gameObject.SetActive(true);
+                actionButtonDic[interactArea.actionType].onClick.RemoveAllListeners();
                 actionButtonDic[interactArea.actionType].onClick.AddListener(()=>interactArea.TriggerAction(pc));
             }
         }
         skillListPanel.SetActive(false);
+        foreach (var skillButton in skillButtons)
+        {
+            skillButton.gameObject.SetActive(false);
+            skillButton.onClick.RemoveAllListeners();
+        }
+        for (int j = 0; j < pc.availableSkills.Count; j++)
+        {
+            // 更新所有技能按钮
+            if (j<skillButtons.Count)
+            {
+                skillButtons[j].gameObject.SetActive(true);
+                skillButtons[j].GetComponentInChildren<Text>().text = pc.availableSkills[j].skillName;
+                int capturedIndex = j; // 捕获当前索引
+                skillButtons[j].onClick.AddListener(() => {
+                    gameObject.SetActive(false);
+                    pc.StartSkillAttack(pc.availableSkills[capturedIndex]);
+                });
+            }
+        }
+        gameObject.SetActive(true);
     }
 
     private void OnActionButtonClicked(ActionType actionType)

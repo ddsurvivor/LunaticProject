@@ -6,19 +6,19 @@ public class ClickManager : MonoBehaviour
 {
     // 正在拖动的棋子
     private PieceController _selectedPiece;
-    
+
     [SerializeField] private RangeUI _rangeUI; // 范围UI
     private float _dragRange = 10f; // 拖动范围限制
     private Vector3 _dragStartPos; // 拖动起始位置
-    
+
     private bool _isDragging = false;
-    
+
     Vector3 point = Vector3.zero;
 
     private void Update()
     {
-        if(! BattleScene.Ins.BM.PlayerController.isInTurn) return;
-        
+        if (!BattleScene.Ins.BM.PlayerController.isInTurn) return;
+
         // 鼠标左键点击时发射射线检测
         if (Input.GetMouseButtonDown(0))
         {
@@ -27,11 +27,13 @@ public class ClickManager : MonoBehaviour
             {
                 return;
             }
+
             if (!_isDragging)
             {
                 ClickPiece();
             }
         }
+
         if (_selectedPiece != null && _isDragging)
         {
             // 判定是否点击到UI
@@ -39,6 +41,7 @@ public class ClickManager : MonoBehaviour
             {
                 return;
             }
+
             DragPiece();
         }
 
@@ -58,27 +61,31 @@ public class ClickManager : MonoBehaviour
             {
                 return;
             }
+
             StopDrag();
         }
-        
+
         // 点击右键取消
-        if (_isDragging && Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1))
         {
-            _selectedPiece.transform.position = _dragStartPos;
-            _selectedPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
-            _selectedPiece = null;
-            _isDragging = false;
-            _rangeUI.CloseRange();
+            if (_isDragging)
+            {
+                _selectedPiece.transform.position = _dragStartPos;
+                _selectedPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
+                _selectedPiece = null;
+                _isDragging = false;
+                _rangeUI.CloseRange();
+            }
+            BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
         }
     }
 
     private void ClickPiece()
     {
-        
         BattleScene.Ins.BM.camera.SetFollow(null);
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit[] hits = Physics.RaycastAll(ray);
-        
+
         foreach (var hit in hits)
         {
             PieceController piece = hit.collider.GetComponent<PieceController>();
@@ -88,7 +95,10 @@ public class ClickManager : MonoBehaviour
             //BattleScene.Ins.BM.camera.SetFollow(piece.transform);
             _selectedPiece = piece;
             Debug.Log($"点击棋子{piece.name}");
-            piece.ShowActionList();
+            //piece.ShowActionList();
+            BattleScene.Ins.UM.ShowPieceActionPanel(piece);
+            BattleScene.Ins.UM.ShowPieceState(piece);
+            BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(piece);
             /*_selectedPiece.StartDrag();
             
             // 显示移动范围
@@ -97,7 +107,7 @@ public class ClickManager : MonoBehaviour
             _rangeUI.ShowCircleRange(_dragStartPos, _dragRange);*/
             return;
         }
-        
+
         //_selectedPiece?.CancelSelect();
         //_selectedPiece = null;
     }
@@ -110,18 +120,22 @@ public class ClickManager : MonoBehaviour
         _isDragging = true;
         // 显示移动范围
         _dragStartPos = _selectedPiece.transform.position;
-        point = _dragStartPos;     
+        point = _dragStartPos;
         _dragRange = _selectedPiece.unitAttrCenter.MoveRange;
         _rangeUI.ShowCircleRange(_dragStartPos, _dragRange);
     }
 
-    
+
     public void DragPiece()
     {
-        if (_selectedPiece == null) {return;}
+        if (_selectedPiece == null)
+        {
+            return;
+        }
+
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit[] hits = Physics.RaycastAll(ray);
-        
+
         foreach (var hit in hits)
         {
             if (hit.collider.CompareTag("Mask")) return;
@@ -132,7 +146,7 @@ public class ClickManager : MonoBehaviour
                 point = hit.point;
             }
         }
-        
+
         // 限制拖动范围
         Vector3 offset = point - _dragStartPos;
         if (offset.magnitude > _dragRange)
@@ -143,7 +157,7 @@ public class ClickManager : MonoBehaviour
 
         _selectedPiece.transform.position = (new Vector3(point.x
             , _selectedPiece.transform.position.y, point.z));
-        
+
         _selectedPiece.CheckFace(_selectedPiece.transform.position - _dragStartPos);
     }
 

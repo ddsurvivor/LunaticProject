@@ -25,6 +25,7 @@ public class PieceController : MonoBehaviour
 
     [Header("配置")] [SerializeField] [ReadOnly]
     private PieceData _pieceData;
+    public PieceData pieceData => _pieceData;
 
     public int pieceID; // 棋子ID
 
@@ -94,7 +95,7 @@ public class PieceController : MonoBehaviour
             unitAttrCenter.Init();
         }
 
-        if (_actionListPanel != null) _actionListPanel.Init(this);
+        //if (_actionListPanel != null) _actionListPanel.Init(this);
         isIdle = true;
         OnInit?.Invoke();
     }
@@ -144,10 +145,11 @@ public class PieceController : MonoBehaviour
 
     public void TurnEnd()
     {
-        if (_actionListPanel != null)
-        {
-            _actionListPanel.gameObject.SetActive(false);
-        }
+        // if (_actionListPanel != null)
+        // {
+        //     _actionListPanel.gameObject.SetActive(false);
+        // }
+        BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
 
         isIdle = true;
         OnTurnEnd?.Invoke();
@@ -156,7 +158,8 @@ public class PieceController : MonoBehaviour
     public void ShowActionList()
     {
         if (!isPlayerPiece) return;
-        _actionListPanel.gameObject.SetActive(true);
+        //_actionListPanel.gameObject.SetActive(true);
+        BattleScene.Ins.UM.pieceActionListPanel.ShowPanel(this);
         BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(this);
         //BattleScene.Ins.UM.infoBox.ShowInfo(this);
     }
@@ -164,7 +167,8 @@ public class PieceController : MonoBehaviour
     public void StartDrag()
     {
         if (!isPlayerPiece) return;
-        _actionListPanel.gameObject.SetActive(false);
+        //_actionListPanel.gameObject.SetActive(false);
+        BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
         if (_curCaverSlot != null)
         {
@@ -197,7 +201,8 @@ public class PieceController : MonoBehaviour
         Debug.Log("取消选择棋子");
         _isAttacking = false;
         rangeUI.CloseRange();
-        _actionListPanel.gameObject.SetActive(false);
+        // _actionListPanel.gameObject.SetActive(false);
+        BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
     }
 
 
