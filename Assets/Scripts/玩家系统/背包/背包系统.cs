@@ -4,6 +4,10 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using XLua;
+
+/// <summary>
+/// 暂时弃用
+/// </summary>
 [LuaCallCSharp]     
 public class 背包系统 : MonoBehaviour
 {

@@ -9,7 +9,13 @@ public class 任务节点 : MonoBehaviour
     public bool 是主线;
     public Sprite[] 按钮节点图片;
     public string[] 前置任务要求;
-    public int[] 前置任务进度要求; 
+    public int[] 前置任务进度要求;
+    
+    // 详细信息
+    public GameObject detialInfoPanel;
+    public Text 任务名称Text;
+    public Text 任务描述Text;
+    public Button 接受任务Button;
     private void OnEnable()
     {
         // GetComponent<Button>().onClick.RemoveAllListeners();
