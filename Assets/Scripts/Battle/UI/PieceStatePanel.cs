@@ -1,16 +1,29 @@
 
+using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class PieceStatePanel : UIPanel
 {
     public PieceController pc;
     
-    public Text nameText;
+    //public Text nameText;
     public Text healthText;
     public Text mpText;
+    public Text ammoText;
     
     public Image healthBar;
     public Image mpBar;
+
+    public void Update()
+    {
+        if (pc != null)
+        {
+            // 计算棋子在屏幕中的位置，更新行动面板的位置
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(pc.transform.position);
+            transform.position = screenPos + new Vector3(0, 100, 0);
+        }
+    }
 
     public void OpenPanel(PieceController pc)
     {
@@ -23,11 +36,12 @@ public class PieceStatePanel : UIPanel
         if (pc != null)
         {
             // 更新显示pc的状态信息
-            nameText.text = pc.pieceData.pieceName;
+            //nameText.text = pc.pieceData.pieceName;
             healthText.text = $"{pc.unitAttrCenter.CurHealth}/{pc.unitAttrCenter.MaxHealth}";
             mpText.text = $"{pc.unitAttrCenter.CurMovePoint}/{pc.unitAttrCenter.MaxMovePoint}";
             healthBar.fillAmount = (float)pc.unitAttrCenter.CurHealth / pc.unitAttrCenter.MaxHealth;
             mpBar.fillAmount = (float)pc.unitAttrCenter.CurMovePoint / pc.unitAttrCenter.MaxMovePoint;
+            ammoText.text =  $"{pc.unitAttrCenter.AmmoCount}/{pc.unitAttrCenter.MaxAmmoCount}";
         }
     }
 }
