@@ -7,8 +7,8 @@ public class SkillPack
 {
     public string skillName;
     public string description;// 技能描述
-    public int mpCost;
-    public int cooldown;
+    [LabelText("能量消耗")]public int mpCost;
+    //public int cooldown;// 冷却时间
     public SkillTarget target;// 作用目标
     public RangeType rangeType;// 作用范围类型
     public float rangeValue;// 范围半径
@@ -20,5 +20,6 @@ public class SkillPack
     public List<BuffPack> buffPacks = new();    // 附加效果列表
     public List<SkillEffect> skillEffects = new(); // 技能特殊效果列表
     public AudioClip skillSound;// 施放音效
+    public List<ItemPack> consumeItems = new(); // 施放消耗道具列表
 
 }

@@ -151,7 +151,6 @@ MonoBehaviour:
       skillName: 
       description: 
       mpCost: 0
-      cooldown: 0
       target: 0
       rangeType: 0
       rangeValue: 0
@@ -167,7 +166,6 @@ MonoBehaviour:
       skillName: 
       description: 
       mpCost: 0
-      cooldown: 0
       target: 0
       rangeType: 0
       rangeValue: 0
@@ -180,8 +178,11 @@ MonoBehaviour:
       skillEffects: 
       skillSound: {fileID: 0}
     maxAmmoCount: 0
+    evasionRate: 0
     skillPacks: []
     elementType: 0
+    initialMana: 0
+    maxMana: 0
   pieceID: 2
   player: {fileID: 0}
   isPlayerPiece: 1
@@ -192,7 +193,6 @@ MonoBehaviour:
     skillName: 
     description: 
     mpCost: 0
-    cooldown: 0
     target: 0
     rangeType: 0
     rangeValue: 0
@@ -520,7 +520,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8316052725672642774}
   m_LocalRotation: {x: 0.35355338, y: -0.35355338, z: 0.1464466, w: 0.8535535}
-  m_LocalPosition: {x: -1.41, y: 2.35, z: 1.48}
+  m_LocalPosition: {x: -0.35, y: 0, z: 0.48}
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -568,7 +568,7 @@ SpriteRenderer:
   m_SortingLayerID: 2062317405
   m_SortingLayer: 3
   m_SortingOrder: 100
-  m_Sprite: {fileID: 21300000, guid: 5db2d72c76c8f1245b07c039ba7fa353, type: 3}
+  m_Sprite: {fileID: 21300000, guid: b6b12bc80f28fc84a92127c3da9fed45, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

@@ -132,9 +132,11 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             // 更新所有技能按钮
             if (j<skillButtons.Count)
             {
-                skillButtons[j].gameObject.SetActive(true);
-                skillButtons[j].GetComponentInChildren<Text>().text = pc.availableSkills[j].skillName;
                 int capturedIndex = j; // 捕获当前索引
+                skillButtons[j].gameObject.SetActive(true);
+                skillButtons[j].enabled = pc.SkillAvailable(pc.availableSkills[capturedIndex]);
+                skillButtons[j].GetComponentInChildren<Text>().text = pc.availableSkills[j].skillName;
+                skillButtons[j].onClick.RemoveAllListeners();
                 skillButtons[j].onClick.AddListener(() => {
                     gameObject.SetActive(false);
                     pc.StartSkillAttack(pc.availableSkills[capturedIndex]);

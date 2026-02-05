@@ -6369,101 +6369,15 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!1 &1449785367 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3815781300908005228, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
+--- !u!114 &1449785373 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1449785373, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
   m_PrefabInstance: {fileID: 3815781300132472897}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1449785372
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1449785367}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e9b4bafbabd7cbf4fae6a144d91f8691, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
-    ReferencedUnityObjects: []
-    SerializedBytesString: 
-    Prefab: {fileID: 0}
-    PrefabModificationsReferencedUnityObjects: []
-    PrefabModifications: []
-    SerializationNodes:
-    - Name: "\u5FAA\u73AF\u97F3\u6548\u5B57\u5178"
-      Entry: 7
-      Data: 0|System.Collections.Generic.Dictionary`2[[System.String, mscorlib],[UnityEngine.GameObject,
-        UnityEngine.CoreModule]], mscorlib
-    - Name: comparer
-      Entry: 7
-      Data: 1|System.Collections.Generic.GenericEqualityComparer`1[[System.String,
-        mscorlib]], mscorlib
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: "\u6240\u6709\u97F3\u6548\u5B57\u5178"
-      Entry: 7
-      Data: 2|System.Collections.Generic.Dictionary`2[[System.String, mscorlib],[System.Collections.Generic.List`1[[UnityEngine.GameObject,
-        UnityEngine.CoreModule]], mscorlib]], mscorlib
-    - Name: comparer
-      Entry: 9
-      Data: 1
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
---- !u!114 &1449785373
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1449785367}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1042f6d44d47427e952afa8b35181e44, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serializationData:
-    SerializedFormat: 2
-    SerializedBytes: 
-    ReferencedUnityObjects: []
-    SerializedBytesString: 
-    Prefab: {fileID: 0}
-    PrefabModificationsReferencedUnityObjects: []
-    PrefabModifications: []
-    SerializationNodes: []
-  battleScene: 
-  endLog: 
-  PLAYERPROFILE: {fileID: 1449785375}
---- !u!114 &1449785375 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3815781300908005233, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
-  m_PrefabInstance: {fileID: 3815781300132472897}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1449785367}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a8205fd312f5eb4dbb9f1767c29339f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1458392653
@@ -9738,6 +9652,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1449785372, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 1449785372, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
+    - target: {fileID: 1449785373, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 1449785373, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
     - target: {fileID: 3815781300908005228, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
       propertyPath: m_Name
       value: "\u5355\u4F8B"

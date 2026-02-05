@@ -27,4 +27,6 @@ public class PieceData
     [LabelText("元素属性")]public PieceElementType elementType;
     [OdinSerialize]
     [LabelText("克制伤害")]public Dictionary<PieceElementType, int> _elementAddDamage = new();// 元素克制加成伤害
+    [LabelText("初始能量值")] public int initialMana;
+    [LabelText("最大能量值")] public int maxMana;
 }

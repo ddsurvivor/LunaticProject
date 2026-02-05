@@ -20,9 +20,9 @@
 
         public void UpdateDisplay()
         {
-            ItemData itemData = GM.Ins.marketSystem.marketItemListSO.GetData(itemPack.itemId);
+            ItemData itemData = GM.Ins.marketSystem.marketItemListSO.GetData(itemPack.itemName);
             image.sprite = itemData.itemIcon;
-            nameText.text = itemData.itemName;
+            nameText.text = itemData.itemName.ToString();
             numText.text = "x" + itemPack.itemNum;
         }
 

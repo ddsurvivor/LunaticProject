@@ -132,6 +132,12 @@ public class PLAYERPROFILE : SerializedMonoBehaviour
         player[2].HPMAX       = 30;         // 生命上限
         player[2].STAYING     = 20;       
         player[2].STAYINGMAX  = 20;   
+        
+        
+        // 道具
+        itemPacks.Clear();
+        itemPacks.Add(new ItemPack(ItemName.能量包, 6));
+        itemPacks.Add(new ItemPack(ItemName.医疗单元I型, 3));
     }
     
 
@@ -240,5 +246,23 @@ public class PLAYERPROFILE : SerializedMonoBehaviour
         // }
 
         return rt;
+    }
+
+    public int GetItemNum(ItemName itemName)
+    {
+        var item = GM.Ins.PLAYERPROFILE.itemPacks
+            .Find(t => t.itemName == itemName);
+        return item != null ? item.itemNum : 0;
+    }
+    public void CostItem(ItemName itemName, int num)
+    {
+        var item = GM.Ins.PLAYERPROFILE.itemPacks
+            .Find(t => t.itemName == itemName);
+        if (item != null)
+        {
+            item.itemNum -= num;
+            if (item.itemNum < 0)
+                item.itemNum = 0;
+        }
     }
 }

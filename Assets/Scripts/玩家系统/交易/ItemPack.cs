@@ -1,6 +1,11 @@
 
     public class ItemPack
     {
-        public int itemId;
+        public ItemName itemName;
         public int itemNum;
+        public ItemPack(ItemName itemName, int itemNum)
+        {
+            this.itemName = itemName;
+            this.itemNum = itemNum;
+        }
     }

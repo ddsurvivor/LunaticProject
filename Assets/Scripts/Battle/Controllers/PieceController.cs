@@ -67,6 +67,7 @@ public class PieceController : MonoBehaviour
     [Header("事件")] public UnityEvent OnInit;
     public UnityEvent OnTurnStart;
     public UnityEvent OnTurnEnd;
+    
 
 
     public void Init(PlayerController player, PieceData pieceData = null)
@@ -443,12 +444,20 @@ public class PieceController : MonoBehaviour
         rangeUI?.ShowSkillRange(skillPack);
         _skillPack = skillPack;
     }
+    public bool SkillAvailable(SkillPack skillPack)
+    {
+        if (!unitAttrCenter.HasMana()) return false;
+        if(!unitAttrCenter.HasItem(skillPack.consumeItems)) return false;
+        return true;
+    }
 
     /// <summary>
     /// 发动技能
     /// </summary>
     public virtual void CastSkill()
     {
+        if(_skillPack == null) return;
+        
         // 根据范围获取所有棋子
         List<PieceController> targets = rangeUI.GetCurTargets;
         if(targets.Count <1 && (_skillPack.target != SkillTarget.Area && _skillPack.target != SkillTarget.Self))
@@ -476,8 +485,9 @@ public class PieceController : MonoBehaviour
             , () =>
             {
                 if (!unitAttrCenter.CostMP()) return;
+                if(!unitAttrCenter.CostMana(_skillPack.mpCost)) return;
+                if(!unitAttrCenter.CostItem(_skillPack.consumeItems)) return;
                 BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack, atkPos.position);
-                
                 // 结束攻击状态
                 _isUsingSkill = false;
                 rangeUI.CloseRange();
