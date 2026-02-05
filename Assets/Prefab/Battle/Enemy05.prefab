@@ -25,8 +25,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 610182326741578693}
   m_LocalRotation: {x: 0.35355338, y: -0.35355338, z: 0.1464466, w: 0.8535535}
-  m_LocalPosition: {x: -1.79, y: 2.8000002, z: 1.9900017}
-  m_LocalScale: {x: -0.5, y: 0.5, z: 0.5}
+  m_LocalPosition: {x: 0.53, y: 0, z: -0.68}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7676897098428941033}
@@ -75,7 +75,7 @@ SpriteRenderer:
   m_SortingOrder: 100
   m_Sprite: {fileID: 21300000, guid: 7f059a8863891374fb6079396e7c2e50, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_FlipX: 0
+  m_FlipX: 1
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 25, y: 25}
@@ -718,6 +718,53 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56f2af82d91b5174789152dc9ad9d86a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects:
+    - {fileID: 21300000, guid: b0548fbe45f56ee47bd4894b74f36ea3, type: 3}
+    - {fileID: 21300000, guid: 2d28348e1fb1e464ca59ed168d305009, type: 3}
+    - {fileID: 21300000, guid: cdc8e8cc34af23e4a8da238f4a9bfe84, type: 3}
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: skillSpriteList
+      Entry: 7
+      Data: 0|System.Collections.Generic.List`1[[System.Collections.Generic.List`1[[UnityEngine.Sprite,
+        UnityEngine.CoreModule]], mscorlib]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 1|System.Collections.Generic.List`1[[UnityEngine.Sprite, UnityEngine.CoreModule]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 3
+    - Name: 
+      Entry: 10
+      Data: 0
+    - Name: 
+      Entry: 10
+      Data: 1
+    - Name: 
+      Entry: 10
+      Data: 2
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
   pieceSpriteRenderer: {fileID: 864119987245996845}
   idleSprite: {fileID: 21300000, guid: 7f059a8863891374fb6079396e7c2e50, type: 3}
   moveSprite: {fileID: 21300000, guid: 43d57b52074cde7488be55c92f8753ac, type: 3}
@@ -738,10 +785,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 6526f2557206bd04b838a9b45890242f, type: 3}
   - {fileID: 21300000, guid: 6526f2557206bd04b838a9b45890242f, type: 3}
   - {fileID: 21300000, guid: d207bd9b9a45d3048b32dde43ef1f04d, type: 3}
-  skillSprites:
-  - {fileID: 21300000, guid: b0548fbe45f56ee47bd4894b74f36ea3, type: 3}
-  - {fileID: 21300000, guid: 2d28348e1fb1e464ca59ed168d305009, type: 3}
-  - {fileID: 21300000, guid: cdc8e8cc34af23e4a8da238f4a9bfe84, type: 3}
   idleBackSprite: {fileID: 21300000, guid: d32a099818069e448893cf70b44306bc, type: 3}
   moveBackSprite: {fileID: 21300000, guid: d26e0a20a0efb3d4fba9d9f948f988d7, type: 3}
   attackBackSprite: {fileID: 0}
@@ -775,7 +818,6 @@ MonoBehaviour:
       skillName: 
       description: 
       mpCost: 0
-      cooldown: 0
       target: 0
       rangeType: 0
       rangeValue: 0
@@ -787,11 +829,11 @@ MonoBehaviour:
       buffPacks: []
       skillEffects: 
       skillSound: {fileID: 0}
+      animationIndex: 0
     rangedAtk:
       skillName: 
       description: 
       mpCost: 0
-      cooldown: 0
       target: 0
       rangeType: 0
       rangeValue: 0
@@ -803,10 +845,13 @@ MonoBehaviour:
       buffPacks: []
       skillEffects: 
       skillSound: {fileID: 0}
+      animationIndex: 0
     maxAmmoCount: 0
     evasionRate: 0
     skillPacks: []
     elementType: 0
+    initialMana: 0
+    maxMana: 0
   pieceID: 1005
   player: {fileID: 0}
   isPlayerPiece: 0
@@ -817,7 +862,6 @@ MonoBehaviour:
     skillName: 
     description: 
     mpCost: 0
-    cooldown: 0
     target: 0
     rangeType: 0
     rangeValue: 0
@@ -829,6 +873,7 @@ MonoBehaviour:
     buffPacks: []
     skillEffects: 
     skillSound: {fileID: 0}
+    animationIndex: 0
   interactAreas: []
   availableActions: 
   availableSkills: []
