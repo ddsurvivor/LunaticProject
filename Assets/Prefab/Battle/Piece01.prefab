@@ -162,6 +162,7 @@ MonoBehaviour:
       buffPacks: []
       skillEffects: 
       skillSound: {fileID: 0}
+      animationIndex: 0
     rangedAtk:
       skillName: 
       description: 
@@ -177,6 +178,7 @@ MonoBehaviour:
       buffPacks: []
       skillEffects: 
       skillSound: {fileID: 0}
+      animationIndex: 0
     maxAmmoCount: 0
     evasionRate: 0
     skillPacks: []
@@ -204,6 +206,7 @@ MonoBehaviour:
     buffPacks: []
     skillEffects: 
     skillSound: {fileID: 0}
+    animationIndex: 0
   interactAreas: []
   availableActions: 
   availableSkills: []
@@ -473,6 +476,45 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56f2af82d91b5174789152dc9ad9d86a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects:
+    - {fileID: 21300000, guid: e326656bdb1e36a4f9dd6bec962f0ab6, type: 3}
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: skillSpriteList
+      Entry: 7
+      Data: 0|System.Collections.Generic.List`1[[System.Collections.Generic.List`1[[UnityEngine.Sprite,
+        UnityEngine.CoreModule]], mscorlib]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 1|System.Collections.Generic.List`1[[UnityEngine.Sprite, UnityEngine.CoreModule]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 10
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
   pieceSpriteRenderer: {fileID: 8316052725672642768}
   idleSprite: {fileID: 21300000, guid: e6046fdc00c400c48a3caa59ee99c8ff, type: 3}
   moveSprite: {fileID: 21300000, guid: dbe6f829ebe806f48b7f2e667d960c50, type: 3}
@@ -488,9 +530,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: fd2e4830f312c474d89c7206a3643a4f, type: 3}
   - {fileID: 21300000, guid: 73d1e7627983a6543ac25f1ae0b487cc, type: 3}
   - {fileID: 21300000, guid: 8d43e5631695146458ba6db836b2197e, type: 3}
-  skillSprites:
-  - {fileID: 21300000, guid: dbe6f829ebe806f48b7f2e667d960c50, type: 3}
-  - {fileID: 21300000, guid: e326656bdb1e36a4f9dd6bec962f0ab6, type: 3}
   idleBackSprite: {fileID: 21300000, guid: 78e9d6e99ed05774db9f4eb466b02694, type: 3}
   moveBackSprite: {fileID: 0}
   attackBackSprite: {fileID: 0}

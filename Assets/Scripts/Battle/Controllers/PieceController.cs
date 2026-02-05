@@ -477,7 +477,8 @@ public class PieceController : MonoBehaviour
         CheckFace(atkPos.transform.position - transform.position);
         Debug.Log($"{this.name}发动技能攻击{_skillPack.skillName}，targets数量：{targets.Count}");
         // 播放技能动画
-        pieceDisplay.ChangeDisplayState(PieceDisplayState.Skill, false, 1f);
+        pieceDisplay.ChangeDisplayState(PieceDisplayState.Skill, false, 1f, 
+            null, _skillPack.animationIndex);
         PlayAudio(_skillPack);
         
         // 延迟0.3f

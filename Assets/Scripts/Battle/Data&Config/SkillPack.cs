@@ -21,5 +21,6 @@ public class SkillPack
     public List<SkillEffect> skillEffects = new(); // 技能特殊效果列表
     public AudioClip skillSound;// 施放音效
     public List<ItemPack> consumeItems = new(); // 施放消耗道具列表
+    public int animationIndex = 0; // 技能动画索引
 
 }

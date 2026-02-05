@@ -1,10 +1,12 @@
 using System;using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class PieceDisplay : MonoBehaviour
+public class PieceDisplay : SerializedMonoBehaviour
 {
     
     // 棋子图片控制脚本，有一个SpriteRenderer用于显示棋子图片
@@ -18,8 +20,10 @@ public class PieceDisplay : MonoBehaviour
     public Sprite dodgeSprite;
     public Sprite hitSprite;
     public List<Sprite> deathSprite;
-    public List<Sprite> skillSprites;
- 
+    [OdinSerialize]
+    public List<List<Sprite>> skillSpriteList = new();
+    
+
     // 每种图片还有背面图
     public Sprite idleBackSprite;
     public Sprite moveBackSprite;
@@ -31,7 +35,8 @@ public class PieceDisplay : MonoBehaviour
     private UnityAction finishAction;
     // 更改显示状态脚本，传入一个状态，和一个持续时间，如果是-1则表示永久更改，否则持续时间结束后恢复到idle状态
     // 如果传入back则显示背面图片
-    public void ChangeDisplayState(PieceDisplayState state, bool back = false, float duration = -1f, UnityAction finish = null)
+    public void ChangeDisplayState(PieceDisplayState state, bool back = false, float duration = -1f,
+        UnityAction finish = null, int index=0)
     {
         //Debug.Log($"ChangeDisplayState: {state}, back: {back}, duration: {duration}");
         if(pieceSpriteRenderer== null) return;
@@ -63,7 +68,7 @@ public class PieceDisplay : MonoBehaviour
                 pieceSpriteRenderer.sprite = back ? hitBackSprite : hitSprite;
                 break;
             case PieceDisplayState.Skill:
-                StartCoroutine(PlaySpriteAnimation(skillSprites, 0.2f));
+                StartCoroutine(PlaySpriteAnimation(skillSpriteList[index], 0.2f));
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(state), state, null);
