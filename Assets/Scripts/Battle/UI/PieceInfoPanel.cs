@@ -21,6 +21,8 @@ using UnityEngine.UI;
     
     [SerializeField][ReadOnly]
     private PieceController piece;
+    
+    public List<BuffCell> buffCells = new();
     public void OnSelectPiece(PieceController piece)
     {
         if(piece.isPlayerPiece== false) return;// 只显示玩家棋子信息
@@ -53,6 +55,24 @@ using UnityEngine.UI;
             }
         }
         ammoNumText.text = piece.unitAttrCenter.AmmoCount.ToString();
+
+        // 更新buff
+        foreach (var buffCell in buffCells)
+        {
+            buffCell.gameObject.SetActive(false);
+        }
+        for (int i = 0; i < piece.unitAttrCenter.buffStates.Count; i++)
+        {
+            if (i < buffCells.Count)
+            {
+                buffCells[i].gameObject.SetActive(true);
+                buffCells[i].SetData(piece.unitAttrCenter.buffStates[i]);
+            }
+            else
+            {
+                break;
+            }
+        }
     }
 
 }
