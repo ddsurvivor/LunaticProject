@@ -18,7 +18,7 @@ public class 剧本System: MonoBehaviour
     public GameObject Content;
     public GameObject 剧本预制体;
     public GameObject 剧本父物体Content;
-    public Image BG,BG_black,SPEAKERBG;
+    public Image BG,BG_black,SPEAKERBG,FULLCG;
     public Text 说话人TextObject;
     public float 起始生成偏移;
     public float 间隔;
@@ -630,6 +630,29 @@ public class 剧本System: MonoBehaviour
                         大地图System.instance.RefreshAllNodes();
                         //大地图System.instance.剧情结束();
                         //大地图System.instance.剧情结束();
+                    }
+
+                    if (key.Contains(Center.Command_FullCG))
+                    {
+                        var prams = 指令切割(key);
+                        if (prams.Length >= 3)
+                        {
+                            // 有淡入淡出类型和自定义时长
+                            int fadeType = Convert.ToInt32(prams[1]);
+                            float duration = float.Parse(prams[2]);
+                            LoadImageWithFade(prams[0], FULLCG, fadeType, duration);
+                        }
+                        else if (prams.Length >= 2)
+                        {
+                            // 有淡入淡出类型，使用默认时长
+                            int fadeType = Convert.ToInt32(prams[1]);
+                            LoadImageWithFade(prams[0], FULLCG, fadeType);
+                        }
+                        else if(prams.Length >= 1)
+                        {
+                            // 使用默认淡出后淡入效果
+                            LoadImageWithFade(prams[0], FULLCG, 3);
+                        }
                     }
                 }
       }

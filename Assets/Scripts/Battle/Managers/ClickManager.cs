@@ -99,6 +99,7 @@ public class ClickManager : MonoBehaviour
             BattleScene.Ins.UM.ShowPieceActionPanel(piece);
             BattleScene.Ins.UM.ShowPieceState(piece);
             BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(piece);
+            BattleScene.Ins.BM.camera.SetFollow(piece.transform);
             /*_selectedPiece.StartDrag();
             
             // 显示移动范围

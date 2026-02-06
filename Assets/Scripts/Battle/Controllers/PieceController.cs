@@ -177,11 +177,11 @@ public class PieceController : MonoBehaviour
             _curCaverSlot = null;
         }
 
-        if (_curLadderArea != null)
-        {
-            _curLadderArea.LeaveSlot(this);
-            _curLadderArea = null;
-        }
+        // if (_curLadderArea != null)
+        // {
+        //     _curLadderArea.LeaveSlot(this);
+        //     _curLadderArea = null;
+        // }
         //BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(this);
         //BattleScene.Ins.UM.teamPanel.OnSelectPiece(pieceID);
     }

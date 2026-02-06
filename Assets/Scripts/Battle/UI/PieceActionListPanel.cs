@@ -106,6 +106,10 @@ public class PieceActionListPanel : SerializedMonoBehaviour
     /// <param name="pc"></param>
     public void ShowPanel(PieceController pc)
     {
+        if (pc.unitAttrCenter.CurMovePoint<1)
+        {
+            return;
+        }
         this.pc = pc;
         foreach (var button in actionButtonDic)
         {
@@ -116,7 +120,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
         {
             if (actionButtonDic.ContainsKey(interactArea.actionType))
             {
-                actionButtonDic[interactArea.actionType].gameObject.SetActive(true);
+                actionButtonDic[interactArea.actionType].gameObject.SetActive(pc.unitAttrCenter.CurMovePoint>=1);
                 actionButtonDic[interactArea.actionType].onClick.RemoveAllListeners();
                 actionButtonDic[interactArea.actionType].onClick.AddListener(()=>interactArea.TriggerAction(pc));
             }

@@ -41,7 +41,7 @@ public class BattleManager : MonoBehaviour
             PlayerStart();
         }
 
-        CheckAllLadderMove(PlayerController.isInTurn);
+        //CheckAllLadderMove(PlayerController.isInTurn);
         CheckAllArea();
     }
 
@@ -265,13 +265,13 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    public void CheckAllLadderMove(bool isPlayerTurn)
+    /*public void CheckAllLadderMove(bool isPlayerTurn)
     {
         foreach (var ladder in ladderAreas)
         {
             ladder.StartMove(isPlayerTurn);
         }
-    }
+    }*/
 
     public void ApplySKillEffect(SkillPack skillPack, PieceController caster = null
         , Vector3 targetPos = default)
