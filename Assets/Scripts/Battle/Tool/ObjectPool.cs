@@ -19,6 +19,9 @@ public enum ItemType
     ENERGY_ATTACK=12,
     // 动能攻击特效
     KINETIC_ATTACK=13,
+    HEAL_SKILL=14,
+    // 等离子爆炸
+    PLASMA_EXPLOSION=15,
     
     // 治疗区域
     HEAL_AREA=20,
