@@ -139,7 +139,7 @@ public class RangeUI : MonoBehaviour
         if (skillIcon.activeInHierarchy) // 单体敌人锁定
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+            Plane groundPlane = new Plane(Vector3.up, new Vector3(0, transform.position.y, 0));
             if (groundPlane.Raycast(ray, out float enter))
             {
                 Vector3 hitPoint = ray.GetPoint(enter);
@@ -158,7 +158,7 @@ public class RangeUI : MonoBehaviour
         if (grenadeCircle.activeInHierarchy) // 爆炸范围锁定
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+            Plane groundPlane = new Plane(Vector3.up, new Vector3(0, transform.position.y, 0));
             if (groundPlane.Raycast(ray, out float enter))
             {
                 Vector3 hitPoint = ray.GetPoint(enter);
@@ -178,12 +178,12 @@ public class RangeUI : MonoBehaviour
         if (fanRoot.activeInHierarchy) // 扇形范围锁定
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+            Plane groundPlane = new Plane(Vector3.up, new Vector3(0, transform.position.y, 0));
             if (groundPlane.Raycast(ray, out float enter))
             {
                 Vector3 hitPoint = ray.GetPoint(enter);
                 Vector3 direction = hitPoint - transform.position;
-                direction.y = 0f; // 忽略y轴，只在xz平面
+                direction.y = 0; // 忽略y轴，只在xz平面
                 fanRoot.transform.localRotation = Quaternion.LookRotation(direction, Vector3.up);
             }
         }

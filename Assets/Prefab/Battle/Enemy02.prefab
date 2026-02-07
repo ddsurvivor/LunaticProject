@@ -398,6 +398,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56f2af82d91b5174789152dc9ad9d86a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: skillSpriteList
+      Entry: 7
+      Data: 0|System.Collections.Generic.List`1[[System.Collections.Generic.List`1[[UnityEngine.Sprite,
+        UnityEngine.CoreModule]], mscorlib]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
   pieceSpriteRenderer: {fileID: 1142199792870587360}
   idleSprite: {fileID: 21300000, guid: ab955d86836f0bd4c999facdf3fa36bf, type: 3}
   moveSprite: {fileID: 21300000, guid: 443f1e27738fa83488db2a316863702b, type: 3}
@@ -415,7 +437,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 6813dab69a3a87e4493b3eee9b9ed83d, type: 3}
   - {fileID: 21300000, guid: f8be390886e5caf4aa0075c1a06686d8, type: 3}
   - {fileID: 21300000, guid: c502ac38fb4bb594798a2c8231dd8121, type: 3}
-  skillSprites: []
   idleBackSprite: {fileID: 0}
   moveBackSprite: {fileID: 21300000, guid: d26e0a20a0efb3d4fba9d9f948f988d7, type: 3}
   attackBackSprite: {fileID: 0}
@@ -449,7 +470,6 @@ MonoBehaviour:
       skillName: 
       description: 
       mpCost: 0
-      cooldown: 0
       target: 0
       rangeType: 0
       rangeValue: 0
@@ -461,11 +481,11 @@ MonoBehaviour:
       buffPacks: []
       skillEffects: 
       skillSound: {fileID: 0}
+      animationIndex: 0
     rangedAtk:
       skillName: 
       description: 
       mpCost: 0
-      cooldown: 0
       target: 0
       rangeType: 0
       rangeValue: 0
@@ -477,10 +497,13 @@ MonoBehaviour:
       buffPacks: []
       skillEffects: 
       skillSound: {fileID: 0}
+      animationIndex: 0
     maxAmmoCount: 0
     evasionRate: 0
     skillPacks: []
     elementType: 0
+    initialMana: 0
+    maxMana: 0
   pieceID: 1002
   player: {fileID: 0}
   isPlayerPiece: 0
@@ -491,7 +514,6 @@ MonoBehaviour:
     skillName: 
     description: 
     mpCost: 0
-    cooldown: 0
     target: 0
     rangeType: 0
     rangeValue: 0
@@ -503,6 +525,7 @@ MonoBehaviour:
     buffPacks: []
     skillEffects: 
     skillSound: {fileID: 0}
+    animationIndex: 0
   interactAreas: []
   availableActions: 
   availableSkills: []
@@ -921,7 +944,7 @@ SpriteRenderer:
   m_SortingOrder: 100
   m_Sprite: {fileID: 21300000, guid: ab955d86836f0bd4c999facdf3fa36bf, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_FlipX: 0
+  m_FlipX: 1
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 25, y: 25}
