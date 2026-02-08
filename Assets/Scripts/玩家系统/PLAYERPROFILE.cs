@@ -248,6 +248,8 @@ public class PLAYERPROFILE : SerializedMonoBehaviour
         return rt;
     }
 
+
+    #region 仓库存档
     public int GetItemNum(ItemName itemName)
     {
         var item = GM.Ins.PLAYERPROFILE.itemPacks
@@ -265,4 +267,20 @@ public class PLAYERPROFILE : SerializedMonoBehaviour
                 item.itemNum = 0;
         }
     }
+    
+    public void AddItem(ItemName itemName, int num)
+    {
+        var item = GM.Ins.PLAYERPROFILE.itemPacks
+            .Find(t => t.itemName == itemName);
+        if (item != null)
+        {
+            item.itemNum += num;
+        }
+        else
+        {
+            GM.Ins.PLAYERPROFILE.itemPacks
+                .Add(new ItemPack(itemName, num));
+        }
+    }
+    #endregion 
 }

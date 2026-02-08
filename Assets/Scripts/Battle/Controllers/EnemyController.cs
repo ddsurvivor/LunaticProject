@@ -29,6 +29,7 @@ public class EnemyController : PieceController
     public override void Dead()
     {
         Debug.Log($"{this.name} 死亡");
+        OnDead?.Invoke();
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Death, false, -1, () =>
         {
             if (!deadNotDelete)

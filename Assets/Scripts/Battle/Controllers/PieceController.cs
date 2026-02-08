@@ -64,10 +64,11 @@ public class PieceController : MonoBehaviour
 
     public bool isIdle; // 是否处于待机状态
 
-    [Header("事件")] public UnityEvent OnInit;
-    public UnityEvent OnTurnStart;
-    public UnityEvent OnTurnEnd;
-    
+    [FoldoutGroup("事件")]
+    public UnityEvent OnInit;
+    [FoldoutGroup("事件")]public UnityEvent OnTurnStart;
+    [FoldoutGroup("事件")]public UnityEvent OnTurnEnd;
+    [FoldoutGroup("事件")]public UnityEvent OnDead;
 
 
     public void Init(PlayerController player, PieceData pieceData = null)
@@ -414,6 +415,7 @@ public class PieceController : MonoBehaviour
     public virtual void Dead()
     {
         Debug.Log($"{this.name} 死亡");
+        OnDead?.Invoke();
         if(uiCanvas!= null) uiCanvas.SetActive(false);
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Death, false, -1, () =>
         {

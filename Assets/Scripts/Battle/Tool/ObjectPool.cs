@@ -25,6 +25,9 @@ public enum ItemType
     
     // 治疗区域
     HEAL_AREA=20,
+    
+    // 物品拾取
+    PICKABLE_ITEM=30,
 }
 /// <summary>
 /// 对象池

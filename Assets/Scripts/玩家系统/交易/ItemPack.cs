@@ -1,4 +1,5 @@
 
+[System.Serializable]
     public class ItemPack
     {
         public ItemName itemName;
