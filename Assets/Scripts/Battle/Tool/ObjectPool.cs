@@ -22,7 +22,9 @@ public enum ItemType
     HEAL_SKILL=14,
     // 等离子爆炸
     PLASMA_EXPLOSION=15,
-    
+    // 燃烧特效
+    FLAME_EFFECT=16,
+
     // 治疗区域
     HEAL_AREA=20,
     
