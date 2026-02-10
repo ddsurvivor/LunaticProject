@@ -299,7 +299,7 @@ public class 剧本System: MonoBehaviour
                     if (key.Contains(Center.Command_Modify))
                     {
                         var prams = 指令切割(key);
-                       PLAYERPROFILE.修改属性(Convert.ToInt32(prams[0]),prams[1],Convert.ToInt32(prams[2]));
+                       GM.Ins.PLAYERPROFILE.修改属性(Convert.ToInt32(prams[0]),prams[1],Convert.ToInt32(prams[2]));
                     }
                     if (key.Contains(Center.Command_background))
                     {
@@ -346,7 +346,7 @@ public class 剧本System: MonoBehaviour
                         int 修改结果=Convert.ToInt32(prams[6]);
                         string 失败修改变量 = prams[7];
                         int 修改结果F=Convert.ToInt32(prams[8]);
-                        int 修正值 = PLAYERPROFILE.获取数据<int>(被检定属性,检定角色);
+                        int 修正值 = GM.Ins.PLAYERPROFILE.获取数据<int>(被检定属性,检定角色);
                         int 随机值 = 0;
                         for (int i = 0; i < 骰子数量; i++)
                         {
@@ -413,7 +413,8 @@ public class 剧本System: MonoBehaviour
                         var prams = 指令切割(key);
                         已储存剧本 = 读取表格数据(prams[0], Center.Languageint);
                         curPartName = prams[0];
-                        进度System.存档("cache");
+                        // 自动保存
+                        //进度System.存档("cache");
                         记录上段剧情 = 已储存剧本;
                         try
                         {
@@ -432,7 +433,8 @@ public class 剧本System: MonoBehaviour
                     if (key.Contains(Center.Command_Gameover))
                     {
                         大地图System.instance.失败();
-                        进度System.存档("读档");
+                        // 自动保存
+                        //进度System.存档("读档");
                         已储存剧本 = 记录上段剧情;
                         刷新();
                     }
@@ -628,6 +630,7 @@ public class 剧本System: MonoBehaviour
                         GM.Ins.PLAYERPROFILE.保存任务进度(prams[0], result);
                         // 重新刷新任务节点
                         大地图System.instance.RefreshAllNodes();
+                        // 自动保存
                         //大地图System.instance.剧情结束();
                         //大地图System.instance.剧情结束();
                     }

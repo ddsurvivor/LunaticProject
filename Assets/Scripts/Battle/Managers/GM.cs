@@ -3,6 +3,8 @@
     using UnityEngine;
 using UnityEngine.SceneManagement;
     using Sirenix.OdinInspector;
+    using Sirenix.Serialization;
+
     public class GM: MonoSingleton<GM>
     {
         // 战斗切换
@@ -10,9 +12,11 @@ using UnityEngine.SceneManagement;
         public string battleScene;
         [ReadOnly]
         public string endLog;
+        [OdinSerialize]
         public PLAYERPROFILE PLAYERPROFILE;
         
         // 系统
+        public DataManager DM;
         public MarketSystem marketSystem;
 
 

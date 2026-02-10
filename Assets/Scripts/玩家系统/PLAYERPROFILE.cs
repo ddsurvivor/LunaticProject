@@ -2,81 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 using UnityEngine;
 
-public class PLAYERPROFILE : SerializedMonoBehaviour
+/// <summary>
+/// 玩家存档文件
+/// </summary>
+[System.Serializable]
+public class PLAYERPROFILE
 {
     //public static PLAYERPROFILE instance;
+    [OdinSerialize]
     public Dictionary<string, int> finishNodeDic=new Dictionary<string, int>();
-    public struct Player
-    {
-        private string name;
-        private int hp;
-        private int _hpmax;
-        private int staying;
-        private int stayingMax;
-        private int yizhi;
-		private int tactics;//作战
-        int Physique;//体能
-        private int Talk;//沟通
-        private int Recognition;//模式识别
-
-        public string NAME
-        {
-            get { return name; }
-            set { name = value; }
-        }
-        public int HPMAX
-        {
-            get { return _hpmax; }
-            set { _hpmax = value; }
-        }
-
-
-        public int HP
-        {
-            get { return hp; }
-            set { hp = value; }
-        }
-        public int STAYING
-        {
-            get { return staying; }
-            set { staying = value; }
-        }
-        public int STAYINGMAX
-        {
-            get { return stayingMax; }
-            set { stayingMax = value; }
-        }
-        public int YIZHI
-        {
-            get { return yizhi; }
-            set { yizhi = value; }
-        }
-		public int TACTICS
-		{
- 			get { return tactics; }
-            set { tactics = value; }
-		}
-        public int PHYSIQUE
-        {
-            get { return Physique; }
-            set { Physique = value; }
-        }
-        public int TALK
-        {
-            get { return Talk; }
-            set { Talk = value; }
-        }
-
-        public int RECOGNITION
-        {
-            get { return Recognition; }
-            set { Recognition = value; }    
-        }
-    }
-
-    public static Player[] player = new Player[20];
+    
+    /// <summary>
+    /// 棋子角色数据
+    /// </summary>
+    public Player[] player = new Player[20];
 
     [Header("进度存档")]
     public int date = 0;
@@ -86,13 +28,15 @@ public class PLAYERPROFILE : SerializedMonoBehaviour
 
     [Header("道具存档")] 
     public List<ItemPack> itemPacks = new();
+    
+    public DateTime lastSaveTime;
 
 
-    private void Awake()
-    {
-        //instance = this;
-        新游戏初始化数值();
-    }
+    // private void Awake()
+    // {
+    //     //instance = this;
+    //     新游戏初始化数值();
+    // }
 
     public void 新游戏初始化数值()
     {
@@ -153,7 +97,7 @@ public class PLAYERPROFILE : SerializedMonoBehaviour
         }
     }
     
-    public static void 修改属性(int index, string fieldName, int value)
+    public void 修改属性(int index, string fieldName, int value)
     {
         if (index < 0 || index >= player.Length)
         {
@@ -180,7 +124,7 @@ public class PLAYERPROFILE : SerializedMonoBehaviour
         Debug.Log($"修改属性测试: {index} 的 {fieldName} 从 {oldVal} 改为 {newVal}");
     }
 
-    public static T 获取数据<T>(string fieldName, int index)
+    public T 获取数据<T>(string fieldName, int index)
     {
         Player[] players = player;
 

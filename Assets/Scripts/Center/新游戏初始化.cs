@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 已弃用
+/// </summary>
 public class 新游戏初始化 : MonoBehaviour
 {
     public void Awake()
@@ -13,11 +16,11 @@ public class 新游戏初始化 : MonoBehaviour
 
     private void Init()
     {
-        PLAYERPROFILE.player[0] = new PLAYERPROFILE.Player();
-        PLAYERPROFILE.player[0] .NAME = "qiuwu";
-        PLAYERPROFILE.player[0] .HP = 6;
-        PLAYERPROFILE.player[0] .PHYSIQUE = 4;
-        PLAYERPROFILE.player[0] .TACTICS = 5;
-        PLAYERPROFILE.player[0] .YIZHI = 3;
+        // PLAYERPROFILE.player[0] = new PLAYERPROFILE.Player();
+        // PLAYERPROFILE.player[0] .NAME = "qiuwu";
+        // PLAYERPROFILE.player[0] .HP = 6;
+        // PLAYERPROFILE.player[0] .PHYSIQUE = 4;
+        // PLAYERPROFILE.player[0] .TACTICS = 5;
+        // PLAYERPROFILE.player[0] .YIZHI = 3;
     }
 }

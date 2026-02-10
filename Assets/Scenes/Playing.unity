@@ -1196,12 +1196,12 @@ RectTransform:
   m_LocalScale: {x: 0.4114814, y: 0.4114814, z: 0.4114814}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 495632249}
-  m_RootOrder: 1
+  m_Father: {fileID: 912389794}
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -206, y: 65}
+  m_AnchoredPosition: {x: -471, y: 0}
   m_SizeDelta: {x: 3052.751, y: 1365.3906}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!95 &379461296
@@ -1895,8 +1895,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 912389794}
-  - {fileID: 379461295}
-  - {fileID: 1439133433}
   m_Father: {fileID: 1840832286}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3437,6 +3435,8 @@ RectTransform:
   - {fileID: 939057330}
   - {fileID: 197402379}
   - {fileID: 165800381}
+  - {fileID: 379461295}
+  - {fileID: 1439133433}
   m_Father: {fileID: 495632249}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -6469,12 +6469,12 @@ RectTransform:
   m_LocalScale: {x: 0.4114814, y: 0.7619401, z: 0.4114814}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 495632249}
-  m_RootOrder: 2
+  m_Father: {fileID: 912389794}
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1174, y: 228}
+  m_AnchoredPosition: {x: 909, y: 163}
   m_SizeDelta: {x: 3052.751, y: 1365.3906}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!95 &1439133434
@@ -9936,6 +9936,26 @@ PrefabInstance:
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 1449785373, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
+    - target: {fileID: 1449785373, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
+      propertyPath: serializationData.PrefabModifications.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1449785373, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
+      propertyPath: serializationData.PrefabModifications.Array.data[0]
+      value: '"path":"PLAYERPROFILE.player","value":{"$id":0,"$type":"Player[], Assembly-CSharp","$rlength":0,"$rcontent":[]}'
+      objectReference: {fileID: 0}
+    - target: {fileID: 1449785373, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
+      propertyPath: serializationData.PrefabModificationsReferencedUnityObjects.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 640456764101210058, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
+      propertyPath: playerprofiles.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 640456764101210058, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
+      propertyPath: playerprofiles.Array.data[0].currentMap
+      value: TEST
+      objectReference: {fileID: 0}
     - target: {fileID: 3815781300908005228, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
       propertyPath: m_Name
       value: "\u5355\u4F8B"
@@ -9984,9 +10004,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3815781300908005233, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
+    - target: {fileID: 0}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 3815781300908005233, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
