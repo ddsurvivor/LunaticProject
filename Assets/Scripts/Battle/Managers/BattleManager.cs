@@ -9,6 +9,7 @@ public class BattleManager : MonoBehaviour
     public CameraController camera;
     public BuffManager buffManager;
     public SkillManager skillManager;
+    public SpriteManager spriteManager;
 
     public PieceDataListSO pieceDataListSO;
 

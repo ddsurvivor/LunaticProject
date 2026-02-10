@@ -11,7 +11,7 @@ public class BuffCell : MonoBehaviour
     public void SetData(BuffState buffState)
     {
         // 加载图标
-        //icon.sprite = buffState.buffData.icon;
+        icon.sprite = BattleScene.Ins.BM.spriteManager.GetBuffIcon(buffState.buffType);
         if (buffState.stacks >= 1)
         {
             countText.text = buffState.stacks.ToString();
