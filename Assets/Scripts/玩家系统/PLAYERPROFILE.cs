@@ -31,6 +31,7 @@ public class PLAYERPROFILE
     
     public DateTime lastSaveTime;
 
+    public bool isNewGame = false;
 
     // private void Awake()
     // {
@@ -41,6 +42,7 @@ public class PLAYERPROFILE
     public void 新游戏初始化数值()
     {
         Debug.Log("检测为新游戏,初始化数值");
+        player = new Player[20];
         player[0] = new Player();
         player[0].NAME = "QIUWU";
         player[0].HP = 15;//体力
@@ -82,6 +84,9 @@ public class PLAYERPROFILE
         itemPacks.Clear();
         itemPacks.Add(new ItemPack(ItemName.能量包, 6));
         itemPacks.Add(new ItemPack(ItemName.医疗单元I型, 3));
+        
+        //初始化
+        isNewGame = true;
     }
     
 

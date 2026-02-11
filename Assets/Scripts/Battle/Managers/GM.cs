@@ -1,4 +1,5 @@
 
+    using System;
     using System.Collections;
     using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -19,6 +20,11 @@ using UnityEngine.SceneManagement;
         public DataManager DM;
         public MarketSystem marketSystem;
 
+        private void Start()
+        {
+            DM.Init();
+            PLAYERPROFILE.新游戏初始化数值();
+        }
 
         public void StartBattle(string battleScene, string endLog)
         {
@@ -39,6 +45,12 @@ using UnityEngine.SceneManagement;
         {
             StartCoroutine(LoadSceneCoroutine());
         }
+
+        public void LoadPlayingScene()
+        {
+            StartCoroutine(LoadSceneCoroutine());
+        }
+        
         
         IEnumerator LoadSceneCoroutine()
         {

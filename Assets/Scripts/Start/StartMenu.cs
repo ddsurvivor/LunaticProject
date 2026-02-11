@@ -6,6 +6,8 @@ using UnityEngine.SceneManagement;
 public class StartMenu : MonoBehaviour
 {
     public string startLevelName;
+
+    public SavePanel savePanel;
     // Start is called before the first frame update
     void Start()
     {
@@ -33,5 +35,10 @@ public class StartMenu : MonoBehaviour
 #else
             Application.Quit();
 #endif
+    }
+    
+    public void OnClickContinue()
+    {
+        savePanel.gameObject.SetActive(true);
     }
 }

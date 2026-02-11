@@ -14,7 +14,7 @@ public class DaytimeSystem : SerializedMonoBehaviour
     
     public Text dateText;
     public Image dateImage;
-    public Dictionary<Daytime, Sprite> daytimeSprites = new Dictionary<Daytime, Sprite>();
+    public Dictionary<Daytime, GameObject> daytimeSprites = new ();
 
     private void Start()
     {
@@ -26,7 +26,9 @@ public class DaytimeSystem : SerializedMonoBehaviour
         if (cost == 3)// 特殊差分
         {
             GM.Ins.PLAYERPROFILE.daytime = Daytime.轰炸;
-            dateImage.sprite = daytimeSprites[GM.Ins.PLAYERPROFILE.daytime];
+            CloseAllSprite();
+            daytimeSprites[GM.Ins.PLAYERPROFILE.daytime].SetActive(true);
+            //dateImage.sprite = daytimeSprites[GM.Ins.PLAYERPROFILE.daytime];
             return;
         }
         // 日期向前推进
@@ -51,7 +53,16 @@ public class DaytimeSystem : SerializedMonoBehaviour
         dateText.text = $"{startYear}  /  {startMonth}  /  {startDay + GM.Ins.PLAYERPROFILE.date} 【{GM.Ins.PLAYERPROFILE.daytime}】";
         if (daytimeSprites.ContainsKey(GM.Ins.PLAYERPROFILE.daytime))
         {
-            dateImage.sprite = daytimeSprites[GM.Ins.PLAYERPROFILE.daytime];
+            CloseAllSprite();
+            daytimeSprites[GM.Ins.PLAYERPROFILE.daytime].SetActive(true);
+        }
+    }
+    
+    private void CloseAllSprite()
+    {
+        foreach (var sprite in daytimeSprites.Values)
+        {
+            sprite.SetActive(false);
         }
     }
 }
