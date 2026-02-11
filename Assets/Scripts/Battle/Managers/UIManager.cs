@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,6 +15,9 @@ public class UIManager : MonoBehaviour
         public Text turnNumberText;
         public PieceActionListPanel pieceActionListPanel;
         public PieceStatePanel pieceStatePanel;
+
+        public RectTransform skillNameDisplay;
+        public Text skillNamText;
 
         public void Init()
         {
@@ -49,5 +53,16 @@ public class UIManager : MonoBehaviour
             Vector3 screenPos = Camera.main.WorldToScreenPoint(pc.transform.position);
             pieceStatePanel.transform.position = screenPos + new Vector3(0, 100, 0);
             pieceStatePanel.OpenPanel(pc);
+        }
+
+        public void PopSkillName(string skillName)
+        {
+            skillNamText.text = skillName;
+            skillNameDisplay.gameObject.SetActive(true);
+            Sequence seq = DOTween.Sequence();
+            
+            seq.Append(skillNameDisplay.DOMoveX(280, 0.3f));
+            seq.AppendInterval(1f);
+            seq.Append(skillNameDisplay.DOMoveX(-280, 0.3f));
         }
     }

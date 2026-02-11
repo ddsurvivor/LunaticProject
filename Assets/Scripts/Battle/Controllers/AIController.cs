@@ -275,6 +275,7 @@ public class AIController : PlayerController
                     // 释放技能
                     aiPiece.StartSkillAttack(skillPack);
                     aiPiece.CastSkillOnTarget(target, skillPack);
+                    BattleScene.Ins.UM.PopSkillName(skillPack.skillName);
                     return;
                 }
                 else

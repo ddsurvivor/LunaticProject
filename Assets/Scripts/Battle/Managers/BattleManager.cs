@@ -116,6 +116,7 @@ public class BattleManager : MonoBehaviour
     public void PieceSkill(PieceController attacker, List<PieceController> targets
         , SkillPack skillPack, Vector3 targetPos = default)
     {
+        BattleScene.Ins.UM.PopSkillName(skillPack.skillName);
         foreach (var target in targets)
         {
             Debug.Log($"Skill Attack: Attacker={attacker.name}, Target={target.name}");
