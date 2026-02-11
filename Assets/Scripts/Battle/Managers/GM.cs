@@ -23,6 +23,8 @@ using UnityEngine.SceneManagement;
         private void Start()
         {
             DM.Init();
+            // 临时使用全新游戏存档
+            PLAYERPROFILE = new PLAYERPROFILE();
             PLAYERPROFILE.新游戏初始化数值();
         }
 

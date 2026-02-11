@@ -15,6 +15,7 @@ public class PLAYERPROFILE
     [OdinSerialize]
     public Dictionary<string, int> finishNodeDic=new Dictionary<string, int>();
     
+    [OdinSerialize]
     /// <summary>
     /// 棋子角色数据
     /// </summary>

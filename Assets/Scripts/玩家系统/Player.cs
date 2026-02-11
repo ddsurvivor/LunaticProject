@@ -1,19 +1,22 @@
 
+using Sirenix.OdinInspector;
+
+[System.Serializable]
 /// <summary>
 /// 玩家棋子存档数据
 /// </summary>
 public struct Player
 {
-    private string name;
-    private int hp;
-    private int _hpmax;
-    private int staying;
-    private int stayingMax;
-    private int yizhi;
-    private int tactics;//作战
-    int Physique;//体能
-    private int Talk;//沟通
-    private int Recognition;//模式识别
+    [ShowInInspector][ReadOnly]private string name;
+    [ShowInInspector][ReadOnly]private int hp;
+    [ShowInInspector][ReadOnly]private int _hpmax;
+    [ShowInInspector][ReadOnly]private int staying;
+    [ShowInInspector][ReadOnly]private int stayingMax;
+    [ShowInInspector][ReadOnly]private int yizhi;
+    [ShowInInspector][ReadOnly]private int tactics;//作战
+    [ShowInInspector][ReadOnly]int Physique;//体能
+    [ShowInInspector][ReadOnly]private int Talk;//沟通
+    [ShowInInspector][ReadOnly]private int Recognition;//模式识别
 
     public string NAME
     {

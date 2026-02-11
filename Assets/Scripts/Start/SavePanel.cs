@@ -9,7 +9,7 @@ public class SavePanel : UIPanel
         base.UpdateDisplay();
         for (int i = 0; i < saveCells.Count; i++)
         {
-            if (i < GM.Ins.DM.playerprofiles.Count)
+            if (GM.Ins.DM.playerprofiles.ContainsKey(i))
             {
                 var playerprofile = GM.Ins.DM.playerprofiles[i];
                 saveCells[i].SetData(playerprofile.lastSaveTime.ToString("yyyy-MM-dd HH:mm:ss"));

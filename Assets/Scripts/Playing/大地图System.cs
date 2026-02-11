@@ -73,6 +73,7 @@ public class 大地图System : SerializedMonoBehaviour
         是可以点击地图事件 = true;
         instance = this;
         Debug.Log("测试中,打开第一张地图");
+        // TODO:根据存档打开地图
         打开地图("TEST");
     }
 

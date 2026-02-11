@@ -9,6 +9,7 @@ public class DataManager : SerializedMonoBehaviour
     [OdinSerialize]
     public Dictionary<int, PLAYERPROFILE> playerprofiles = new();
     private string savePath = Application.streamingAssetsPath + "/Datas/";
+    // 发布时改为 Application.persistentDataPath + "/Datas/";
     private int saveSlotCount = 10;
     public void Init()
     {
@@ -22,7 +23,6 @@ public class DataManager : SerializedMonoBehaviour
         playerprofiles.Clear();
         for (int i = 0; i < saveSlotCount; i++)
         {
-            
             int j = i;
             PLAYERPROFILE playerprofile = JsonTool.LoadJson<PLAYERPROFILE>(savePath + $"PlayerProfiles_{j}.json");
             if(playerprofile == null) continue;
@@ -39,4 +39,10 @@ public class DataManager : SerializedMonoBehaviour
     {
         JsonTool.SaveJson(GM.Ins.PLAYERPROFILE,savePath + $"PlayerProfiles_{index}.json");
     }
+    // [Button("ES3测试保存")]
+    // public void ES3SaveDate(int index)
+    // {
+    //     string path = savePath + $"PlayerProfiles_{index}.json";
+    //     ES3.Save("PlayerProfile", GM.Ins.PLAYERPROFILE, path);
+    // }
 }

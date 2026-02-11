@@ -14,7 +14,7 @@ public class SaveCell : SavePanel
     }
     public void OnClickLoad()
     {
-        if (index< GM.Ins.DM.playerprofiles.Count)
+        if (GM.Ins.DM.playerprofiles.ContainsKey(index))
         {
             // 加载当前存档到玩家数据
             GM.Ins.PLAYERPROFILE = GM.Ins.DM.playerprofiles[index];
