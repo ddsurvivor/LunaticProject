@@ -9,14 +9,14 @@ public class MarketSystem : MonoBehaviour
     /// 道具数据
     /// </summary>
     public MarketItemListSO marketItemListSO;
-    public GameObject inventoryPanel;
+    public InventoryPanel inventoryPanel;
     public GameObject marketPanel;
     public MarketItemCell marketItemCellPrefab;
     
     // 打开背包面板
     public void OpenInventoryPanel()
     {
-        inventoryPanel.SetActive(true);
+        inventoryPanel.gameObject.SetActive(true);
         // 根据玩家存档刷新背包显示
     }
     

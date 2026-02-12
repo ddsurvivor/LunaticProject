@@ -24,6 +24,7 @@ public class ItemData
     public Sprite itemIcon;
     public EquipType itemType; // 道具类别
     public UseType useType; // 使用类别
+    public int price; // 价格
 }
 
 public enum ItemName
@@ -34,6 +35,7 @@ public enum ItemName
     能量包,
     医疗单元I型,
     专速达,
+    礼盒,
 }
 
 // 装备类别
