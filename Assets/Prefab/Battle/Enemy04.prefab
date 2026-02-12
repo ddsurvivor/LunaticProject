@@ -398,13 +398,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56f2af82d91b5174789152dc9ad9d86a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: skillSpriteList
+      Entry: 7
+      Data: 0|System.Collections.Generic.List`1[[System.Collections.Generic.List`1[[UnityEngine.Sprite,
+        UnityEngine.CoreModule]], mscorlib]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
   pieceSpriteRenderer: {fileID: 1142199792870587360}
   idleSprite: {fileID: 21300000, guid: c8b0d8bc39ba69e4e91616b5535aa03d, type: 3}
   moveSprite: {fileID: 21300000, guid: 08f41eab5f1b6604ab7c65136026427f, type: 3}
   attackSprite:
   - {fileID: 21300000, guid: eeca494b770370b41891f28e3a77f84a, type: 3}
-  - {fileID: 21300000, guid: 078a0dd4f0207ba49bf4082fc11a130f, type: 3}
-  - {fileID: 21300000, guid: b0c89725bb2057444aa860be66d0c6d4, type: 3}
   shootSprite:
   - {fileID: 21300000, guid: 7204b1aad4cbdd148b3e7033181d7871, type: 3}
   - {fileID: 21300000, guid: 0e5d61b09927ede49bfe985460688d0f, type: 3}
@@ -416,7 +436,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: ae1ba9ab337d56f49b7ba3b6f83ccca6, type: 3}
   - {fileID: 21300000, guid: 237388ec073064a41adfb448d25611b3, type: 3}
   - {fileID: 21300000, guid: 88709199f968b2b48bde70d2dff0c43a, type: 3}
-  skillSprites: []
   idleBackSprite: {fileID: 0}
   moveBackSprite: {fileID: 21300000, guid: d26e0a20a0efb3d4fba9d9f948f988d7, type: 3}
   attackBackSprite: {fileID: 0}
@@ -450,7 +469,6 @@ MonoBehaviour:
       skillName: 
       description: 
       mpCost: 0
-      cooldown: 0
       target: 0
       rangeType: 0
       rangeValue: 0
@@ -462,11 +480,12 @@ MonoBehaviour:
       buffPacks: []
       skillEffects: 
       skillSound: {fileID: 0}
+      consumeItems: []
+      animationIndex: 0
     rangedAtk:
       skillName: 
       description: 
       mpCost: 0
-      cooldown: 0
       target: 0
       rangeType: 0
       rangeValue: 0
@@ -478,9 +497,14 @@ MonoBehaviour:
       buffPacks: []
       skillEffects: 
       skillSound: {fileID: 0}
+      consumeItems: []
+      animationIndex: 0
     maxAmmoCount: 0
+    evasionRate: 0
     skillPacks: []
     elementType: 0
+    initialMana: 0
+    maxMana: 0
   pieceID: 1004
   player: {fileID: 0}
   isPlayerPiece: 0
@@ -491,7 +515,6 @@ MonoBehaviour:
     skillName: 
     description: 
     mpCost: 0
-    cooldown: 0
     target: 0
     rangeType: 0
     rangeValue: 0
@@ -503,6 +526,8 @@ MonoBehaviour:
     buffPacks: []
     skillEffects: 
     skillSound: {fileID: 0}
+    consumeItems: []
+    animationIndex: 0
   interactAreas: []
   availableActions: 
   availableSkills: []
@@ -514,6 +539,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnTurnEnd:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDead:
     m_PersistentCalls:
       m_Calls: []
   enemyAIType: 1
@@ -871,7 +899,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4292008241871193393}
   m_LocalRotation: {x: 0.35355338, y: -0.35355338, z: 0.1464466, w: 0.8535535}
-  m_LocalPosition: {x: 0.61, y: 1.72, z: -0.11}
+  m_LocalPosition: {x: 3.11, y: 1.72, z: -2.77}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children: []

@@ -36,5 +36,6 @@ public class SaveCell : SavePanel
         }
         // 同步保存到磁盘
         GM.Ins.DM.SaveData(index);
+        SetData(GM.Ins.PLAYERPROFILE.lastSaveTime.ToString("yyyy-MM-dd HH:mm:ss"));
     }
 }

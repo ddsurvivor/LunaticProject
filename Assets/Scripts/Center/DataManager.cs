@@ -32,6 +32,7 @@ public class DataManager : SerializedMonoBehaviour
 
     public void SaveData(int index)
     {
+        playerprofiles[index] = GM.Ins.PLAYERPROFILE;
         JsonTool.SaveJson(GM.Ins.PLAYERPROFILE,savePath + $"PlayerProfiles_{index}.json");
     }
     [Button("测试保存")]

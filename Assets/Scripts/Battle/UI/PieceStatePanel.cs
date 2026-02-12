@@ -14,6 +14,8 @@ public class PieceStatePanel : UIPanel
     
     public Image healthBar;
     public Image mpBar;
+    public Image manaBar;
+    public Text manaText;
 
     public void Update()
     {
@@ -29,6 +31,7 @@ public class PieceStatePanel : UIPanel
     {
         this.pc = pc;
         gameObject.SetActive(true);
+        UpdateDisplay();
     }
     public override void UpdateDisplay()
     {
@@ -42,6 +45,8 @@ public class PieceStatePanel : UIPanel
             healthBar.fillAmount = (float)pc.unitAttrCenter.CurHealth / pc.unitAttrCenter.MaxHealth;
             mpBar.fillAmount = (float)pc.unitAttrCenter.CurMovePoint / pc.unitAttrCenter.MaxMovePoint;
             ammoText.text =  $"{pc.unitAttrCenter.AmmoCount}/{pc.unitAttrCenter.MaxAmmoCount}";
+            manaBar.fillAmount = (float)pc.unitAttrCenter.ManaPoint / pc.unitAttrCenter.MaxManaPoint;
+            manaText.text = $"{pc.unitAttrCenter.ManaPoint}/{pc.unitAttrCenter.MaxManaPoint}";
         }
     }
 }

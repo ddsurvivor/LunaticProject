@@ -14,6 +14,8 @@ using UnityEngine.UI;
     public Text pieceName;
     public Transform hpBar;
     public List<GameObject> mpIcon;
+    public Transform manaBar;
+    public List<GameObject> ammoIcons;
     public Text ammoNumText;
     
     public Sprite[] headSprites;
@@ -54,7 +56,22 @@ using UnityEngine.UI;
                 mpIcon[i].SetActive(false);
             }
         }
-        ammoNumText.text = piece.unitAttrCenter.AmmoCount.ToString();
+        int curMana = piece.unitAttrCenter.ManaPoint;
+        float manaPercent = (float)curMana / piece.unitAttrCenter.MaxManaPoint;
+        manaBar.localScale = new Vector3(manaPercent, 1, 1);
+        
+        int ammo = piece.unitAttrCenter.AmmoCount;
+        for (int i = 0; i < ammoIcons.Count; i++)
+        {
+            if (i < ammo)
+            {
+                ammoIcons[i].SetActive(true);
+            }
+            else
+            {
+                ammoIcons[i].SetActive(false);
+            }
+        }
 
         // 更新buff
         foreach (var buffCell in buffCells)

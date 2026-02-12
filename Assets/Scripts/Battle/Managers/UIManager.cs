@@ -55,8 +55,20 @@ public class UIManager : MonoBehaviour
             pieceStatePanel.OpenPanel(pc);
         }
 
+        /// <summary>
+        /// 更新棋子状态面板显示
+        /// 在棋子受伤、消耗后调用
+        /// </summary>
+        /// <param name="pc"></param>
+        public void OnPieceStateChance(PieceController pc)
+        {
+            pieceStatePanel.OpenPanel(pc);
+            pieceInfoPanel.OnSelectPiece(pc);
+        }
+
         public void PopSkillName(string skillName)
         {
+            if(skillName == null) return;
             skillNamText.text = skillName;
             skillNameDisplay.gameObject.SetActive(true);
             Sequence seq = DOTween.Sequence();

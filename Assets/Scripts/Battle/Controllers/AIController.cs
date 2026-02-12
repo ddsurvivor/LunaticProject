@@ -260,6 +260,14 @@ public class AIController : PlayerController
         }
         else if (enemyAIType == EnemyAIType.SkillUser) // 技能型AI
         {
+            // 优先近战
+            if (distanceToTarget <= meleeRange)
+            {
+                // 近战攻击
+                aiPiece.StartNormalAttack();
+                aiPiece.CastAttackOnTarget(target);
+                return;
+            }
             // 优先计算是否使用技能
             int skillRoll = UnityEngine.Random.Range(1, 101);
             if (aiPiece.availableSkills.Count > 0 && skillRoll <= GameConst.enemySkillRate)
@@ -295,6 +303,7 @@ public class AIController : PlayerController
     {
         if (distanceToTarget <= meleeRange)
         {
+            //Debug.LogError($"敌人近战攻击，实际距离{distanceToTarget}, 近战范围{meleeRange}");
             // 近战攻击
             aiPiece.StartNormalAttack();
             aiPiece.CastAttackOnTarget(target);
