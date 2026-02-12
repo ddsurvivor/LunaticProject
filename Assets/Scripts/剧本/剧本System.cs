@@ -116,12 +116,35 @@ public class 剧本System: MonoBehaviour
         已阅读++;
     }
 
-    public void OnClickSkip()
+    public void SkipNext()
+    {
+        进度条.normalizedPosition = new Vector2(0, -1f);
+        if (已阅读>=已储存剧本.Length)
+        {
+            return;
+        }
+        if (当前说话内容.Contains(Center.Tag_notspawn))
+        {
+            进行指令(当前事件);
+            return;
+        }
+        //当文本更新时?.Invoke();
+   
+        //AudioManager.instance.播放音效("Key");
+        进行指令(当前事件);
+        生成剧本预制体();
+        已阅读++;
+    }
+
+    public void OnClickSkip(int num = 0)
     {
         Debug.Log($"跳过{已储存剧本.Length-已阅读}条剧本");
-        for (int i = 0; i < 2*(已储存剧本.Length-已阅读); i++)
+        AudioManager.instance.播放音效("Key");
+        int skipCount = 已储存剧本.Length - 已阅读 - num;
+        for (int i = 0; i < skipCount; i++)
         {
-            Next();
+            //Next();
+            SkipNext();
         }
     }
 
