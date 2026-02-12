@@ -29,9 +29,10 @@ public class PLAYERPROFILE
 
     [Header("道具存档")] 
     public List<ItemPack> itemPacks = new();
+    public int coins;// 金币数量
     
+    [Header("存档信息")]
     public DateTime lastSaveTime;
-
     public bool isNewGame = false;
 
     // private void Awake()
@@ -43,6 +44,8 @@ public class PLAYERPROFILE
     public void 新游戏初始化数值()
     {
         Debug.Log("检测为新游戏,初始化数值");
+        coins = GameConst.initialCoins; 
+        
         player = new Player[20];
         player[0] = new Player();
         player[0].NAME = "QIUWU";

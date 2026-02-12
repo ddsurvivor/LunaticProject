@@ -17,6 +17,12 @@
         {
             this.itemPack = itemPack;
         }
+        
+        public void SetItem(ItemPack itemPack, bool market = false)
+        {
+            this.itemPack = itemPack;
+            UpdateDisplay();
+        }
 
         public void UpdateDisplay()
         {

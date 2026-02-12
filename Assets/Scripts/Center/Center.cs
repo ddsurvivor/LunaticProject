@@ -57,6 +57,7 @@ public class Center : MonoBehaviour
     public static string Command_Smallmap="SMALLMAP";//二级地图
     public static string Command_Save = "SAVE";
     public static string Command_FullCG = "FULLCG";//全屏CG
+    public static string Command_Shop = "SHOP";//商店
  
     public static readonly char Plot指令分隔符 = '+';
 
