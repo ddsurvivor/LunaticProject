@@ -18,7 +18,7 @@ public class 剧本System: MonoBehaviour
     public GameObject Content;
     public GameObject 剧本预制体;
     public GameObject 剧本父物体Content;
-    public Image BG,BG_black,SPEAKERBG,FULLCG;
+    public Image BG,BG_black,SPEAKERBG,FULLCG,HALFCG;
     public Text 说话人TextObject;
     public float 起始生成偏移;
     public float 间隔;
@@ -253,6 +253,8 @@ public class 剧本System: MonoBehaviour
     /// <param name="imageName"></param>
     public void LoadImageWithFade(string imageName, Image targetimg, int fadeType = 3, float duration = -1)
     {
+        if(FULLCG.gameObject.activeInHierarchy) FULLCG.gameObject.SetActive(false);
+        if(HALFCG.gameObject.activeInHierarchy) HALFCG.gameObject.SetActive(false);
         if (duration < 0)
         {
             duration = CG淡入淡出时间;
@@ -694,6 +696,31 @@ public class 剧本System: MonoBehaviour
                         sequence.AppendInterval(duration);
                         sequence.Append(FULLCG.DOFade(0f, fadeTime));
                         sequence.AppendCallback(()=>FULLCG.gameObject.SetActive(false));
+                    }
+                    if (key.Contains(Center.Command_HalfCG))// 半屏CG
+                    {
+                        var prams = 指令切割(key);
+                        float duration =2;
+                        float fadeTime = CG淡入淡出时间;
+                        if (prams.Length < 1)
+                        {
+                           return;
+                        }
+
+                        Texture2D texture = Resources.Load<Texture2D>("CG/" + prams[0]);
+
+                        if (texture == null)
+                        {
+                            Debug.LogError("无法加载图片: " + prams[0]);
+                            return;
+                        }
+
+                        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+                        HALFCG.sprite = sprite;
+                        HALFCG.gameObject.SetActive(true);
+                        HALFCG.color = new Color(1, 1, 1, 0);
+                        Sequence sequence = DOTween.Sequence();
+                        sequence.Append(HALFCG.DOFade(1f, fadeTime));
                     }
 
                     if (key.Contains(Center.Command_Shop))

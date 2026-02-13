@@ -29,6 +29,7 @@ public class PieceStatePanel : UIPanel
 
     public void OpenPanel(PieceController pc)
     {
+        if(!pc.isPlayerPiece) return;
         this.pc = pc;
         gameObject.SetActive(true);
         UpdateDisplay();

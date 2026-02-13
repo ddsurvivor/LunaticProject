@@ -469,6 +469,7 @@ public class AIController : PlayerController
             threatValues[highDamageTarget] += 2; // 伤害最高的玩家棋子威胁值+2
         }
 
+        if(threatValues.Count == 0) return;
         // 选择威胁值最高的目标进行攻击
         PieceController target = threatValues.Aggregate((l, r)
             => l.Value > r.Value ? l : r).Key;

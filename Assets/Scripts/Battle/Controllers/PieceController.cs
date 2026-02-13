@@ -419,14 +419,15 @@ public class PieceController : MonoBehaviour
         if(uiCanvas!= null) uiCanvas.SetActive(false);
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Death, false, -1, () =>
         {
-            if (!isPlayerPiece)
-            {
-                pieceDisplay.pieceSpriteRenderer.DOFade(0f, 0.8f).OnComplete(() =>
-                {
-                    this.gameObject.SetActive(false);
-                    BattleScene.Ins.BM.PlayerCheckWin();
-                });
-            }
+            BattleScene.Ins.BM.PlayerCheckWin();
+            // if (!isPlayerPiece)
+            // {
+            //     pieceDisplay.pieceSpriteRenderer.DOFade(0f, 0.8f).OnComplete(() =>
+            //     {
+            //         this.gameObject.SetActive(false);
+            //         BattleScene.Ins.BM.PlayerCheckWin();
+            //     });
+            // }
         });
     }
 

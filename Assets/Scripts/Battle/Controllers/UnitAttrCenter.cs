@@ -139,6 +139,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
     public void TakeDamage(AttackPack attackPack)
     {
+        if(pc.isDead) return;
         if (attackPack.damage <= 0) return;
         _curHealth -= attackPack.damage;
         // 伤害跳字
@@ -174,7 +175,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
                 this.transform.position + Vector3.up * 5f
                 , Quaternion.identity);
         }
-
+        BattleScene.Ins.UM.OnPieceStateChance(pc);
         Debug.Log($"受到{attackPack.damageType}伤害{attackPack.damage}");
     }
 
@@ -186,6 +187,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         if (hpBarFill != null)
             hpBarFill.localScale = new Vector3((float)_curHealth / _maxHealth, 1f, 1f);
         Debug.Log($"恢复生命{healAmount}");
+        BattleScene.Ins.UM.OnPieceStateChance(pc);
     }
 
     public bool CostMP(int costPoint = 1)
@@ -194,6 +196,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         {
             _curMovePoint -= costPoint;
             Debug.Log($"{gameObject.name}消耗行动力{costPoint}，剩余行动力{_curMovePoint}");
+            BattleScene.Ins.UM.OnPieceStateChance(pc);
             return true;
         }
 
@@ -210,6 +213,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         if (_ammoCount >= costCount)
         {
             _ammoCount -= costCount;
+            BattleScene.Ins.UM.OnPieceStateChance(pc);
             return true;
         }
 
@@ -222,6 +226,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         {
             _manaPoint -= costPoint;
             Debug.Log($"{gameObject.name}消耗能量{costPoint}，剩余能量{_manaPoint}");
+            BattleScene.Ins.UM.OnPieceStateChance(pc);
             return true;
         }
 

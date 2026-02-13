@@ -11,7 +11,7 @@ public class UIManager : MonoBehaviour
         public Button burstButton;
         public TeamPanel teamPanel;
         public PieceInfoPanel pieceInfoPanel;
-        public Button restartButton;// 重启战斗
+        public GameObject restartButton;// 重启战斗
         public Text turnNumberText;
         public PieceActionListPanel pieceActionListPanel;
         public PieceStatePanel pieceStatePanel;
@@ -76,5 +76,12 @@ public class UIManager : MonoBehaviour
             seq.Append(skillNameDisplay.DOMoveX(280, 0.3f));
             seq.AppendInterval(1f);
             seq.Append(skillNameDisplay.DOMoveX(-280, 0.3f));
+        }
+        
+        public void OnClickRestartButton()
+        {
+            // 重新加载当前场景
+            UnityEngine.SceneManagement.SceneManager
+                .LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
         }
     }

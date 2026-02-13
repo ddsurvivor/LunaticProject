@@ -254,9 +254,10 @@ public class BattleManager : MonoBehaviour
                 break;
             }
         }
-
+        Debug.Log($"检查我方棋子全灭：{allPlayerDead}");
         if (allPlayerDead)
         {
+            Debug.Log("我方棋子全灭，玩家失败");
             // 我方棋子全灭，玩家失败
             BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家失败！");
             // 激活重新开始按钮
