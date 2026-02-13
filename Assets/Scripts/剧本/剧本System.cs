@@ -267,7 +267,7 @@ public class 剧本System: MonoBehaviour
         }
 
         Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-        
+        targetimg.gameObject.SetActive(true);
         // 根据淡入淡出类型执行不同的效果
         switch (fadeType)
         {
@@ -658,27 +658,47 @@ public class 剧本System: MonoBehaviour
                         //大地图System.instance.剧情结束();
                     }
 
-                    if (key.Contains(Center.Command_FullCG))
+                    if (key.Contains(Center.Command_FullCG))// 全屏CG
                     {
                         var prams = 指令切割(key);
-                        if (prams.Length >= 3)
+                        float duration =2;
+                        float fadeTime = CG淡入淡出时间;
+                        if (prams.Length >= 2)
                         {
-                            // 有淡入淡出类型和自定义时长
-                            int fadeType = Convert.ToInt32(prams[1]);
-                            float duration = float.Parse(prams[2]);
-                            LoadImageWithFade(prams[0], FULLCG, fadeType, duration);
+                            //自定义时长
+                            duration = float.Parse(prams[1]);
                         }
-                        else if (prams.Length >= 2)
+                        else if (prams.Length >= 1)
                         {
-                            // 有淡入淡出类型，使用默认时长
-                            int fadeType = Convert.ToInt32(prams[1]);
-                            LoadImageWithFade(prams[0], FULLCG, fadeType);
+                            duration = 2;
                         }
-                        else if(prams.Length >= 1)
+                        else
                         {
-                            // 使用默认淡出后淡入效果
-                            LoadImageWithFade(prams[0], FULLCG, 3);
+                            return;
                         }
+                        
+                        Texture2D texture = Resources.Load<Texture2D>("CG/" + prams[0]);
+
+                        if (texture == null)
+                        {
+                            Debug.LogError("无法加载图片: " + prams[0]);
+                            return;
+                        }
+
+                        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+                        FULLCG.sprite = sprite;
+                        FULLCG.gameObject.SetActive(true);
+                        FULLCG.color = new Color(1, 1, 1, 0);
+                        Sequence sequence = DOTween.Sequence();
+                        sequence.Append(FULLCG.DOFade(1f, fadeTime));
+                        sequence.AppendInterval(duration);
+                        sequence.Append(FULLCG.DOFade(0f, fadeTime));
+                        sequence.AppendCallback(()=>FULLCG.gameObject.SetActive(false));
+                    }
+
+                    if (key.Contains(Center.Command_Shop))
+                    {
+                        // 显示商店面板
                     }
                 }
       }
