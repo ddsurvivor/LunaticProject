@@ -30,6 +30,12 @@ MonoBehaviour:
     - {fileID: 8300000, guid: c991445a400d91949966d781bac0f98c, type: 3}
     - {fileID: 8300000, guid: 2d1927f565305d24e9ae473ceea52d2d, type: 3}
     - {fileID: 8300000, guid: 994a763418d61cc46b53f049d5ddee76, type: 3}
+    - {fileID: 8300000, guid: 5aaa312eaf85fae4ea0341ff5298d8b8, type: 3}
+    - {fileID: 8300000, guid: 90252c2ca83f8e9498210473f93a3fa9, type: 3}
+    - {fileID: 8300000, guid: 9a59580c91f8009499c7116c002f21d5, type: 3}
+    - {fileID: 8300000, guid: 4c2e99d52e73b724eb53ceb5d0948822, type: 3}
+    - {fileID: 8300000, guid: dee4965651d458546a235669ff915c8e, type: 3}
+    - {fileID: 8300000, guid: ca092c4e97d95524395afc5e3e50deb3, type: 3}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -1877,10 +1883,10 @@ MonoBehaviour:
       Data: 130
     - Name: maxMovePoint
       Entry: 3
-      Data: 2
+      Data: 3
     - Name: moveRange
       Entry: 4
-      Data: 5
+      Data: 20
     - Name: meleeAtk
       Entry: 7
       Data: 85|SkillPack, Assembly-CSharp
@@ -2094,7 +2100,7 @@ MonoBehaviour:
       Data: 3
     - Name: evasionRate
       Entry: 3
-      Data: 0
+      Data: 20
     - Name: actionSounds
       Entry: 7
       Data: 96|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
@@ -2530,13 +2536,13 @@ MonoBehaviour:
       Data: "\u675C\u4F2F\u5B89"
     - Name: maxHealth
       Entry: 3
-      Data: 150
+      Data: 200
     - Name: maxMovePoint
       Entry: 3
       Data: 3
     - Name: moveRange
       Entry: 4
-      Data: 25
+      Data: 30
     - Name: meleeAtk
       Entry: 7
       Data: 116|SkillPack, Assembly-CSharp
@@ -2621,8 +2627,8 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: skillSound
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 14
     - Name: consumeItems
       Entry: 7
       Data: 121|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
@@ -2737,8 +2743,8 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: skillSound
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 15
     - Name: consumeItems
       Entry: 6
       Data: 
@@ -2753,7 +2759,7 @@ MonoBehaviour:
       Data: 4
     - Name: evasionRate
       Entry: 3
-      Data: 20
+      Data: 35
     - Name: actionSounds
       Entry: 7
       Data: 128|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
@@ -3023,8 +3029,8 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: skillSound
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 13
     - Name: consumeItems
       Entry: 7
       Data: 145|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
@@ -3143,7 +3149,7 @@ MonoBehaviour:
       Data: 2
     - Name: moveRange
       Entry: 4
-      Data: 10
+      Data: 15
     - Name: meleeAtk
       Entry: 7
       Data: 149|SkillPack, Assembly-CSharp
@@ -3173,7 +3179,7 @@ MonoBehaviour:
       Data: 0
     - Name: skillVFXType
       Entry: 3
-      Data: 0
+      Data: 13
     - Name: attackPacks
       Entry: 7
       Data: 150|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
@@ -3228,8 +3234,8 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: skillSound
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 16
     - Name: consumeItems
       Entry: 7
       Data: 154|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
@@ -3268,7 +3274,7 @@ MonoBehaviour:
       Data: 1
     - Name: rangeValue
       Entry: 4
-      Data: 12
+      Data: 15
     - Name: rangeAgle
       Entry: 4
       Data: 0
@@ -3350,8 +3356,8 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: skillSound
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 17
     - Name: consumeItems
       Entry: 7
       Data: 161|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
@@ -3375,7 +3381,7 @@ MonoBehaviour:
       Data: 3
     - Name: evasionRate
       Entry: 3
-      Data: 0
+      Data: 20
     - Name: actionSounds
       Entry: 7
       Data: 162|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
@@ -3433,7 +3439,7 @@ MonoBehaviour:
       Data: 1
     - Name: $v
       Entry: 3
-      Data: 2
+      Data: 3
     - Name: 
       Entry: 8
       Data: 
@@ -3445,7 +3451,7 @@ MonoBehaviour:
       Data: 2
     - Name: $v
       Entry: 3
-      Data: 2
+      Data: 3
     - Name: 
       Entry: 8
       Data: 
@@ -3493,13 +3499,13 @@ MonoBehaviour:
       Data: "\u9ED1\u8863\u4EBA"
     - Name: maxHealth
       Entry: 3
-      Data: 200
+      Data: 175
     - Name: maxMovePoint
       Entry: 3
       Data: 2
     - Name: moveRange
       Entry: 4
-      Data: 15
+      Data: 35
     - Name: meleeAtk
       Entry: 7
       Data: 167|SkillPack, Assembly-CSharp
@@ -3602,8 +3608,8 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: skillSound
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 3
     - Name: consumeItems
       Entry: 6
       Data: 
@@ -3633,7 +3639,7 @@ MonoBehaviour:
       Data: 1
     - Name: rangeValue
       Entry: 4
-      Data: 8
+      Data: 15
     - Name: rangeAgle
       Entry: 4
       Data: 0
@@ -3697,8 +3703,8 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: skillSound
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 18
     - Name: consumeItems
       Entry: 6
       Data: 
@@ -3710,10 +3716,10 @@ MonoBehaviour:
       Data: 
     - Name: maxAmmoCount
       Entry: 3
-      Data: 2
+      Data: 3
     - Name: evasionRate
       Entry: 3
-      Data: 0
+      Data: 30
     - Name: actionSounds
       Entry: 7
       Data: 178|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
@@ -3842,8 +3848,8 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: skillSound
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 19
     - Name: consumeItems
       Entry: 6
       Data: 
@@ -3887,7 +3893,7 @@ MonoBehaviour:
       Data: 1
     - Name: $v
       Entry: 3
-      Data: 2
+      Data: 6
     - Name: 
       Entry: 8
       Data: 
@@ -3899,7 +3905,7 @@ MonoBehaviour:
       Data: 2
     - Name: $v
       Entry: 3
-      Data: 2
+      Data: 6
     - Name: 
       Entry: 8
       Data: 
@@ -3911,7 +3917,7 @@ MonoBehaviour:
       Data: 3
     - Name: $v
       Entry: 3
-      Data: 0
+      Data: 2
     - Name: 
       Entry: 8
       Data: 
@@ -4205,8 +4211,8 @@ MonoBehaviour:
   - pieceId: 1001
     pieceName: "\u6253\u5370\u673A"
     maxHealth: 130
-    maxMovePoint: 2
-    moveRange: 5
+    maxMovePoint: 3
+    moveRange: 20
     meleeAtk:
       skillName: 
       description: 
@@ -4250,7 +4256,7 @@ MonoBehaviour:
       consumeItems: []
       animationIndex: 0
     maxAmmoCount: 3
-    evasionRate: 0
+    evasionRate: 20
     skillPacks: []
     elementType: 1
     initialMana: 0
@@ -4304,9 +4310,9 @@ MonoBehaviour:
     maxMana: 0
   - pieceId: 1003
     pieceName: "\u675C\u4F2F\u5B89"
-    maxHealth: 150
+    maxHealth: 200
     maxMovePoint: 3
-    moveRange: 25
+    moveRange: 30
     meleeAtk:
       skillName: 
       description: 
@@ -4323,7 +4329,7 @@ MonoBehaviour:
       atkTimes: 1
       buffPacks: []
       skillEffects: 
-      skillSound: {fileID: 0}
+      skillSound: {fileID: 8300000, guid: 5aaa312eaf85fae4ea0341ff5298d8b8, type: 3}
       consumeItems: []
       animationIndex: 0
     rangedAtk:
@@ -4344,11 +4350,11 @@ MonoBehaviour:
       atkTimes: 0
       buffPacks: []
       skillEffects: 
-      skillSound: {fileID: 0}
+      skillSound: {fileID: 8300000, guid: 90252c2ca83f8e9498210473f93a3fa9, type: 3}
       consumeItems: []
       animationIndex: 0
     maxAmmoCount: 4
-    evasionRate: 20
+    evasionRate: 35
     skillPacks:
     - skillName: "\u7834\u7247\u69B4\u5F39"
       description: 
@@ -4393,7 +4399,7 @@ MonoBehaviour:
         rate: 100
         target: 6
       skillEffects: 
-      skillSound: {fileID: 0}
+      skillSound: {fileID: 8300000, guid: 994a763418d61cc46b53f049d5ddee76, type: 3}
       consumeItems: []
       animationIndex: 0
     elementType: 2
@@ -4403,7 +4409,7 @@ MonoBehaviour:
     pieceName: "\u519B\u68B0\u65E0\u4EBA\u673A"
     maxHealth: 35
     maxMovePoint: 2
-    moveRange: 10
+    moveRange: 15
     meleeAtk:
       skillName: 
       description: 
@@ -4413,14 +4419,14 @@ MonoBehaviour:
       rangeValue: 5
       rangeAgle: 0
       explodeRadius: 0
-      skillVFXType: 0
+      skillVFXType: 13
       attackPacks:
       - damage: 10
         damageType: 1
       atkTimes: 0
       buffPacks: []
       skillEffects: 
-      skillSound: {fileID: 0}
+      skillSound: {fileID: 8300000, guid: 9a59580c91f8009499c7116c002f21d5, type: 3}
       consumeItems: []
       animationIndex: 0
     rangedAtk:
@@ -4429,7 +4435,7 @@ MonoBehaviour:
       mpCost: 0
       target: 1
       rangeType: 1
-      rangeValue: 12
+      rangeValue: 15
       rangeAgle: 0
       explodeRadius: 0
       skillVFXType: 0
@@ -4443,20 +4449,20 @@ MonoBehaviour:
         rate: 30
         target: 1
       skillEffects: 
-      skillSound: {fileID: 0}
+      skillSound: {fileID: 8300000, guid: 4c2e99d52e73b724eb53ceb5d0948822, type: 3}
       consumeItems: []
       animationIndex: 0
     maxAmmoCount: 3
-    evasionRate: 0
+    evasionRate: 20
     skillPacks: []
     elementType: 0
     initialMana: 0
     maxMana: 0
   - pieceId: 1005
     pieceName: "\u9ED1\u8863\u4EBA"
-    maxHealth: 200
+    maxHealth: 175
     maxMovePoint: 2
-    moveRange: 15
+    moveRange: 35
     meleeAtk:
       skillName: 
       description: 
@@ -4477,7 +4483,7 @@ MonoBehaviour:
         rate: 100
         target: 1
       skillEffects: 
-      skillSound: {fileID: 0}
+      skillSound: {fileID: 8300000, guid: ed2caebc00be18e4c831e7e799bcd4ca, type: 3}
       consumeItems: []
       animationIndex: 0
     rangedAtk:
@@ -4486,7 +4492,7 @@ MonoBehaviour:
       mpCost: 0
       target: 1
       rangeType: 1
-      rangeValue: 8
+      rangeValue: 15
       rangeAgle: 0
       explodeRadius: 0
       skillVFXType: 0
@@ -4496,11 +4502,11 @@ MonoBehaviour:
       atkTimes: 3
       buffPacks: []
       skillEffects: 
-      skillSound: {fileID: 0}
+      skillSound: {fileID: 8300000, guid: dee4965651d458546a235669ff915c8e, type: 3}
       consumeItems: []
       animationIndex: 0
-    maxAmmoCount: 2
-    evasionRate: 0
+    maxAmmoCount: 3
+    evasionRate: 30
     skillPacks:
     - skillName: 
       description: 
@@ -4521,7 +4527,7 @@ MonoBehaviour:
         rate: 100
         target: 4
       skillEffects: 02000000
-      skillSound: {fileID: 0}
+      skillSound: {fileID: 8300000, guid: ca092c4e97d95524395afc5e3e50deb3, type: 3}
       consumeItems: []
       animationIndex: 0
     elementType: 0
