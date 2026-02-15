@@ -27,6 +27,20 @@ public class RangeUI : MonoBehaviour
     public List<PieceController> GetCurTargets => _curTargets;
     private SkillPack _curSkillPack;
 
+    // public void Awake()
+    // {
+    //     circle.SetActive(false);
+    //     moveIcon.SetActive(false);
+    //     attackCircle.SetActive(false);
+    //     attackIcon.SetActive(false);
+    //     if(skillIcon!= null) skillIcon.SetActive(false);
+    //     if(skillCircle!=null) skillCircle.SetActive(false);
+    //     grenadeCircle.SetActive(false);
+    //     highlightCircle.SetActive(false);
+    //     fanRoot.SetActive(false);
+    //         
+    // }
+
     public void ShowCircleRange(float radius)
     {
         circle.SetActive(true);
@@ -136,7 +150,7 @@ public class RangeUI : MonoBehaviour
             }
         }
 
-        if (skillIcon.activeInHierarchy) // 单体敌人锁定
+        if (skillIcon!=null && skillIcon.activeInHierarchy) // 单体敌人锁定
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             Plane groundPlane = new Plane(Vector3.up, new Vector3(0, transform.position.y, 0));
@@ -187,16 +201,18 @@ public class RangeUI : MonoBehaviour
                 fanRoot.transform.localRotation = Quaternion.LookRotation(direction, Vector3.up);
             }
         }
+        
+        HighlightTarget();
     }
 
     private void FixedUpdate()
     {
-        HighlightTarget();
+        
     }
 
     private void HighlightTarget()
     {
-        if (skillIcon.activeInHierarchy) // 单体敌人锁定
+        if (skillIcon!=null && skillIcon.activeInHierarchy) // 单体敌人锁定
         {
             // 检测球体范围内的所有敌人
             Collider[] hitColliders = Physics.OverlapSphere(skillIcon.transform.position, 3f);

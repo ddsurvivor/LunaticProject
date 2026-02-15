@@ -15,12 +15,16 @@ public class 大地图System : SerializedMonoBehaviour
     public GameObject 失败Obj;
 
     public static bool 是可以点击地图事件;
+
     #region 进入剧情视觉反馈
+
     public float 点击后放大倍率;
     public float 点击后放大进行时间;
-    public float 点击进入剧情编辑器等待时间=0.8f;
+    public float 点击进入剧情编辑器等待时间 = 0.8f;
+
     #endregion
-    public 任务节点[] NodeList;//任务节点列表
+
+    public 任务节点[] NodeList; //任务节点列表
     public DaytimeSystem daytimeSystem;
 
     // 二级地图
@@ -39,11 +43,9 @@ public class 大地图System : SerializedMonoBehaviour
 
     public void 进入大地图调用特殊剧情()
     {
-        switch (PlayingSystem.特殊剧情)
+        if (GM.Ins.PLAYERPROFILE.isNewGame)
         {
-            case "新游戏":
-                大地图System.instance.开始剧情 ("PR1");
-                break;
+            大地图System.instance.开始剧情("PR1");
         }
     }
 
@@ -55,9 +57,10 @@ public class 大地图System : SerializedMonoBehaviour
         }
 
         是可以点击地图事件 = false;
-      
+
         当前地图.transform.DOScale(Vector3.one * 点击后放大倍率, 点击后放大进行时间);
         StartCoroutine(wait());
+
         IEnumerator wait()
         {
             yield return new WaitForSeconds(点击进入剧情编辑器等待时间);
@@ -65,9 +68,9 @@ public class 大地图System : SerializedMonoBehaviour
             剧情.gameObject.SetActive(true);
             剧情.设置新剧本(t);
             剧情.Next();
-          
         }
     }
+
     private void Awake()
     {
         是可以点击地图事件 = true;
@@ -91,10 +94,10 @@ public class 大地图System : SerializedMonoBehaviour
     {
         foreach (var VARIABLE in 地图)
         {
-            if (VARIABLE.name==t)
+            if (VARIABLE.name == t)
             {
                 当前地图 = VARIABLE;
-                当前地图.transform.localScale=Vector3.one;
+                当前地图.transform.localScale = Vector3.one;
                 VARIABLE.SetActive(true);
 
                 //NodeList = VARIABLE.GetComponentsInChildren<任务节点>(true);
@@ -108,12 +111,13 @@ public class 大地图System : SerializedMonoBehaviour
                 {
                     node.UpdateState();
                 }
-                
+
                 // 是否打开小地图
-                if (GM.Ins.PLAYERPROFILE.curSmallMapIndex!=0)
+                if (GM.Ins.PLAYERPROFILE.curSmallMapIndex != 0)
                 {
                     SmallMapActive(GM.Ins.PLAYERPROFILE.curSmallMapIndex, true);
                 }
+
                 break;
             }
         }
@@ -138,6 +142,4 @@ public class 大地图System : SerializedMonoBehaviour
             SmallMapDict[mapID].SetActive(active);
         }
     }
-
-    
 }

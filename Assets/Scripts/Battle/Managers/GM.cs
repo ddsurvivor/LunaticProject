@@ -28,11 +28,34 @@ using UnityEngine.SceneManagement;
             PLAYERPROFILE.新游戏初始化数值();
         }
 
+        // public void StartBattle(string battleScene, string endLog)
+        // {
+        //     this.battleScene = battleScene;
+        //     this.endLog = endLog;
+        //     SceneManager.LoadScene(battleScene);
+        //     PlayingSystem.特殊剧情 = "";
+        // }
+        
         public void StartBattle(string battleScene, string endLog)
         {
             this.battleScene = battleScene;
             this.endLog = endLog;
-            SceneManager.LoadScene(battleScene);
+            StartCoroutine(StartBattleCoroutine(battleScene));
+        }
+
+        private IEnumerator StartBattleCoroutine(string sceneName)
+        {
+            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
+
+            while (!asyncLoad.isDone)
+            {
+                // 可选：显示加载进度
+                float progress = Mathf.Clamp01(asyncLoad.progress / 0.9f);
+                Debug.Log($"加载进度: {progress * 100}%");
+                yield return null;
+            }
+
+            // 场景加载完成后执行
             PlayingSystem.特殊剧情 = "";
         }
 

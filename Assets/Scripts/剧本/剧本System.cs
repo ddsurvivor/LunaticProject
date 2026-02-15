@@ -89,11 +89,14 @@ public class 剧本System: MonoBehaviour
     {
         foreach (var VARIABLE in 已生成文本)
         {
-            Destroy(VARIABLE.gameObject);
+            if (VARIABLE != null)
+            {
+                Destroy(VARIABLE.gameObject);
+            }
         }
 
         Yoffset = 起始生成偏移;
-        Content.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,起始生成偏移);
+        if(Content!=null) Content.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,起始生成偏移);
     }
 [ContextMenu("下一句")]
     public void Next()
