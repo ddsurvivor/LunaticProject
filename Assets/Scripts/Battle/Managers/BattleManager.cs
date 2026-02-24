@@ -236,6 +236,7 @@ public class BattleManager : MonoBehaviour
             }
         }
 
+        Debug.Log($"判定敌人棋子全灭：{allEnemyDead}");
         if (allEnemyDead)
         {
             // 敌方棋子全灭，玩家胜利
@@ -293,6 +294,8 @@ public class BattleManager : MonoBehaviour
                         targetPos,
                         Quaternion.identity).GetComponent<HealArea>();
                     healArea.SetData(skillPack.buffPacks[0], 1);
+                    break;
+                case SkillEffect.SpaceBomb:
                     break;
                 default:
                     break;

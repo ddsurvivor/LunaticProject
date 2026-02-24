@@ -27,6 +27,7 @@ public enum ActionType
     技能 = 10,// 技能
     道具 = 11,// 道具
     交互 = 12,// 交互
+    轨道轰炸 = 13,// 轨道轰炸
     
 }
 
@@ -131,6 +132,7 @@ public enum SkillEffect
 {
     HealArea = 1,// 区域治疗
     Blink = 2,// 瞬移
+    SpaceBomb = 3,// 轨道轰炸
 }
 
 public enum Daytime

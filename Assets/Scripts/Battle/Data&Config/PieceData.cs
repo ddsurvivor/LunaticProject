@@ -29,4 +29,6 @@ public class PieceData
     [LabelText("克制伤害")]public Dictionary<PieceElementType, int> _elementAddDamage = new();// 元素克制加成伤害
     [LabelText("初始能量值")] public int initialMana;
     [LabelText("最大能量值")] public int maxMana;
+    [LabelText("掉落道具")] public List<ItemPack> dropItemList = new();
+    [LabelText("掉落概率")]  public int dropRate;
 }

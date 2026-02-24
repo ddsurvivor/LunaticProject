@@ -137,6 +137,11 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         if (hpBarFill != null) hpBarFill.localScale = new Vector3(1f, 1f, 1f);
     }
 
+    public void SetHealth(float healthPercent)
+    {
+        _curHealth = Mathf.CeilToInt(_maxHealth * healthPercent);
+    }
+
     public void TakeDamage(AttackPack attackPack)
     {
         if(pc.isDead) return;

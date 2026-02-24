@@ -1,4 +1,5 @@
 
+    using System;
     using System.Collections.Generic;
     using Sirenix.OdinInspector;
     using Sirenix.Serialization;
@@ -8,7 +9,7 @@
     [CreateAssetMenu(fileName = "PieceDataListSO", menuName = "BattleSO/PieceDataListSO", order = 1)]
     public class PieceDataListSO: SerializedScriptableObject
     {
-        [OdinSerialize]
+        [OdinSerialize][NonSerialized]
         //[TableList]
         public List<PieceData> pieceDataList = new();
         
