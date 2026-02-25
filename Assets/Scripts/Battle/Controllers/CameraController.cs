@@ -21,7 +21,10 @@ public class CameraController : MonoBehaviour
         {
             Vector3 delta = Input.mousePosition - _lastMousePosition;
             Vector3 move = new Vector3(-delta.x, -delta.y, 0) * panSpeed * Time.deltaTime;
-            transform.Translate(move, Space.Self);
+            //transform.Translate(move, Space.Self);
+            // 将 move 投影到本地 x/y 平面（z=0）
+            move = transform.right * move.x + transform.up * move.y;
+            transform.position += move;
             _lastMousePosition = Input.mousePosition;
         }
     }

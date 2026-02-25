@@ -122,7 +122,11 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             {
                 actionButtonDic[interactArea.actionType].gameObject.SetActive(pc.unitAttrCenter.CurMovePoint>=1);
                 actionButtonDic[interactArea.actionType].onClick.RemoveAllListeners();
-                actionButtonDic[interactArea.actionType].onClick.AddListener(()=>interactArea.TriggerAction(pc));
+                actionButtonDic[interactArea.actionType].onClick.AddListener(()=>
+                {
+                    if(!pc.unitAttrCenter.CostMP()) return;
+                    interactArea.TriggerAction(pc);
+                });
             }
         }
         skillListPanel.SetActive(false);

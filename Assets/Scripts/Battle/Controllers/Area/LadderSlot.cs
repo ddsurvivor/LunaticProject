@@ -2,6 +2,9 @@
     using System.Collections.Generic;
     using UnityEngine;
 
+    /// <summary>
+    /// 已废弃
+    /// </summary>
     public class LadderSlot: MonoBehaviour
     {
         public List<PieceController> pieces = new();

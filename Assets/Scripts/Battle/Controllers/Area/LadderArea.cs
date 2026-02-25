@@ -22,24 +22,33 @@ public class LadderArea : InteractArea
         // pieces.Add(piece);
         
         // 直接攀爬
-        if(!piece.unitAttrCenter.CostMP()) return;
-        
+
         // 如果这个棋子的y坐标与uppos之差小于1，则移动到downpos，否则移动到uppos
         if (Mathf.Abs(piece.transform.position.y - upPos.position.y) < 1f)
         {
             // 记录棋子与当前的upPos的xz偏差值
             Vector3 offset = piece.transform.position - upPos.position;
             offset.y = 0;
-            piece.transform.position = (downPos.position);
+            piece.transform.position = (downPos.position + offset);
         }
         else
         {
             // 记录棋子与当前的downPos的xz偏差值
             Vector3 offset = piece.transform.position - downPos.position;
             offset.y = 0;
-            piece.transform.position = (upPos.position );
+            piece.transform.position = (upPos.position + offset);
         }
         BattleScene.Ins.BM.camera.SetFollow(piece.transform);
+    }
+
+    public Vector3 GetNearPos(Vector3 pos)
+    {
+        if (Mathf.Abs(pos.y - upPos.position.y) < 1f)
+        {
+            return upPos.position;
+        }
+        
+        return downPos.position;
     }
 
     // public void LeaveSlot(PieceController target)

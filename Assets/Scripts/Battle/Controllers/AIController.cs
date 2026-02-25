@@ -18,6 +18,10 @@ public class AIController : PlayerController
 
     // 增援波次管理
     public WaveController waveController;
+    
+    // 地图寻路管理器
+    public MapController mapController;
+    
 
     private float _timer;
     private float _actionInterval = 2.0f; // 每个动作之间的间隔时间
@@ -197,6 +201,13 @@ public class AIController : PlayerController
     private void EnemyAttack(EnemyController aiPiece, PieceController target)
     {
         if (target == null) return;
+        
+        if(Mathf.Abs(target.transform.position.y - aiPiece.transform.position.y) > 1.0f)
+        {
+            // 如果目标在不同高度，则优先移动到与目标相同高度的位置
+            EnemyMoveToLadder(aiPiece);
+            return;
+        }
 
         float meleeRange = aiPiece.GetRange(true); // 近战攻击范围
         float rangedRange = aiPiece.GetRange(false); // 远程攻击范围
@@ -215,7 +226,13 @@ public class AIController : PlayerController
         }
         else if (enemyAIType == EnemyAIType.Shoot)
         {
-            if (distanceToTarget <= rangedRange)
+            if (distanceToTarget <= rangedRange*0.6f)
+            {
+                // 如果在远程攻击范围的60%内则逃跑
+                EnemyMove(aiPiece, target.transform.position, rangedRange, true);
+                
+            }
+            else if (distanceToTarget <= rangedRange)
             {
                 // 判定弹药是否足够
                 if (aiPiece.unitAttrCenter.AmmoCount <= 0)
@@ -232,30 +249,31 @@ public class AIController : PlayerController
             }
             else
             {
-                /// 计算目标方向
-                Vector3 direction = (target.transform.position - aiPiece.transform.position)
-                    .normalized;
-                // 计算理想攻击位置（距离目标 rangedRange - 0.5f）
-                Vector3 idealAttackPos =
-                    target.transform.position - direction * (rangedRange - 0.5f);
-                // 计算自身到理想攻击位置的距离
-                float distanceToIdeal =
-                    Vector3.Distance(aiPiece.transform.position, idealAttackPos);
-
-                Vector3 moveTargetPos;
-                if (distanceToIdeal <= moveRange)
-                {
-                    // 可以直接到达理想攻击位置
-                    moveTargetPos = idealAttackPos;
-                }
-                else
-                {
-                    // 只能移动到最大移动距离
-                    moveTargetPos = aiPiece.transform.position + direction * moveRange;
-                }
-
-                aiPiece.transform.DOMove(moveTargetPos, 1.0f);
-                aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
+                EnemyMove(aiPiece, target.transform.position, rangedRange);
+                // /// 计算目标方向
+                // Vector3 direction = (target.transform.position - aiPiece.transform.position)
+                //     .normalized;
+                // // 计算理想攻击位置（距离目标 rangedRange - 0.5f）
+                // Vector3 idealAttackPos =
+                //     target.transform.position - direction * (rangedRange - 0.5f);
+                // // 计算自身到理想攻击位置的距离
+                // float distanceToIdeal =
+                //     Vector3.Distance(aiPiece.transform.position, idealAttackPos);
+                //
+                // Vector3 moveTargetPos;
+                // if (distanceToIdeal <= moveRange)
+                // {
+                //     // 可以直接到达理想攻击位置
+                //     moveTargetPos = idealAttackPos;
+                // }
+                // else
+                // {
+                //     // 只能移动到最大移动距离
+                //     moveTargetPos = aiPiece.transform.position + direction * moveRange;
+                // }
+                //
+                // aiPiece.transform.DOMove(moveTargetPos, 1.0f);
+                // aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
             }
         }
         else if (enemyAIType == EnemyAIType.SkillUser) // 技能型AI
@@ -288,7 +306,7 @@ public class AIController : PlayerController
                 }
                 else
                 {
-                    EnemyMove(aiPiece, target, skillRange);
+                    EnemyMove(aiPiece, target.transform.position, skillRange);
                 }
             }
             else
@@ -325,7 +343,7 @@ public class AIController : PlayerController
         }
         else
         {
-            EnemyMove(aiPiece, target, rangedRange);
+            EnemyMove(aiPiece, target.transform.position, rangedRange);
         }
     }
 
@@ -333,10 +351,10 @@ public class AIController : PlayerController
     /// AI移动函数
     /// </summary>
     /// <param name="aiPiece"></param>
-    /// <param name="target"></param>
+    /// <param name="targetPos"></param>
     /// <param name="range">移动依据的范围</param>
     /// <param name="leave"></param>
-    private void EnemyMove(EnemyController aiPiece, PieceController target, float range
+    private void EnemyMove(EnemyController aiPiece, Vector3 targetPos, float range
         , bool leave = false)
     {
         float moveRange = aiPiece.unitAttrCenter.MoveRange; // 移动范围
@@ -364,12 +382,17 @@ public class AIController : PlayerController
         var groundBounds = groundObj.GetComponent<Collider>().bounds;
 
         /// 计算目标方向
-        Vector3 direction = (target.transform.position - aiPiece.transform.position);
+        Vector3 direction = (targetPos - aiPiece.transform.position);
         direction.y = 0; // 忽略y轴高度差
         direction = direction.normalized;
         // 计算理想攻击位置（距离目标 rangedRange - 0.5f）
         Vector3 idealAttackPos =
-            aiPiece.transform.position + direction * (range + 0.5f);
+            targetPos - direction * (range - 0.5f);
+        if (leave)
+        {
+            // 如果是远离目标，则反向计算理想位置
+            idealAttackPos = targetPos - direction * (range-0.5f);
+        }
         // 计算自身到理想攻击位置的距离
         float distanceToIdeal =
             Vector3.Distance(aiPiece.transform.position, idealAttackPos);
@@ -393,13 +416,32 @@ public class AIController : PlayerController
         moveTargetPos.z =
             Mathf.Clamp(moveTargetPos.z, groundBounds.min.z + 3.5f, groundBounds.max.z - 3.5f);
 
-        Debug.Log(
-            $"边界范围 X:{groundBounds.min.x}~{groundBounds.max.x} Z:{groundBounds.min.z}~{groundBounds.max.z}");
+        /*Debug.Log(
+            $"边界范围 X:{groundBounds.min.x}~{groundBounds.max.x} Z:{groundBounds.min.z}~{groundBounds.max.z}");*/
         Debug.Log(
             $"技能型AI{aiPiece.name}移动到 {moveTargetPos}");
         aiPiece.transform.DOMove(moveTargetPos, 1.0f);
         aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
         aiPiece.CheckFace(moveTargetPos- aiPiece.transform.position);
+    }
+
+    /// <summary>
+    /// 敌人移动到梯子位置的函数
+    /// </summary>
+    /// <param name="aiPiece"></param>
+    private void EnemyMoveToLadder(EnemyController aiPiece)
+    {
+        LadderArea ladderArea = mapController?.GetLadder(aiPiece.transform.position);
+        if(ladderArea == null) return;
+        Vector3 targetPos = ladderArea.GetNearPos(aiPiece.transform.position);
+        if((targetPos - aiPiece.transform.position).magnitude < 2f)
+        {
+            // 如果已经在梯子附近，则直接触发梯子交互
+            ladderArea.TriggerAction(aiPiece);
+            return;
+        }
+        Debug.Log($"敌人{aiPiece.name}移动到梯子位置 {ladderArea.GetNearPos(aiPiece.transform.position)}");
+        EnemyMove(aiPiece, ladderArea.GetNearPos(aiPiece.transform.position), 0f);
     }
 
     /// <summary>
@@ -437,8 +479,7 @@ public class AIController : PlayerController
         {
             if (playerPiece.isDead) continue;
             threatValues.Add(playerPiece, 0);
-
-
+            
             // 获取最近的玩家棋子
             float distance =
                 Vector3.Distance(playerPiece.transform.position, aiPiece.transform.position);
