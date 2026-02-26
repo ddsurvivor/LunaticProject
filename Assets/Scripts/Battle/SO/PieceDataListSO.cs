@@ -9,7 +9,7 @@
     [CreateAssetMenu(fileName = "PieceDataListSO", menuName = "BattleSO/PieceDataListSO", order = 1)]
     public class PieceDataListSO: SerializedScriptableObject
     {
-        [OdinSerialize][NonSerialized]
+        [OdinSerialize]
         //[TableList]
         public List<PieceData> pieceDataList = new();
         

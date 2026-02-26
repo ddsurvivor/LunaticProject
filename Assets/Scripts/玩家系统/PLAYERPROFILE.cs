@@ -224,6 +224,7 @@ public class PLAYERPROFILE
     
     public void AddItem(ItemName itemName, int num)
     {
+        Debug.Log($"添加道具: {itemName} 数量: {num}");
         var item = GM.Ins.PLAYERPROFILE.itemPacks
             .Find(t => t.itemName == itemName);
         if (item != null)

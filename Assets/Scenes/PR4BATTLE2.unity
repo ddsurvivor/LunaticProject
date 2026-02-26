@@ -129,7 +129,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh45004
+  m_Name: pb_Mesh385066
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -2312,6 +2312,7 @@ GameObject:
   m_Component:
   - component: {fileID: 171875391}
   - component: {fileID: 171875392}
+  - component: {fileID: 171875393}
   m_Layer: 0
   m_Name: ==========BoxOut==========
   m_TagString: Untagged
@@ -2374,6 +2375,23 @@ MonoBehaviour:
     - Name: enemyPiecesDict
       Entry: 6
       Data: 
+--- !u!114 &171875393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 171875390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1cbe85fb508d14d45a55e7a2e370fb18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dropList:
+  - itemName: 3
+    itemNum: 4
+  - itemName: 5
+    itemNum: 3
 --- !u!1001 &180457541
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5032,7 +5050,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh44872
+  m_Name: pb_Mesh384934
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -13979,7 +13997,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh45242
+  m_Name: pb_Mesh385318
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -16753,6 +16771,7 @@ MonoBehaviour:
   spriteManager: {fileID: 0}
   pieceDataListSO: {fileID: 0}
   areaList: []
+  finishDrop: {fileID: 0}
 --- !u!114 &1713777225
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17246,7 +17265,7 @@ MonoBehaviour:
   m_BlendUpdateMethod: 0
   m_DefaultBlend:
     m_Style: 1
-    m_Time: 0.2
+    m_Time: 0.5
     m_CustomCurve:
       serializedVersion: 2
       m_Curve: []
@@ -20507,6 +20526,14 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 106691963638292477, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 106691963638292477, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+    - target: {fileID: 250236510420190770, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 250236510420190770, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
     - target: {fileID: 938954361116868618, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -20603,6 +20630,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4936786522100155707, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 4936786522100155707, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
     - target: {fileID: 5450057616862123614, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -20758,7 +20789,7 @@ PrefabInstance:
     - target: {fileID: 6793405397572969132, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 6793405397572969132, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
     - target: {fileID: 6793405397572969134, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: serializationData.Prefab
       value: 
@@ -20767,6 +20798,10 @@ PrefabInstance:
       propertyPath: camera
       value: 
       objectReference: {fileID: 2123997333}
+    - target: {fileID: 6793405397572969135, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: finishDrop
+      value: 
+      objectReference: {fileID: 171875393}
     - target: {fileID: 7162913518181066253, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

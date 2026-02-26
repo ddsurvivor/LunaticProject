@@ -36,6 +36,7 @@ public class EnemyController : PieceController
         isActived = false;
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Death, false, -1, () =>
         {
+            CheckDrop();
             if (!deadNotDelete)
             {
                 pieceDisplay.pieceSpriteRenderer.DOFade(0f, 0.8f).OnComplete(() =>
@@ -127,4 +128,20 @@ public class EnemyController : PieceController
     }
 
     #endregion
+
+    private void CheckDrop()
+    {
+        if (pieceData.dropItemList.Count > 0)
+        {
+            // 按照概率随机
+            if (GameConst.CheckRate(pieceData.dropRate))
+            {
+                foreach (var dropItem in pieceData.dropItemList)
+                {
+                    // 添加道具到存档里
+                    GM.Ins.PLAYERPROFILE.AddItem(dropItem.itemName, dropItem.itemNum);
+                }
+            }
+        }
+    }
 }

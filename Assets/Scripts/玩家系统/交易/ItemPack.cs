@@ -1,12 +1,18 @@
+using System.Collections.Generic;
+using Sirenix.Serialization;
+using UnityEngine;
+using System;
+using Sirenix.OdinInspector;
 
-[System.Serializable]
-    public class ItemPack
+[Serializable]
+public class ItemPack
+{
+    public ItemName itemName;
+    public int itemNum;
+
+    public ItemPack(ItemName itemName, int itemNum)
     {
-        public ItemName itemName;
-        public int itemNum;
-        public ItemPack(ItemName itemName, int itemNum)
-        {
-            this.itemName = itemName;
-            this.itemNum = itemNum;
-        }
+        this.itemName = itemName;
+        this.itemNum = itemNum;
     }
+}

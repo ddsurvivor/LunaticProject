@@ -15,6 +15,7 @@ public class BattleManager : MonoBehaviour
 
     //public List<LadderArea> ladderAreas = new();
     public List<HealArea> areaList = new();// 
+    public FinishDrop finishDrop;
 
     public int TunrNumber => _turnNumber;
     private int _turnNumber = 0;
@@ -241,6 +242,9 @@ public class BattleManager : MonoBehaviour
         {
             // 敌方棋子全灭，玩家胜利
             BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家胜利！");
+            // 处理胜利事件
+            if(finishDrop != null) finishDrop.DropItems();
+            // 延迟后退出战斗
             DOVirtual.DelayedCall(1.0f, () => { BattleScene.Ins.BM.OnClickQuitBattle(); });
             return;
         }
