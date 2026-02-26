@@ -81,7 +81,7 @@ public class PieceController : MonoBehaviour
             availableActions.Add(ActionType.近战攻击);
             availableActions.Add(ActionType.远程攻击);
             availableActions.Add(ActionType.待机); // 待机
-            availableActions.Add(ActionType.重新装填); // 装填
+            //availableActions.Add(ActionType.重新装填); // 装填
             availableActions.Add(ActionType.技能); // 技能
         }
         //Debug.Log(_pieceDisplay.name);
@@ -157,14 +157,14 @@ public class PieceController : MonoBehaviour
         OnTurnEnd?.Invoke();
     }
 
-    public void ShowActionList()
-    {
-        if (!isPlayerPiece) return;
-        //_actionListPanel.gameObject.SetActive(true);
-        BattleScene.Ins.UM.pieceActionListPanel.ShowPanel(this);
-        BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(this);
-        //BattleScene.Ins.UM.infoBox.ShowInfo(this);
-    }
+    // public void ShowActionList()
+    // {
+    //     if (!isPlayerPiece) return;
+    //     //_actionListPanel.gameObject.SetActive(true);
+    //     BattleScene.Ins.UM.pieceActionListPanel.ShowPanel(this);
+    //     BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(this);
+    //     //BattleScene.Ins.UM.infoBox.ShowInfo(this);
+    // }
 
     public void StartDrag()
     {

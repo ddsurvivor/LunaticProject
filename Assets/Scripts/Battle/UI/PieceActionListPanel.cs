@@ -33,7 +33,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             }
         }
     }
-    public void Init(PieceController pc)
+    /*public void Init(PieceController pc)
     {
         this.pc = pc;
         // 遍历所有ActionType枚举值
@@ -70,7 +70,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 });
             }
         }
-    }
+    }*/
 
     public void Update()
     {
@@ -111,6 +111,15 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             return;
         }
         this.pc = pc;
+        if (pc.unitAttrCenter.AmmoCount < pc.unitAttrCenter.MaxAmmoCount)
+        {
+            pc.availableActions.Add(ActionType.重新装填);
+        }
+        else
+        {
+            pc.availableActions.Remove(ActionType.重新装填);
+        }
+
         foreach (var button in actionButtonDic)
         {
             button.Value.gameObject.SetActive(
@@ -190,7 +199,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 pc.ReloadAmmo();
                 break;
             case ActionType.道具:
-                pc.PlayAudio(actionType);
+                //pc.PlayAudio(actionType);
                 break;
             case ActionType.交互:
                 pc.PlayAudio(actionType);
