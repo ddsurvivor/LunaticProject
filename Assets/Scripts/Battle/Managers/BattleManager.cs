@@ -13,7 +13,7 @@ public class BattleManager : MonoBehaviour
 
     public PieceDataListSO pieceDataListSO;
 
-    public List<LadderArea> ladderAreas = new();
+    //public List<LadderArea> ladderAreas = new();
     public List<HealArea> areaList = new();// 
 
     public int TunrNumber => _turnNumber;

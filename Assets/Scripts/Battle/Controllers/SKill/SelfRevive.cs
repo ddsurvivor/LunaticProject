@@ -5,7 +5,7 @@ using UnityEngine;
 /// </summary>
 public class SelfRevive: MonoBehaviour
 {
-    public PieceController piece;
+    public EnemyController piece;
     [LabelText("复活恢复百分比")]
     [Range(0f,1f)]
     public float revivePercent = 0.5f; // 复活时恢复的生命百分比
@@ -27,6 +27,7 @@ public class SelfRevive: MonoBehaviour
         {
             // 满血满状态复活
             piece.Init(piece.player);
+            piece.isActived = true;
             piece.unitAttrCenter.SetHealth(revivePercent);
             isFakeDead = false;
             reviveCount--;

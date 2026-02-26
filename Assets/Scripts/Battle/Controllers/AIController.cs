@@ -454,6 +454,7 @@ public class AIController : PlayerController
             if (!aiPiece.isActived || aiPiece.isDead) continue;
             if (!aiPiece.unitAttrCenter.CostMP()) continue;
             CheckEnemyAction(aiPiece);
+            BattleScene.Ins.BM.camera.SetFollow(aiPiece.transform);
             return;
         }
 

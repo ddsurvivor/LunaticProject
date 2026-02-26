@@ -10543,6 +10543,7 @@ GameObject:
   - component: {fileID: 127037823670675263}
   - component: {fileID: 106691963638292477}
   - component: {fileID: 250236510420190770}
+  - component: {fileID: -1736436856563953904}
   m_Layer: 0
   m_Name: BattleScene
   m_TagString: Untagged
@@ -10605,7 +10606,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AIController: {fileID: 6793405397572969132}
   PlayerController: {fileID: 6793405397572969130}
-  camera: {fileID: 0}
+  camera: {fileID: -1736436856563953904}
   buffManager: {fileID: 1986275414}
   skillManager: {fileID: 127037823670675263}
   spriteManager: {fileID: 250236510420190770}
@@ -10681,6 +10682,7 @@ MonoBehaviour:
   burstChargeBarFill: {fileID: 0}
   fogController: {fileID: 0}
   waveController: {fileID: 0}
+  mapController: {fileID: 0}
 --- !u!114 &6793405397572969130
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11080,6 +11082,26 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+--- !u!114 &-1736436856563953904
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6793405397572969121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb93d5c0ce2e4201abb3ecb7f814b871, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  virtualCamera: {fileID: 0}
+  followVCam: {fileID: 0}
+  zoomSpeed: 10
+  minZoom: 8
+  maxZoom: 30
+  panSpeed: 3.5
+  shakeDelay: 0.5
+  impulse: {fileID: 0}
 --- !u!1 &6867484007454029416
 GameObject:
   m_ObjectHideFlags: 0
@@ -12581,7 +12603,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.882353, g: 0.3647059, b: 0.16078432, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -14300,6 +14322,10 @@ PrefabInstance:
     - target: {fileID: 1201238227312202659, guid: 02e8833b36da05f45b37b4e6f7e4618f, type: 3}
       propertyPath: m_SortingLayerID
       value: 2062317405
+      objectReference: {fileID: 0}
+    - target: {fileID: 2486823348617150042, guid: 02e8833b36da05f45b37b4e6f7e4618f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3720141087411870068, guid: 02e8833b36da05f45b37b4e6f7e4618f, type: 3}
       propertyPath: m_SortingLayer

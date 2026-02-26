@@ -82,7 +82,7 @@ public class ClickManager : MonoBehaviour
 
     private void ClickPiece()
     {
-        BattleScene.Ins.BM.camera.SetFollow(null);
+        //BattleScene.Ins.BM.camera.SetFollow(null);
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit[] hits = Physics.RaycastAll(ray);
 
