@@ -264,14 +264,14 @@ public class RangeUI : MonoBehaviour
             if (piece == null) continue;
             if (_curSkillPack.target == SkillTarget.All)
             {
-                piece.rangeUI?.ShowHighlight(true);
+                piece.ShowHighlight(true);
                 newTargets.Add(piece);
             }
             else if (_curSkillPack.target == SkillTarget.EnemyAll)
             {
                 if (!piece.isPlayerPiece)
                 {
-                    piece.rangeUI?.ShowHighlight(true);
+                    piece.ShowHighlight(true);
                     newTargets.Add(piece);
                 }
             }
@@ -279,7 +279,7 @@ public class RangeUI : MonoBehaviour
             {
                 if (!piece.isPlayerPiece)
                 {
-                    piece.rangeUI?.ShowHighlight(true);
+                    piece.ShowHighlight(true);
                     newTargets.Add(piece);
                 }
             }
@@ -287,7 +287,7 @@ public class RangeUI : MonoBehaviour
             {
                 if (piece.isPlayerPiece)
                 {
-                    piece.rangeUI?.ShowHighlight(true);
+                    piece.ShowHighlight(true);
                     newTargets.Add(piece);
                 }
             }
@@ -300,7 +300,7 @@ public class RangeUI : MonoBehaviour
                 continue;
             }
 
-            piece.rangeUI?.ShowHighlight(false);
+            piece.ShowHighlight(false);
         }
 
         _curTargets = newTargets;
@@ -314,14 +314,14 @@ public class RangeUI : MonoBehaviour
         {
             if (_curSkillPack.target == SkillTarget.All)
             {
-                piece.rangeUI?.ShowHighlight(true);
+                piece.ShowHighlight(true);
                 newTargets.Add(piece);
             }
             else if (_curSkillPack.target == SkillTarget.EnemyAll)
             {
                 if (!piece.isPlayerPiece)
                 {
-                    piece.rangeUI?.ShowHighlight(true);
+                    piece.ShowHighlight(true);
                     newTargets.Add(piece);
                 }
             }
@@ -329,7 +329,7 @@ public class RangeUI : MonoBehaviour
             {
                 if (!piece.isPlayerPiece)
                 {
-                    piece.rangeUI?.ShowHighlight(true);
+                    piece.ShowHighlight(true);
                     newTargets.Add(piece);
                 }
             }
@@ -337,7 +337,7 @@ public class RangeUI : MonoBehaviour
             {
                 if (piece.isPlayerPiece)
                 {
-                    piece.rangeUI?.ShowHighlight(true);
+                    piece.ShowHighlight(true);
                     newTargets.Add(piece);
                 }
             }
@@ -350,7 +350,7 @@ public class RangeUI : MonoBehaviour
                 continue;
             }
 
-            piece.rangeUI?.ShowHighlight(false);
+            piece.ShowHighlight(false);
         }
 
         _curTargets = newTargets;

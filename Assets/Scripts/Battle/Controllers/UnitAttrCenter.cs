@@ -139,7 +139,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
     public void SetHealth(float healthPercent)
     {
-        _curHealth = Mathf.CeilToInt(_maxHealth * healthPercent);
+        _curHealth = Mathf.CeilToInt(_maxHealth * healthPercent/100f);
     }
 
     public void TakeDamage(AttackPack attackPack)

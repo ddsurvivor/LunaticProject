@@ -14,7 +14,7 @@ public class BattleManager : MonoBehaviour
     public PieceDataListSO pieceDataListSO;
 
     //public List<LadderArea> ladderAreas = new();
-    public List<HealArea> areaList = new();// 
+    public List<HealArea> areaList = new(); // 
     public FinishDrop finishDrop;
 
     public int TunrNumber => _turnNumber;
@@ -30,6 +30,7 @@ public class BattleManager : MonoBehaviour
 
     public void ChangeTurn()
     {
+        HandleDelaySkill(); // 处理回合结束时的延时技能效果
         if (PlayerController.isInTurn)
         {
             PlayerController.isInTurn = false;
@@ -118,6 +119,7 @@ public class BattleManager : MonoBehaviour
         , SkillPack skillPack, Vector3 targetPos = default)
     {
         BattleScene.Ins.UM.PopSkillName(skillPack.skillName);
+
         foreach (var target in targets)
         {
             Debug.Log($"Skill Attack: Attacker={attacker.name}, Target={target.name}");
@@ -170,7 +172,7 @@ public class BattleManager : MonoBehaviour
                 realDamage -= armor;
                 // 减伤
                 realDamage = (int)(realDamage
-                    * (100 - attacker.unitAttrCenter.buffAttrDic[
+                    * (100 + attacker.unitAttrCenter.buffAttrDic[
                         BuffAttrType.DamageIncrease]) / 100f * // 伤害增加
                     (100 - target.unitAttrCenter.buffAttrDic[
                         BuffAttrType.DamageReduction]) / 100f); // 伤害减免
@@ -213,14 +215,12 @@ public class BattleManager : MonoBehaviour
                     }
                 }
             }
+
+            // 处理附加效果
+            ApplySKillEffect(skillPack, attacker, target, targetPos);
         }
 
-        
-            
-            // 处理附加效果
-            ApplySKillEffect(skillPack, attacker, targetPos);
-        
-    
+        onceEffect = false;
         //BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
     }
 
@@ -243,7 +243,7 @@ public class BattleManager : MonoBehaviour
             // 敌方棋子全灭，玩家胜利
             BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家胜利！");
             // 处理胜利事件
-            if(finishDrop != null) finishDrop.DropItems();
+            if (finishDrop != null) finishDrop.DropItems();
             // 延迟后退出战斗
             DOVirtual.DelayedCall(1.0f, () => { BattleScene.Ins.BM.OnClickQuitBattle(); });
             return;
@@ -259,6 +259,7 @@ public class BattleManager : MonoBehaviour
                 break;
             }
         }
+
         Debug.Log($"检查我方棋子全灭：{allPlayerDead}");
         if (allPlayerDead)
         {
@@ -281,7 +282,11 @@ public class BattleManager : MonoBehaviour
         }
     }*/
 
+    // 只处理一次的效果
+    private bool onceEffect = false;
+
     public void ApplySKillEffect(SkillPack skillPack, PieceController caster = null
+        , PieceController target = null
         , Vector3 targetPos = default)
     {
         foreach (var effect in skillPack.skillEffects)
@@ -289,10 +294,14 @@ public class BattleManager : MonoBehaviour
             switch (effect)
             {
                 case SkillEffect.Blink:
+                    if (onceEffect) continue;
+                    onceEffect = true;
                     caster.transform.position =
                         targetPos + new Vector3(-0.5f, 0, -0.5f);
                     break;
                 case SkillEffect.HealArea:
+                    if (onceEffect) continue;
+                    onceEffect = true;
                     Debug.Log("生成治疗区");
                     HealArea healArea = ObjectPool.Ins.GenerateObject(ItemType.HEAL_AREA,
                         targetPos,
@@ -300,6 +309,19 @@ public class BattleManager : MonoBehaviour
                     healArea.SetData(skillPack.buffPacks[0], 1);
                     break;
                 case SkillEffect.SpaceBomb:
+                    if (target.gameObject.activeInHierarchy)
+                    {
+                        // 检测目标是否有假死技能, 如果有且进入了假死状态，则彻底杀死
+                        SelfRevive revive = target.GetComponent<SelfRevive>();
+                        if (revive != null)
+                        {
+                            if (revive.isFakeDead)
+                            {
+                                revive.TrueDeath();
+                            }
+                        }
+                    }
+
                     break;
                 default:
                     break;
@@ -319,6 +341,60 @@ public class BattleManager : MonoBehaviour
                 area.gameObject.SetActive(false);
                 areaList.RemoveAt(index);
             }
+        }
+    }
+
+    // 存储延时技能
+    private PieceController _delaySkillCaster;
+    private SkillPack _delaySkillPack;
+    private Vector3 _delaySkillTargetPos;
+    private GameObject _delaySkillEffectObj;
+
+    public void RestoreDelaySkill(PieceController caster, SkillPack skillPack
+        , Vector3 targetPos = default)
+    {
+        // 存储技能数据，等待回合结束时触发攻击
+        _delaySkillCaster = caster;
+        _delaySkillPack = skillPack;
+        _delaySkillTargetPos = targetPos;
+
+        if (skillPack.rangeType == RangeType.Grenade) // 爆炸范围锁定
+        {
+            // 生成一个标记物显示爆炸位置
+            _delaySkillEffectObj =
+                ObjectPool.Ins.GenerateObject(ItemType.SKILL_AREA, targetPos, Quaternion.identity);
+            _delaySkillEffectObj.transform.localScale =
+                skillPack.explodeRadius * 1f / 11f * Vector3.one;
+        }
+    }
+
+    // 处理临时效果
+    public void HandleDelaySkill()
+    {
+        if (_delaySkillPack != null)
+        {
+            float explodeRadius = _delaySkillPack.explodeRadius;
+            // 检测球体范围内的所有敌人
+            Collider[] hitColliders =
+                Physics.OverlapSphere(_delaySkillTargetPos, explodeRadius);
+            List<PieceController> newTargets = new();
+            foreach (var collider in hitColliders)
+            {
+                PieceController piece = collider.transform.GetComponent<PieceController>();
+                if (piece == null) continue;
+                if(!piece.gameObject.activeInHierarchy) continue;
+                newTargets.Add(piece);
+            }
+            if (_delaySkillTargetPos != null && _delaySkillPack.skillVFXType != 0)
+            {
+                ObjectPool.Ins.GenerateObject(
+                    _delaySkillPack.skillVFXType,
+                    _delaySkillTargetPos + Vector3.up * 3f,
+                    Quaternion.identity);
+            }
+            PieceSkill(_delaySkillCaster, newTargets, _delaySkillPack, _delaySkillTargetPos);
+            _delaySkillEffectObj.SetActive(false);
+            _delaySkillPack = null;
         }
     }
 

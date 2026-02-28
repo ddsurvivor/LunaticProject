@@ -3985,20 +3985,21 @@ MonoBehaviour:
     description: 
     mpCost: 0
     target: 4
-    rangeType: 1
-    rangeValue: 100
+    rangeType: 3
+    rangeValue: 40
     rangeAgle: 0
-    explodeRadius: 0
+    explodeRadius: 10
     skillVFXType: 10
     attackPacks:
     - damage: 170
       damageType: 2
     atkTimes: 1
     buffPacks: []
-    skillEffects: 
+    skillEffects: 03000000
     skillSound: {fileID: 0}
     consumeItems: []
     animationIndex: 0
+    isDelaySkill: 1
 --- !u!65 &334446702
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5201,7 +5202,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh29106
+  m_Name: pb_Mesh36190
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -6118,7 +6119,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh29040
+  m_Name: pb_Mesh36110
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -12761,7 +12762,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh29298
+  m_Name: pb_Mesh36382
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -13790,7 +13791,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh29448
+  m_Name: pb_Mesh36532
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -19976,7 +19977,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh28906
+  m_Name: pb_Mesh35976
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -27217,6 +27218,63 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!1001 &2689357392042846246
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2689357393630688496, guid: a1f3d4b46ae82fd40a217a6870f778bd, type: 3}
+      propertyPath: m_RootOrder
+      value: 26
+      objectReference: {fileID: 0}
+    - target: {fileID: 2689357393630688496, guid: a1f3d4b46ae82fd40a217a6870f778bd, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2689357393630688496, guid: a1f3d4b46ae82fd40a217a6870f778bd, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2689357393630688496, guid: a1f3d4b46ae82fd40a217a6870f778bd, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2689357393630688496, guid: a1f3d4b46ae82fd40a217a6870f778bd, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2689357393630688496, guid: a1f3d4b46ae82fd40a217a6870f778bd, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2689357393630688496, guid: a1f3d4b46ae82fd40a217a6870f778bd, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2689357393630688496, guid: a1f3d4b46ae82fd40a217a6870f778bd, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2689357393630688496, guid: a1f3d4b46ae82fd40a217a6870f778bd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2689357393630688496, guid: a1f3d4b46ae82fd40a217a6870f778bd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2689357393630688496, guid: a1f3d4b46ae82fd40a217a6870f778bd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2689357393630688499, guid: a1f3d4b46ae82fd40a217a6870f778bd, type: 3}
+      propertyPath: m_Name
+      value: grenadeCircle
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a1f3d4b46ae82fd40a217a6870f778bd, type: 3}
 --- !u!1001 &3386606834741142861
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [System.Serializable]
 public class SkillPack
@@ -22,5 +23,6 @@ public class SkillPack
     public AudioClip skillSound;// 施放音效
     public List<ItemPack> consumeItems = new(); // 施放消耗道具列表
     public int animationIndex = 0; // 技能动画索引
+    public bool isDelaySkill = false; // 是否为延迟技能
 
 }

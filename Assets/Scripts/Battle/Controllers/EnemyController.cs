@@ -131,7 +131,7 @@ public class EnemyController : PieceController
 
     private void CheckDrop()
     {
-        if (pieceData.dropItemList.Count > 0)
+        if (pieceData.dropItemList!=null && pieceData.dropItemList.Count > 0)
         {
             // 按照概率随机
             if (GameConst.CheckRate(pieceData.dropRate))

@@ -17,6 +17,7 @@ public class PieceController : MonoBehaviour
 
     [FormerlySerializedAs("_rangeUI")] [SerializeField]
     public RangeUI rangeUI; // 范围UI
+    public GameObject hightlightEffect; // 高亮特效
 
     [SerializeField] private PieceActionListPanel _actionListPanel; // 棋子动作列表面板
 
@@ -410,6 +411,7 @@ public class PieceController : MonoBehaviour
         transform.DOShakePosition(0.5f, 0.8f);
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
         if(uiCanvas!= null) uiCanvas.SetActive(true);
+        ShowHighlight(false);
     }
 
     public virtual void Dead()
@@ -460,6 +462,14 @@ public class PieceController : MonoBehaviour
     public virtual void CastSkill()
     {
         if(_skillPack == null) return;
+        Transform atkPos = rangeUI.GetSkillTransform();
+        if (_skillPack.isDelaySkill) // 延时类技能跳过结算
+        {
+            BattleScene.Ins.BM.RestoreDelaySkill(this, _skillPack, atkPos.position);
+            _isUsingSkill = false;
+            rangeUI.CloseRange();
+            return;
+        }
         
         // 根据范围获取所有棋子
         List<PieceController> targets = rangeUI.GetCurTargets;
@@ -468,7 +478,6 @@ public class PieceController : MonoBehaviour
             Debug.Log("未选中任何目标，无法发动技能");
             return;
         }
-        Transform atkPos = rangeUI.GetSkillTransform();
         if (atkPos != null && _skillPack.skillVFXType != 0)
         {
             ObjectPool.Ins.GenerateObject(
@@ -519,6 +528,12 @@ public class PieceController : MonoBehaviour
     public float GetRange(bool isNormalAtk)
     {
         return isNormalAtk ? _pieceData.meleeAtk.rangeValue : _pieceData.rangedAtk.rangeValue;
+    }
+
+    public void ShowHighlight(bool option)
+    {
+        rangeUI?.ShowHighlight(option);
+        if(hightlightEffect!=null) hightlightEffect.SetActive(option);
     }
 
     // ======= 音效 ======= //

@@ -24,12 +24,15 @@ public enum ItemType
     PLASMA_EXPLOSION=15,
     // 燃烧特效
     FLAME_EFFECT=16,
+    // 技能攻击区域标记
+    SKILL_AREA=17,
 
     // 治疗区域
     HEAL_AREA=20,
     
     // 物品拾取
     PICKABLE_ITEM=30,
+    
 }
 /// <summary>
 /// 对象池

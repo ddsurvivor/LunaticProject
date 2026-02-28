@@ -72,7 +72,7 @@
                     break;
                 case BuffType.Frail:
                     unit.AddBuffAttr(BuffAttrType.MeleeArmorPercent, value*-30);
-                    // 伤害增加30%
+                    // 伤害减少
                     unit.AddBuffAttr(BuffAttrType.DamageIncrease,  value*-20);
                     break;
                 default:

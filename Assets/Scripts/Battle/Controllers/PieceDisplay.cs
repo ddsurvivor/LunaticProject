@@ -33,6 +33,9 @@ public class PieceDisplay : SerializedMonoBehaviour
     public Sprite hitBackSprite;
 
     private UnityAction finishAction;
+    
+    
+    private float frameDuration = 0.2f; // 每帧持续时间，默认为0.2秒
     // 更改显示状态脚本，传入一个状态，和一个持续时间，如果是-1则表示永久更改，否则持续时间结束后恢复到idle状态
     // 如果传入back则显示背面图片
     public void ChangeDisplayState(PieceDisplayState state, bool back = false, float duration = -1f,
@@ -51,10 +54,10 @@ public class PieceDisplay : SerializedMonoBehaviour
                 pieceSpriteRenderer.sprite = back ? moveBackSprite : moveSprite;
                 break;
             case PieceDisplayState.Attack:
-                StartCoroutine(PlaySpriteAnimation(attackSprite, 0.3f));
+                StartCoroutine(PlaySpriteAnimation(attackSprite, frameDuration));
                 break;
             case PieceDisplayState.Shoot:
-                StartCoroutine(PlaySpriteAnimation(shootSprite, 0.3f));
+                StartCoroutine(PlaySpriteAnimation(shootSprite, frameDuration));
                 //pieceSpriteRenderer.sprite = back ? shootBackSprite : shootSprite;
                 break;
             case PieceDisplayState.Dodge:
@@ -62,13 +65,13 @@ public class PieceDisplay : SerializedMonoBehaviour
                 break;
             case PieceDisplayState.Death:
                 // 按顺序按固定时间间隔播放死亡动画
-                StartCoroutine(PlaySpriteAnimation(deathSprite, 0.2f));
+                StartCoroutine(PlaySpriteAnimation(deathSprite, frameDuration));
                 break;
             case PieceDisplayState.Hit:
                 pieceSpriteRenderer.sprite = back ? hitBackSprite : hitSprite;
                 break;
             case PieceDisplayState.Skill:
-                StartCoroutine(PlaySpriteAnimation(skillSpriteList[index], 0.2f));
+                StartCoroutine(PlaySpriteAnimation(skillSpriteList[index], frameDuration));
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(state), state, null);
@@ -107,6 +110,12 @@ public class PieceDisplay : SerializedMonoBehaviour
         finishAction?.Invoke();
     }
     
+    public void PlayFrame(List<Sprite> sprites, UnityAction finish = null)
+    {
+        finishAction = finish;
+        StartCoroutine(PlaySpriteAnimation(sprites, frameDuration));
+    }
+    
     public void FaceRight(bool faceRight)
     {
         Vector3 scale = pieceSpriteRenderer.transform.localScale;
@@ -124,5 +133,6 @@ public enum PieceDisplayState
     Dodge,
     Hit,
     Death,
+    TrueDeath,
     Skill
 }
