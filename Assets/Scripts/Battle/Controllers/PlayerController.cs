@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Serialization;
 
 
@@ -21,9 +22,15 @@ public class PlayerController : SerializedMonoBehaviour
     [Header("UI")] 
     public RectTransform burstChargeBarFill; // 聚能条填充部分
     private float originWidth = 500f;
+    
+    [FoldoutGroup("事件")]
+    public UnityEvent OnInit;
+    [FoldoutGroup("事件")]public UnityEvent OnTurnStart;
+    [FoldoutGroup("事件")]public UnityEvent OnTurnEnd;
 
     public virtual void Init()
     {
+        OnInit.Invoke();
         burstCharge = 0f;
         UpdateBurstBar();
         foreach (var piece in pieces)
@@ -35,6 +42,7 @@ public class PlayerController : SerializedMonoBehaviour
     }
     public virtual void TurnStart()
     {
+        OnTurnStart.Invoke();
         // 所有棋子重置状态
         foreach (var piece in pieces)
         {
@@ -46,6 +54,7 @@ public class PlayerController : SerializedMonoBehaviour
 
     public virtual void TurnEnd()
     {
+        OnTurnEnd.Invoke();
         // 可以在这里添加玩家回合结束时的逻辑
         foreach (var piece in pieces)
         {

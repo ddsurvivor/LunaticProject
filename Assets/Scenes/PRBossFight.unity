@@ -1057,6 +1057,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   actionType: 6
+  ableToTrigger: 1
   fogEffect: {fileID: 0}
 --- !u!65 &101851123
 BoxCollider:
@@ -1915,6 +1916,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   actionType: 6
+  ableToTrigger: 1
   fogEffect: {fileID: 1564675299}
 --- !u!43 &270171899
 Mesh:
@@ -2486,6 +2488,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   actionType: 13
+  ableToTrigger: 1
+  coolDown: 2
+  currentCoolDown: 0
   bombSkillPack:
     skillName: "\u8F68\u9053\u8F70\u70B8"
     description: 
@@ -7051,8 +7056,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 826854624}
   m_LocalRotation: {x: 0, y: -0.08045985, z: 0, w: 0.99675786}
-  m_LocalPosition: {x: 50.6619, y: 0, z: -75.6144}
-  m_LocalScale: {x: 0.69486773, y: 1, z: 3.1229098}
+  m_LocalPosition: {x: 47.7144, y: 0, z: -75.9762}
+  m_LocalScale: {x: 0.7971523, y: 1, z: 3.1229098}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1423871543}
@@ -8408,7 +8413,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh21732
+  m_Name: pb_Mesh204730
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -9626,6 +9631,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   actionType: 6
+  ableToTrigger: 1
   fogEffect: {fileID: 0}
 --- !u!65 &1156488170
 BoxCollider:
@@ -15826,6 +15832,15 @@ MonoBehaviour:
   totalDamage: 0
   burstTarget: {fileID: 0}
   burstChargeBarFill: {fileID: 0}
+  OnInit:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTurnStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTurnEnd:
+    m_PersistentCalls:
+      m_Calls: []
   fogController: {fileID: 0}
   waveController: {fileID: 0}
   mapController: {fileID: 0}
@@ -15885,6 +15900,15 @@ MonoBehaviour:
   totalDamage: 0
   burstTarget: {fileID: 0}
   burstChargeBarFill: {fileID: 1372463332}
+  OnInit:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTurnStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTurnEnd:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &1713777230
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19435,6 +19459,34 @@ PrefabInstance:
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 6793405397572969130, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+    - target: {fileID: 6793405397572969130, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: OnTurnStart.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6793405397572969130, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: OnTurnStart.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6793405397572969130, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: OnTurnStart.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 334446701}
+    - target: {fileID: 6793405397572969130, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: OnTurnStart.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6793405397572969130, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: OnTurnStart.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnTurnStart
+      objectReference: {fileID: 0}
+    - target: {fileID: 6793405397572969130, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: OnTurnStart.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: BombArea, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 6793405397572969130, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: OnTurnStart.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 6793405397572969132, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: fogController
       value: 

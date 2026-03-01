@@ -129,6 +129,11 @@ public class PieceActionListPanel : SerializedMonoBehaviour
         {
             if (actionButtonDic.ContainsKey(interactArea.actionType))
             {
+                if (!interactArea.ableToTrigger)
+                {
+                    actionButtonDic[interactArea.actionType].gameObject.SetActive(false);
+                    continue;
+                }
                 actionButtonDic[interactArea.actionType].gameObject.SetActive(pc.unitAttrCenter.CurMovePoint>=1);
                 actionButtonDic[interactArea.actionType].onClick.RemoveAllListeners();
                 actionButtonDic[interactArea.actionType].onClick.AddListener(()=>
