@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 暂时弃用
+/// </summary>
 public class 物品 : MonoBehaviour
 {
     public string Name;//技术名词
