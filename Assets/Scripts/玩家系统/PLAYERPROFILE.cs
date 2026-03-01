@@ -88,7 +88,7 @@ public class PLAYERPROFILE
         itemPacks.Clear();
         itemPacks.Add(new ItemPack(ItemName.能量包, 6));
         itemPacks.Add(new ItemPack(ItemName.医疗单元I型, 3));
-        
+        itemPacks.Add(new ItemPack(ItemName.专速达, 3));
         //初始化
         isNewGame = true;
     }

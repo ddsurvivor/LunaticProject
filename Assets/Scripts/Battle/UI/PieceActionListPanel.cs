@@ -144,27 +144,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             }
         }
         skillListPanel.SetActive(false);
-        foreach (var skillButton in skillButtons)
-        {
-            skillButton.gameObject.SetActive(false);
-            skillButton.onClick.RemoveAllListeners();
-        }
-        for (int j = 0; j < pc.availableSkills.Count; j++)
-        {
-            // 更新所有技能按钮
-            if (j<skillButtons.Count)
-            {
-                int capturedIndex = j; // 捕获当前索引
-                skillButtons[j].gameObject.SetActive(true);
-                skillButtons[j].enabled = pc.SkillAvailable(pc.availableSkills[capturedIndex]);
-                skillButtons[j].GetComponentInChildren<Text>().text = pc.availableSkills[j].skillName;
-                skillButtons[j].onClick.RemoveAllListeners();
-                skillButtons[j].onClick.AddListener(() => {
-                    gameObject.SetActive(false);
-                    pc.StartSkillAttack(pc.availableSkills[capturedIndex]);
-                });
-            }
-        }
+        
         gameObject.SetActive(true);
     }
 
@@ -182,7 +162,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 pc.StartNormalAttack();
                 break;
             case ActionType.技能:
-                skillListPanel.SetActive(true);
+                OpenSkillListPanel();
                 return;
                 break;
             case ActionType.待机:
@@ -205,6 +185,9 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 break;
             case ActionType.道具:
                 //pc.PlayAudio(actionType);
+                // 打开道具二级菜单
+                OpenItemPanel();
+                 return;
                 break;
             case ActionType.交互:
                 pc.PlayAudio(actionType);
@@ -214,6 +197,63 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 break;
         }
         gameObject.SetActive(false);
+    }
+    
+    private void OpenSkillListPanel()
+    {
+        skillListPanel.SetActive(true);
+        foreach (var skillButton in skillButtons)
+        {
+            skillButton.gameObject.SetActive(false);
+            skillButton.onClick.RemoveAllListeners();
+        }
+        for (int j = 0; j < pc.availableSkills.Count; j++)
+        {
+            // 更新所有技能按钮
+            if (j<skillButtons.Count)
+            {
+                int capturedIndex = j; // 捕获当前索引
+                skillButtons[j].gameObject.SetActive(true);
+                skillButtons[j].enabled = pc.SkillAvailable(pc.availableSkills[capturedIndex]);
+                skillButtons[j].GetComponentInChildren<Text>().text = pc.availableSkills[j].skillName;
+                skillButtons[j].onClick.RemoveAllListeners();
+                skillButtons[j].onClick.AddListener(() => {
+                    gameObject.SetActive(false);
+                    pc.StartSkillAttack(pc.availableSkills[capturedIndex]);
+                });
+            }
+        }
+    }
+
+    private void OpenItemPanel()
+    {
+        // 复用技能按钮
+        skillListPanel.SetActive(true);
+        foreach (var skillButton in skillButtons)
+        {
+            skillButton.gameObject.SetActive(false);
+            skillButton.onClick.RemoveAllListeners();
+        }
+        for (int j = 0; j < GM.Ins.PLAYERPROFILE.itemPacks.Count; j++)
+        {
+            // 更新所有技能按钮
+            if (j >= skillButtons.Count) return;
+            ItemData itemData =
+                GM.Ins.marketSystem.marketItemListSO.GetData(GM.Ins.PLAYERPROFILE.itemPacks[j]
+                    .itemName);
+            if (itemData!=null && itemData.equipType == EquipType.Consumable)
+            {
+                int capturedIndex = j; // 捕获当前索引
+                skillButtons[j].gameObject.SetActive(true);
+                skillButtons[j].enabled = pc.ItemAvailable(itemData);
+                skillButtons[j].GetComponentInChildren<Text>().text = itemData.itemName.ToString();
+                skillButtons[j].onClick.RemoveAllListeners();
+                skillButtons[j].onClick.AddListener(() => {
+                    gameObject.SetActive(false);
+                    pc.UseItem(itemData);
+                });
+            }
+        }
     }
     
 }

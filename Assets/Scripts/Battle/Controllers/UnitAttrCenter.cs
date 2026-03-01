@@ -139,12 +139,12 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
     public void SetHealth(float healthPercent)
     {
-        _curHealth = Mathf.CeilToInt(_maxHealth * healthPercent/100f);
+        _curHealth = Mathf.CeilToInt(_maxHealth * healthPercent / 100f);
     }
 
     public void TakeDamage(AttackPack attackPack)
     {
-        if(pc.isDead) return;
+        if (pc.isDead) return;
         if (attackPack.damage <= 0) return;
         _curHealth -= attackPack.damage;
         // 伤害跳字
@@ -180,6 +180,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
                 this.transform.position + Vector3.up * 5f
                 , Quaternion.identity);
         }
+
         BattleScene.Ins.UM.OnPieceStateChance(pc);
         Debug.Log($"受到{attackPack.damageType}伤害{attackPack.damage}");
     }
@@ -213,6 +214,15 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         return _curMovePoint >= costPoint;
     }
 
+    public void AddMP(int mpAmount)
+    {
+        if (mpAmount <= 0) return;
+        _curMovePoint += mpAmount;
+        if (_curMovePoint > _maxMovePoint) _curMovePoint = _maxMovePoint;
+        Debug.Log($"恢复行动力{mpAmount}");
+        BattleScene.Ins.UM.OnPieceStateChance(pc);
+    }
+
     public bool CostAmmo(int costCount = 1)
     {
         if (_ammoCount >= costCount)
@@ -237,9 +247,19 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
         return false;
     }
+
     public bool HasMana(int costPoint = 1)
     {
         return _manaPoint >= costPoint;
+    }
+
+    public void AddMana(int manaAmount)
+    {
+        if (manaAmount <= 0) return;
+        _manaPoint += manaAmount;
+        if (_manaPoint > _maxManaPoint) _manaPoint = _maxManaPoint;
+        Debug.Log($"恢复能量{manaAmount}");
+        BattleScene.Ins.UM.OnPieceStateChance(pc);
     }
 
     public bool CostItem(List<ItemPack> itemPacks)
@@ -248,6 +268,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         {
             return true;
         }
+
         foreach (var item in itemPacks)
         {
             if (GM.Ins.PLAYERPROFILE.GetItemNum(item.itemName) >= item.itemNum)
@@ -263,14 +284,17 @@ public class UnitAttrCenter : SerializedMonoBehaviour
                 return false;
             }
         }
+
         return false;
     }
+
     public bool HasItem(List<ItemPack> itemPacks)
     {
         if (itemPacks == null || itemPacks.Count == 0)
         {
             return true;
         }
+
         foreach (var item in itemPacks)
         {
             if (GM.Ins.PLAYERPROFILE.GetItemNum(item.itemName) < item.itemNum)
@@ -279,6 +303,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
                 return false;
             }
         }
+
         return true;
     }
 

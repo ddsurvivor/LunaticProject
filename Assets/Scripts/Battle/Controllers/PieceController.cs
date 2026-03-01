@@ -84,6 +84,7 @@ public class PieceController : MonoBehaviour
             availableActions.Add(ActionType.待机); // 待机
             //availableActions.Add(ActionType.重新装填); // 装填
             availableActions.Add(ActionType.技能); // 技能
+            availableActions.Add(ActionType.道具);
         }
         //Debug.Log(_pieceDisplay.name);
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
@@ -534,6 +535,65 @@ public class PieceController : MonoBehaviour
     {
         rangeUI?.ShowHighlight(option);
         if(hightlightEffect!=null) hightlightEffect.SetActive(option);
+    }
+    
+    // ======= 道具 ====== //
+    public bool ItemAvailable(ItemData itemData)
+    {
+        if (itemData == null) return false;
+        if (!unitAttrCenter.HasMP()) return false;
+        switch (itemData.useType)
+        {
+            case UseType.InBattle:
+                return true;
+            case UseType.WhenEnergyNotFull:
+                if(unitAttrCenter.ManaPoint >= unitAttrCenter.MaxManaPoint) 
+                    return false;
+                break;
+            case UseType.OutOfBattle:
+                return false;
+                break;
+            case UseType.WhenHpNotFull:
+                if(unitAttrCenter.CurHealth >= unitAttrCenter.MaxHealth) 
+                    return false;
+                break;
+            case UseType.WhenStaminaNotFull:
+                if(unitAttrCenter.CurMovePoint >= unitAttrCenter.MaxMovePoint) 
+                    return false;
+                break;
+            default:
+                return true;
+        }
+
+        return true;
+    }
+
+    public void UseItem(ItemData itemData)
+    {
+        if (!unitAttrCenter.HasItem(new List<ItemPack>() {new ItemPack(itemData.itemName,1) })) return;
+        if (!unitAttrCenter.CostMP()) return;
+        switch (itemData.itemName)
+        {
+            case ItemName.通用作战平台_CW179:
+                break;
+            case ItemName.魔女兵器:
+                break;
+            case ItemName.UX210_枪骑兵:
+                break;
+            case ItemName.能量包:// 回复能量
+                unitAttrCenter.AddMana(100);
+                break;
+            case ItemName.医疗单元I型:
+                unitAttrCenter.Heal(100);
+                break;
+            case ItemName.专速达:
+                unitAttrCenter.AddMP(3);
+                break;
+            case ItemName.礼盒:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     // ======= 音效 ======= //
