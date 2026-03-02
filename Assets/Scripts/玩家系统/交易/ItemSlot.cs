@@ -1,12 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
+//using TMPro;
 
 public class ItemSlot : MonoBehaviour
 {
     [Header("组件引用")]
     [SerializeField] private Image iconImage;
-    [SerializeField] private TextMeshProUGUI countText;
+    //[SerializeField] private TextMeshProUGUI countText;
 
     /// <summary>
     /// 设置道具（空道具传入 null 或 itemNum <= 0）
@@ -25,7 +25,7 @@ public class ItemSlot : MonoBehaviour
         {
             iconImage.sprite = data.itemIcon;
             iconImage.enabled = true;
-            countText.text = pack.itemNum.ToString();   // 数量始终显示（包括1）
+            //countText.text = pack.itemNum.ToString();   // 数量始终显示（包括1）
         }
         else
         {
@@ -41,7 +41,7 @@ public class ItemSlot : MonoBehaviour
     {
         iconImage.sprite = null;
         iconImage.enabled = false;
-        countText.text = "";
+        //countText.text = "";
     }
 
     
