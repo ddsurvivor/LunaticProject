@@ -31,6 +31,9 @@ public class PLAYERPROFILE
     public List<ItemPack> itemPacks = new();
     public int coins;// 金币数量
     
+    [Header("教程存档")]
+    public List<string> seenTutorials = new List<string>();
+
     [Header("存档信息")]
     public DateTime lastSaveTime;
     public bool isNewGame = false;
