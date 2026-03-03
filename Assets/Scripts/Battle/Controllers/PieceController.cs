@@ -516,11 +516,11 @@ public class PieceController : MonoBehaviour
     {
         // 如果targetPos在当前棋子左侧，则朝向左侧，否则朝向右侧，更新piece display
         // 由于棋子式斜45站立的，所以应该同时计算x轴和z轴
-        if (direction.x < 0 )
+        if (direction.x < -direction.z)
         {
             pieceDisplay.FaceRight(!isPlayerPiece);
         }
-        else if (direction.x > 0)
+        else //if (direction.x > 0)
         {
             pieceDisplay.FaceRight(isPlayerPiece);
         }
