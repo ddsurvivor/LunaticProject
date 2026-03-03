@@ -30,6 +30,12 @@ public class DataManager : SerializedMonoBehaviour
         }
     }
 
+    public PLAYERPROFILE LoadData(int index)
+    {
+        PLAYERPROFILE playerprofile = JsonTool.LoadJson<PLAYERPROFILE>(savePath + $"PlayerProfiles_{index}.json");
+        return playerprofile;
+    }
+
     public void SaveData(int index)
     {
         //playerprofiles[index] = GM.Ins.PLAYERPROFILE;

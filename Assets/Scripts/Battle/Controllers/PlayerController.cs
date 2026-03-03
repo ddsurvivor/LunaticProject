@@ -21,7 +21,7 @@ public class PlayerController : SerializedMonoBehaviour
 
     [Header("UI")] 
     public RectTransform burstChargeBarFill; // 聚能条填充部分
-    private float originWidth = 500f;
+    private float originWidth = 1000f;
     
     [FoldoutGroup("事件")]
     public UnityEvent OnInit;
@@ -61,7 +61,9 @@ public class PlayerController : SerializedMonoBehaviour
             piece.TurnEnd();
             BattleScene.Ins.BM.buffManager.ProcessBuffs(piece.unitAttrCenter);
         }
-        
+
+        EndBurstMode(); // 回合结束关闭聚能状态
+
     }
 
     /// <summary>
@@ -102,6 +104,14 @@ public class PlayerController : SerializedMonoBehaviour
             piece.TurnStart();
         }
     }
+    public void EndBurstMode()
+    {
+        isBursting = false;
+        burstCharge = 0f;
+        UpdateBurstBar();
+        totalDamage = 0;
+        burstTarget = null;
+    }
 
 
     // UI
@@ -135,7 +145,7 @@ public class PlayerController : SerializedMonoBehaviour
         if (burstChargeBarFill != null)
         {
             float endWidth = originWidth * (burstCharge / maxBurstCharge);
-            DOVirtual.Float(burstCharge, endWidth, 0.3f, (value) =>
+            DOVirtual.Float(burstChargeBarFill.sizeDelta.x, endWidth, 0.3f, (value) =>
             {
                 burstChargeBarFill.sizeDelta = new Vector2(value, burstChargeBarFill.sizeDelta.y);
             }).SetDelay(0.3f);

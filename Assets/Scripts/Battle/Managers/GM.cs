@@ -73,6 +73,8 @@ using UnityEngine.SceneManagement;
 
         public void LoadPlayingScene()
         {
+            endLog = "";
+            battleScene = "";
             StartCoroutine(LoadSceneCoroutine());
         }
         
