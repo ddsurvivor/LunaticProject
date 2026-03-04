@@ -728,7 +728,13 @@ public class 剧本System: MonoBehaviour
 
                     if (key.Contains(Center.Command_Shop))
                     {
-                        // 显示商店面板
+                        var prams = 指令切割(key);
+                        if (prams.Length >= 1)
+                        {
+                            int.TryParse(prams[1], out int result);
+                            // 显示商店面板
+                            GM.Ins.marketSystem.OpenMarketPanel(result);
+                        }
                     }
                 }
       }
@@ -751,5 +757,13 @@ public class 剧本System: MonoBehaviour
           }
 
           return null;
+      }
+      
+      // 休息
+      public void OnClickRest()
+      {
+          // 重置状态
+          // 推进日期
+          大地图System.instance.daytimeSystem.NextDay();
       }
 }

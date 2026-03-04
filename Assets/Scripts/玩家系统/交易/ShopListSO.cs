@@ -7,4 +7,9 @@
     public class ShopListSO: ScriptableObject
     {
         public List<ShopData> shopDatas = new();
+        
+        public ShopData GetShopData(int shopId)
+        {
+            return shopDatas.Find(shop => shop.shopId == shopId);
+        }
     }

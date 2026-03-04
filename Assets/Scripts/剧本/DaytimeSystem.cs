@@ -46,6 +46,13 @@ public class DaytimeSystem : SerializedMonoBehaviour
         }
         UpdateDaytimeImage();
     }
+
+    public void NextDay()
+    {
+        GM.Ins.PLAYERPROFILE.date += 1;
+        GM.Ins.PLAYERPROFILE.daytime = Daytime.上午;
+        UpdateDaytimeImage();
+    }
     
     public void UpdateDaytimeImage()
     {

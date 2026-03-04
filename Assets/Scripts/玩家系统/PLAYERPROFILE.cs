@@ -220,8 +220,11 @@ public class PLAYERPROFILE
         if (item != null)
         {
             item.itemNum -= num;
-            if (item.itemNum < 0)
+            if (item.itemNum <= 0)
+            {
                 item.itemNum = 0;
+                itemPacks.Remove(item);
+            }
         }
     }
     
@@ -239,6 +242,17 @@ public class PLAYERPROFILE
             GM.Ins.PLAYERPROFILE.itemPacks
                 .Add(new ItemPack(itemName, num));
         }
+    }
+    
+    public bool HasEnoughMoney(int cost)
+    {
+        return coins >= cost;
+    }
+    
+    public void CostMoney(int cost)
+    {
+        coins -= cost;
+        if (coins < 0) coins = 0;
     }
     #endregion 
 }

@@ -1,3 +1,4 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 /// <summary>
@@ -10,8 +11,9 @@ public class MarketSystem : MonoBehaviour
     /// </summary>
     public MarketItemListSO marketItemListSO;
     public InventoryPanel inventoryPanel;
-    public GameObject marketPanel;
+    //public GameObject marketPanel;
     public MarketItemCell marketItemCellPrefab;
+    public ShopListSO shopListSO;
     
     // 打开背包面板
     public void OpenInventoryPanel()
@@ -20,12 +22,15 @@ public class MarketSystem : MonoBehaviour
         // 根据玩家存档刷新背包显示
     }
     
+    [Button("打开交易面板")]
     /// <summary>
     /// 打开交易面板
     /// </summary>
-    /// <param name="shopData">交易对象商店</param>
-    public void OpenMarketPanel(ShopData shopData)
+    public void OpenMarketPanel(int shopId)
     {
-        marketPanel.SetActive(true);
+        ShopData shopData = shopListSO.GetShopData(shopId);
+        inventoryPanel.ShowShop(shopData);
+        // 显示玩家背包界面，点击玩家物品可卖出
+        // 显示商店界面，点击商店物品可购买
     }
 }
