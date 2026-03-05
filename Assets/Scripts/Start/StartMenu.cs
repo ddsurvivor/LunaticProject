@@ -22,7 +22,7 @@ public class StartMenu : MonoBehaviour
 
     public void OnClickStart()
     {
-        SceneManager.LoadScene(startLevelName);
+        SceneManager.LoadSceneAsync(startLevelName);
     }
 
     public void OnClickSet()

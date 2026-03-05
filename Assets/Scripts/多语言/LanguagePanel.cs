@@ -48,7 +48,7 @@ public class LanguagePanel : MonoBehaviour{
                 if (Center.instance != null) {
                     Font font = Center.instance.GetFont();
                     if (font != null) {
-                        textcomponent.font = font;
+                        //textcomponent.font = font;
                     }
                 }
             }
@@ -90,7 +90,7 @@ public class LanguagePanel : MonoBehaviour{
                 if (Center.instance != null) {
                     Font font = Center.instance.GetFont();
                     if (font != null) {
-                        textcomponent.font = font;
+                        //textcomponent.font = font;
                     }
                 }
             }
