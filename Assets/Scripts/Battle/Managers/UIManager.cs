@@ -18,6 +18,8 @@ public class UIManager : MonoBehaviour
 
         public RectTransform skillNameDisplay;
         public Text skillNamText;
+        
+        public 剧本System logSystem;
 
         public void Init()
         {
@@ -82,5 +84,16 @@ public class UIManager : MonoBehaviour
             // 重新加载当前场景
             UnityEngine.SceneManagement.SceneManager
                 .LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+        }
+
+        /// <summary>
+        /// 开始战斗内剧情
+        /// </summary>
+        /// <param name="t"></param>
+        public void StartLog(string t)
+        {
+            logSystem.gameObject.SetActive(true);
+            logSystem.设置新剧本(t);
+            logSystem.Next();
         }
     }
