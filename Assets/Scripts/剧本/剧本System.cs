@@ -703,9 +703,13 @@ public class 剧本System: MonoBehaviour
                     if (key.Contains(Center.Command_HalfCG))// 半屏CG
                     {
                         var prams = 指令切割(key);
-                        float duration =2;
+                        //float duration =2;
                         float fadeTime = CG淡入淡出时间;
-                        if (prams.Length < 1)
+                        if (prams.Length >= 2)
+                        {
+                            fadeTime = float.Parse(prams[2]);
+                        }
+                        else if (prams.Length < 1)
                         {
                            return;
                         }
@@ -735,6 +739,11 @@ public class 剧本System: MonoBehaviour
                             // 显示商店面板
                             GM.Ins.marketSystem.OpenMarketPanel(result);
                         }
+                    }
+
+                    if (key.Contains(Center.Command_Close))
+                    {
+                        this.gameObject.SetActive(false);
                     }
                 }
       }

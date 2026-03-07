@@ -90,6 +90,7 @@ public class ObstructionOutline : MonoBehaviour
         // 多点检测（围绕角色中心随机偏移）
         else
         {
+            bool allHit = true; // 记录是否所有射线都被遮挡
             for (int i = 0; i < rayCount; i++)
             {
                 Vector2 randomOffset = Random.insideUnitCircle * checkRadius;
@@ -103,9 +104,11 @@ public class ObstructionOutline : MonoBehaviour
                     Debug.DrawRay(camPos, randomDir.normalized * randomDist, hasHit ? Color.red : Color.green);
 
                 if (hasHit && hit.collider.gameObject != gameObject)
-                    return true;
+                    allHit = true;
+                else if(!hasHit)
+                    allHit = false;
             }
-            return false;
+            return allHit;
         }
     }
 
