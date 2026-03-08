@@ -90,6 +90,7 @@ public class ClickManager : MonoBehaviour
         {
             PieceController piece = hit.collider.GetComponent<PieceController>();
             if (piece == null || !piece.isPlayerPiece) continue;
+            if (piece.cantControl)return;
             if(piece.isDead) continue;
             //if(piece.unitAttrCenter.CurMovePoint<=0) continue;
             _selectedPiece?.CancelSelect();

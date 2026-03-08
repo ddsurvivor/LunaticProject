@@ -64,6 +64,8 @@ public class PieceController : MonoBehaviour
     //public bool isActived = false; // 是否被激活
 
     public bool isIdle; // 是否处于待机状态
+    
+    public bool cantControl; // 无法被控制（眩晕等状态）
 
     [FoldoutGroup("事件")]
     public UnityEvent OnInit;
@@ -87,7 +89,7 @@ public class PieceController : MonoBehaviour
             availableActions.Add(ActionType.道具);
         }
         //Debug.Log(_pieceDisplay.name);
-        pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
+        pieceDisplay?.ChangeDisplayState(PieceDisplayState.Idle);
         if (pieceData != null)
         {
             _pieceData = pieceData;
@@ -106,6 +108,7 @@ public class PieceController : MonoBehaviour
 
     private void Update()
     {
+        if (cantControl)return;
         if (!isPlayerPiece) return;
         if (_isAttacking)
         {

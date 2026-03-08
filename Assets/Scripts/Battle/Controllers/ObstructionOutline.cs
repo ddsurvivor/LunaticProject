@@ -20,6 +20,15 @@ public class ObstructionOutline : MonoBehaviour
     //private MaterialPropertyBlock propertyBlock;
     private bool wasObstructed = false; // 上一帧的遮挡状态
     private Transform camTransform;
+// 固定检测点（中心+四个方向）
+    private static readonly Vector2[] Offsets = new Vector2[]
+    {
+        Vector2.zero, // 中心
+        new Vector2(1, 0), // 右
+        new Vector2(-1, 0), // 左
+        new Vector2(0, 1), // 上
+        new Vector2(0, -1) // 下
+    };
 
     void Start()
     {
@@ -52,7 +61,8 @@ public class ObstructionOutline : MonoBehaviour
     /// </summary>
     public void CheckUpdate()
     {
-        bool isObstructed = CheckObstruction();
+        //bool isObstructed = CheckObstruction();
+        bool isObstructed = CheckObstruction2();
         if (isObstructed != wasObstructed)
         {
             Debug.Log($"更新碰撞{isObstructed}");
@@ -110,6 +120,33 @@ public class ObstructionOutline : MonoBehaviour
             }
             return allHit;
         }
+    }
+    
+    
+    bool CheckObstruction2()
+    {
+        Vector3 camPos = camTransform.position;
+        Vector3 targetPos = transform.position;
+
+        // 检查五个固定点
+        for (int i = 0; i < Offsets.Length; i++)
+        {
+            Vector2 offset = Offsets[i] * checkRadius;
+            Vector3 checkPoint = targetPos + new Vector3(offset.x, offset.y, 0);
+            Vector3 direction = checkPoint - camPos;
+            float distance = direction.magnitude;
+
+            RaycastHit hit;
+            bool hasHit = Physics.Raycast(camPos, direction, out hit, distance, obstacleLayer);
+            if (debugMode)
+                Debug.DrawRay(camPos, direction.normalized * distance, hasHit ? Color.red : Color.green);
+
+            // 如果没有击中障碍物，或者击中的是自身，则判定为未遮挡
+            if (!hasHit || hit.collider.gameObject == gameObject)
+                return false;
+        }
+        // 所有射线都遮挡才为遮挡
+        return true;
     }
 
     /// <summary>
