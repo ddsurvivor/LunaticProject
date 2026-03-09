@@ -735,7 +735,7 @@ public class 剧本System: MonoBehaviour
                         var prams = 指令切割(key);
                         if (prams.Length >= 1)
                         {
-                            int.TryParse(prams[1], out int result);
+                            int.TryParse(prams[0], out int result);
                             // 显示商店面板
                             GM.Ins.marketSystem.OpenMarketPanel(result);
                         }
