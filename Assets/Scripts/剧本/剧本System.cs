@@ -789,6 +789,19 @@ public class 剧本System : MonoBehaviour
             {
                 this.gameObject.SetActive(false);
             }
+
+            if (key.Contains(Center.Command_Chapter))
+            {
+                var prams = 指令切割(key);
+                if (prams.Length >= 3)
+                {
+                    string title = prams[0];
+                    //int.TryParse(prams[0], out int result);
+                    float.TryParse(prams[1], out float fadeTime);
+                    float.TryParse(prams[1], out float duration);
+                    大地图System.instance.chapterPanel.ShowChapter(title, fadeTime, duration);
+                }
+            }
         }
     }
 
