@@ -42,7 +42,7 @@ public class 任务节点 : MonoBehaviour
         }
         if(GM.Ins.PLAYERPROFILE.获取任务进度( gameObject.name.Replace("(Clone)",""))>=1)
         {
-            Debug.Log($"当前节点已完成则不显示");
+            Debug.Log($"当前节点已完成则不显示{gameObject.name}");
             // 
             gameObject.SetActive(false);
             //GetComponent<Button>().enabled = false;

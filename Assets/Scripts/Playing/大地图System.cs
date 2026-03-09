@@ -31,6 +31,10 @@ public class 大地图System : SerializedMonoBehaviour
     public Dictionary<int, GameObject> SmallMapDict = new Dictionary<int, GameObject>();
 
 
+    [Header("UI面板")]
+    public InventoryPanel inventoryPanel;
+
+    public ChapterPanel chapterPanel;
     public void 失败()
     {
         失败Obj.SetActive(true);

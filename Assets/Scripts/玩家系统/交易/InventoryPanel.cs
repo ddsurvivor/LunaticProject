@@ -16,11 +16,15 @@ public class InventoryPanel : UIPanel
     public Text playerMoneyText;
 
     private ShopData currentShopData;
+    
+    // 打折
+    public int discountPercent = 100; // 默认不打折
 
-    public void ShowShop(ShopData shopData)
+    public void ShowShop(ShopData shopData, int discountPercent = 100)
     {
         currentShopData = shopData;
         gameObject.SetActive(true);
+        this.discountPercent = discountPercent;
         //UpdateDisplay();
     }
 
@@ -144,7 +148,7 @@ public class InventoryPanel : UIPanel
         int sum = 0;
         foreach (var pack in buyingList)
         {
-            sum += GetItemPrice(pack.itemName) * pack.itemNum;
+            sum += GetItemPriceWithDiscount(pack.itemName) * pack.itemNum;
         }
 
         foreach (var pack in sellingList)
@@ -160,5 +164,11 @@ public class InventoryPanel : UIPanel
         // 从市场数据获取物品价格
         var itemData = GM.Ins.marketSystem.marketItemListSO.GetData(itemName);
         return itemData != null ? itemData.price : 0;
+    }
+    private int GetItemPriceWithDiscount(ItemName itemName)
+    {
+        // 从市场数据获取物品价格并应用折扣
+        int basePrice = GetItemPrice(itemName);
+        return Mathf.RoundToInt(basePrice * discountPercent / 100f);
     }
 }

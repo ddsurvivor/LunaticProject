@@ -26,7 +26,7 @@ public class ObstructionOutline : MonoBehaviour
         Vector2.zero, // 中心
         new Vector2(1, 0), // 右
         new Vector2(-1, 0), // 左
-        new Vector2(0, 1), // 上
+        new Vector2(0, 2), // 上
         new Vector2(0, -1) // 下
     };
 
