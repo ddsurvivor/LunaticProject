@@ -26,6 +26,8 @@ public enum ItemType
     FLAME_EFFECT=16,
     // 技能攻击区域标记
     SKILL_AREA=17,
+    // 轨道轰炸特效
+    ORBITAL_STRIKE=18,
 
     // 治疗区域
     HEAL_AREA=20,

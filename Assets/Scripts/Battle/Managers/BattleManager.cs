@@ -402,6 +402,22 @@ public class BattleManager : MonoBehaviour
     // ===== Test ======//
     public void OnClickQuitBattle()
     {
+        // 保存所有棋子状态保存到存档内
+        if (GM.Ins.pieceHPInherit)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                var playerPiece = PlayerController.pieces[i];
+                if (playerPiece != null)
+                {
+                    GM.Ins.PLAYERPROFILE.SetPlayer(i, 
+                        playerPiece.unitAttrCenter.CurHealth, 
+                        playerPiece.unitAttrCenter.AmmoCount, 
+                        playerPiece.unitAttrCenter.ManaPoint);
+                }
+            }
+        }
+        // 退出战斗，返回主界面
         GM.Ins.BattleEnd();
     }
 }

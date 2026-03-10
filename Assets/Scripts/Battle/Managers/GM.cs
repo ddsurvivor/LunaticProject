@@ -19,6 +19,9 @@ using UnityEngine.SceneManagement;
         // 系统
         public DataManager DM;
         public MarketSystem marketSystem;
+        
+        [LabelText("棋子血量继承")]
+        public bool pieceHPInherit = false;
 
         private void Start()
         {

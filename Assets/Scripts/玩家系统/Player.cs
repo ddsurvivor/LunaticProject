@@ -18,6 +18,10 @@ public struct Player
     [ShowInInspector][ReadOnly]private int Talk;//沟通
     [ShowInInspector][ReadOnly]private int Recognition;//模式识别
 
+    public int curHealth;// 当前血量
+    public int curAmmo;// 当前弹药
+    public int curMana;// 当前能量
+
     public string NAME
     {
         get { return name; }

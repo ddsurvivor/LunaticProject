@@ -319,4 +319,11 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
         return 0;
     }
+
+    public void SetValues(int health, int mana, int ammo)
+    {
+        _curHealth = health;
+        _manaPoint = mana;
+        _ammoCount = ammo;
+    }
 }

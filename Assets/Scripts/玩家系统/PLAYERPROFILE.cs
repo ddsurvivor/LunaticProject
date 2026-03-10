@@ -205,6 +205,27 @@ public class PLAYERPROFILE
         return rt;
     }
 
+    public Player GetPlayer(int index)
+    {
+        if (index < 0 || index >= player.Length)
+        {
+            Debug.LogError($"修改属性时index越界!index = {index}");
+            return new Player();
+        }
+        return player[index];
+    }
+
+    public void SetPlayer(int index, int curHealth, int curAmmo, int curMana)
+    {
+        if (index < 0 || index >= player.Length)
+        {
+            Debug.LogError($"修改属性时index越界!index = {index}");
+            return;
+        }
+        player[index].curHealth = curHealth;
+        player[index].curAmmo = curAmmo;
+        player[index].curMana = curMana;
+    }
 
     #region 仓库存档
     public int GetItemNum(ItemName itemName)

@@ -1,4 +1,5 @@
 using System;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 
@@ -14,6 +15,9 @@ public class ClickManager : MonoBehaviour
     private bool _isDragging = false;
 
     Vector3 point = Vector3.zero;
+
+    [LabelText("拖动方式移动")]
+    public bool dragMove;
 
     private void Update()
     {

@@ -57,6 +57,8 @@ public class 剧本System : MonoBehaviour
     }
 
     [SerializeField] [ReadOnly] private string curPartName;
+    
+    public CheckDicePanel checkDicePanel;
 
     public void 设置新剧本(string t)
     {
@@ -393,9 +395,12 @@ public class 剧本System : MonoBehaviour
                 int 修改结果F = Convert.ToInt32(prams[8]);
                 int 修正值 = GM.Ins.PLAYERPROFILE.获取数据<int>(被检定属性, 检定角色);
                 int 随机值 = 0;
+                int [] 骰子结果 = new int[骰子数量];
                 for (int i = 0; i < 骰子数量; i++)
                 {
-                    随机值 += Random.Range(0, 骰子大小) + 1;
+                    int roll = Random.Range(1, 骰子大小+ 1);
+                    骰子结果[i] = roll;
+                    随机值 += roll;
                 }
 
                 int 最终值 = 随机值 + 修正值;
@@ -411,6 +416,7 @@ public class 剧本System : MonoBehaviour
                 }
 
                 储存的检定结果 = $"{骰子数量}D{骰子大小}={随机值}  {随机值}+ {修正值}={最终值}";
+                checkDicePanel.ShowResult(骰子数量, 骰子结果, 最终值 >= 检定目标);
                 当检定结束时?.Invoke();
             }
 
@@ -832,5 +838,12 @@ public class 剧本System : MonoBehaviour
         // 重置状态
         // 推进日期
         大地图System.instance.daytimeSystem.NextDay();
+    }
+    
+    // ====== Test ======= //
+    [Button("测试Log")]
+    public void TestLog(string log)
+    {
+        大地图System.instance.开始剧情 (log);
     }
 }
