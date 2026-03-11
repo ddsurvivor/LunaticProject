@@ -138,6 +138,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitAttrCenter: {fileID: 8316052724586748498}
   rangeUI: {fileID: 5206216451852455031}
+  hightlightEffect: {fileID: 0}
   _actionListPanel: {fileID: 1933915504802351383}
   pieceDisplay: {fileID: 9066005200974287038}
   uiCanvas: {fileID: 0}
@@ -162,7 +163,9 @@ MonoBehaviour:
       buffPacks: []
       skillEffects: 
       skillSound: {fileID: 0}
+      consumeItems: []
       animationIndex: 0
+      isDelaySkill: 0
     rangedAtk:
       skillName: 
       description: 
@@ -178,13 +181,17 @@ MonoBehaviour:
       buffPacks: []
       skillEffects: 
       skillSound: {fileID: 0}
+      consumeItems: []
       animationIndex: 0
+      isDelaySkill: 0
     maxAmmoCount: 0
     evasionRate: 0
     skillPacks: []
     elementType: 0
     initialMana: 0
     maxMana: 0
+    dropItemList: []
+    dropRate: 0
   pieceID: 3
   player: {fileID: 0}
   isPlayerPiece: 1
@@ -206,11 +213,14 @@ MonoBehaviour:
     buffPacks: []
     skillEffects: 
     skillSound: {fileID: 0}
+    consumeItems: []
     animationIndex: 0
+    isDelaySkill: 0
   interactAreas: []
   availableActions: 
   availableSkills: []
   isIdle: 0
+  cantControl: 0
   OnInit:
     m_PersistentCalls:
       m_Calls: []
@@ -218,6 +228,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnTurnEnd:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDead:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &8316052724586748498
@@ -480,6 +493,7 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
+    - {fileID: 21300000, guid: 725a745c4e877d648a626877e6d3b34c, type: 3}
     - {fileID: 21300000, guid: 5ded1d4bee5872d478d7a88a0215040f, type: 3}
     - {fileID: 21300000, guid: 2575b72c98e524a419f57e9181bfbd59, type: 3}
     - {fileID: 21300000, guid: 4717a2b980669dd45817c4a433a113e7, type: 3}
@@ -501,10 +515,13 @@ MonoBehaviour:
         mscorlib
     - Name: 
       Entry: 12
-      Data: 1
+      Data: 2
     - Name: 
       Entry: 10
       Data: 0
+    - Name: 
+      Entry: 10
+      Data: 1
     - Name: 
       Entry: 13
       Data: 
@@ -520,10 +537,10 @@ MonoBehaviour:
       Data: 2
     - Name: 
       Entry: 10
-      Data: 1
+      Data: 2
     - Name: 
       Entry: 10
-      Data: 2
+      Data: 3
     - Name: 
       Entry: 13
       Data: 
@@ -539,7 +556,9 @@ MonoBehaviour:
   pieceSpriteRenderer: {fileID: 8316052725672642768}
   idleSprite: {fileID: 21300000, guid: 6542ca542a8b5c247a76112de6b7c134, type: 3}
   moveSprite: {fileID: 21300000, guid: 3e03b3afe2c033645910796e3175597d, type: 3}
-  attackSprite: []
+  attackSprite:
+  - {fileID: 21300000, guid: 3e03b3afe2c033645910796e3175597d, type: 3}
+  - {fileID: 21300000, guid: 988d251a3b79a1440a02de7e1a9319c4, type: 3}
   shootSprite:
   - {fileID: 21300000, guid: 725a745c4e877d648a626877e6d3b34c, type: 3}
   - {fileID: 21300000, guid: 7ebfc8cec844c8240b0f6b42092219b6, type: 3}
