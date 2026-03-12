@@ -218,8 +218,19 @@ public class BattleManager : MonoBehaviour
 
             // 处理附加效果
             ApplySKillEffect(skillPack, attacker, target, targetPos);
+            
+            
         }
-
+        BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
+        // 处理聚能充能效果，多段伤害只充能一次
+        if (attacker.isPlayerPiece)
+        {
+            if (!PlayerController.isBursting)
+            {
+                // 攻击充能
+                PlayerController.ChargeBurst(GameConst.attackBurstCharge);
+            }
+        }
         onceEffect = false;
         //BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
     }

@@ -12,6 +12,9 @@ public class LadderArea : InteractArea
 
     public Transform upPos;
     public Transform downPos;
+    
+    public GameObject upFogEffect;// 楼梯上方可以添加迷雾
+    public GameObject downFogEffect;
 
     public override void TriggerAction(PieceController piece = null)
     {
@@ -30,6 +33,12 @@ public class LadderArea : InteractArea
             Vector3 offset = piece.transform.position - upPos.position;
             offset.y = 0;
             piece.transform.position = (downPos.position + offset);
+            
+            if (downFogEffect != null)// 如果有迷雾，触发迷雾效果
+            {
+                downFogEffect.SetActive(false);
+                BattleScene.Ins.BM.AIController.OnScanFog(downFogEffect);
+            }
         }
         else
         {
@@ -37,6 +46,12 @@ public class LadderArea : InteractArea
             Vector3 offset = piece.transform.position - downPos.position;
             offset.y = 0;
             piece.transform.position = (upPos.position + offset);
+
+            if (upFogEffect != null)// 如果上方有迷雾，触发迷雾效果
+            {
+                upFogEffect.SetActive(false);
+                BattleScene.Ins.BM.AIController.OnScanFog(upFogEffect);
+            }
         }
         BattleScene.Ins.BM.camera.SetFollow(piece.transform);
     }

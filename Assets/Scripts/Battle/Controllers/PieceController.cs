@@ -124,7 +124,7 @@ public class PieceController : MonoBehaviour
             {
                 CastAttack();
             }
-
+        
             // 点击右键取消
             if (Input.GetMouseButtonDown(1))
             {
@@ -156,6 +156,9 @@ public class PieceController : MonoBehaviour
         if(isDead) return;
         unitAttrCenter.FullMovePoint();
         isIdle = false;
+        BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
+        // 恢复idle动画
+        pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
     }
 
     public void TurnEnd()
@@ -328,7 +331,7 @@ public class PieceController : MonoBehaviour
                 atkPos.position + Vector3.up * 3f,
                 atkPos.localRotation);
         }
-
+    
         Debug.Log("棋子攻击");
         CheckFace(targets[0].transform.position - transform.position);
         if (_curAtkType == ActionType.近战攻击)
@@ -343,19 +346,19 @@ public class PieceController : MonoBehaviour
             unitAttrCenter.CostAmmo();
             PlayAudio(ActionType.远程攻击);
         }
-
-
-        // 聚能充能
-        if (isPlayerPiece)
-        {
-            if (!BattleScene.Ins.BM.PlayerController.isBursting)
-            {
-                // 攻击充能
-                BattleScene.Ins.BM.PlayerController.ChargeBurst(GameConst.attackBurstCharge);
-            }
-        }
-
-        BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
+    
+    
+        // // 聚能充能
+        // if (isPlayerPiece)
+        // {
+        //     if (!BattleScene.Ins.BM.PlayerController.isBursting)
+        //     {
+        //         // 攻击充能
+        //         BattleScene.Ins.BM.PlayerController.ChargeBurst(GameConst.attackBurstCharge);
+        //     }
+        // }
+    
+        
         
         // 延迟0.3f
         DOVirtual.DelayedCall(0.3f
@@ -419,7 +422,16 @@ public class PieceController : MonoBehaviour
         }
 
         Debug.Log($"{this.name} 受伤");
-        pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
+        // 判定地方聚能状态
+        if (!isPlayerPiece && BattleScene.Ins.BM.PlayerController.isBursting)
+        {
+            // 如果是敌人棋子且玩家处于聚能状态，受伤动画持续到回合结束
+            pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, -1);
+        }
+        else
+        {
+            pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
+        }
         transform.DOShakePosition(0.5f, 0.8f);
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
         if(uiCanvas!= null) uiCanvas.SetActive(true);

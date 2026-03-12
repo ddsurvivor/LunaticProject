@@ -86,6 +86,12 @@ public class UIManager : MonoBehaviour
                 .LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
         }
 
+        public void OnClickQuit()
+        {
+            // 加载开始场景
+            UnityEngine.SceneManagement.SceneManager.LoadScene("StartScene");
+        }
+
         /// <summary>
         /// 开始战斗内剧情
         /// </summary>
@@ -95,5 +101,14 @@ public class UIManager : MonoBehaviour
             logSystem.gameObject.SetActive(true);
             logSystem.设置新剧本(t);
             logSystem.Next();
+        }
+
+        public void OnTurnStart()
+        {
+            if (pieceStatePanel.gameObject.activeInHierarchy)
+            {
+                pieceStatePanel.OpenPanel(pieceStatePanel.pc);
+                pieceInfoPanel.OnSelectPiece(pieceStatePanel.pc);
+            }
         }
     }

@@ -50,6 +50,7 @@ public class PlayerController : SerializedMonoBehaviour
         }
 
         BattleScene.Ins.UM.endTurnButton.enabled = false;
+        BattleScene.Ins.UM.OnTurnStart();
     }
 
     public virtual void TurnEnd()
@@ -62,7 +63,10 @@ public class PlayerController : SerializedMonoBehaviour
             BattleScene.Ins.BM.buffManager.ProcessBuffs(piece.unitAttrCenter);
         }
 
-        EndBurstMode(); // 回合结束关闭聚能状态
+        if (isBursting)
+        {
+            EndBurstMode(); // 回合结束关闭聚能状态
+        }
 
     }
 
@@ -91,6 +95,9 @@ public class PlayerController : SerializedMonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// 进入聚能状态
+    /// </summary>
     public void EnterBurstMode()
     {
         isBursting = true;
@@ -103,7 +110,12 @@ public class PlayerController : SerializedMonoBehaviour
         {
             piece.TurnStart();
         }
+        BattleScene.Ins.BM.camera.ActiveBurstMode(true);
     }
+    
+    /// <summary>
+    /// 结束聚能状态
+    /// </summary>
     public void EndBurstMode()
     {
         isBursting = false;
@@ -111,6 +123,8 @@ public class PlayerController : SerializedMonoBehaviour
         UpdateBurstBar();
         totalDamage = 0;
         burstTarget = null;
+        BattleScene.Ins.BM.camera.ActiveBurstMode(false);
+        Debug.Log("聚能状态结束");
     }
 
 

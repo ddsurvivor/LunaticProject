@@ -2,6 +2,7 @@ using System;
 using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.Serialization;
 
 public class CameraController : MonoBehaviour
@@ -18,6 +19,10 @@ public class CameraController : MonoBehaviour
     [LabelText("拖动速度")] public float panSpeed = 20f;
 
     Tweener shakeTweener;
+
+    public Camera mainCam;
+    public Camera colorCam;
+    public Camera playerCam;
 
     public void Start()
     {
@@ -115,5 +120,15 @@ public class CameraController : MonoBehaviour
                 currentSize,
                 shakeDelay).SetDelay(0.8f);
         });
+    }
+
+    public void ActiveBurstMode(bool option)
+    {
+        // 开启聚能模式镜头
+        // Color Grading 并将 Saturation 设置为 -100
+        //mainCam.gameObject.GetComponent<PostProcessVolume>().
+        //mainCam.cullingMask = option? LayerMask.GetMask("Player") : -1;// 只渲染玩家层
+        playerCam.gameObject.SetActive(option); // 开启玩家专用镜头
+        colorCam.gameObject.SetActive(option); // 开启聚能模式镜头
     }
 }

@@ -146,4 +146,11 @@ public class 大地图System : SerializedMonoBehaviour
             SmallMapDict[mapID].SetActive(active);
         }
     }
+
+
+    public void OnClickQuit()
+    {
+        // 加载开始场景
+        UnityEngine.SceneManagement.SceneManager.LoadScene("StartScene");
+    }
 }
