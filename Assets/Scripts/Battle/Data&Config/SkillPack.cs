@@ -24,5 +24,6 @@ public class SkillPack
     public List<ItemPack> consumeItems = new(); // 施放消耗道具列表
     public int animationIndex = 0; // 技能动画索引
     public bool isDelaySkill = false; // 是否为延迟技能
+    public bool layerSkill = false; // 是否为单层技能
 
 }

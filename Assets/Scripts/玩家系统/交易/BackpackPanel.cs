@@ -19,7 +19,7 @@ public class BackpackPanel : MonoBehaviour
     /// <summary>
     /// 打开背包并刷新
     /// </summary>
-    public void Open()
+    public void OnEnable()
     {
         gameObject.SetActive(true);
         Refresh();
