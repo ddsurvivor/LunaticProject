@@ -50,8 +50,9 @@ public class UIManager : SerializedMonoBehaviour
 
     public void ShowBurstReady(bool option)
     {
-        burstButton.enabled = option;
-        //burstButton.gameObject.SetActive(option);
+        //burstButton.enabled = option;
+        burstButton.gameObject.SetActive(option);
+        burstButton.interactable = option;
     }
 
     /// <summary>

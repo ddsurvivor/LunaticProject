@@ -21,7 +21,7 @@ public class PlayerController : SerializedMonoBehaviour
 
     [Header("UI")] 
     public RectTransform burstChargeBarFill; // 聚能条填充部分
-    private float originWidth = 1000f;
+    private float originWidth = 1842.2f;
     
     [FoldoutGroup("事件")]
     public UnityEvent OnInit;
@@ -124,6 +124,7 @@ public class PlayerController : SerializedMonoBehaviour
         totalDamage = 0;
         burstTarget = null;
         BattleScene.Ins.BM.camera.ActiveBurstMode(false);
+        BattleScene.Ins.UM.ShowBurstReady(false);
         Debug.Log("聚能状态结束");
     }
 
@@ -138,7 +139,8 @@ public class PlayerController : SerializedMonoBehaviour
     public void OnClickBurst()
     {
         Debug.Log("发动聚能");
-        BattleScene.Ins.UM.ShowBurstReady(false);
+        //BattleScene.Ins.UM.ShowBurstReady(false);
+        BattleScene.Ins.UM.burstButton.interactable = false;
         if (BattleScene.Ins.BM.AIController.ableBurst)
         {
             Debug.Log("敌人也准备发动聚能，进入拼点环节");
