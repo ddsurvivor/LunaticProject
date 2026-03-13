@@ -808,6 +808,14 @@ public class 剧本System : MonoBehaviour
                     大地图System.instance.chapterPanel.ShowChapter(title, fadeTime, duration);
                 }
             }
+            if(key.Contains(Center.Command_Tutorial))
+            {
+                var prams = 指令切割(key);
+                if (prams.Length >= 1)
+                {
+                    大地图System.instance.tutorial.Show(prams[0]);
+                }
+            }
         }
     }
 

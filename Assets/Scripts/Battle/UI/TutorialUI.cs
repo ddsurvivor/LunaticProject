@@ -4,6 +4,7 @@ using UnityEngine.UI;          // ← 必须使用这个
 
 public class TutorialUI : MonoBehaviour
 {
+    public TutorialDatabaseSO database;
     [Header("UI组件引用")]
     public Image displayImage;
     public Text displayText;
@@ -23,6 +24,16 @@ public class TutorialUI : MonoBehaviour
         //completeBtn.onClick.AddListener(CompleteTutorial);
 
         //gameObject.SetActive(false);
+    }
+
+    public void Show(string levelName)
+    {
+        // 使用接口获取教程数据
+        TutorialData data = database.GetTutorial(levelName);
+        if (data != null)
+        {
+            this.Show(data, levelName);
+        }
     }
 
     /// <summary>
