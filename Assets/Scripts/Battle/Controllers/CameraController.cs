@@ -103,7 +103,7 @@ public class CameraController : MonoBehaviour
             () => virtualCamera.m_Lens.OrthographicSize,
             x => virtualCamera.m_Lens.OrthographicSize = x,
             minZoom,
-            shakeDelay
+            shakeDelay/10f
         ).OnComplete(() =>
         {
             virtualCamera.Follow = null;

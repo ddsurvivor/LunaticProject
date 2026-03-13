@@ -36,8 +36,11 @@
         public void UpdateDisplay()
         {
             ItemData itemData = GM.Ins.marketSystem.marketItemListSO.GetData(itemPack.itemName);
-            image.gameObject.SetActive(true);
-            image.sprite = itemData.itemIcon;
+            if (itemData.itemIcon != null)
+            {
+                image.gameObject.SetActive(true);
+                image.sprite = itemData.itemIcon;
+            }
             nameText.text = itemData.itemName.ToString();
             numText.text = "x" + itemPack.itemNum;
             int selectedCount = GetCurrentSelectedCount();

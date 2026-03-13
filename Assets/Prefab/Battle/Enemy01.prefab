@@ -462,6 +462,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56f2af82d91b5174789152dc9ad9d86a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: skillSpriteList
+      Entry: 7
+      Data: 0|System.Collections.Generic.List`1[[System.Collections.Generic.List`1[[UnityEngine.Sprite,
+        UnityEngine.CoreModule]], mscorlib]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
   pieceSpriteRenderer: {fileID: 4377983920536472043}
   idleSprite: {fileID: 21300000, guid: fee01cbc57e72f144badc598208ec976, type: 3}
   moveSprite: {fileID: 21300000, guid: 7bf6d24286f0a304891a1e019290aeba, type: 3}
@@ -470,13 +492,12 @@ MonoBehaviour:
   shootSprite:
   - {fileID: 21300000, guid: 541a3d153dcf3d646a43789da39abb1f, type: 3}
   - {fileID: 21300000, guid: b28a8cf6bca7cb44eb8926b5db0e134d, type: 3}
-  dodgeSprite: {fileID: 0}
+  dodgeSprite: {fileID: 21300000, guid: fee01cbc57e72f144badc598208ec976, type: 3}
   hitSprite: {fileID: 21300000, guid: ad98dd290dd142a4e9cc0daafab7ed17, type: 3}
   deathSprite:
   - {fileID: 21300000, guid: 26f8ad661ba653f478d0004c53670ef0, type: 3}
   - {fileID: 21300000, guid: 796c672c6dcd3174bbca7a239be0e11e, type: 3}
   - {fileID: 21300000, guid: 917cdb31f9a69d54e82df1d5376aead5, type: 3}
-  skillSprites: []
   idleBackSprite: {fileID: 0}
   moveBackSprite: {fileID: 21300000, guid: d26e0a20a0efb3d4fba9d9f948f988d7, type: 3}
   attackBackSprite: {fileID: 0}
@@ -497,6 +518,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitAttrCenter: {fileID: 3435330606817873377}
   rangeUI: {fileID: 0}
+  hightlightEffect: {fileID: 0}
   _actionListPanel: {fileID: 0}
   pieceDisplay: {fileID: 190077875118252175}
   uiCanvas: {fileID: 3583820045096354495}
@@ -510,7 +532,6 @@ MonoBehaviour:
       skillName: 
       description: 
       mpCost: 0
-      cooldown: 0
       target: 0
       rangeType: 0
       rangeValue: 0
@@ -522,11 +543,14 @@ MonoBehaviour:
       buffPacks: []
       skillEffects: 
       skillSound: {fileID: 0}
+      consumeItems: []
+      animationIndex: 0
+      isDelaySkill: 0
+      layerSkill: 0
     rangedAtk:
       skillName: 
       description: 
       mpCost: 0
-      cooldown: 0
       target: 0
       rangeType: 0
       rangeValue: 0
@@ -538,9 +562,18 @@ MonoBehaviour:
       buffPacks: []
       skillEffects: 
       skillSound: {fileID: 0}
+      consumeItems: []
+      animationIndex: 0
+      isDelaySkill: 0
+      layerSkill: 0
     maxAmmoCount: 0
+    evasionRate: 0
     skillPacks: []
     elementType: 0
+    initialMana: 0
+    maxMana: 0
+    dropItemList: []
+    dropRate: 0
   pieceID: 1001
   player: {fileID: 0}
   isPlayerPiece: 0
@@ -551,7 +584,6 @@ MonoBehaviour:
     skillName: 
     description: 
     mpCost: 0
-    cooldown: 0
     target: 0
     rangeType: 0
     rangeValue: 0
@@ -563,10 +595,15 @@ MonoBehaviour:
     buffPacks: []
     skillEffects: 
     skillSound: {fileID: 0}
+    consumeItems: []
+    animationIndex: 0
+    isDelaySkill: 0
+    layerSkill: 0
   interactAreas: []
   availableActions: 
   availableSkills: []
   isIdle: 0
+  cantControl: 0
   OnInit:
     m_PersistentCalls:
       m_Calls: []
@@ -574,6 +611,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnTurnEnd:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDead:
     m_PersistentCalls:
       m_Calls: []
   enemyAIType: 1

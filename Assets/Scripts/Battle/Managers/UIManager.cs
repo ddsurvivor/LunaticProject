@@ -89,7 +89,7 @@ public class UIManager : SerializedMonoBehaviour
 
     public void PopSkillName(string skillName)
     {
-        if (skillName == null) return;
+        if (string.IsNullOrWhiteSpace(skillName)) return;
         skillNamText.text = skillName;
         skillNameDisplay.gameObject.SetActive(true);
         Sequence seq = DOTween.Sequence();

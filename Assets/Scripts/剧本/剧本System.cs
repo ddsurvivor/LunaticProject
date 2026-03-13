@@ -775,6 +775,7 @@ public class 剧本System : MonoBehaviour
 
             if (key.Contains(Center.Command_Shop))
             {
+                Debug.LogError("打开商城");
                 var prams = 指令切割(key);
                 int result = 0;
                 int discount = 100;// 默认没有折扣
@@ -825,7 +826,7 @@ public class 剧本System : MonoBehaviour
                     大地图System.instance.打开地图(prams[0]);
                 }
             }
-            if (key.Contains(Center.Command_Item))
+            if (key.Contains(Center.Command_Item))// +ITEM(int mode, int itemId, int count)
             {
                 var prams = 指令切割(key);
                 if(prams.Length >= 3)
