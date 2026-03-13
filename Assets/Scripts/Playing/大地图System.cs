@@ -117,7 +117,7 @@ public class 大地图System : SerializedMonoBehaviour
                 {
                     node.UpdateState();
                 }
-
+                GM.Ins.PLAYERPROFILE.currentMap = t;
                 // 是否打开小地图
                 if (GM.Ins.PLAYERPROFILE.curSmallMapIndex != 0)
                 {
