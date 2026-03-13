@@ -97,7 +97,7 @@ using UnityEngine.SceneManagement;
             }
         
             // 场景加载完成后执行
-            大地图System.instance.打开地图("TEST");
+            大地图System.instance.打开地图(PLAYERPROFILE.currentMap);
             if (endLog != "")
             {
                 大地图System.instance.开始剧情(endLog);

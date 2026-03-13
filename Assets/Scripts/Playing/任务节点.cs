@@ -34,7 +34,7 @@ public class 任务节点 : MonoBehaviour
     public void UpdateState()
     {
         GetComponent<Image>().sprite = 是主线 ? 按钮节点图片[0] : 按钮节点图片[1];
-        GetComponentInChildren<Text>().text = gameObject.name.Replace("(Clone)","");
+        //GetComponentInChildren<Text>().text = gameObject.name.Replace("(Clone)","");
         
         if (前置任务要求.Length!=前置任务进度要求.Length)
         {
