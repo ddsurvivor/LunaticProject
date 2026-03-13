@@ -155,6 +155,16 @@ public class BattleManager : MonoBehaviour
                 return;
             }
 
+            if (skillPack.layerSkill)
+            {
+                // 攻击者和被攻击者不在同一个y值则不受伤害
+                if (Mathf.Abs(attacker.transform.position.y - target.transform.position.y) > 0.1f)
+                {
+                    Debug.Log("Skill Attack: Target is on a different layer, no damage applied");
+                    return;
+                }
+            }
+
             int addAtk =
                 attacker.unitAttrCenter.attr.GetAddDamage(target.unitAttrCenter.elementType);
             foreach (var attackPack in skillPack.attackPacks)

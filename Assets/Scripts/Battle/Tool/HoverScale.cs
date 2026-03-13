@@ -10,17 +10,23 @@ using System.Collections;
 [RequireComponent(typeof(Button))] // 确保挂载在按钮上，但非必须
 public class HoverScale : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    [Header("缩放设置")]
-    [SerializeField] private float hoverScale = 1.2f;          // 悬停时放大倍数
-    [SerializeField] private float animationDuration = 0.2f;   // 动画时长（秒）
-    [SerializeField] private AnimationCurve scaleCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f); // 动画曲线
+    [Header("缩放设置")] [SerializeField] private float hoverScale = 1.2f; // 悬停时放大倍数
+    [SerializeField] private float animationDuration = 0.2f; // 动画时长（秒）
+
+    [SerializeField]
+    private AnimationCurve scaleCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f); // 动画曲线
 
     private RectTransform rectTransform;
     private Vector3 originalScale;
     private Coroutine scaleCoroutine;
-    private bool isHovered = false;        // 标记当前是否处于悬停状态（由事件或检测更新）
-    
+    private bool isHovered = false; // 标记当前是否处于悬停状态（由事件或检测更新）
+
     private Button button; // 可选：如果需要根据按钮状态调整行为
+
+    public Text text;
+
+    private Color originalColor;
+
     void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
@@ -30,8 +36,10 @@ public class HoverScale : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             enabled = false;
             return;
         }
+
         originalScale = rectTransform.localScale;
         button = GetComponent<Button>(); // 可选：获取按钮组件以检查状态
+        if (text != null) originalColor = text.color;
     }
 
     void OnEnable()
@@ -100,13 +108,14 @@ public class HoverScale : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     /// </summary>
     private void SetHoverState(bool hovered)
     {
-        if(button!=null && button.enabled == false) // 如果按钮不可用，不处理悬停效果
+        if (button != null && button.enabled == false) // 如果按钮不可用，不处理悬停效果
         {
             hovered = false;
         }
+
         // 如果状态没变，不处理
         if (isHovered == hovered) return;
-        
+
         isHovered = hovered;
         Vector3 targetScale = hovered ? originalScale * hoverScale : originalScale;
 
@@ -116,6 +125,10 @@ public class HoverScale : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
         // 启动新的缩放动画
         scaleCoroutine = StartCoroutine(ScaleTo(targetScale, animationDuration));
+        if (text != null)
+        {
+            text.color = hovered ? Color.black : originalColor; // 悬停时变黄，恢复时还原颜色
+        }
     }
 
     /// <summary>
