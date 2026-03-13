@@ -8,16 +8,17 @@ public class CheckDicePanel : MonoBehaviour
     [Header("骰子六面图片")]
     public Sprite[] diceSprites; // 0-5分别代表1-6点
 
-    [Header("判定结果图片")]
-    public Sprite successSprite;
-    public Sprite failSprite;
+    //[Header("判定结果图片")]
+    //public Sprite successSprite;
+    //public Sprite failSprite;
 
     
    
 
     [Header("判定结果UI")]
-    public Image resultImage;
+    public GameObject success;
 
+    public GameObject fail;
     [Header("滚动动画设置")]
     public float rollDuration = 1.0f; // 滚动总时长
     public float rollSpeed = 0.1f;    // 每次切换图片间隔
@@ -35,6 +36,8 @@ public class CheckDicePanel : MonoBehaviour
     public void ShowResult(int diceCount, int[] diceResult, bool isSuccess)
     {
         gameObject.SetActive(true);
+        success.gameObject.SetActive(false);
+        fail.gameObject.SetActive(false);
         // 隐藏所有骰子对象
         for (int i = 0; i < diceImages.Count; i++)
         {
@@ -70,10 +73,15 @@ public class CheckDicePanel : MonoBehaviour
         }
 
         // 显示判定结果图片
-        if (resultImage != null)
+        if (isSuccess)
         {
-            resultImage.sprite = isSuccess ? successSprite : failSprite;
-            resultImage.gameObject.SetActive(true);
+            success.gameObject.SetActive(true);
+            fail.gameObject.SetActive(false);
+        }
+        else
+        {
+            success.gameObject.SetActive(false);
+            fail.gameObject.SetActive(true);
         }
         yield return new WaitForSeconds(closeDelay);
         // 关闭界面

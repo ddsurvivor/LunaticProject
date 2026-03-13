@@ -63,6 +63,7 @@ public class Center : MonoBehaviour
     public static string Command_Chapter = "CHAPTER";//章节标题
     public static string Command_Tutorial = "TUTORIAL";//教程
     public static string Command_Map = "MAP";//地图
+    public static string Command_Item = "ITEM";//物品
  
     public static readonly char Plot指令分隔符 = '+';
 

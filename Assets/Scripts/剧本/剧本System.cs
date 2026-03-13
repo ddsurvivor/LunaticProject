@@ -825,6 +825,27 @@ public class 剧本System : MonoBehaviour
                     大地图System.instance.打开地图(prams[0]);
                 }
             }
+            if (key.Contains(Center.Command_Item))
+            {
+                var prams = 指令切割(key);
+                if(prams.Length >= 3)
+                {
+                    int.TryParse(prams[0], out int mode);
+                    int.TryParse(prams[1], out int itemId);
+                    int.TryParse(prams[2], out int count);
+                    
+                    if(mode == 0)
+                    {
+                        // 获得物品
+                        GM.Ins.PLAYERPROFILE.AddItem((ItemName)itemId, count);
+                    }
+                    else if(mode == 1)
+                    {
+                        // 消耗物品
+                        GM.Ins.PLAYERPROFILE.CostItem((ItemName)itemId, count);
+                    }
+                }
+            }
         }
     }
 
