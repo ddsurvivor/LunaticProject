@@ -457,6 +457,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitAttrCenter: {fileID: 2068541439121932266}
   rangeUI: {fileID: 0}
+  hightlightEffect: {fileID: 0}
   _actionListPanel: {fileID: 0}
   pieceDisplay: {fileID: 3583487980011262596}
   uiCanvas: {fileID: 190304371215773876}
@@ -483,6 +484,8 @@ MonoBehaviour:
       skillSound: {fileID: 0}
       consumeItems: []
       animationIndex: 0
+      isDelaySkill: 0
+      layerSkill: 0
     rangedAtk:
       skillName: 
       description: 
@@ -500,12 +503,16 @@ MonoBehaviour:
       skillSound: {fileID: 0}
       consumeItems: []
       animationIndex: 0
+      isDelaySkill: 0
+      layerSkill: 0
     maxAmmoCount: 0
     evasionRate: 0
     skillPacks: []
     elementType: 0
     initialMana: 0
     maxMana: 0
+    dropItemList: []
+    dropRate: 0
   pieceID: 1004
   player: {fileID: 0}
   isPlayerPiece: 0
@@ -529,10 +536,13 @@ MonoBehaviour:
     skillSound: {fileID: 0}
     consumeItems: []
     animationIndex: 0
+    isDelaySkill: 0
+    layerSkill: 0
   interactAreas: []
   availableActions: 
   availableSkills: []
   isIdle: 0
+  cantControl: 0
   OnInit:
     m_PersistentCalls:
       m_Calls: []
@@ -545,7 +555,7 @@ MonoBehaviour:
   OnDead:
     m_PersistentCalls:
       m_Calls: []
-  enemyAIType: 1
+  enemyAIType: 4
   isActived: 1
   deadNotDelete: 0
 --- !u!1 &1457925914143748292

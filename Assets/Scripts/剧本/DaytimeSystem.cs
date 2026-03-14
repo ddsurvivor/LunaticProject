@@ -13,6 +13,7 @@ public class DaytimeSystem : SerializedMonoBehaviour
     private int startDay = 45;
     
     public Text dateText;
+    public Text timeText;
     public Image dateImage;
     public Dictionary<Daytime, GameObject> daytimeSprites = new ();
 
@@ -57,7 +58,9 @@ public class DaytimeSystem : SerializedMonoBehaviour
     public void UpdateDaytimeImage()
     {
         // 更新日期文本
-        dateText.text = $"{startYear}  /  {startMonth}  /  {startDay + GM.Ins.PLAYERPROFILE.date} 【{GM.Ins.PLAYERPROFILE.daytime}】";
+        dateText.text = $"{startYear} / Q{startMonth} / {startDay + GM.Ins.PLAYERPROFILE.date}";
+        timeText.text = GM.Ins.PLAYERPROFILE.daytime == Daytime.轰炸 ? 
+            "夜晚" : GM.Ins.PLAYERPROFILE.daytime.ToString();
         if (daytimeSprites.ContainsKey(GM.Ins.PLAYERPROFILE.daytime))
         {
             CloseAllSprite();

@@ -124,8 +124,10 @@ public class 大地图System : SerializedMonoBehaviour
                 {
                     SmallMapActive(GM.Ins.PLAYERPROFILE.curSmallMapIndex, true);
                 }
-
-                break;
+            }
+            else
+            {
+                VARIABLE.SetActive(false);
             }
         }
     }

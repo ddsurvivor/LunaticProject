@@ -24,10 +24,10 @@ public class ObstructionOutline : MonoBehaviour
     private static readonly Vector2[] Offsets = new Vector2[]
     {
         Vector2.zero, // 中心
-        new Vector2(1, 0), // 右
-        new Vector2(-1, 0), // 左
+        new Vector2(0.8f, 0), // 右
+        new Vector2(-0.8f, 0), // 左
         new Vector2(0, 1.5f), // 上
-        new Vector2(0, -1) // 下
+        new Vector2(0, -0.8f) // 下
     };
 
     void Start()
@@ -62,7 +62,7 @@ public class ObstructionOutline : MonoBehaviour
     public void CheckUpdate()
     {
         //bool isObstructed = CheckObstruction();
-        bool isObstructed = CheckObstruction2();
+        bool isObstructed = CheckObstruction3();//CheckObstruction2();
         if (isObstructed != wasObstructed)
         {
             Debug.Log($"更新碰撞{isObstructed}");
@@ -134,12 +134,49 @@ public class ObstructionOutline : MonoBehaviour
             Vector2 offset = Offsets[i] * checkRadius;
             Vector3 checkPoint = targetPos + new Vector3(offset.x, offset.y, 0);
             Vector3 direction = checkPoint - camPos;
-            float distance = direction.magnitude;
+            float distance = direction.magnitude*100f;
 
+            
+            Debug.Log(distance);
             RaycastHit hit;
             bool hasHit = Physics.Raycast(camPos, direction, out hit, distance, obstacleLayer);
             if (debugMode)
                 Debug.DrawRay(camPos, direction.normalized * distance, hasHit ? Color.red : Color.green);
+
+            // 如果没有击中障碍物，或者击中的是自身，则判定为未遮挡
+            if (!hasHit || hit.collider.gameObject == gameObject)
+                return false;
+        }
+        // 所有射线都遮挡才为遮挡
+        return true;
+    }
+    // Assets/Scripts/Battle/Controllers/ObstructionOutline.cs
+    bool CheckObstruction3()
+    {
+        Vector3 targetPos = transform.position;
+
+        // 角度
+        float xAngle = 45f;
+        float yAngle = -45f;
+        float zAngle = 0f;
+
+        // 构造旋转四元数
+        Quaternion rotation = Quaternion.Euler(xAngle, yAngle, zAngle);
+
+        // 旋转前向向量，得到方向
+        Vector3 direction = rotation * Vector3.back;
+        direction.Normalize();
+        float rayLength = 30f; // 射线长度，可根据实际场景调整
+
+        for (int i = 0; i < Offsets.Length; i++)
+        {
+            Vector2 offset = Offsets[i] * checkRadius;
+            Vector3 checkPoint = targetPos + new Vector3(offset.x, offset.y, 0);
+
+            RaycastHit hit;
+            bool hasHit = Physics.Raycast(checkPoint, direction, out hit, rayLength, obstacleLayer);
+            if (debugMode)
+                Debug.DrawRay(checkPoint, direction * rayLength, hasHit ? Color.red : Color.green);
 
             // 如果没有击中障碍物，或者击中的是自身，则判定为未遮挡
             if (!hasHit || hit.collider.gameObject == gameObject)

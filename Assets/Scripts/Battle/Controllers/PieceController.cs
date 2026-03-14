@@ -100,6 +100,7 @@ public class PieceController : MonoBehaviour
                 Player playerData = GM.Ins.PLAYERPROFILE.GetPlayer(pieceID - 1);
                 if (playerData.curHealth > 0)
                 {
+                    // 只有当玩家当前血量大于0时才继承血量，否则按照默认值初始化，避免玩家死亡后再次进入战斗时棋子带着异常血量
                     unitAttrCenter.SetValues(playerData.curHealth, playerData.curMana, playerData.curAmmo);
                 }
             }
@@ -509,8 +510,7 @@ public class PieceController : MonoBehaviour
                 atkPos.position + Vector3.up * 3f,
                 atkPos.localRotation);
         }
-        
-        CheckFace(atkPos.transform.position - transform.position);
+        if(atkPos!=null) CheckFace(atkPos.transform.position - transform.position);
         Debug.Log($"{this.name}发动技能攻击{_skillPack.skillName}，targets数量：{targets.Count}");
         // 播放技能动画
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Skill, false, 1f, 
@@ -527,6 +527,7 @@ public class PieceController : MonoBehaviour
                 BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack, atkPos.position);
                 // 结束攻击状态
                 _isUsingSkill = false;
+                Debug.Log("关闭显示范围");
                 rangeUI.CloseRange();
             }, false);
         

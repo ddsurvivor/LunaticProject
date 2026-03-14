@@ -10,11 +10,13 @@ public class EnemyController : PieceController
     public EnemyAIType enemyAIType;
     public bool isActived = false; // 是否被激活
     public bool deadNotDelete = false; // 死亡后不删除，用于剧情需要
+    public bool navigate;/// 是否正在导航中
     //public bool ableFakeDeath = false; // 是否具有假死能力
     //private bool isFakeDead = false; // 是否处于假死状态
     //public bool FakeDead => isFakeDead;
 
     public Dictionary<PieceController, int> damageDic = new(); // 记录各个单位造成的伤害
+
 
     // 添加伤害记录
     public void AddDamageRecord(PieceController pc, int damage)

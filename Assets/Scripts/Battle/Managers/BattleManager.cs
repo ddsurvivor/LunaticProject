@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DG.Tweening;
+using JetBrains.Annotations;
 using UnityEngine;
 
 public class BattleManager : MonoBehaviour
@@ -231,7 +232,7 @@ public class BattleManager : MonoBehaviour
             
             
         }
-        BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
+        if(targets.Count>0) BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
         // 处理聚能充能效果，多段伤害只充能一次
         if (attacker.isPlayerPiece)
         {
@@ -241,7 +242,8 @@ public class BattleManager : MonoBehaviour
                 PlayerController.ChargeBurst(GameConst.attackBurstCharge);
             }
         }
-        onceEffect = false;
+        // 处理附加效果
+        ApplySKillEffectOnce(skillPack, attacker, targetPos);
         //BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
     }
 
@@ -303,8 +305,7 @@ public class BattleManager : MonoBehaviour
         }
     }*/
 
-    // 只处理一次的效果
-    private bool onceEffect = false;
+    
 
     public void ApplySKillEffect(SkillPack skillPack, PieceController caster = null
         , PieceController target = null
@@ -314,21 +315,6 @@ public class BattleManager : MonoBehaviour
         {
             switch (effect)
             {
-                case SkillEffect.Blink:
-                    if (onceEffect) continue;
-                    onceEffect = true;
-                    caster.transform.position =
-                        targetPos + new Vector3(-0.5f, 0, -0.5f);
-                    break;
-                case SkillEffect.HealArea:
-                    if (onceEffect) continue;
-                    onceEffect = true;
-                    Debug.Log("生成治疗区");
-                    HealArea healArea = ObjectPool.Ins.GenerateObject(ItemType.HEAL_AREA,
-                        targetPos,
-                        Quaternion.identity).GetComponent<HealArea>();
-                    healArea.SetData(skillPack.buffPacks[0], 1);
-                    break;
                 case SkillEffect.SpaceBomb:
                     if (target.gameObject.activeInHierarchy)
                     {
@@ -343,6 +329,30 @@ public class BattleManager : MonoBehaviour
                         }
                     }
 
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+    public void ApplySKillEffectOnce(SkillPack skillPack, PieceController caster = null
+        , Vector3 targetPos = default)
+    {
+        Debug.Log("处理一次性效果");
+        foreach (var effect in skillPack.skillEffects)
+        {
+            switch (effect)
+            {
+                case SkillEffect.Blink:
+                    caster.transform.position =
+                        targetPos + new Vector3(-0.5f, 0, -0.5f);
+                    break;
+                case SkillEffect.HealArea:
+                    Debug.Log("生成治疗区");
+                    HealArea healArea = ObjectPool.Ins.GenerateObject(ItemType.HEAL_AREA,
+                        targetPos,
+                        Quaternion.identity).GetComponent<HealArea>();
+                    healArea.SetData(skillPack.buffPacks[0], 1);
                     break;
                 default:
                     break;

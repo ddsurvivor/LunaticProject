@@ -103,6 +103,9 @@ public enum EnemyAIType
     Shoot = 2,
     [LabelText("技能型")]
     SkillUser = 3,
+    
+    [LabelText("近战型")]
+    Melee = 4,
 }
 
 #region 技能枚举
