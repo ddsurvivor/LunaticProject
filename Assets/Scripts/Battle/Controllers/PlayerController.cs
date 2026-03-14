@@ -15,32 +15,32 @@ public class PlayerController : SerializedMonoBehaviour
     public float burstCharge = 0f; // 聚能值
     public float maxBurstCharge = 100f; // 最大聚能值
     public bool ableBurst => burstCharge >= maxBurstCharge && !isBursting; // 是否可以发动聚能
-    
+
     public int totalDamage; // 对单一敌人造成的总伤害数值
     public PieceController burstTarget; // 当前聚能回合攻击的单一目标敌人
 
-    [Header("UI")] 
-    public RectTransform burstChargeBarFill; // 聚能条填充部分
-    
+    [Header("UI")] public RectTransform burstChargeBarFill; // 聚能条填充部分
+
     private float originWidth = 1842.2f;
-    
-    [FoldoutGroup("事件")]
-    public UnityEvent OnInit;
-    [FoldoutGroup("事件")]public UnityEvent OnTurnStart;
-    [FoldoutGroup("事件")]public UnityEvent OnTurnEnd;
+
+    [FoldoutGroup("事件")] public UnityEvent OnInit;
+    [FoldoutGroup("事件")] public UnityEvent OnTurnStart;
+    [FoldoutGroup("事件")] public UnityEvent OnTurnEnd;
 
     public virtual void Init()
     {
         OnInit.Invoke();
         burstCharge = 0f;
-        UpdateBurstBar();
+        UpdateBurstBar(true);
         foreach (var piece in pieces)
         {
             piece.Init(this, BattleScene.Ins.BM.pieceDataListSO.GetPieceData(piece.pieceID));
         }
+
         BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(pieces[0]);
         BattleScene.Ins.UM.ShowBurstReady(false);
     }
+
     public virtual void TurnStart()
     {
         OnTurnStart.Invoke();
@@ -68,7 +68,6 @@ public class PlayerController : SerializedMonoBehaviour
         {
             EndBurstMode(); // 回合结束关闭聚能状态
         }
-
     }
 
     /// <summary>
@@ -111,9 +110,10 @@ public class PlayerController : SerializedMonoBehaviour
         {
             piece.TurnStart();
         }
+
         BattleScene.Ins.BM.camera.ActiveBurstMode(true);
     }
-    
+
     /// <summary>
     /// 结束聚能状态
     /// </summary>
@@ -134,7 +134,7 @@ public class PlayerController : SerializedMonoBehaviour
     public void OnClickTurnEnd()
     {
         BattleScene.Ins.BM.ChangeTurn();
-        BattleScene.Ins.UM.endTurnButton.enabled  = false;
+        BattleScene.Ins.UM.endTurnButton.enabled = false;
     }
 
     public void OnClickBurst()
@@ -157,28 +157,38 @@ public class PlayerController : SerializedMonoBehaviour
         EnterBurstMode();
     }
 
-    private void UpdateBurstBar()
+    private void UpdateBurstBar(bool instant = false)
     {
         if (burstChargeBarFill != null)
         {
             float endWidth = originWidth * (burstCharge / maxBurstCharge);
-            DOVirtual.Float(burstChargeBarFill.sizeDelta.x, endWidth, 0.3f, (value) =>
+            if (instant)
             {
-                burstChargeBarFill.sizeDelta = new Vector2(value, burstChargeBarFill.sizeDelta.y);
-            }).SetDelay(0.3f);
-            /*burstChargeBarFill.sizeDelta = new Vector2(originWidth * (burstCharge / maxBurstCharge),
-                burstChargeBarFill.sizeDelta.y);*/
+                burstChargeBarFill.sizeDelta =
+                    new Vector2(endWidth, burstChargeBarFill.sizeDelta.y);
+            }
+            else
+            {
+                DOVirtual.Float(burstChargeBarFill.sizeDelta.x, endWidth, 0.3f
+                    , (value) =>
+                    {
+                        burstChargeBarFill.sizeDelta =
+                            new Vector2(value, burstChargeBarFill.sizeDelta.y);
+                    }).SetDelay(0.3f);
+                /*burstChargeBarFill.sizeDelta = new Vector2(originWidth * (burstCharge / maxBurstCharge),
+                    burstChargeBarFill.sizeDelta.y);*/
+            }
         }
     }
-    
-    public int AddBurstDamage(PieceController enemy,  int damage)
+
+    public int AddBurstDamage(PieceController enemy, int damage)
     {
         //爆发状态下攻击同一目标增加额外伤害
         if (BattleScene.Ins.BM.PlayerController.burstTarget == enemy)
         {
             damage = (int)(GameConst.burstDamageRate * damage);
             damage += (int)(BattleScene.Ins.BM.PlayerController.totalDamage *
-                                        GameConst.burstAddDamageRate);
+                            GameConst.burstAddDamageRate);
             BattleScene.Ins.BM.PlayerController.totalDamage += damage;
         }
         else
@@ -186,6 +196,7 @@ public class PlayerController : SerializedMonoBehaviour
             BattleScene.Ins.BM.PlayerController.burstTarget = enemy;
             BattleScene.Ins.BM.PlayerController.totalDamage = damage;
         }
+
         return damage;
     }
 }
