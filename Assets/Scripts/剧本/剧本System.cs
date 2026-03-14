@@ -789,7 +789,7 @@ public class 剧本System : MonoBehaviour
                     int.TryParse(prams[0], out result);
                 }
                 // 显示商店面板
-                GM.Ins.marketSystem.OpenMarketPanel(result);
+                GM.Ins.marketSystem.OpenMarketPanel(result, discount);
             }
 
             if (key.Contains(Center.Command_Close))
@@ -807,6 +807,19 @@ public class 剧本System : MonoBehaviour
                     float.TryParse(prams[1], out float fadeTime);
                     float.TryParse(prams[1], out float duration);
                     大地图System.instance.chapterPanel.ShowChapter(title, fadeTime, duration);
+                }
+            }
+            if (key.Contains(Center.Command_Logs))
+            {
+                // LOGS(世界崩塌;毁灭殆尽;万物终结,2,1)
+                var prams = 指令切割(key);
+                if (prams.Length >= 3)
+                {
+                    string[] title = prams[0].Split(";");
+                    //int.TryParse(prams[0], out int result);
+                    float.TryParse(prams[1], out float fadeTime);
+                    float.TryParse(prams[1], out float duration);
+                    大地图System.instance.chapterPanel.ShowChapters(title, fadeTime, duration);
                 }
             }
             if(key.Contains(Center.Command_Tutorial))
@@ -839,6 +852,7 @@ public class 剧本System : MonoBehaviour
                     {
                         // 获得物品
                         GM.Ins.PLAYERPROFILE.AddItem((ItemName)itemId, count);
+                        大地图System.instance.itemGetPanel.ShowPanel(new ItemPack((ItemName)itemId, count));
                     }
                     else if(mode == 1)
                     {
@@ -884,5 +898,10 @@ public class 剧本System : MonoBehaviour
     public void TestLog(string log)
     {
         大地图System.instance.开始剧情 (log);
+    }
+    [Button("测试指令")]
+    public void TestCommand(string command)
+    {
+        进行指令(command);
     }
 }

@@ -27,6 +27,8 @@ public class CheckDicePanel : MonoBehaviour
     [Header("骰子UI对象（场景预放置）")]
     public List<Image> diceImages = new List<Image>();
 
+    //public GameObject blur;
+
     /// <summary>
     /// 展示骰子检定结果
     /// </summary>
@@ -44,7 +46,7 @@ public class CheckDicePanel : MonoBehaviour
             diceImages[i].gameObject.SetActive(i < diceCount);
         }
         
-
+        //blur.SetActive(true);
         // 开始滚动动画
         StartCoroutine(RollDiceCoroutine(diceCount, diceResult, isSuccess));
     }

@@ -21,6 +21,7 @@ public class PlayerController : SerializedMonoBehaviour
 
     [Header("UI")] 
     public RectTransform burstChargeBarFill; // 聚能条填充部分
+    
     private float originWidth = 1842.2f;
     
     [FoldoutGroup("事件")]

@@ -37,6 +37,7 @@ public class 大地图System : SerializedMonoBehaviour
     public ChapterPanel chapterPanel;
     
     public TutorialUI tutorial;
+    public ItemGetPanel itemGetPanel;
     public void 失败()
     {
         失败Obj.SetActive(true);
