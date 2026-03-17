@@ -53,7 +53,7 @@
 
         private void OnMouseEnter()
         {
-            if(isFull) return;
+            //if(isFull) return;
             highlightEffect.SetActive(true);
         }
         private void OnMouseExit()
