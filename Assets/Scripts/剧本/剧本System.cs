@@ -60,6 +60,8 @@ public class 剧本System : MonoBehaviour
     
     public CheckDicePanel checkDicePanel;
 
+    public Color choiceColor;
+
     public void 设置新剧本(string t)
     {
         刷新();
@@ -431,7 +433,7 @@ public class 剧本System : MonoBehaviour
                     GameObject go = 生成剧本预制体();
                     GameObject text = go.GetComponent<打字机>().textComponent.gameObject;
                     text.AddComponent<Button>();
-                    text.GetComponent<Text>().color = Color.green;
+                    text.GetComponent<Text>().color = choiceColor;
                     text.GetComponent<Text>().raycastTarget = true;
                     string 事件 = 当前事件;
                     text.GetComponent<Button>().onClick.AddListener(() =>
