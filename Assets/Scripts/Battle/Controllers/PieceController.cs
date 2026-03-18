@@ -215,6 +215,21 @@ public class PieceController : MonoBehaviour
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
     }
 
+    public void StartMove()
+    {
+        if (!isPlayerPiece) return;
+        PlayAudio(ActionType.移动);
+        //pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
+    }
+
+    public void StopMove()
+    {
+        CheckActionPos();
+        _actionListPanel.gameObject.SetActive(true);
+        pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
+        BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
+    }
+
     public void CancelSelect()
     {
         Debug.Log("取消选择棋子");

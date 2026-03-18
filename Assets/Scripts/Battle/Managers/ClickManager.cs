@@ -1,4 +1,5 @@
 using System;
+using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -46,7 +47,14 @@ public class ClickManager : MonoBehaviour
                 return;
             }
 
-            DragPiece();
+            if (dragMove)
+            {
+                DragPiece();
+            }
+            else
+            {
+                DragMoveIcon();
+            }
         }
 
         // if (Input.GetMouseButton(0))
@@ -66,7 +74,14 @@ public class ClickManager : MonoBehaviour
                 return;
             }
 
-            StopDrag();
+            if (dragMove)
+            {
+                StopDrag();
+            }
+            else
+            {
+                ClickMovePoint();
+            }
         }
 
         // 点击右键取消
@@ -130,6 +145,15 @@ public class ClickManager : MonoBehaviour
         point = _dragStartPos;
         _dragRange = _selectedPiece.unitAttrCenter.MoveRange;
         _rangeUI.ShowCircleRange(_dragStartPos, _dragRange);
+
+        if (dragMove)
+        {
+            
+        }
+        else
+        {
+            _rangeUI.moveIcon.SetActive(true);
+        }
     }
 
 
@@ -168,6 +192,38 @@ public class ClickManager : MonoBehaviour
         _selectedPiece.CheckFace(_selectedPiece.transform.position - _dragStartPos);
     }
 
+    public void DragMoveIcon()
+    {
+        if (_selectedPiece == null)
+        {
+            return;
+        }
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit[] hits = Physics.RaycastAll(ray);
+
+        foreach (var hit in hits)
+        {
+            if (hit.collider.CompareTag("Mask")) return;
+            if (hit.collider.CompareTag("Ground"))
+            {
+                //Debug.Log("点击地面，移动棋子");
+                // 移动选中的棋子到地面点击位置
+                point = hit.point;
+            }
+        }
+
+        // 限制拖动范围
+        Vector3 offset = point - _dragStartPos;
+        if (offset.magnitude > _dragRange)
+        {
+            offset = offset.normalized * _dragRange;
+            point = _dragStartPos + offset;
+        }
+        _rangeUI.moveIcon.transform.position = (new Vector3(point.x
+            , _rangeUI.moveIcon.transform.position.y, point.z));
+    }
+
     private void StopDrag()
     {
         if (_selectedPiece != null)
@@ -177,6 +233,26 @@ public class ClickManager : MonoBehaviour
             BattleScene.Ins.BM.camera.SetFollow(_selectedPiece.transform);
             _selectedPiece.unitAttrCenter.CostMP();
             _selectedPiece.StopDrag();
+            _rangeUI.CloseRange();
+            //_selectedPiece = null;
+        }
+    }
+
+    public void ClickMovePoint()
+    {
+        if (_selectedPiece != null)
+        {
+            Debug.Log("停止拖动棋子");
+            _isDragging = false;
+            BattleScene.Ins.BM.camera.SetFollow(_selectedPiece.transform);
+            _selectedPiece.unitAttrCenter.CostMP();
+            Vector3 targetPos = new Vector3(point.x, _rangeUI.moveIcon.transform.position.y, point.z);
+            _selectedPiece.CheckFace(targetPos - _dragStartPos);
+            _selectedPiece.StartMove();
+            _selectedPiece.transform.DOMove(targetPos, 1.0f).OnComplete(() =>
+            {
+                _selectedPiece.StopMove();
+            });
             _rangeUI.CloseRange();
             //_selectedPiece = null;
         }
