@@ -9,7 +9,7 @@ public class DetailAttributeRow : MonoBehaviour {
     /// <summary>
     /// 更新属性行显示
     /// </summary>
-    public void UpdateInfo(string name, int currentVal, int maxVal = 100) {
+    public void UpdateInfo(string name, int currentVal, int maxVal = 150) {
         attrNameText.text = name;
         attrValueText.text = currentVal.ToString();
         

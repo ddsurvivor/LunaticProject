@@ -61,6 +61,8 @@ public class PLAYERPROFILE
         player[0].YIZHI = 5;
         player[0].TALK = 5;
         player[0].RECOGNITION = 3;//模式识别
+        player[0].spriteName = "PC01C1";
+        player[0].Level = 1;
         player[1] = new Player(); 
         // player[2] ── 绿
         player[1].NAME        = "LV";
@@ -73,6 +75,8 @@ public class PLAYERPROFILE
         player[1].HPMAX       = 10;         // 生命上限
         player[1].STAYING     = 20;         // 耐力
         player[1].STAYINGMAX = 20;
+        player[1].spriteName = "PC02C1";
+        player[1].Level = 1;
 // player[2] ── 马赛
         player[2] = new Player();
         player[2].NAME        = "MASAI";
@@ -85,6 +89,13 @@ public class PLAYERPROFILE
         player[2].HPMAX       = 30;         // 生命上限
         player[2].STAYING     = 20;       
         player[2].STAYINGMAX  = 20;   
+        player[2].spriteName = "PC03C1";
+        player[2].Level = 1;
+        
+        // 技能点测试
+        player[0].SkillPoints = 5;
+        player[1].SkillPoints = 5;
+        player[2].SkillPoints = 5;
         
         
         // 道具
@@ -225,6 +236,16 @@ public class PLAYERPROFILE
         player[index].curHealth = curHealth;
         player[index].curAmmo = curAmmo;
         player[index].curMana = curMana;
+    }
+
+    public void ModPlayer(int index, int attr, int mod, int val = 0)
+    {
+        if(player.Length <= index || index < 0)
+        {
+            Debug.LogError($"修改属性时index越界!index = {index}");
+            return;
+        }
+        player[index].AccessAttribute(attr, (AttrOp)mod, val);
     }
 
     #region 仓库存档

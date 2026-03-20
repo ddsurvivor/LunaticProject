@@ -11,6 +11,8 @@ public class DataManager : SerializedMonoBehaviour
     private string savePath = Application.streamingAssetsPath + "/Datas/";
     // 发布时改为 Application.persistentDataPath + "/Datas/";
     private int saveSlotCount = 10;
+    
+    public LevelUpConfig levelUpConfig;
     public void Init()
     {
         // 测试加载

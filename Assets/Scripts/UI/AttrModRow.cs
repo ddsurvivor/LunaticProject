@@ -1,11 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class AttributeRowUI : MonoBehaviour {
+public class AttrModRow : MonoBehaviour {
     public Text attrNameText;
     public Text valueText;
     public Text pendingAddText; // 显示 +N
-    public Slider progressBar;
+    public Image progressBar;
+    public Image modBar;
     public Button plusBtn;
     public Button minusBtn;
 
@@ -42,7 +43,8 @@ public class AttributeRowUI : MonoBehaviour {
     public void UpdateUI() {
         valueText.text = baseValue.ToString();
         pendingAddText.text = pendingAdd > 0 ? "+" + pendingAdd : "0";
-        progressBar.value = (float)(baseValue + pendingAdd) / maxValue;
+        progressBar.transform.localScale = new Vector3((float)baseValue / maxValue, 1, 1);
+        modBar.transform.localScale = new Vector3((float)(baseValue + pendingAdd) / maxValue, 1, 1);
     }
     
     public void Commit() {

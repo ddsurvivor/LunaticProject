@@ -8,6 +8,7 @@ using UnityEngine.UI;
 using Random = UnityEngine.Random;
 using DG.Tweening;
 using Sirenix.OdinInspector;
+using Sirenix.Utilities;
 
 
 public class 剧本System : MonoBehaviour
@@ -57,7 +58,7 @@ public class 剧本System : MonoBehaviour
     }
 
     [SerializeField] [ReadOnly] private string curPartName;
-    
+
     public CheckDicePanel checkDicePanel;
 
     public Color choiceColor;
@@ -343,8 +344,19 @@ public class 剧本System : MonoBehaviour
             if (key.Contains(Center.Command_Modify))
             {
                 var prams = 指令切割(key);
-                GM.Ins.PLAYERPROFILE.修改属性(Convert.ToInt32(prams[0]), prams[1]
-                    , Convert.ToInt32(prams[2]));
+                if (prams.Length >= 4)
+                {
+                    int.TryParse(prams[0], out int index);
+                    int.TryParse(prams[1], out int attr);
+                    int.TryParse(prams[2], out int opIndex);
+                    int.TryParse(prams[3], out int value);
+                    GM.Ins.PLAYERPROFILE.ModPlayer(index, attr, opIndex, value);
+                }
+                else if (prams.Length >= 3)
+                {
+                    GM.Ins.PLAYERPROFILE.修改属性(Convert.ToInt32(prams[0]), prams[1]
+                        , Convert.ToInt32(prams[2]));
+                }
             }
 
             if (key.Contains(Center.Command_background))
@@ -397,10 +409,10 @@ public class 剧本System : MonoBehaviour
                 int 修改结果F = Convert.ToInt32(prams[8]);
                 int 修正值 = GM.Ins.PLAYERPROFILE.获取数据<int>(被检定属性, 检定角色);
                 int 随机值 = 0;
-                int [] 骰子结果 = new int[骰子数量];
+                int[] 骰子结果 = new int[骰子数量];
                 for (int i = 0; i < 骰子数量; i++)
                 {
-                    int roll = Random.Range(1, 骰子大小+ 1);
+                    int roll = Random.Range(1, 骰子大小 + 1);
                     骰子结果[i] = roll;
                     随机值 += roll;
                 }
@@ -499,6 +511,7 @@ public class 剧本System : MonoBehaviour
 
             if (key.Contains(Center.Command_If))
             {
+                if(key.Contains(Center.Command_Modify)) continue;
                 var prams = 指令切割(key);
                 if (prams[0] == 已阅读.ToString())
                 {
@@ -721,7 +734,7 @@ public class 剧本System : MonoBehaviour
                 }
                 else
                 {
-                    return;
+                    continue;
                 }
 
                 Texture2D texture = Resources.Load<Texture2D>("CG/" + prams[0]);
@@ -729,7 +742,7 @@ public class 剧本System : MonoBehaviour
                 if (texture == null)
                 {
                     Debug.LogError("无法加载图片: " + prams[0]);
-                    return;
+                    continue;
                 }
 
                 Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height)
@@ -755,7 +768,7 @@ public class 剧本System : MonoBehaviour
                 }
                 else if (prams.Length < 1)
                 {
-                    return;
+                    continue;
                 }
 
                 Texture2D texture = Resources.Load<Texture2D>("CG/" + prams[0]);
@@ -763,7 +776,7 @@ public class 剧本System : MonoBehaviour
                 if (texture == null)
                 {
                     Debug.LogError("无法加载图片: " + prams[0]);
-                    return;
+                    continue;
                 }
 
                 Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height)
@@ -780,7 +793,7 @@ public class 剧本System : MonoBehaviour
                 Debug.LogError("打开商城");
                 var prams = 指令切割(key);
                 int result = 0;
-                int discount = 100;// 默认没有折扣
+                int discount = 100; // 默认没有折扣
                 if (prams.Length >= 2)
                 {
                     int.TryParse(prams[0], out result);
@@ -790,6 +803,7 @@ public class 剧本System : MonoBehaviour
                 {
                     int.TryParse(prams[0], out result);
                 }
+
                 // 显示商店面板
                 GM.Ins.marketSystem.OpenMarketPanel(result, discount);
             }
@@ -811,6 +825,7 @@ public class 剧本System : MonoBehaviour
                     大地图System.instance.chapterPanel.ShowChapter(title, fadeTime, duration);
                 }
             }
+
             if (key.Contains(Center.Command_Logs))
             {
                 // LOGS(世界崩塌;毁灭殆尽;万物终结,2,1)
@@ -824,40 +839,43 @@ public class 剧本System : MonoBehaviour
                     大地图System.instance.chapterPanel.ShowChapters(title, fadeTime, duration);
                 }
             }
-            if(key.Contains(Center.Command_Tutorial))
+
+            if (key.Contains(Center.Command_Tutorial))
             {
                 var prams = 指令切割(key);
                 if (prams.Length >= 1)
                 {
                     大地图System.instance.tutorial.Show(prams[0]);
                 }
-            }                          
+            }
 
             if (key.Contains(Center.Command_Map))
             {
                 // 
                 var prams = 指令切割(key);
-                if(prams.Length >= 1)
+                if (prams.Length >= 1)
                 {
                     大地图System.instance.打开地图(prams[0]);
                 }
             }
-            if (key.Contains(Center.Command_Item))// +ITEM(int mode, int itemId, int count)
+
+            if (key.Contains(Center.Command_Item)) // +ITEM(int mode, int itemId, int count)
             {
                 var prams = 指令切割(key);
-                if(prams.Length >= 3)
+                if (prams.Length >= 3)
                 {
                     int.TryParse(prams[0], out int mode);
                     int.TryParse(prams[1], out int itemId);
                     int.TryParse(prams[2], out int count);
-                    
-                    if(mode == 0)
+
+                    if (mode == 0)
                     {
                         // 获得物品
                         GM.Ins.PLAYERPROFILE.AddItem((ItemName)itemId, count);
-                        大地图System.instance.itemGetPanel.ShowPanel(new ItemPack((ItemName)itemId, count));
+                        大地图System.instance.itemGetPanel.ShowPanel(new ItemPack((ItemName)itemId
+                            , count));
                     }
-                    else if(mode == 1)
+                    else if (mode == 1)
                     {
                         // 消耗物品
                         GM.Ins.PLAYERPROFILE.CostItem((ItemName)itemId, count);
@@ -895,13 +913,14 @@ public class 剧本System : MonoBehaviour
         // 推进日期
         大地图System.instance.daytimeSystem.NextDay();
     }
-    
+
     // ====== Test ======= //
     [Button("测试Log")]
     public void TestLog(string log)
     {
-        大地图System.instance.开始剧情 (log);
+        大地图System.instance.开始剧情(log);
     }
+
     [Button("测试指令")]
     public void TestCommand(string command)
     {

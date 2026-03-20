@@ -86,6 +86,16 @@ public class LevelUpConfig : ScriptableObject
         }
         return levels[level - 1];
     }
+    
+    public int GetReward(int level)
+    {
+        if (level < 1 || level > 30)
+        {
+            Debug.LogError($"等级 {level} 超出有效范围 (1-30)");
+            return -1;
+        }
+        return levels[level - 1].rewardAttributePoints;
+    }
 
     /// <summary>
     /// 获取指定等级升级所需的经验值（从上一级升到本级所需的经验）
@@ -100,23 +110,5 @@ public class LevelUpConfig : ScriptableObject
         return levels[level - 1].requiredExp;
     }
 
-    /// <summary>
-    /// 根据当前累积经验值计算角色等级（1~30）
-    /// </summary>
-    public int CalculateLevel(int totalExp)
-    {
-        int accumulatedExp = 0;
-        for (int i = 0; i < levels.Count; i++)
-        {
-            // 等级1的 requiredExp 通常为0，直接跳过累积判断
-            if (i > 0)
-                accumulatedExp += levels[i - 1].requiredExp;
-
-            // 如果总经验小于等于当前等级的累积经验，则当前等级为 i
-            // 但注意：等级1时 accumulatedExp 仍为0，totalExp >=0 即满足
-            if (totalExp < accumulatedExp + levels[i].requiredExp)
-                return i + 1;
-        }
-        return 30; // 超过30级封顶
-    }
+    
 }
