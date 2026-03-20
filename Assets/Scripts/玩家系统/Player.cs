@@ -58,7 +58,7 @@ public struct Player
         // 注意：c# 7.0+ 支持 ref local，但 struct 内部可以直接操作
         switch (index) {
             case 0: return Execute(ref hp, op, val);
-            //case 1: return Execute(ref hpMax, op, val);
+            case 1: return Execute(ref _hpmax, op, val);
             case 2: return Execute(ref staying, op, val);
             case 3: return Execute(ref stayingMax, op, val);
             case 4: return Execute(ref yizhi, op, val);
@@ -66,7 +66,6 @@ public struct Player
             case 6: return Execute(ref Physique, op, val);
             case 7: return Execute(ref Talk, op, val);
             case 8: return Execute(ref Recognition, op, val);
-            //case 9: return Execute(ref Luck, op, val);
             default: return 0;
         }
     }
@@ -80,7 +79,7 @@ public struct Player
     
     // 获取属性名称的快捷方法
     public string GetAttrName(int index) {
-        string[] names = { "生命值", "最大生命", "耐力", "最大耐力", "意志", "作战", "体能", "沟通", "模式识别", "幸运" };
+        string[] names = { "等级", "最大生命", "耐力", "最大耐力", "意志", "作战", "体能", "沟通", "模式识别"};
         return (index >= 0 && index < names.Length) ? names[index] : "未知";
     }
 
