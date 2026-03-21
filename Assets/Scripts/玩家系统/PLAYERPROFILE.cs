@@ -51,7 +51,7 @@ public class PLAYERPROFILE
         
         player = new Player[20];
         player[0] = new Player();
-        player[0].NAME = "QIUWU";
+        player[0].NAME = "QIU WU";
         player[0].HP = 15;//体力
         player[0].HPMAX = 15;
         player[0].STAYING = 30;//耐力
@@ -65,7 +65,7 @@ public class PLAYERPROFILE
         player[0].Level = 1;
         player[1] = new Player(); 
         // player[2] ── 绿
-        player[1].NAME        = "LV";
+        player[1].NAME        = "MIDORI";
         player[1].PHYSIQUE    = 2;          // 体能
         player[1].YIZHI       = 4;          // 意志
         player[1].TALK        = 3;      // 沟通 
@@ -79,7 +79,7 @@ public class PLAYERPROFILE
         player[1].Level = 1;
 // player[2] ── 马赛
         player[2] = new Player();
-        player[2].NAME        = "MASAI";
+        player[2].NAME        = "MARSEILLE";
         player[2].PHYSIQUE    = 4;      // 体能 
         player[2].YIZHI       = 3;      // 意志 
         player[2].TALK        = 5;          // 沟通
