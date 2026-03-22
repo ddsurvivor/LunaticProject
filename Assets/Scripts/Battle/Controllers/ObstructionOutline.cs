@@ -5,6 +5,11 @@ using UnityEngine;
 /// </summary>
 public class ObstructionOutline : MonoBehaviour
 {
+    // 引用
+    public PieceDisplay piece;
+    public SpriteMask sprite;
+    
+    
     [Header("遮挡检测设置")] [Tooltip("障碍物所在的 Layer")]
     public LayerMask obstacleLayer;
 
@@ -49,6 +54,7 @@ public class ObstructionOutline : MonoBehaviour
                 Debug.LogWarning($"材质 {mat.name} 中不存在属性 {outlinePropertyName}，请检查属性名是否正确。");
             }
         }*/
+        
     }
 
     void Update()
@@ -69,6 +75,8 @@ public class ObstructionOutline : MonoBehaviour
             SetOutlineEnabled(isObstructed);
             wasObstructed = isObstructed;
         }
+
+        if (piece != null && sprite!=null) sprite.sprite = piece.pieceSpriteRenderer.sprite;
     }
 
     /// <summary>
