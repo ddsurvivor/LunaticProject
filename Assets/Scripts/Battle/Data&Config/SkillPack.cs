@@ -25,5 +25,23 @@ public class SkillPack
     public int animationIndex = 0; // 技能动画索引
     public bool isDelaySkill = false; // 是否为延迟技能
     public bool layerSkill = false; // 是否为单层技能
+    public List<SkillEffectBase> additionalEffects = new(); // 额外效果列表
+}
 
+
+/// <summary>
+/// 技能特殊效果基类，所有技能特殊效果都继承自这个类
+/// </summary>
+public class SkillEffectBase
+{
+    
+}
+
+/// <summary>
+/// 击退效果，造成伤害的同时将目标击退一定距离
+/// </summary>
+public class HitBackEffect : SkillEffectBase
+{
+    [LabelText("击退距离")]
+    public float dis;// 击退距离
 }

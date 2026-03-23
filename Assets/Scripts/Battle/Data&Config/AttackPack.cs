@@ -10,4 +10,5 @@
             this.damage = damage;
             this.damageType = damageType;
         }
+        
     }

@@ -229,7 +229,7 @@ public class BattleManager : MonoBehaviour
 
             // 处理附加效果
             ApplySKillEffect(skillPack, attacker, target, targetPos);
-            
+            ApplyAddEffect(skillPack, attacker, target, targetPos);
             
         }
         if(targets.Count>0) BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
@@ -353,6 +353,26 @@ public class BattleManager : MonoBehaviour
                         targetPos,
                         Quaternion.identity).GetComponent<HealArea>();
                     healArea.SetData(skillPack.buffPacks[0], 1);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void ApplyAddEffect(SkillPack skillPack, PieceController target = null, PieceController caster = null
+        , Vector3 targetPos = default)
+    {
+        foreach (var effectBase in skillPack.additionalEffects)
+        {
+            switch (effectBase)
+            {
+                case HitBackEffect hitBackEffect:
+                    Vector3 dir = (target.transform.position - caster.transform.position);
+                    dir.y = 0;
+                    dir.Normalize();
+                    Vector3 hitBackPos = target.transform.position + dir * hitBackEffect.dis;
+                    target.transform.DOMove(hitBackPos, 0.2f);
                     break;
                 default:
                     break;
