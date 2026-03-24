@@ -452,7 +452,7 @@ public class PieceController : MonoBehaviour
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
         }
 
-        transform.DOShakePosition(0.5f, 0.8f);
+        pieceDisplay.pieceSpriteRenderer.transform.DOShakePosition(0.5f, 0.8f);
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
         if (uiCanvas != null) uiCanvas.SetActive(true);
         ShowHighlight(false);

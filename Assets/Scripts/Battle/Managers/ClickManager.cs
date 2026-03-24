@@ -246,7 +246,7 @@ public class ClickManager : MonoBehaviour
             _isDragging = false;
             BattleScene.Ins.BM.camera.SetFollow(_selectedPiece.transform);
             _selectedPiece.unitAttrCenter.CostMP();
-            Vector3 targetPos = new Vector3(point.x, _rangeUI.moveIcon.transform.position.y, point.z);
+            Vector3 targetPos = new Vector3(point.x, _selectedPiece.transform.position.y, point.z);
             _selectedPiece.CheckFace(targetPos - _dragStartPos);
             _selectedPiece.StartMove();
             _selectedPiece.transform.DOMove(targetPos, 1.0f).OnComplete(() =>

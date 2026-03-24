@@ -230,6 +230,11 @@ public class BattleManager : MonoBehaviour
             // 处理附加效果
             ApplySKillEffect(skillPack, attacker, target, targetPos);
             ApplyAddEffect(skillPack, attacker, target, targetPos);
+            if (attacker.player.isBursting)// 聚能状态下所有攻击附加击退效果
+            {
+                SpaceBombEffect(skillPack, attacker, target, targetPos);// 去除假死
+                HitBackEffect(new HitBackEffect { dis = 2f }, attacker, target, targetPos);
+            }
             
         }
         if(targets.Count>0) BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
@@ -316,22 +321,29 @@ public class BattleManager : MonoBehaviour
             switch (effect)
             {
                 case SkillEffect.SpaceBomb:
-                    if (target.gameObject.activeInHierarchy)
-                    {
-                        // 检测目标是否有假死技能, 如果有且进入了假死状态，则彻底杀死
-                        SelfRevive revive = target.GetComponent<SelfRevive>();
-                        if (revive != null)
-                        {
-                            if (revive.isFakeDead)
-                            {
-                                revive.TrueDeath();
-                            }
-                        }
-                    }
-
+                    SpaceBombEffect(skillPack, caster, target, targetPos);
+                    
                     break;
                 default:
                     break;
+            }
+        }
+    }
+
+    private void SpaceBombEffect(SkillPack skillPack, PieceController caster = null
+        , PieceController target = null
+        , Vector3 targetPos = default)
+    {
+        if (target.gameObject.activeInHierarchy)
+        {
+            // 检测目标是否有假死技能, 如果有且进入了假死状态，则彻底杀死
+            SelfRevive revive = target.GetComponent<SelfRevive>();
+            if (revive != null)
+            {
+                if (revive.isFakeDead)
+                {
+                    revive.TrueDeath();
+                }
             }
         }
     }
@@ -372,16 +384,22 @@ public class BattleManager : MonoBehaviour
             switch (effectBase)
             {
                 case HitBackEffect hitBackEffect:
-                    Vector3 dir = (target.transform.position - caster.transform.position);
-                    dir.y = 0;
-                    dir.Normalize();
-                    Vector3 hitBackPos = target.transform.position + dir * hitBackEffect.dis;
-                    target.transform.DOMove(hitBackPos, 0.2f);
+                    HitBackEffect(hitBackEffect, caster, target, targetPos);
                     break;
                 default:
                     break;
             }
         }
+    }
+
+    private void HitBackEffect(HitBackEffect hitBackEffect,  PieceController caster = null
+        ,PieceController target = null, Vector3 targetPos = default)
+    {
+        Vector3 dir = (target.transform.position - caster.transform.position);
+        dir.y = 0;
+        dir.Normalize();
+        Vector3 hitBackPos = target.transform.position + dir * hitBackEffect.dis;
+        target.transform.DOMove(hitBackPos, 0.2f);
     }
 
     public void CheckAllArea()
