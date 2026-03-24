@@ -17,15 +17,17 @@ public class PieceController : MonoBehaviour
 
     [FormerlySerializedAs("_rangeUI")] [SerializeField]
     public RangeUI rangeUI; // 范围UI
+
     public GameObject hightlightEffect; // 高亮特效
 
     [SerializeField] private PieceActionListPanel _actionListPanel; // 棋子动作列表面板
 
     [SerializeField] public PieceDisplay pieceDisplay;
-    public GameObject uiCanvas;// UI画布
+    public GameObject uiCanvas; // UI画布
 
     [Header("配置")] [SerializeField] [ReadOnly]
     private PieceData _pieceData;
+
     public PieceData pieceData => _pieceData;
 
     public int pieceID; // 棋子ID
@@ -64,14 +66,13 @@ public class PieceController : MonoBehaviour
     //public bool isActived = false; // 是否被激活
 
     public bool isIdle; // 是否处于待机状态
-    
+
     public bool cantControl; // 无法被控制（眩晕等状态）
 
-    [FoldoutGroup("事件")]
-    public UnityEvent OnInit;
-    [FoldoutGroup("事件")]public UnityEvent OnTurnStart;
-    [FoldoutGroup("事件")]public UnityEvent OnTurnEnd;
-    [FoldoutGroup("事件")]public UnityEvent OnDead;
+    [FoldoutGroup("事件")] public UnityEvent OnInit;
+    [FoldoutGroup("事件")] public UnityEvent OnTurnStart;
+    [FoldoutGroup("事件")] public UnityEvent OnTurnEnd;
+    [FoldoutGroup("事件")] public UnityEvent OnDead;
 
 
     public void Init(PlayerController player, PieceData pieceData = null)
@@ -88,6 +89,7 @@ public class PieceController : MonoBehaviour
             availableActions.Add(ActionType.技能); // 技能
             availableActions.Add(ActionType.道具);
         }
+
         //Debug.Log(_pieceDisplay.name);
         pieceDisplay?.ChangeDisplayState(PieceDisplayState.Idle);
         if (pieceData != null)
@@ -101,7 +103,8 @@ public class PieceController : MonoBehaviour
                 if (playerData.curHealth > 0)
                 {
                     // 只有当玩家当前血量大于0时才继承血量，否则按照默认值初始化，避免玩家死亡后再次进入战斗时棋子带着异常血量
-                    unitAttrCenter.SetValues(playerData.curHealth, playerData.curMana, playerData.curAmmo);
+                    unitAttrCenter.SetValues(playerData.curHealth, playerData.curMana
+                        , playerData.curAmmo);
                 }
             }
         }
@@ -117,7 +120,7 @@ public class PieceController : MonoBehaviour
 
     private void Update()
     {
-        if (cantControl)return;
+        if (cantControl) return;
         if (!isPlayerPiece) return;
         if (_isAttacking)
         {
@@ -125,7 +128,7 @@ public class PieceController : MonoBehaviour
             {
                 CastAttack();
             }
-        
+
             // 点击右键取消
             if (Input.GetMouseButtonDown(1))
             {
@@ -154,7 +157,7 @@ public class PieceController : MonoBehaviour
     public void TurnStart()
     {
         OnTurnStart?.Invoke();
-        if(isDead) return;
+        if (isDead) return;
         unitAttrCenter.FullMovePoint();
         isIdle = false;
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
@@ -334,11 +337,12 @@ public class PieceController : MonoBehaviour
     {
         // 根据范围获取所有棋子
         List<PieceController> targets = rangeUI.GetCurTargets;
-        if(targets.Count <1)
+        if (targets.Count < 1)
         {
             Debug.Log("未选中任何目标，无法发动技能");
             return;
         }
+
         Transform atkPos = rangeUI.GetSkillTransform();
         if (atkPos != null && _curAttackPack.skillVFXType != 0)
         {
@@ -347,7 +351,7 @@ public class PieceController : MonoBehaviour
                 atkPos.position + Vector3.up * 3f,
                 atkPos.localRotation);
         }
-    
+
         Debug.Log("棋子攻击");
         CheckFace(targets[0].transform.position - transform.position);
         if (_curAtkType == ActionType.近战攻击)
@@ -362,8 +366,8 @@ public class PieceController : MonoBehaviour
             unitAttrCenter.CostAmmo();
             PlayAudio(ActionType.远程攻击);
         }
-    
-    
+
+
         // // 聚能充能
         // if (isPlayerPiece)
         // {
@@ -373,21 +377,20 @@ public class PieceController : MonoBehaviour
         //         BattleScene.Ins.BM.PlayerController.ChargeBurst(GameConst.attackBurstCharge);
         //     }
         // }
-    
-        
-        
+
+
+        // 结束攻击状态
+        _isAttacking = false;
         // 延迟0.3f
         DOVirtual.DelayedCall(0.3f
             , () =>
             {
                 if (!unitAttrCenter.CostMP()) return;
                 BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack);
-                
-                // 结束攻击状态
-                _isAttacking = false;
+
                 rangeUI.CloseRange();
             }, false);
-        
+
         // 技能聚能充能
     }
 
@@ -448,9 +451,10 @@ public class PieceController : MonoBehaviour
         {
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
         }
+
         transform.DOShakePosition(0.5f, 0.8f);
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
-        if(uiCanvas!= null) uiCanvas.SetActive(true);
+        if (uiCanvas != null) uiCanvas.SetActive(true);
         ShowHighlight(false);
     }
 
@@ -458,12 +462,13 @@ public class PieceController : MonoBehaviour
     {
         Debug.Log($"{this.name} 死亡");
         OnDead?.Invoke();
-        if(uiCanvas!= null) uiCanvas.SetActive(false);
+        if (uiCanvas != null) uiCanvas.SetActive(false);
         if (pieceDisplay == null)
         {
             gameObject.SetActive(false);
             return;
         }
+
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Death, false, -1, () =>
         {
             BattleScene.Ins.BM.PlayerCheckWin();
@@ -490,14 +495,21 @@ public class PieceController : MonoBehaviour
 
     public void StartSkillAttack(SkillPack skillPack)
     {
+        if (!unitAttrCenter.HasMana(skillPack.mpCost))
+        {
+            Debug.Log("能量不足");
+            return;
+        }
+
         _isUsingSkill = true;
         rangeUI?.ShowSkillRange(skillPack);
         _skillPack = skillPack;
     }
+
     public bool SkillAvailable(SkillPack skillPack)
     {
-        if (!unitAttrCenter.HasMana()) return false;
-        if(!unitAttrCenter.HasItem(skillPack.consumeItems)) return false;
+        if (!unitAttrCenter.HasMana(skillPack.mpCost)) return false;
+        if (!unitAttrCenter.HasItem(skillPack.consumeItems)) return false;
         return true;
     }
 
@@ -506,23 +518,26 @@ public class PieceController : MonoBehaviour
     /// </summary>
     public virtual void CastSkill()
     {
-        if(_skillPack == null) return;
+        if (_skillPack == null) return;
         Transform atkPos = rangeUI.GetSkillTransform();
         if (_skillPack.isDelaySkill) // 延时类技能跳过结算
         {
             BattleScene.Ins.BM.RestoreDelaySkill(this, _skillPack, atkPos.position);
             _isUsingSkill = false;
             rangeUI.CloseRange();
+            Debug.Log("延迟类技能");
             return;
         }
-        
+
         // 根据范围获取所有棋子
         List<PieceController> targets = rangeUI.GetCurTargets;
-        if(targets.Count <1 && (_skillPack.target != SkillTarget.Area && _skillPack.target != SkillTarget.Self))
+        if (targets.Count < 1 && (_skillPack.target != SkillTarget.Area &&
+                                  _skillPack.target != SkillTarget.Self))
         {
             Debug.Log("未选中任何目标，无法发动技能");
             return;
         }
+
         if (atkPos != null && _skillPack.skillVFXType != 0)
         {
             ObjectPool.Ins.GenerateObject(
@@ -530,27 +545,33 @@ public class PieceController : MonoBehaviour
                 atkPos.position + Vector3.up * 3f,
                 atkPos.localRotation);
         }
-        if(atkPos!=null) CheckFace(atkPos.transform.position - transform.position);
+
+        if (atkPos != null) CheckFace(atkPos.transform.position - transform.position);
         Debug.Log($"{this.name}发动技能攻击{_skillPack.skillName}，targets数量：{targets.Count}");
         // 播放技能动画
-        pieceDisplay.ChangeDisplayState(PieceDisplayState.Skill, false, 1f, 
+        pieceDisplay.ChangeDisplayState(PieceDisplayState.Skill, false, 1f,
             null, _skillPack.animationIndex);
         PlayAudio(_skillPack);
-        
+        // 结束攻击状态
+        _isUsingSkill = false;
         // 延迟0.3f
         DOVirtual.DelayedCall(0.3f
             , () =>
             {
                 if (!unitAttrCenter.CostMP()) return;
-                if(!unitAttrCenter.CostMana(_skillPack.mpCost)) return;
-                if(!unitAttrCenter.CostItem(_skillPack.consumeItems)) return;
+                if (!unitAttrCenter.CostMana(_skillPack.mpCost))
+                {
+                    Debug.LogError("能量值不足");
+                    return;
+                }
+
+                if (!unitAttrCenter.CostItem(_skillPack.consumeItems)) return;
                 BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack, atkPos.position);
-                // 结束攻击状态
-                _isUsingSkill = false;
+
                 Debug.Log("关闭显示范围");
                 rangeUI.CloseRange();
             }, false);
-        
+
         // 技能聚能充能
     }
 
@@ -569,7 +590,7 @@ public class PieceController : MonoBehaviour
             pieceDisplay.FaceRight(isPlayerPiece);
         }
     }
-    
+
     public float GetRange(bool isNormalAtk)
     {
         return isNormalAtk ? _pieceData.meleeAtk.rangeValue : _pieceData.rangedAtk.rangeValue;
@@ -578,9 +599,9 @@ public class PieceController : MonoBehaviour
     public void ShowHighlight(bool option)
     {
         rangeUI?.ShowHighlight(option);
-        if(hightlightEffect!=null) hightlightEffect.SetActive(option);
+        if (hightlightEffect != null) hightlightEffect.SetActive(option);
     }
-    
+
     // ======= 道具 ====== //
     public bool ItemAvailable(ItemData itemData)
     {
@@ -591,18 +612,18 @@ public class PieceController : MonoBehaviour
             case UseType.InBattle:
                 return true;
             case UseType.WhenEnergyNotFull:
-                if(unitAttrCenter.ManaPoint >= unitAttrCenter.MaxManaPoint) 
+                if (unitAttrCenter.ManaPoint >= unitAttrCenter.MaxManaPoint)
                     return false;
                 break;
             case UseType.OutOfBattle:
                 return false;
                 break;
             case UseType.WhenHpNotFull:
-                if(unitAttrCenter.CurHealth >= unitAttrCenter.MaxHealth) 
+                if (unitAttrCenter.CurHealth >= unitAttrCenter.MaxHealth)
                     return false;
                 break;
             case UseType.WhenStaminaNotFull:
-                if(unitAttrCenter.CurMovePoint >= unitAttrCenter.MaxMovePoint) 
+                if (unitAttrCenter.CurMovePoint >= unitAttrCenter.MaxMovePoint)
                     return false;
                 break;
             default:
@@ -614,7 +635,8 @@ public class PieceController : MonoBehaviour
 
     public void UseItem(ItemData itemData)
     {
-        if (!unitAttrCenter.HasItem(new List<ItemPack>() {new ItemPack(itemData.itemName,1) })) return;
+        if (!unitAttrCenter.HasItem(new List<ItemPack>()
+                { new ItemPack(itemData.itemName, 1) })) return;
         if (!unitAttrCenter.CostMP()) return;
         switch (itemData.itemName)
         {
@@ -624,7 +646,7 @@ public class PieceController : MonoBehaviour
                 break;
             case ItemName.UX210_枪骑兵:
                 break;
-            case ItemName.能量包:// 回复能量
+            case ItemName.能量包: // 回复能量
                 unitAttrCenter.AddMana(100);
                 break;
             case ItemName.医疗单元I型:
