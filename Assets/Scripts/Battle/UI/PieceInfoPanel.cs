@@ -61,6 +61,7 @@ using UnityEngine.UI;
         manaBar.localScale = new Vector3(manaPercent, 1, 1);
         
         int ammo = piece.unitAttrCenter.AmmoCount;
+        ammoNumText.text = ammo.ToString();
         for (int i = 0; i < ammoIcons.Count; i++)
         {
             if (i < ammo)
