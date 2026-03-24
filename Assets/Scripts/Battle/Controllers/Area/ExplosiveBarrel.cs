@@ -12,6 +12,10 @@ public class ExplosiveBarrel : MonoBehaviour
 
     private bool _hasExploded = false;
 
+    public void Start()
+    {
+        GetComponent<UnitAttrCenter>().Init();
+    }
     /// <summary>
     /// 对接你的生命值系统：当生命值归零时调用
     /// </summary>

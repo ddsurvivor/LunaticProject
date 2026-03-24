@@ -459,6 +459,11 @@ public class PieceController : MonoBehaviour
         Debug.Log($"{this.name} 死亡");
         OnDead?.Invoke();
         if(uiCanvas!= null) uiCanvas.SetActive(false);
+        if (pieceDisplay == null)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Death, false, -1, () =>
         {
             BattleScene.Ins.BM.PlayerCheckWin();

@@ -4,6 +4,7 @@ using DG.Tweening;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using UnityEngine;
+using UnityEngine.Events;
 
 /// <summary>
 /// 单位属性中心
@@ -69,6 +70,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
 
     [Header("UI")] public Transform hpBarFill;
+    public UnityEvent OnDead;
 
     public void Init()
     {
@@ -326,4 +328,5 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         _manaPoint = mana;
         _ammoCount = ammo;
     }
+    
 }

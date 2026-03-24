@@ -360,9 +360,13 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    private void ApplyAddEffect(SkillPack skillPack, PieceController target = null, PieceController caster = null
-        , Vector3 targetPos = default)
+    private void ApplyAddEffect(SkillPack skillPack,  PieceController caster = null
+        ,PieceController target = null, Vector3 targetPos = default)
     {
+        if (skillPack.additionalEffects==null || skillPack.additionalEffects.Count == 0)
+        {
+            return;
+        }
         foreach (var effectBase in skillPack.additionalEffects)
         {
             switch (effectBase)
