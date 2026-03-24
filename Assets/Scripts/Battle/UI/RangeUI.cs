@@ -215,7 +215,7 @@ public class RangeUI : MonoBehaviour
         if (skillIcon!=null && skillIcon.activeInHierarchy) // 单体敌人锁定
         {
             // 检测球体范围内的所有敌人
-            Collider[] hitColliders = Physics.OverlapSphere(skillIcon.transform.position, 3f);
+            Collider[] hitColliders = Physics.OverlapSphere(skillIcon.transform.position, 1f);
 
             CheckTarget(hitColliders);
         }
