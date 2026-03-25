@@ -35,8 +35,14 @@ public class UIPanel : MonoBehaviour
 
     }
 
+    public virtual void ShowPanel()
+    {
+        gameObject.SetActive(true);
+    }
     public virtual void ClosePanel()
     {
         gameObject.SetActive(false);
     }
+    
+    
 }

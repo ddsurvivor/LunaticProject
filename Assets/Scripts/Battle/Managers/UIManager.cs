@@ -24,7 +24,10 @@ public class UIManager : SerializedMonoBehaviour
 
     public 剧本System logSystem;
 
+    public MessagePanel messagePanel;
+    
     public Dictionary<KeyCode, GameObject> keyPanelDic = new();
+    
 
     public void Init()
     {
