@@ -1,10 +1,15 @@
 using System;using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using DG.Tweening;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
+using System.Reflection;
+using System.Linq;
 
 public class PieceDisplay : SerializedMonoBehaviour
 {
@@ -14,12 +19,14 @@ public class PieceDisplay : SerializedMonoBehaviour
     // 有一系列按照规定命名的Sprite资源用于显示不同的棋子图片，分别为idel、move、attack、shoot
     public Sprite idleSprite;
     public Sprite moveSprite;
-    public List<Sprite> attackSprite;
-    public List<Sprite> shootSprite;
+    
+    public List<Sprite> meleeSprites;
+    
+    public List<Sprite> rangeSprites;
     // 闪避
     public Sprite dodgeSprite;
     public Sprite hitSprite;
-    public List<Sprite> deathSprite;
+    public List<Sprite> deathSprites;
     [OdinSerialize]
     public List<List<Sprite>> skillSpriteList = new();
     
@@ -54,10 +61,10 @@ public class PieceDisplay : SerializedMonoBehaviour
                 pieceSpriteRenderer.sprite = back ? moveBackSprite : moveSprite;
                 break;
             case PieceDisplayState.Attack:
-                StartCoroutine(PlaySpriteAnimation(attackSprite, frameDuration));
+                StartCoroutine(PlaySpriteAnimation(meleeSprites, frameDuration));
                 break;
             case PieceDisplayState.Shoot:
-                StartCoroutine(PlaySpriteAnimation(shootSprite, frameDuration));
+                StartCoroutine(PlaySpriteAnimation(rangeSprites, frameDuration));
                 //pieceSpriteRenderer.sprite = back ? shootBackSprite : shootSprite;
                 break;
             case PieceDisplayState.Dodge:
@@ -65,7 +72,7 @@ public class PieceDisplay : SerializedMonoBehaviour
                 break;
             case PieceDisplayState.Death:
                 // 按顺序按固定时间间隔播放死亡动画
-                StartCoroutine(PlaySpriteAnimation(deathSprite, frameDuration));
+                StartCoroutine(PlaySpriteAnimation(deathSprites, frameDuration));
                 break;
             case PieceDisplayState.Hit:
                 pieceSpriteRenderer.sprite = back ? hitBackSprite : hitSprite;
@@ -122,6 +129,154 @@ public class PieceDisplay : SerializedMonoBehaviour
         scale.x = Mathf.Abs(scale.x) * (faceRight ? 1 : -1);
         pieceSpriteRenderer.transform.localScale = scale;
     }
+
+    #region 加载图片
+
+    
+
+    
+    //[Button("测试加载图片")]
+    private void TestLoadSprite()
+    {
+        string path = "Assets/A美术/BattleSprites/绿成年战斗资产";
+        string pieceName = "PC02A";
+
+        if (!Directory.Exists(path))
+        {
+            Debug.LogError($"<color=red>【路径不存在】</color> 请检查: {path}");
+            return;
+        }
+
+        // 获取当前脚本所有公开字段
+        FieldInfo[] fields = this.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+
+        foreach (var field in fields)
+        {
+            // --- 排除特定不需要自动绑定的字段 ---
+            if (field.Name == "enabled" || field.Name == "tag" || field.Name == "name") continue;
+
+            // 处理 List<List<Sprite>> (特定命名的技能组)
+            if (field.FieldType == typeof(List<List<Sprite>>))
+            {
+                // 这里为了通用性，判断一下变量名是否包含 skill。你也可以直接针对 skillSpriteList 处理。
+                if (field.Name.ToLower().Contains("skill"))
+                {
+                    LoadSkillSpritesNested(field, path, pieceName);
+                }
+                continue; // 处理完嵌套列表直接跳过后面逻辑
+            }
+
+            // --- 通用命名处理逻辑 (提取后缀) ---
+            // "idleSprite" -> "idle", "meleeSprites" -> "melee", "deathSprites" -> "death"
+            string suffix = field.Name.ToLower().Replace("sprite", "").Replace("list", "");
+            // 移除可能存在的复数 's' (如 meleeSprites -> melee)
+            if (suffix.EndsWith("s")) suffix = suffix.Substring(0, suffix.Length - 1);
+            
+            // 处理 List<Sprite> (序列)
+            if (field.FieldType == typeof(List<Sprite>))
+            {
+                field.SetValue(this, LoadSpriteListSequential(path, pieceName, suffix));
+            }
+            // 处理 Sprite (单张)
+            else if (field.FieldType == typeof(Sprite))
+            {
+                field.SetValue(this, LoadSingleSprite(path, pieceName, suffix));
+            }
+        }
+
+        // 核心：标记对象已改变，否则引用不会保存！
+        EditorUtility.SetDirty(this);
+        // 可选：强制保存未保存的资源（更保险）
+        // AssetDatabase.SaveAssets();
+
+        Debug.Log($"<color=green>【自动绑定完成】</color> 已尝试匹配 {pieceName} 的所有资源。");
+        Debug.Log($"技能组数量: <color=yellow>{skillSpriteList.Count}</color>");
+    }
+
+    // --- 加载逻辑函数 ---
+
+    private Sprite LoadSingleSprite(string folder, string prefix, string suffix)
+    {
+        // 格式: PC01Aidle.png
+        string fullPath = $"{folder}/{prefix}{suffix}.png";
+        Sprite s = AssetDatabase.LoadAssetAtPath<Sprite>(fullPath);
+        if (s == null) Debug.LogWarning($"[单图] 未找到: {fullPath}");
+        return s;
+    }
+
+    private List<Sprite> LoadSpriteListSequential(string folder, string prefix, string suffix)
+    {
+        // 格式: PC01Amelee1.png, PC01Amelee2.png ...
+        List<Sprite> sprites = new List<Sprite>();
+        int index = 1;
+        
+        while (true)
+        {
+            string fullPath = $"{folder}/{prefix}{suffix}{index}.png";
+            Sprite s = AssetDatabase.LoadAssetAtPath<Sprite>(fullPath);
+            
+            if (s == null) break; // 只要断了一次序号（比如有1,2,4），就停止。这是通常的做法。
+            
+            sprites.Add(s);
+            index++;
+        }
+
+        if (sprites.Count == 0) Debug.LogWarning($"[序列] 未在路径找到以 '{prefix}{suffix}' 开头的图片帧。");
+        return sprites;
+    }
+
+    // 针对 PC01AskillX-Y 格式的特定处理
+    private void LoadSkillSpritesNested(FieldInfo field, string folder, string prefix)
+    {
+        // 清空旧数据
+        List<List<Sprite>> allSkills = new List<List<Sprite>>();
+        
+        int skillGroupIndex = 1;
+
+        // 外层循环：遍历技能组 (skill1, skill2, ...)
+        while (true)
+        {
+            List<Sprite> currentSkillFrames = new List<Sprite>();
+            int frameIndex = 1;
+
+            // 内层循环：遍历该技能组内的帧 (1-1, 1-2, ...)
+            while (true)
+            {
+                // 格式拼接: PC01Askill + 1 + - + 1 + .png
+                string fullPath = $"{folder}/{prefix}skill{skillGroupIndex}-{frameIndex}.png";
+                Sprite s = AssetDatabase.LoadAssetAtPath<Sprite>(fullPath);
+
+                if (s == null)
+                {
+                    // 这里有一个细节：如果 skill1-1 存在，但 skill1-2 不存在，我们应该跳出内层。
+                    // 但此时我们不能确定 skill2-1 是否存在。
+                    break; 
+                }
+
+                currentSkillFrames.Add(s);
+                frameIndex++;
+            }
+
+            // 如果这一组搜集到了图片，添加到总列表中
+            if (currentSkillFrames.Count > 0)
+            {
+                allSkills.Add(currentSkillFrames);
+                skillGroupIndex++; // 继续尝试寻找下一个技能组
+            }
+            else
+            {
+                // 如果 skill{skillGroupIndex}-1 连第一帧都没找到，说明没有更多技能组了，跳出外层
+                break;
+            }
+        }
+
+        if (allSkills.Count == 0) Debug.LogWarning($"[技能组] 未能在 '{folder}' 下找到匹配 '{prefix}skillX-Y.png' 格式的图片。");
+        
+        // 将反射获取到的列表赋值回脚本变量
+        field.SetValue(this, allSkills);
+    }
+    
+    #endregion
 }
 
 public enum PieceDisplayState
