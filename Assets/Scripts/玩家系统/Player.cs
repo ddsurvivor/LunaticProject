@@ -100,10 +100,26 @@ public struct Player
         return exp;
      }
     
-    // 获取属性名称的快捷方法
-    public string GetAttrName(int index) {
-        string[] names = { "最大生命", "耐力", "体力", "意志", "作战", "体能", "沟通", "模式识别"};
-        return (index >= 0 && index < names.Length) ? names[index] : "未知";
+    /// <summary>
+    /// 获取属性名称的快捷方法
+    /// </summary>
+    public string GetAttrName(int index)
+    {
+        return index switch
+        {
+            0 => "最大生命",
+            1 => "耐力",
+            2 => "体力",
+            3 => "意志",
+            4 => "作战",
+            5 => "体能",
+            6 => "沟通",
+            7 => "模式识别",
+            21 => "技能点",
+            22 => "经验值",
+            23 => "等级",
+            _ => "未知" // 默认处理
+        };
     }
 
     public string NAME

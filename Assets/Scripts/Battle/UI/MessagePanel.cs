@@ -4,8 +4,7 @@ using UnityEngine.UI;
 
 public class MessagePanel : UIPanel
 {
-    [Header("UI Components")] [SerializeField]
-    private GameObject panelRoot; // 弹窗根节点
+    [Header("UI Components")]
 
     [SerializeField] private Text titleText; // 标题文本
     [SerializeField] private Text contentText; // 旧版 Text
@@ -21,9 +20,17 @@ public class MessagePanel : UIPanel
     /// </summary>
     public void ShowMessage(string text)
     {
+        if (gameObject.activeInHierarchy)
+        {
+            contentText.text += "\n"+text;
+        }
+        else
+        {
+            
         ResetUI();
         contentText.text = text;
         ShowPanel();
+        }
     }
 
     /// <summary>
@@ -78,7 +85,6 @@ public class MessagePanel : UIPanel
             sprites[i] = GM.Ins.marketSystem.marketItemListSO.GetData(dropList[i].itemName)
                 .itemIcon;
         }
-
         ShowMessage(text, sprites);
     }
 
@@ -103,6 +109,26 @@ public class MessagePanel : UIPanel
 
         text += $"获得了{expGain}经验值";
         ShowMessage(text, sprites);
+    }
+    
+    public void ShowModifyMessage(int index,int attr,int opIndex,int value)
+    {
+        titleText.text = "属性变化";
+        //棋子名字 0邱悟、1绿、2马赛
+        string pieceName = GM.Ins.PLAYERPROFILE.player[index].NAME;
+        
+        string attrName = GM.Ins.PLAYERPROFILE.player[index].GetAttrName(attr);
+        string opText = "";
+        switch (opIndex)
+        {
+            // opIndex: 0读取，1增加，2赋值，3减小
+            case 0: opText = "当前"; break;
+            case 1: opText = "增加"; break;
+            case 2: opText = "设置为"; break;
+            case 3: opText = "减少"; break;
+        }
+        string text = $"{pieceName}的{attrName}{opText}{value}";
+        ShowMessage(text);
     }
 
 
