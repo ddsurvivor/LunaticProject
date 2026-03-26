@@ -272,6 +272,7 @@ public class BattleManager : MonoBehaviour
             BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家胜利！");
             // 处理胜利事件
             if (finishDrop != null) finishDrop.DropItems();
+            PlayerController.EndBurstMode();// 结束聚能状态
             // 延迟后退出战斗
             DOVirtual.DelayedCall(1.0f, () => { BattleScene.Ins.BM.OnClickQuitBattle(); });
             return;
@@ -468,6 +469,30 @@ public class BattleManager : MonoBehaviour
             PieceSkill(_delaySkillCaster, newTargets, _delaySkillPack, _delaySkillTargetPos);
             _delaySkillEffectObj.SetActive(false);
             _delaySkillPack = null;
+        }
+    }
+    
+    [SerializeField] private Material gray;
+    [SerializeField] private Material grayEnemy;
+    /// <summary>
+    /// 聚能状态下的特殊视觉效果（如屏幕变灰）
+    /// </summary>
+    public void ShowBurstGray(bool option)
+    {
+        // 把 gray材质上的shader里的GREYSCALE_ON属性打开，所有使用这个材质的图片就会变灰
+        if (gray != null)
+        {
+            if (option)
+            {
+                gray.EnableKeyword("GREYSCALE_ON");
+                grayEnemy.EnableKeyword("GREYSCALE_ON");
+            }
+            else
+            {
+                gray.DisableKeyword("GREYSCALE_ON");
+                grayEnemy.DisableKeyword("GREYSCALE_ON");
+            }
+            Debug.Log("设置灰色滤镜: " + option);
         }
     }
 

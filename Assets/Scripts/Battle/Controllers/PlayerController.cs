@@ -111,7 +111,12 @@ public class PlayerController : SerializedMonoBehaviour
             piece.TurnStart();
         }
 
-        BattleScene.Ins.BM.camera.ActiveBurstMode(true);
+        // 用相机滤镜模式
+        //BattleScene.Ins.BM.camera.ActiveBurstMode(true);
+
+        // 所有图片变色
+        BattleScene.Ins.BM.ShowBurstGray(true);
+
     }
 
     /// <summary>
@@ -124,7 +129,8 @@ public class PlayerController : SerializedMonoBehaviour
         UpdateBurstBar();
         totalDamage = 0;
         burstTarget = null;
-        BattleScene.Ins.BM.camera.ActiveBurstMode(false);
+        //BattleScene.Ins.BM.camera.ActiveBurstMode(false);
+        BattleScene.Ins.BM.ShowBurstGray(false);
         BattleScene.Ins.UM.ShowBurstReady(false);
         Debug.Log("聚能状态结束");
     }
@@ -199,4 +205,7 @@ public class PlayerController : SerializedMonoBehaviour
 
         return damage;
     }
+
+
+    
 }

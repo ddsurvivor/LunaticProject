@@ -2607,7 +2607,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 9f81f637447f9994faa623d845f67cec, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -7574,7 +7574,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 9f81f637447f9994faa623d845f67cec, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -9866,7 +9866,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 9f81f637447f9994faa623d845f67cec, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -15077,6 +15077,7 @@ MonoBehaviour:
   OnTurnEnd:
     m_PersistentCalls:
       m_Calls: []
+  gray: {fileID: 0}
   fogController: {fileID: 0}
   waveController: {fileID: 0}
   mapController: {fileID: 0}
@@ -15140,6 +15141,7 @@ MonoBehaviour:
   skillNameDisplay: {fileID: 0}
   skillNamText: {fileID: 0}
   logSystem: {fileID: 0}
+  messagePanel: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15181,6 +15183,7 @@ MonoBehaviour:
   OnTurnEnd:
     m_PersistentCalls:
       m_Calls: []
+  gray: {fileID: 0}
 --- !u!114 &1713777230
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18956,6 +18959,10 @@ PrefabInstance:
       value: BattleScene
       objectReference: {fileID: 0}
     - target: {fileID: 6793405397572969130, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: gray
+      value: 
+      objectReference: {fileID: 2100000, guid: 9f81f637447f9994faa623d845f67cec, type: 2}
+    - target: {fileID: 6793405397572969130, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: pieces.Array.data[0]
       value: 
       objectReference: {fileID: 320141623}
@@ -18970,7 +18977,7 @@ PrefabInstance:
     - target: {fileID: 6793405397572969130, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 6793405397572969130, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 6793405397572969131, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: serializationData.Prefab
       value: 

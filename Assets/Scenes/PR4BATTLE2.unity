@@ -2393,6 +2393,7 @@ MonoBehaviour:
     itemNum: 4
   - itemName: 5
     itemNum: 3
+  finishExp: 100
 --- !u!1001 &180457541
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4221,7 +4222,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 9f81f637447f9994faa623d845f67cec, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -9544,7 +9545,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 9f81f637447f9994faa623d845f67cec, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -10146,7 +10147,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 9f81f637447f9994faa623d845f67cec, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -10918,7 +10919,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 9f81f637447f9994faa623d845f67cec, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -16944,6 +16945,8 @@ MonoBehaviour:
   pieceDataListSO: {fileID: 0}
   areaList: []
   finishDrop: {fileID: 0}
+  gray: {fileID: 0}
+  grayEnemy: {fileID: 0}
 --- !u!114 &1713777225
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17084,6 +17087,7 @@ MonoBehaviour:
   skillNameDisplay: {fileID: 0}
   skillNamText: {fileID: 0}
   logSystem: {fileID: 0}
+  messagePanel: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0
