@@ -495,6 +495,12 @@ public class BattleManager : MonoBehaviour
             Debug.Log("设置灰色滤镜: " + option);
         }
     }
+    // 或者在程序退出时
+    void OnApplicationQuit()
+    {
+        gray.DisableKeyword("GREYSCALE_ON");
+        grayEnemy.DisableKeyword("GREYSCALE_ON");
+    }
 
 
     // ===== Test ======//
