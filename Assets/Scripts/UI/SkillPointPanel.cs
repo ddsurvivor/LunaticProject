@@ -25,10 +25,10 @@ public class SkillPointPanel : MonoBehaviour
         //InitPanel();
     }
     
-    public void ShowPanel(int unitID)
+    public void ShowPanel(Player playerData)
     {
-        this.unitID = unitID;
-        playerData = GM.Ins.PLAYERPROFILE.GetPlayer(unitID); // 接收外部传入的数据副本
+        //this.unitID = unitID;
+        this.playerData = playerData; //GM.Ins.PLAYERPROFILE.GetPlayer(unitID); // 接收外部传入的数据副本
         if(!hasInited) InitPanel();
         gameObject.SetActive(true);
         nameText.text = playerData.NAME;
@@ -95,7 +95,7 @@ public class SkillPointPanel : MonoBehaviour
             rowList[i].Commit();
         }
 
-        GM.Ins.PLAYERPROFILE.player[unitID] = playerData;
+        //GM.Ins.PLAYERPROFILE.player[unitID] = playerData;
         // 2. 【重点：存档回写】
         // 在这里将修改后的 playerData 结构体存入你的存档系统或全局管理器
         // SaveToDisk(playerData); 

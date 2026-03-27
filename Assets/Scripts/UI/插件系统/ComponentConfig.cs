@@ -40,12 +40,13 @@ public class ComponentData
 [CreateAssetMenu(fileName = "ComponentConfig", menuName = "Game/ComponentConfig")]
 public class ComponentConfig : ScriptableObject
 {
+    
     public List<ComponentData> componentList = new List<ComponentData>();
 
     public ComponentData GetData(int id)
     {
         // 如果 ID 为 0 或未找到，返回 null
-        if (id <= 0) return null;
+        if (id < 0) return null;
         return componentList.Find(c => c.id == id);
     }
 }

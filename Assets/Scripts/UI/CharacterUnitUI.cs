@@ -3,6 +3,9 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems; // 必须引用，处理鼠标事件
 using System.Collections.Generic;
 
+/// <summary>
+/// 棋子列队单位显示
+/// </summary>
 public class CharacterUnitUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     , IPointerClickHandler
 {
@@ -20,6 +23,7 @@ public class CharacterUnitUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     [SerializeField] private List<DetailAttributeRow> cachedRows = new List<DetailAttributeRow>();
 
     public SkillPointPanel skillPointPanel;
+    public CharacterUIPage characterUIPage;
     void Start()
     {
         InitBasicInfo();
@@ -76,6 +80,7 @@ public class CharacterUnitUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     public void OnPointerClick(PointerEventData eventData)
     {
         // 打开技能面板
-        skillPointPanel.ShowPanel(unitID);
+        //skillPointPanel.ShowPanel(unitID);
+        characterUIPage.ShowPanel(playerData);
     }
 }

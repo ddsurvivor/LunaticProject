@@ -5,8 +5,8 @@ public class UIDetailPanel : MonoBehaviour
 {
     public Text titleText;
     public Text descText;
-    public Button equipButton;
-    public Button unequipButton;
+    public GameObject equipButton;
+    public GameObject unequipButton;
 
     private int targetID;
     private CharacterUIPage mainPage;

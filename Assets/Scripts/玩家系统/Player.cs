@@ -131,7 +131,6 @@ public class Player
     
     
     // 插件仓库
-    [FormerlySerializedAs("inventory")] 
     public List<int> componentInventory = new List<int>();
 
     public void Equip(int id)
@@ -163,6 +162,8 @@ public class Player
 
         componentInventory.Add(id); // 回到背包
     }
+
+    
 
     #region 属性
     

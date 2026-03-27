@@ -25,6 +25,11 @@ public class UIItemSlot : MonoBehaviour, IPointerClickHandler
             iconImage.enabled = false;
         }
     }
+    public void Clear()
+    {
+        currentItemID = 0;
+        iconImage.enabled = false;
+    }
 
     public void OnPointerClick(PointerEventData eventData)
     {
