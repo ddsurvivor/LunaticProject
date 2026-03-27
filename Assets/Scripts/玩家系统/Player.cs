@@ -1,11 +1,14 @@
 
+using System.Collections.Generic;
 using Sirenix.OdinInspector;
+using UnityEngine.Serialization;
+
 public enum AttrOp { Get=0, Add=1, Set=2,Sub=3 } // 定义操作：读取、累加、赋值、减少
 [System.Serializable]
 /// <summary>
 /// 玩家棋子存档数据
 /// </summary>
-public struct Player
+public class Player
 {
     [ShowInInspector][ReadOnly]private string name;
     [ShowInInspector][ReadOnly]private int hp;
@@ -25,6 +28,10 @@ public struct Player
     
     [ShowInInspector][ReadOnly]private int skillPoints; // 当前可用点数
     [ShowInInspector][ReadOnly]private int level;
+    
+    // 存储 ID：3个普通槽位，2个武器槽位
+    public int[] normalSlots = new int[3]; 
+    public int[] weaponSlots = new int[2];
 
     public int SkillPoints
     {
@@ -121,7 +128,44 @@ public struct Player
             _ => "未知" // 默认处理
         };
     }
+    
+    
+    // 插件仓库
+    [FormerlySerializedAs("inventory")] 
+    public List<int> componentInventory = new List<int>();
 
+    public void Equip(int id)
+    {
+        ComponentData data = GM.Ins.DM.componentConfig.GetData(id);
+        if (data == null) return;
+
+        int[] targetSlots = (data.type == ComponentType.Normal) ? normalSlots : weaponSlots;
+
+        for (int i = 0; i < targetSlots.Length; i++)
+        {
+            if (targetSlots[i] == 0) // 寻找空格子
+            {
+                targetSlots[i] = id;
+                componentInventory.Remove(id); // 从背包移除
+                break;
+            }
+        }
+    }
+
+    public void Unequip(int id)
+    {
+        // 查找并重置槽位
+        for (int i = 0; i < normalSlots.Length; i++)
+            if (normalSlots[i] == id) { normalSlots[i] = 0; break; }
+            
+        for (int i = 0; i < weaponSlots.Length; i++)
+            if (weaponSlots[i] == id) { weaponSlots[i] = 0; break; }
+
+        componentInventory.Add(id); // 回到背包
+    }
+
+    #region 属性
+    
     public string NAME
     {
         get { return name; }
@@ -175,4 +219,6 @@ public struct Player
         get { return Recognition; }
         set { Recognition = value; }    
     }
+    
+    #endregion
 }

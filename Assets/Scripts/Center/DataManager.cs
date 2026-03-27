@@ -13,6 +13,7 @@ public class DataManager : SerializedMonoBehaviour
     private int saveSlotCount = 10;
     
     public LevelUpConfig levelUpConfig;
+    public ComponentConfig componentConfig;
     public void Init()
     {
         // 测试加载
