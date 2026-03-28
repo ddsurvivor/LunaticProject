@@ -225,6 +225,9 @@ public class PieceActionListPanel : SerializedMonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 显示道具
+    /// </summary>
     private void OpenItemPanel()
     {
         // 复用技能按钮
@@ -244,9 +247,11 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             if (itemData!=null && itemData.equipType == EquipType.Consumable)
             {
                 int capturedIndex = j; // 捕获当前索引
+                int num = GM.Ins.PLAYERPROFILE.itemPacks[j].itemNum;
                 skillButtons[j].gameObject.SetActive(true);
                 skillButtons[j].enabled = pc.ItemAvailable(itemData);
-                skillButtons[j].GetComponentInChildren<Text>().text = itemData.itemName.ToString();
+                skillButtons[j].GetComponentInChildren<Text>().text =
+                    itemData.itemName.ToString() + $" x{num}";
                 skillButtons[j].onClick.RemoveAllListeners();
                 skillButtons[j].onClick.AddListener(() => {
                     gameObject.SetActive(false);
