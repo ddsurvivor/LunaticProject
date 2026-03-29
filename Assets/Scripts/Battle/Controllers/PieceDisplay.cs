@@ -135,11 +135,11 @@ public class PieceDisplay : SerializedMonoBehaviour
     
 
     
-    //[Button("测试加载图片")]
+    [Button("测试加载图片")]
     private void TestLoadSprite()
     {
-        string path = "Assets/A美术/BattleSprites/绿成年战斗资产";
-        string pieceName = "PC02A";
+        string path = "Assets/A美术/BattleSprites/马赛成年动作";// 
+        string pieceName = "PC03A";
 
         if (!Directory.Exists(path))
         {
