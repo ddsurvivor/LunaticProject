@@ -10,6 +10,20 @@ public enum DamageType
     [LabelText("热能")]Ranged = 2,// 远程
     [LabelText("火能")]Electric = 3,// 电子
 }
+// 编写静态扩展类
+public static class EnumExtensions
+{
+    public static string ToChinese(this DamageType type)
+    {
+        switch (type)
+        {
+            case DamageType.Melee: return "动能";
+            case DamageType.Ranged:     return "热能";
+            case DamageType.Electric:      return "火能";
+            default:                  return type.ToString();
+        }
+    }
+}
 
 /// <summary>
 /// 棋子行动类型
@@ -106,6 +120,9 @@ public enum EnemyAIType
     
     [LabelText("近战型")]
     Melee = 4,
+    
+    [LabelText("混合型")]
+    Combine = 5,
 }
 
 #region 技能枚举

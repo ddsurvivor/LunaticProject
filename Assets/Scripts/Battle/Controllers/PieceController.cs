@@ -386,7 +386,7 @@ public class PieceController : MonoBehaviour
             , () =>
             {
                 if (!unitAttrCenter.CostMP()) return;
-                BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack);
+                BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack,Vector3.zero, _curAtkType);
 
                 rangeUI.CloseRange();
             }, false);

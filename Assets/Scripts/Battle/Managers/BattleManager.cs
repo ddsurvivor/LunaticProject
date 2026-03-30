@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -117,9 +118,10 @@ public class BattleManager : MonoBehaviour
     }*/
 
     public void PieceSkill(PieceController attacker, List<PieceController> targets
-        , SkillPack skillPack, Vector3 targetPos = default)
+        , SkillPack skillPack, Vector3 targetPos = default, ActionType actionType = 0)
     {
         BattleScene.Ins.UM.PopSkillName(skillPack.skillName);
+        List<List<DamageInfo>> damageInfoList = new();
 
         foreach (var target in targets)
         {
@@ -168,6 +170,7 @@ public class BattleManager : MonoBehaviour
 
             int addAtk =
                 attacker.unitAttrCenter.attr.GetAddDamage(target.unitAttrCenter.elementType);
+            List<DamageInfo> damageInfos = new();
             foreach (var attackPack in skillPack.attackPacks)
             {
                 Debug.Log($"依次计算伤害");
@@ -203,7 +206,15 @@ public class BattleManager : MonoBehaviour
                 {
                     enemy.AddDamageRecord(attacker, realDamage);
                 }
+
+                if (realDamage > 0)
+                {
+                    damageInfos.Add(new DamageInfo(realDamage, attackPack.damageType.ToChinese()));
+                }
+                
             }
+            damageInfoList.Add(damageInfos);
+            
 
             // 处理buff
             foreach (var buffPack in skillPack.buffPacks)
@@ -235,8 +246,13 @@ public class BattleManager : MonoBehaviour
                 SpaceBombEffect(skillPack, attacker, target, targetPos);// 去除假死
                 HitBackEffect(new HitBackEffect { dis = 2f }, attacker, target, targetPos);
             }
-            
         }
+        // 操作记录系统
+        BattleScene.Ins.UM.logPanel.PlayerLogAttack(attacker.pieceData.pieceName,
+            actionType == 0 ? skillPack.skillName : actionType.ToString(),
+            targets.Select(t => t.pieceData.pieceName).ToList(),
+            damageInfoList
+        );
         if(targets.Count>0) BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
         // 处理聚能充能效果，多段伤害只充能一次
         if (attacker.isPlayerPiece)
@@ -249,6 +265,7 @@ public class BattleManager : MonoBehaviour
         }
         // 处理附加效果
         ApplySKillEffectOnce(skillPack, attacker, targetPos);
+        
         //BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
     }
 

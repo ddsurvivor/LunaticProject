@@ -330,6 +330,44 @@ public class AIController : PlayerController
                 EnemyNormalAttack(aiPiece, target, distanceToTarget, meleeRange, rangedRange);
             }
         }
+        else if (enemyAIType == EnemyAIType.Combine)// 远程和近战混合型AI
+        {
+            if (aiPiece.unitAttrCenter.CurMovePoint >= 2 && 
+                distanceToTarget <= (moveRange + meleeRange))// 一步后可以近战的情况
+            {
+                EnemyMove(aiPiece, target.transform.position, meleeRange);
+            }
+            else if (aiPiece.unitAttrCenter.CurMovePoint >= 2 && 
+                distanceToTarget <= (moveRange + rangedRange))// 一步后可以近战的情况
+            {
+                EnemyMove(aiPiece, target.transform.position, rangedRange);
+            }
+            else if (distanceToTarget <= meleeRange)
+            {
+                // 近战攻击
+                aiPiece.StartNormalAttack();
+                aiPiece.CastAttackOnTarget(target);
+            }
+            else if (distanceToTarget <= rangedRange)
+            {
+                // 判定弹药是否足够
+                if (aiPiece.unitAttrCenter.AmmoCount <= 0)
+                {
+                    // 重新装填
+                    aiPiece.ReloadAmmo();
+                }
+                else
+                {
+                    // 远程攻击
+                    aiPiece.StartNormalAttack(true);
+                    aiPiece.CastAttackOnTarget(target);
+                }
+            }
+            else
+            {
+                EnemyMove(aiPiece, target.transform.position, rangedRange);
+            }
+        }
     }
 
     private void EnemyNormalAttack(EnemyController aiPiece, PieceController target

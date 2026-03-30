@@ -46,7 +46,7 @@ public class 大地图System : SerializedMonoBehaviour
 
     private void OnEnable()
     {
-        进入大地图调用特殊剧情();
+        //进入大地图调用特殊剧情();
     }
 
     public void 进入大地图调用特殊剧情()
@@ -85,7 +85,16 @@ public class 大地图System : SerializedMonoBehaviour
         instance = this;
         Debug.Log("测试中,打开第一张地图");
         // TODO:根据存档打开地图
-        打开地图("TEST");
+        //打开地图("TEST");
+        foreach (var VARIABLE in 地图)
+        {
+            if (VARIABLE.gameObject.activeInHierarchy)
+            {
+                当前地图 = VARIABLE;
+                当前地图.transform.localScale = Vector3.one;
+                VARIABLE.SetActive(true);
+            }
+        }
     }
 
     public void 剧情结束()
