@@ -711,6 +711,9 @@ MonoBehaviour:
   _tauntValue: 0
   _ammoCount: 3
   hpBarFill: {fileID: 0}
+  OnDead:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!65 &8316052724586748499
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -778,14 +781,11 @@ MonoBehaviour:
   pieceSpriteRenderer: {fileID: 8316052725672642768}
   idleSprite: {fileID: 21300000, guid: b6b12bc80f28fc84a92127c3da9fed45, type: 3}
   moveSprite: {fileID: 21300000, guid: 0949c6f7be186d34d90bb6cc470498f8, type: 3}
-  attackSprite:
-  - {fileID: 21300000, guid: 89c913697d2f69143bd169c2e144095a, type: 3}
-  shootSprite:
-  - {fileID: 21300000, guid: 8a5248fdcdc55a842a630dc2148f1384, type: 3}
-  - {fileID: 21300000, guid: fac2d69d3389a254cbaa3018598a359b, type: 3}
+  meleeSprites: []
+  rangeSprites: []
   dodgeSprite: {fileID: 21300000, guid: 7cfb03be92d4fc34bb3a0df156e1a452, type: 3}
   hitSprite: {fileID: 21300000, guid: 179f2f585d6961a4293cf9cac27c5aef, type: 3}
-  deathSprite:
+  deathSprites:
   - {fileID: 21300000, guid: 068a6814a27be9c4c9891e160effec3b, type: 3}
   - {fileID: 21300000, guid: 0ee313303a9ad804bb205c5168c1725a, type: 3}
   idleBackSprite: {fileID: 21300000, guid: f6bb2e8848df5eb49bdac2b9c058a2d2, type: 3}
