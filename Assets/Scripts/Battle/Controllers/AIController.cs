@@ -335,11 +335,13 @@ public class AIController : PlayerController
             if (aiPiece.unitAttrCenter.CurMovePoint >= 2 && 
                 distanceToTarget <= (moveRange + meleeRange))// 一步后可以近战的情况
             {
+                Debug.Log($"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动到近战范围攻击{distanceToTarget} <= {moveRange + meleeRange}");
                 EnemyMove(aiPiece, target.transform.position, meleeRange);
             }
             else if (aiPiece.unitAttrCenter.CurMovePoint >= 2 && 
-                distanceToTarget <= (moveRange + rangedRange))// 一步后可以近战的情况
+                distanceToTarget <= (moveRange + rangedRange))// 一步后可以远程的情况
             {
+                Debug.Log($"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动到远程范围攻击{distanceToTarget} <= {moveRange + rangedRange}");
                 EnemyMove(aiPiece, target.transform.position, rangedRange);
             }
             else if (distanceToTarget <= meleeRange)
@@ -358,6 +360,8 @@ public class AIController : PlayerController
                 }
                 else
                 {
+                    
+                    Debug.Log($"{aiPiece.enemyAIType}AI{aiPiece.name}选择远程攻击{distanceToTarget} <= {rangedRange}");
                     // 远程攻击
                     aiPiece.StartNormalAttack(true);
                     aiPiece.CastAttackOnTarget(target);
@@ -397,7 +401,7 @@ public class AIController : PlayerController
         }
         else
         {
-            EnemyMove(aiPiece, target.transform.position, rangedRange);
+            EnemyMove(aiPiece, target.transform.position, meleeRange);
         }
     }
 
@@ -474,7 +478,7 @@ public class AIController : PlayerController
         /*Debug.Log(
             $"边界范围 X:{groundBounds.min.x}~{groundBounds.max.x} Z:{groundBounds.min.z}~{groundBounds.max.z}");*/
         Debug.Log(
-            $"技能型AI{aiPiece.name}移动到 {moveTargetPos}");
+            $"{aiPiece.enemyAIType}AI{aiPiece.name}移动到 {moveTargetPos}");
         aiPiece.transform.DOMove(moveTargetPos, 1.0f);
         aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
         aiPiece.CheckFace(moveTargetPos - aiPiece.transform.position);
@@ -508,8 +512,11 @@ public class AIController : PlayerController
         foreach (EnemyController aiPiece in pieces)
         {
             if (!aiPiece.isActived || aiPiece.isDead) continue;
+            if (aiPiece.unitAttrCenter.HasMP())
+            {
+                CheckEnemyAction(aiPiece);
+            }
             if (!aiPiece.unitAttrCenter.CostMP()) continue;
-            CheckEnemyAction(aiPiece);
             BattleScene.Ins.BM.camera.SetFollow(aiPiece.transform);
             return;
         }
