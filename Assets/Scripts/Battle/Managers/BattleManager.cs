@@ -244,7 +244,9 @@ public class BattleManager : MonoBehaviour
             if (attacker.player.isBursting)// 聚能状态下所有攻击附加击退效果
             {
                 SpaceBombEffect(skillPack, attacker, target, targetPos);// 去除假死
-                HitBackEffect(new HitBackEffect { dis = 2f }, attacker, target, targetPos);
+                // 击退距离为默认值加上每10点伤害增加0.5f
+                float dis = 1f + damageInfos.Sum(d => d.damageValue) / 10f * 0.5f;
+                HitBackEffect(new HitBackEffect { dis = dis }, attacker, target, targetPos);
             }
         }
         // 操作记录系统
