@@ -147,6 +147,13 @@ public enum RangeType
     Fan = 2,
     [LabelText("手雷")]// 手雷
     Grenade = 3,
+    
+    [LabelText("爆炸")]
+    Nova = 4,// 爆炸
+    
+    [LabelText("弧线")]
+    // 弧线
+    Arc = 5,
 }
 
 public enum SkillEffect
