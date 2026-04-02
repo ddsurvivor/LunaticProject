@@ -18,9 +18,17 @@ public class RangeUI : MonoBehaviour
     public Image fanCircle; // 扇形范围圈
     public GameObject fanLine1;
     public GameObject fanLine2;
+
+    [Header("Arc Settings")] [SerializeField]
+    private GameObject arcRoot;
+
+    [SerializeField] private Image arcOuter; // 外圆环
+    [SerializeField] private Image arcInnerMask; // 内圆覆盖（实现宽度）
+    [SerializeField] private RectTransform arcLine1; // 边线1
+    [SerializeField] private RectTransform arcLine2; // 边线2
     private bool _isShowMoveIcon = false;
 
-    private float circleRadius = 1f/11f;
+    private float circleRadius = 1f / 11f;
     private float _curRange;
 
     private List<PieceController> _curTargets = new();
@@ -52,7 +60,7 @@ public class RangeUI : MonoBehaviour
     {
         circle.SetActive(true);
         transform.position =
-            new Vector3(position.x, position.y +0.1f, position.z); // 只改变x,z轴位置，y轴保持不变
+            new Vector3(position.x, position.y + 0.1f, position.z); // 只改变x,z轴位置，y轴保持不变
         circle.transform.localScale = radius * circleRadius * Vector3.one;
         _curRange = radius;
     }
@@ -78,7 +86,7 @@ public class RangeUI : MonoBehaviour
         }
         else if (skillPack.rangeType == RangeType.Fan)
         {
-            // todo 显示扇形范围
+            // 显示扇形范围
             fanRoot.SetActive(true);
             fanCircle.transform.localScale = skillPack.rangeValue * circleRadius * Vector3.one;
             fanCircle.fillAmount = skillPack.rangeAgle / 360f;
@@ -92,13 +100,83 @@ public class RangeUI : MonoBehaviour
         }
         else if (skillPack.rangeType == RangeType.Grenade)
         {
-            // todo 显示爆炸范围
+            // 显示爆炸范围
             skillCircle.SetActive(true);
             skillCircle.transform.localScale = skillPack.rangeValue * circleRadius * Vector3.one;
             grenadeCircle.SetActive(true);
             grenadeCircle.transform.localScale =
                 skillPack.explodeRadius * circleRadius * Vector3.one;
             _curRange = skillPack.rangeValue;
+        }
+        else if (skillPack.rangeType == RangeType.Nova)
+        {
+            // Nova类型：仅指定一个圆形范围，以自身为中心
+            // 这里我们通常使用 explodeRadius 或 rangeValue 作为爆炸半径
+            skillCircle.SetActive(true);
+            float radius = skillPack.explodeRadius > 0
+                ? skillPack.explodeRadius
+                : skillPack.rangeValue;
+            skillCircle.transform.localScale = radius * circleRadius * Vector3.one;
+
+            // Nova 通常不需要显示准星图标，因为它不可选地
+            skillIcon.SetActive(false);
+            _curRange = radius;
+        }
+        else if (skillPack.rangeType == RangeType.Arc)
+        {
+            arcRoot.SetActive(true);
+
+            Vector3 start = transform.position;
+            Vector3 end = transform.position + skillPack.rangeValue* new Vector3(1f,0,0f);
+
+            // 1. 计算几何基础
+            Vector3 dir = end - start;
+            Vector3 midpoint = (start + end) * 0.5f;
+            Vector3 perpendicular = Vector3.Cross(dir, Vector3.up).normalized;
+
+            // 2. 确定圆心位置 (C)
+            Vector3 center = midpoint + perpendicular * skillPack.arcCenterDis;
+            arcRoot.transform.position = center;
+
+            // 3. 计算半径 (R)
+            float radius = Vector3.Distance(center, start);
+
+            // 4. 计算角度 (使用 Atan2 获取弧度并转角度)
+            float startAngle = Mathf.Atan2(start.z - center.z, start.x - center.x) * Mathf.Rad2Deg;
+            float endAngle = Mathf.Atan2(end.z - center.z, end.x - center.x) * Mathf.Rad2Deg;
+
+            // 确保弧线取短路径
+            float sweepAngle = Mathf.DeltaAngle(startAngle, endAngle);
+            float absSweepAngle = Mathf.Abs(sweepAngle);
+
+            // 5. 设置填充和旋转 (仿照扇形逻辑)
+            arcOuter.fillAmount = absSweepAngle / 360f;
+            arcInnerMask.fillAmount = arcOuter.fillAmount;
+
+            // 旋转起始点：Image 的 Fill 起始点通常是上方，需要偏移
+            // 注意：根据你的 Image 设置，可能需要调整 90 或 180 度的偏移量
+            float rotationOffset = (sweepAngle > 0) ? startAngle : endAngle;
+            arcRoot.transform.localRotation = Quaternion.Euler(90, 0, rotationOffset - 90);
+
+            // 6. 处理宽度 (arcWeight)
+            // 外圆半径为 radius，内圆半径为 radius - arcWeight
+            arcOuter.rectTransform.sizeDelta = new Vector2(radius * 2, radius * 2);
+            float innerSize = (radius - skillPack.arcWeight) * 2;
+            arcInnerMask.rectTransform.sizeDelta = new Vector2(innerSize, innerSize);
+
+            // 7. 设置两条边线
+
+            // 设置边线的长度等于 arcWeight
+            arcLine1.sizeDelta = new Vector2(skillPack.arcWeight, 2f); // 2f 是线宽
+            arcLine2.sizeDelta = new Vector2(skillPack.arcWeight, 2f);
+
+            // 将边线推向圆周边缘
+            arcLine1.localPosition = new Vector3(radius - (skillPack.arcWeight * 0.5f), 0, 0);
+            arcLine2.localPosition = Quaternion.Euler(0, 0, sweepAngle) * arcLine1.localPosition;
+
+            // 旋转边线使其对齐圆心
+            arcLine1.localRotation = Quaternion.identity;
+            arcLine2.localRotation = Quaternion.Euler(0, 0, sweepAngle);
         }
     }
 
@@ -139,7 +217,7 @@ public class RangeUI : MonoBehaviour
             {
                 Vector3 hitPoint = ray.GetPoint(enter);
                 Vector3 direction = hitPoint - transform.position;
-                direction.y = 0;// 忽略y轴，只在xz平面
+                direction.y = 0; // 忽略y轴，只在xz平面
                 float distance = direction.magnitude;
                 if (distance > _curRange)
                 {
@@ -150,7 +228,7 @@ public class RangeUI : MonoBehaviour
             }
         }
 
-        if (skillIcon!=null && skillIcon.activeInHierarchy) // 单体敌人锁定
+        if (skillIcon != null && skillIcon.activeInHierarchy) // 单体敌人锁定
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             Plane groundPlane = new Plane(Vector3.up, new Vector3(0, transform.position.y, 0));
@@ -158,7 +236,7 @@ public class RangeUI : MonoBehaviour
             {
                 Vector3 hitPoint = ray.GetPoint(enter);
                 Vector3 direction = hitPoint - transform.position;
-                direction.y = 0;// 忽略y轴，只在xz平面
+                direction.y = 0; // 忽略y轴，只在xz平面
                 float distance = direction.magnitude;
                 if (distance > _curRange)
                 {
@@ -177,7 +255,7 @@ public class RangeUI : MonoBehaviour
             {
                 Vector3 hitPoint = ray.GetPoint(enter);
                 Vector3 direction = hitPoint - transform.position;
-                direction.y = 0;// 忽略y轴，只在xz平面
+                direction.y = 0; // 忽略y轴，只在xz平面
                 float distance = direction.magnitude;
                 if (distance > _curRange)
                 {
@@ -201,18 +279,21 @@ public class RangeUI : MonoBehaviour
                 fanRoot.transform.localRotation = Quaternion.LookRotation(direction, Vector3.up);
             }
         }
-        
+
+        if (arcRoot.activeInHierarchy)
+        {
+        }
+
         HighlightTarget();
     }
 
     private void FixedUpdate()
     {
-        
     }
 
     private void HighlightTarget()
     {
-        if (skillIcon!=null && skillIcon.activeInHierarchy) // 单体敌人锁定
+        if (skillIcon != null && skillIcon.activeInHierarchy) // 单体敌人锁定
         {
             // 检测球体范围内的所有敌人
             Collider[] hitColliders = Physics.OverlapSphere(skillIcon.transform.position, 1f);
@@ -386,6 +467,7 @@ public class RangeUI : MonoBehaviour
         {
             return fanRoot.transform;
         }
+
         return null;
     }
 

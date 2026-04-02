@@ -134,13 +134,13 @@ public class PieceDisplay : SerializedMonoBehaviour
 
     
 
+    [Header(("加载图片"))]
     
-    //[Button("测试加载图片")]
+    [SerializeField] private string path = "Assets/A美术/BattleSprites/马赛成年动作";
+    [SerializeField] private string pieceName = "PC03A";
+    [Button("测试加载图片")]
     private void TestLoadSprite()
     {
-        string path = "Assets/A美术/BattleSprites/马赛成年动作";// 
-        string pieceName = "PC03A";
-
         if (!Directory.Exists(path))
         {
             Debug.LogError($"<color=red>【路径不存在】</color> 请检查: {path}");

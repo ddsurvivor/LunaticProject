@@ -15,8 +15,9 @@ public class SkillPack
     public float rangeValue;// 范围半径
     [ShowIf("@this.rangeType == RangeType.Fan")]public float rangeAgle;// 范围角度（仅扇形范围有效）
     [ShowIf("@this.rangeType == RangeType.Grenade")]public float explodeRadius;// 爆炸半径（仅爆炸范围有效）
-    [ShowIf("@this.rangeType == RangeType.Arc")] public float arcRadius;// 弧线半径（仅弧线范围有效）
-    [ShowIf("@this.rangeType == RangeType.Arc")]public float arcCenterDis;// 弧线中心距离（仅弧线范围有效）
+    [ShowIf("@this.rangeType == RangeType.Arc")] public float arcWeight;// 弧线宽度
+    [ShowIf("@this.rangeType == RangeType.Arc")] public float arcRadius;// 弧线半径
+    [ShowIf("@this.rangeType == RangeType.Arc")] public float arcCenterDis;// 弧线中心距离（仅弧线范围有效）
     public ItemType skillVFXType;// 技能特效类型
     public List<AttackPack> attackPacks = new();// 伤害列表
     public int atkTimes = 1; // 攻击次数
