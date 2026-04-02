@@ -233,8 +233,13 @@ public class PLAYERPROFILE
 
     public Player GetPlayer(int index)
     {
+        if (index >= 100 && index < 1000)
+        {
+            index = index -= 100;
+        }
         if (index < 0 || index >= player.Length)
         {
+            
             Debug.LogError($"修改属性时index越界!index = {index}");
             return new Player();
         }

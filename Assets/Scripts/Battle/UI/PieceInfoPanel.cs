@@ -18,8 +18,8 @@ using UnityEngine.UI;
     public List<GameObject> ammoIcons;
     public Text ammoNumText;
     
-    public Sprite[] headSprites;
-    public string[] pieceNames;// 临时用，后期改成棋子数据
+    //public Sprite[] headSprites;
+    //public string[] pieceNames;// 临时用，后期改成棋子数据
     
     [SerializeField][ReadOnly]
     private PieceController piece;
@@ -36,10 +36,16 @@ using UnityEngine.UI;
     {
         if(piece == null) return;
         int pieceId = piece.pieceID;
-        if(pieceId < 1 || pieceId > headSprites.Length) return;
+        //if(pieceId < 1 || pieceId > headSprites.Length) return;
         // 更新头像和名称
-        head.sprite = headSprites[pieceId-1];
-        pieceName.text = pieceNames[pieceId-1];
+        Player playerData = GM.Ins.PLAYERPROFILE.GetPlayer(pieceId-1);
+        string name = "CG/PC0" + pieceId + "C1";
+        if (pieceId>100)
+        {
+            name = "CG/PC0" + (pieceId-100).ToString() + "01";
+        }
+        head.sprite = Resources.Load<Sprite>(name);
+        pieceName.text = playerData.NAME;
         // 更新血量
         float hpPercent = (float)piece.unitAttrCenter.CurHealth / piece.unitAttrCenter.MaxHealth;
         hpBar.localScale = new Vector3(hpPercent, 1, 1);

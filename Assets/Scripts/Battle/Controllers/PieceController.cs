@@ -97,7 +97,7 @@ public class PieceController : MonoBehaviour
             _pieceData = pieceData;
             availableSkills = pieceData?.skillPacks;
             unitAttrCenter.SetData(_pieceData);
-            if (GM.Ins.pieceHPInherit)
+            if (isPlayerPiece && GM.Ins.pieceHPInherit)
             {
                 Player playerData = GM.Ins.PLAYERPROFILE.GetPlayer(pieceID - 1);
                 if (playerData.curHealth > 0)
