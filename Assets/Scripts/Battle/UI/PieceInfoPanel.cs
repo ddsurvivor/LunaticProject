@@ -13,8 +13,13 @@ using UnityEngine.UI;
     public Image head;
     public Text pieceName;
     public Transform hpBar;
-    public List<GameObject> mpIcon;
+    //public List<GameObject> hpIcons;
+    public Text hpNumText;
+    public List<GameObject> mpIcons;
+    public Text mpNumText;
     public Transform manaBar;
+    //public List<GameObject> manaIcons;
+    public Text manaNumText;
     public List<GameObject> ammoIcons;
     public Text ammoNumText;
     
@@ -51,15 +56,15 @@ using UnityEngine.UI;
         hpBar.localScale = new Vector3(hpPercent, 1, 1);
         // 更新魔法值图标
         int curMP = piece.unitAttrCenter.CurMovePoint;
-        for (int i = 0; i < mpIcon.Count; i++)
+        for (int i = 0; i < mpIcons.Count; i++)
         {
             if (i < curMP)
             {
-                mpIcon[i].SetActive(true);
+                mpIcons[i].SetActive(true);
             }
             else
             {
-                mpIcon[i].SetActive(false);
+                mpIcons[i].SetActive(false);
             }
         }
         int curMana = piece.unitAttrCenter.ManaPoint;

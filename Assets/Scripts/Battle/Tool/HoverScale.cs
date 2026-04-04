@@ -26,6 +26,7 @@ public class HoverScale : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     public Text text;
 
     private Color originalColor;
+    public Color hoverColor = Color.black;
 
     void Awake()
     {
@@ -127,7 +128,7 @@ public class HoverScale : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         scaleCoroutine = StartCoroutine(ScaleTo(targetScale, animationDuration));
         if (text != null)
         {
-            text.color = hovered ? Color.black : originalColor; // 悬停时变黄，恢复时还原颜色
+            text.color = hovered ? hoverColor : originalColor; // 悬停时变黄，恢复时还原颜色
         }
     }
 

@@ -8,14 +8,14 @@ public class PieceStatePanel : UIPanel
     public PieceController pc;
     
     //public Text nameText;
-    public Text healthText;
-    public Text mpText;
+    //public Text healthText;
+    //public Text mpText;
     public Text ammoText;
     
     public Image healthBar;
-    public Image mpBar;
+    //public Image mpBar;
     public Image manaBar;
-    public Text manaText;
+    //public Text manaText;
 
     public void Update()
     {
@@ -41,13 +41,13 @@ public class PieceStatePanel : UIPanel
         {
             // 更新显示pc的状态信息
             //nameText.text = pc.pieceData.pieceName;
-            healthText.text = $"{pc.unitAttrCenter.CurHealth}/{pc.unitAttrCenter.MaxHealth}";
-            mpText.text = $"{pc.unitAttrCenter.CurMovePoint}/{pc.unitAttrCenter.MaxMovePoint}";
+            //healthText.text = $"{pc.unitAttrCenter.CurHealth}/{pc.unitAttrCenter.MaxHealth}";
+            //mpText.text = $"{pc.unitAttrCenter.CurMovePoint}/{pc.unitAttrCenter.MaxMovePoint}";
             healthBar.fillAmount = (float)pc.unitAttrCenter.CurHealth / pc.unitAttrCenter.MaxHealth;
-            mpBar.fillAmount = (float)pc.unitAttrCenter.CurMovePoint / pc.unitAttrCenter.MaxMovePoint;
+            //mpBar.fillAmount = (float)pc.unitAttrCenter.CurMovePoint / pc.unitAttrCenter.MaxMovePoint;
             ammoText.text =  $"{pc.unitAttrCenter.AmmoCount}/{pc.unitAttrCenter.MaxAmmoCount}";
             manaBar.fillAmount = (float)pc.unitAttrCenter.ManaPoint / pc.unitAttrCenter.MaxManaPoint;
-            manaText.text = $"{pc.unitAttrCenter.ManaPoint}/{pc.unitAttrCenter.MaxManaPoint}";
+            //manaText.text = $"{pc.unitAttrCenter.ManaPoint}/{pc.unitAttrCenter.MaxManaPoint}";
         }
     }
 }

@@ -39,7 +39,8 @@ public class BattleManager : MonoBehaviour
             PlayerController.TurnEnd();
             AIController.isInTurn = true;
             AIController.TurnStart();
-            BattleScene.Ins.UM.turnPanel.ShowTurnChange("敌人回合");
+            //BattleScene.Ins.UM.turnPanel.ShowTurnChange("敌人回合");
+            BattleScene.Ins.UM.ShowTurnChange(false);
         }
         else
         {
@@ -57,7 +58,8 @@ public class BattleManager : MonoBehaviour
         AIController.TurnEnd();
         PlayerController.TurnStart();
         BattleScene.Ins.UM.endTurnButton.enabled = true;
-        BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家回合");
+        BattleScene.Ins.UM.ShowTurnChange(true);
+        //BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家回合");
         _turnNumber++;
         BattleScene.Ins.UM.turnNumberText.text = TunrNumber.ToString();
     }

@@ -158,7 +158,7 @@ public class PlayerController : SerializedMonoBehaviour
             }
         }
 
-        BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家聚能发动！");
+        //BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家聚能发动！");
         // 进入聚能
         EnterBurstMode();
     }

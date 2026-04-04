@@ -9,6 +9,7 @@ using UnityEngine.UI;
 public class UIManager : SerializedMonoBehaviour
 {
     public TurnPanel turnPanel;
+    public List<GameObject> turnImage;
     public Button endTurnButton;
     public InfoBox infoBox;
     public Button burstButton;
@@ -134,5 +135,20 @@ public class UIManager : SerializedMonoBehaviour
             pieceStatePanel.OpenPanel(pieceStatePanel.pc);
             pieceInfoPanel.OnSelectPiece(pieceStatePanel.pc);
         }
+    }
+
+    public void ShowTurnChange(bool playerTurn)
+    {
+        // turnImage[0] 是玩家回合图，turnImage[1] 是敌人回合图
+        // 使用dotween从屏幕外移入再移出
+        int index = playerTurn ? 0 : 1;
+        //turnImage[index].SetActive(true);
+        RectTransform imgRect = turnImage[index].GetComponent<RectTransform>();
+        
+        Sequence seq = DOTween.Sequence();
+        seq.Append(imgRect.DOLocalMoveY(-110, 0.3f));
+        seq.AppendInterval(1f);
+        seq.Append(imgRect.DOLocalMoveY(0, 0.3f));
+        
     }
 }
