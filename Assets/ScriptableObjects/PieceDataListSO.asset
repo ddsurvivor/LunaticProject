@@ -7300,13 +7300,13 @@ MonoBehaviour:
       Data: "\u5730\u6548\u8F66"
     - Name: maxHealth
       Entry: 3
-      Data: 35
+      Data: 200
     - Name: maxMovePoint
       Entry: 3
-      Data: 2
+      Data: 1
     - Name: moveRange
       Entry: 4
-      Data: 15
+      Data: 30
     - Name: meleeAtk
       Entry: 7
       Data: 336|SkillPack, Assembly-CSharp
@@ -7642,7 +7642,7 @@ MonoBehaviour:
       Data: 1
     - Name: $v
       Entry: 3
-      Data: 3
+      Data: 5
     - Name: 
       Entry: 8
       Data: 
@@ -7654,7 +7654,7 @@ MonoBehaviour:
       Data: 2
     - Name: $v
       Entry: 3
-      Data: 3
+      Data: 6
     - Name: 
       Entry: 8
       Data: 
@@ -7714,7 +7714,7 @@ MonoBehaviour:
       Data: 
     - Name: dropRate
       Entry: 3
-      Data: 20
+      Data: 0
     - Name: 
       Entry: 8
       Data: 
@@ -7729,7 +7729,7 @@ MonoBehaviour:
       Data: "\u6A21\u56E0\u4E2D\u6BD2\u80051"
     - Name: maxHealth
       Entry: 3
-      Data: 35
+      Data: 75
     - Name: maxMovePoint
       Entry: 3
       Data: 2
@@ -7912,7 +7912,7 @@ MonoBehaviour:
       Data: 15
     - Name: damageType
       Entry: 3
-      Data: 2
+      Data: 1
     - Name: 
       Entry: 8
       Data: 
@@ -7924,7 +7924,7 @@ MonoBehaviour:
       Data: 
     - Name: atkTimes
       Entry: 3
-      Data: 1
+      Data: 2
     - Name: buffPacks
       Entry: 7
       Data: 366|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
@@ -7970,7 +7970,7 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 18
+      Data: 19
     - Name: consumeItems
       Entry: 7
       Data: 369|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
@@ -8000,10 +8000,10 @@ MonoBehaviour:
       Data: 
     - Name: maxAmmoCount
       Entry: 3
-      Data: 3
+      Data: 6
     - Name: evasionRate
       Entry: 3
-      Data: 20
+      Data: 0
     - Name: actionSounds
       Entry: 7
       Data: 370|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
@@ -8071,7 +8071,7 @@ MonoBehaviour:
       Data: 1
     - Name: $v
       Entry: 3
-      Data: 3
+      Data: 6
     - Name: 
       Entry: 8
       Data: 
@@ -8083,7 +8083,7 @@ MonoBehaviour:
       Data: 2
     - Name: $v
       Entry: 3
-      Data: 3
+      Data: 4
     - Name: 
       Entry: 8
       Data: 
@@ -8143,7 +8143,7 @@ MonoBehaviour:
       Data: 
     - Name: dropRate
       Entry: 3
-      Data: 20
+      Data: 30
     - Name: 
       Entry: 8
       Data: 
@@ -8158,7 +8158,7 @@ MonoBehaviour:
       Data: "\u6A21\u56E0\u4E2D\u6BD2\u80052"
     - Name: maxHealth
       Entry: 3
-      Data: 35
+      Data: 90
     - Name: maxMovePoint
       Entry: 3
       Data: 2
@@ -8182,13 +8182,13 @@ MonoBehaviour:
       Data: 1
     - Name: rangeType
       Entry: 3
-      Data: 1
+      Data: 2
     - Name: rangeValue
       Entry: 4
       Data: 5
     - Name: rangeAgle
       Entry: 4
-      Data: 0
+      Data: 110
     - Name: explodeRadius
       Entry: 4
       Data: 0
@@ -8210,16 +8210,28 @@ MonoBehaviour:
         mscorlib
     - Name: 
       Entry: 12
-      Data: 1
+      Data: 2
     - Name: 
       Entry: 7
       Data: 380|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
-      Data: 10
+      Data: 9
     - Name: damageType
       Entry: 3
       Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 381|AttackPack, Assembly-CSharp
+    - Name: damage
+      Entry: 3
+      Data: 6
+    - Name: damageType
+      Entry: 3
+      Data: 2
     - Name: 
       Entry: 8
       Data: 
@@ -8231,13 +8243,31 @@ MonoBehaviour:
       Data: 
     - Name: atkTimes
       Entry: 3
-      Data: 0
+      Data: 3
     - Name: buffPacks
       Entry: 7
-      Data: 381|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 382|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
-      Data: 0
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 383|BuffPack, Assembly-CSharp
+    - Name: buffType
+      Entry: 3
+      Data: 101
+    - Name: stacks
+      Entry: 3
+      Data: 3
+    - Name: rate
+      Entry: 3
+      Data: 75
+    - Name: target
+      Entry: 3
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: 
       Entry: 13
       Data: 
@@ -8246,7 +8276,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 382|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 384|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -8259,10 +8289,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 17
+      Data: 8
     - Name: consumeItems
       Entry: 7
-      Data: 383|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 385|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -8289,7 +8319,7 @@ MonoBehaviour:
       Data: 
     - Name: rangedAtk
       Entry: 7
-      Data: 384|SkillPack, Assembly-CSharp
+      Data: 386|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -8328,14 +8358,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 385|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 387|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 386|AttackPack, Assembly-CSharp
+      Data: 388|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 15
@@ -8356,13 +8386,13 @@ MonoBehaviour:
       Data: 1
     - Name: buffPacks
       Entry: 7
-      Data: 387|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 389|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 388|BuffPack, Assembly-CSharp
+      Data: 390|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 102
@@ -8386,7 +8416,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 389|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 391|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -8402,7 +8432,7 @@ MonoBehaviour:
       Data: 18
     - Name: consumeItems
       Entry: 7
-      Data: 390|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 392|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -8429,17 +8459,17 @@ MonoBehaviour:
       Data: 
     - Name: maxAmmoCount
       Entry: 3
-      Data: 3
+      Data: 0
     - Name: evasionRate
       Entry: 3
-      Data: 20
+      Data: 0
     - Name: actionSounds
       Entry: 7
-      Data: 391|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
+      Data: 393|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
         UnityEngine.AudioModule]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 392|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
+      Data: 394|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -8461,7 +8491,7 @@ MonoBehaviour:
       Data: 
     - Name: skillPacks
       Entry: 7
-      Data: 393|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
+      Data: 395|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -8474,11 +8504,11 @@ MonoBehaviour:
       Data: 
     - Name: _armorDic
       Entry: 7
-      Data: 394|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
+      Data: 396|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 395|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
+      Data: 397|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -8500,7 +8530,7 @@ MonoBehaviour:
       Data: 1
     - Name: $v
       Entry: 3
-      Data: 3
+      Data: 6
     - Name: 
       Entry: 8
       Data: 
@@ -8512,7 +8542,7 @@ MonoBehaviour:
       Data: 2
     - Name: $v
       Entry: 3
-      Data: 3
+      Data: 6
     - Name: 
       Entry: 8
       Data: 
@@ -8548,16 +8578,16 @@ MonoBehaviour:
       Data: 0
     - Name: dropItemList
       Entry: 7
-      Data: 396|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 398|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 397|ItemPack, Assembly-CSharp
+      Data: 399|ItemPack, Assembly-CSharp
     - Name: itemName
       Entry: 3
-      Data: 3
+      Data: 5
     - Name: itemNum
       Entry: 3
       Data: 1
@@ -8572,7 +8602,7 @@ MonoBehaviour:
       Data: 
     - Name: dropRate
       Entry: 3
-      Data: 20
+      Data: 35
     - Name: 
       Entry: 8
       Data: 
@@ -9718,9 +9748,9 @@ MonoBehaviour:
     dropRate: 0
   - pieceId: 1006
     pieceName: "\u5730\u6548\u8F66"
-    maxHealth: 35
-    maxMovePoint: 2
-    moveRange: 15
+    maxHealth: 200
+    maxMovePoint: 1
+    moveRange: 30
     meleeAtk:
       skillName: 
       description: 
@@ -9782,10 +9812,10 @@ MonoBehaviour:
     dropItemList:
     - itemName: 3
       itemNum: 1
-    dropRate: 20
+    dropRate: 0
   - pieceId: 1007
     pieceName: "\u6A21\u56E0\u4E2D\u6BD2\u80051"
-    maxHealth: 35
+    maxHealth: 75
     maxMovePoint: 2
     moveRange: 15
     meleeAtk:
@@ -9827,21 +9857,21 @@ MonoBehaviour:
       skillVFXType: 0
       attackPacks:
       - damage: 15
-        damageType: 2
-      atkTimes: 1
+        damageType: 1
+      atkTimes: 2
       buffPacks:
       - buffType: 102
         stacks: 1
         rate: 30
         target: 1
       skillEffects: 
-      skillSound: {fileID: 8300000, guid: 4c2e99d52e73b724eb53ceb5d0948822, type: 3}
+      skillSound: {fileID: 8300000, guid: dee4965651d458546a235669ff915c8e, type: 3}
       consumeItems: []
       animationIndex: 0
       isDelaySkill: 0
       layerSkill: 0
-    maxAmmoCount: 3
-    evasionRate: 20
+    maxAmmoCount: 6
+    evasionRate: 0
     skillPacks: []
     elementType: 0
     initialMana: 0
@@ -9849,10 +9879,10 @@ MonoBehaviour:
     dropItemList:
     - itemName: 3
       itemNum: 1
-    dropRate: 20
+    dropRate: 30
   - pieceId: 1008
     pieceName: "\u6A21\u56E0\u4E2D\u6BD2\u80052"
-    maxHealth: 35
+    maxHealth: 90
     maxMovePoint: 2
     moveRange: 15
     meleeAtk:
@@ -9860,21 +9890,27 @@ MonoBehaviour:
       description: 
       mpCost: 0
       target: 1
-      rangeType: 1
+      rangeType: 2
       rangeValue: 5
-      rangeAgle: 0
+      rangeAgle: 110
       explodeRadius: 0
       arcWeight: 0
       arcRadius: 0
       arcCenterDis: 0
       skillVFXType: 13
       attackPacks:
-      - damage: 10
+      - damage: 9
         damageType: 1
-      atkTimes: 0
-      buffPacks: []
+      - damage: 6
+        damageType: 2
+      atkTimes: 3
+      buffPacks:
+      - buffType: 101
+        stacks: 3
+        rate: 75
+        target: 1
       skillEffects: 
-      skillSound: {fileID: 8300000, guid: 9a59580c91f8009499c7116c002f21d5, type: 3}
+      skillSound: {fileID: 8300000, guid: 17754d4fdb03d0545a69df7cf089e479, type: 3}
       consumeItems: []
       animationIndex: 0
       isDelaySkill: 0
@@ -9907,13 +9943,13 @@ MonoBehaviour:
       animationIndex: 0
       isDelaySkill: 0
       layerSkill: 0
-    maxAmmoCount: 3
-    evasionRate: 20
+    maxAmmoCount: 0
+    evasionRate: 0
     skillPacks: []
     elementType: 0
     initialMana: 0
     maxMana: 0
     dropItemList:
-    - itemName: 3
+    - itemName: 5
       itemNum: 1
-    dropRate: 20
+    dropRate: 35
