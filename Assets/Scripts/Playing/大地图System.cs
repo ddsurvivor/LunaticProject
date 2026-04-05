@@ -13,6 +13,10 @@ public class 大地图System : SerializedMonoBehaviour
     public GameObject[] 地图;
     public GameObject 当前地图;
     public GameObject 失败Obj;
+    public GameObject mapRoot;
+
+    [LabelText("调试模式显示所有关卡")]
+    public bool isDebugMode;
 
     public static bool 是可以点击地图事件;
 
@@ -86,6 +90,7 @@ public class 大地图System : SerializedMonoBehaviour
         Debug.Log("测试中,打开第一张地图");
         // TODO:根据存档打开地图
         //打开地图("TEST");
+        if(!isDebugMode) UpdateMission();
         foreach (var VARIABLE in 地图)
         {
             if (VARIABLE.gameObject.activeInHierarchy)
@@ -124,10 +129,7 @@ public class 大地图System : SerializedMonoBehaviour
                 //     大地图System.instance.开始剧情(endLog);
                 //     endLog = "";
                 // }
-                foreach (var node in NodeList)
-                {
-                    node.UpdateState();
-                }
+                UpdateMission();
                 GM.Ins.PLAYERPROFILE.currentMap = t;
                 // 是否打开小地图
                 if (GM.Ins.PLAYERPROFILE.curSmallMapIndex != 0)
@@ -139,6 +141,15 @@ public class 大地图System : SerializedMonoBehaviour
             {
                 VARIABLE.SetActive(false);
             }
+        }
+    }
+
+    private void UpdateMission()
+    {
+        NodeList = mapRoot.GetComponentsInChildren<任务节点>(true);
+        foreach (var node in NodeList)
+        {
+            node.UpdateState();
         }
     }
 

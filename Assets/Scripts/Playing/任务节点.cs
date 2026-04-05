@@ -10,12 +10,14 @@ public class 任务节点 : MonoBehaviour
     public Sprite[] 按钮节点图片;
     public string[] 前置任务要求;
     public int[] 前置任务进度要求;
+    [TextArea]
+    public string missionDes;
     
     // 详细信息
     public GameObject detialInfoPanel;
-    public Text 任务名称Text;
+    //public Text 任务名称Text;
     public Text 任务描述Text;
-    public Button 接受任务Button;
+    //public Button 接受任务Button;
     private void OnEnable()
     {
         // GetComponent<Button>().onClick.RemoveAllListeners();
@@ -27,6 +29,12 @@ public class 任务节点 : MonoBehaviour
     }
     
     public void OnClick()
+    {
+        detialInfoPanel.SetActive(true);
+        任务描述Text.text = missionDes;
+    }
+
+    public void OnClickStart()
     {
         大地图System.instance.开始剧情 (name.Replace("(Clone)",""));
     }
