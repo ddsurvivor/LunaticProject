@@ -355,7 +355,7 @@ public class 剧本System : MonoBehaviour
                 }
                 else if (prams.Length >= 3)
                 {
-                    GM.Ins.PLAYERPROFILE.修改属性(Convert.ToInt32(prams[0]), prams[1]
+                    GM.Ins.PLAYERPROFILE.Modify(Convert.ToInt32(prams[0]), prams[1]
                         , Convert.ToInt32(prams[2]));
                 }
             }
@@ -881,6 +881,15 @@ public class 剧本System : MonoBehaviour
                         // 消耗物品
                         GM.Ins.PLAYERPROFILE.CostItem((ItemName)itemId, count);
                     }
+                }
+            }
+
+            if (key.Contains(Center.Command_PlayerAd))
+            {
+                for (var index = 0; index < 3; index++)
+                {
+                    var player = GM.Ins.PLAYERPROFILE.player[index];
+                    player.spriteName = $"PC0{index + 1}01";
                 }
             }
         }

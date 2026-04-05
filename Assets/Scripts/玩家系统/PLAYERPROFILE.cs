@@ -136,7 +136,7 @@ public class PLAYERPROFILE
         if(isNewGame) isNewGame = false; // 只要保存过一次任务进度，就不再是新游戏了
     }
     
-    public void 修改属性(int index, string fieldName, int value)
+    public void Modify(int index, string fieldName, int value)
     {
         if (index < 0 || index >= player.Length)
         {

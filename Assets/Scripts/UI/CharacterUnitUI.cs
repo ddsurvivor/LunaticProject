@@ -24,7 +24,7 @@ public class CharacterUnitUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public SkillPointPanel skillPointPanel;
     public CharacterUIPage characterUIPage;
-    void Start()
+    void OnEnable()
     {
         InitBasicInfo();
         detailPanel.SetActive(false); // 初始隐藏详细面板
