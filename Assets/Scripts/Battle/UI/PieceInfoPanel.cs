@@ -54,8 +54,10 @@ using UnityEngine.UI;
         // 更新血量
         float hpPercent = (float)piece.unitAttrCenter.CurHealth / piece.unitAttrCenter.MaxHealth;
         hpBar.localScale = new Vector3(hpPercent, 1, 1);
+        hpNumText.text = piece.unitAttrCenter.CurHealth.ToString();
         // 更新魔法值图标
         int curMP = piece.unitAttrCenter.CurMovePoint;
+        mpNumText.text = curMP.ToString();
         for (int i = 0; i < mpIcons.Count; i++)
         {
             if (i < curMP)
@@ -68,11 +70,13 @@ using UnityEngine.UI;
             }
         }
         int curMana = piece.unitAttrCenter.ManaPoint;
+        manaNumText.text = curMana.ToString();
         float manaPercent = (float)curMana / piece.unitAttrCenter.MaxManaPoint;
         manaBar.localScale = new Vector3(manaPercent, 1, 1);
         
         int ammo = piece.unitAttrCenter.AmmoCount;
         ammoNumText.text = ammo.ToString();
+        //Debug.Log("Ammo: " + ammo);
         for (int i = 0; i < ammoIcons.Count; i++)
         {
             if (i < ammo)

@@ -123,6 +123,9 @@ public enum EnemyAIType
     
     [LabelText("混合型")]
     Combine = 5,
+    
+    [LabelText("特殊型")]
+    Special = 6,// 特殊行为由关卡设计决定
 }
 
 #region 技能枚举

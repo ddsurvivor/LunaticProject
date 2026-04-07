@@ -9,17 +9,19 @@ using UnityEngine.Serialization;
 public class PlayerController : SerializedMonoBehaviour
 {
     public List<PieceController> pieces = new();
-    public bool isInTurn;
-    public bool isBursting; // 是否处于聚能状态
+    public List<PieceController> keyPieces = new();// 关键棋子，全部死亡后直接失败
+    [ReadOnly] public bool isInTurn;
+    [ReadOnly] public bool isBursting; // 是否处于聚能状态
 
     public float burstCharge = 0f; // 聚能值
-    public float maxBurstCharge = 100f; // 最大聚能值
+    [ReadOnly]  public float maxBurstCharge = 100f; // 最大聚能值
     public bool ableBurst => burstCharge >= maxBurstCharge && !isBursting; // 是否可以发动聚能
 
-    public int totalDamage; // 对单一敌人造成的总伤害数值
-    public PieceController burstTarget; // 当前聚能回合攻击的单一目标敌人
+    [ReadOnly]  public int totalDamage; // 对单一敌人造成的总伤害数值
+    [ReadOnly] public PieceController burstTarget; // 当前聚能回合攻击的单一目标敌人
 
-    [Header("UI")] public RectTransform burstChargeBarFill; // 聚能条填充部分
+    [Header("UI")] 
+    public RectTransform burstChargeBarFill; // 聚能条填充部分
 
     private float originWidth = 1842.2f;
 

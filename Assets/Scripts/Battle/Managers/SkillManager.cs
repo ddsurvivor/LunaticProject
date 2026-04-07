@@ -8,11 +8,13 @@ public class SkillManager : MonoBehaviour
     private SkillPack _curSkillPack;
     private List<PieceController> resultTargets = new();
 
-    public List<PieceController> GetTargets(PieceController caster, Transform target, SkillPack skill)
+    public List<PieceController> GetTargets(PieceController caster, Transform target
+        , SkillPack skill)
     {
         CheckRange(caster, target, skill);
         return resultTargets;
     }
+
     /// <summary>
     /// 根据范围类型检测目标
     /// </summary>
@@ -24,6 +26,7 @@ public class SkillManager : MonoBehaviour
         casterPc = caster;
         _curSkillPack = skill;
         Collider[] hitColliders = null;
+        List<PieceController> newTargets = new();
         if (skill.rangeType == RangeType.Circle) // 单体敌人锁定
         {
             // 检测球体范围内的所有敌人
@@ -43,7 +46,7 @@ public class SkillManager : MonoBehaviour
             // 根据扇形角度，等间距的发射多根射线进行检测，结果需要去掉重复
             float halfAngle = _curSkillPack.rangeAgle / 2f;
             int rayCount = Mathf.CeilToInt(_curSkillPack.rangeAgle / 5f); // 每5度发射一根射线
-            HashSet<PieceController> hitPieces = new HashSet<PieceController>();
+            //HashSet<PieceController> hitPieces = new HashSet<PieceController>();
             for (int i = 0; i <= rayCount; i++)
             {
                 float angle = -halfAngle + i * (_curSkillPack.rangeAgle / rayCount);
@@ -53,23 +56,27 @@ public class SkillManager : MonoBehaviour
                 if (Physics.Raycast(ray, out RaycastHit hitInfo, _curSkillPack.rangeValue))
                 {
                     PieceController piece = hitInfo.collider.GetComponent<PieceController>();
-                    if (piece != null)
+                    if (piece != null && !newTargets.Contains(piece))
                     {
-                        hitPieces.Add(piece);
+                        newTargets.Add(piece);
                     }
                 }
             }
         }
 
-        List<PieceController> newTargets = new();
-        foreach (var hitCollider in hitColliders)
+
+        if (hitColliders != null)
         {
-            PieceController pc = hitCollider.GetComponent<PieceController>();
-            if (pc != null)
+            foreach (var hitCollider in hitColliders)
             {
-                newTargets.Add(pc);
+                PieceController pc = hitCollider.GetComponent<PieceController>();
+                if (pc != null)
+                {
+                    newTargets.Add(pc);
+                }
             }
         }
+
         CheckTarget(newTargets);
     }
 
@@ -116,9 +123,4 @@ public class SkillManager : MonoBehaviour
             }
         }
     }
-
-    
-    
-
-
 }

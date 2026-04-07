@@ -346,6 +346,7 @@ public class AIController : PlayerController
             }
             else if (distanceToTarget <= meleeRange)
             {
+                Debug.Log($"{aiPiece.enemyAIType}AI{aiPiece.name}选择近战攻击{distanceToTarget} <= {meleeRange}");
                 // 近战攻击
                 aiPiece.StartNormalAttack();
                 aiPiece.CastAttackOnTarget(target);
@@ -369,7 +370,21 @@ public class AIController : PlayerController
             }
             else
             {
+                Debug.Log($"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动到{target.transform.position}");
                 EnemyMove(aiPiece, target.transform.position, rangedRange);
+            }
+        }
+        else if(enemyAIType == EnemyAIType.Special)
+        {
+            // 特殊行为由关卡设计决定，这里暂时不实现具体逻辑
+            // 撤退到指定点时胜利
+            RetreatWin retreatWin = aiPiece.GetComponent<RetreatWin>();
+            if (retreatWin!=null)
+            {
+                Debug.Log("移动到指定点");
+                Vector3 pos = retreatWin.targetPoint.position;
+                EnemyMove(aiPiece, pos, 0f);
+                retreatWin.CheckTargetReached();// 行动后判定胜利
             }
         }
     }

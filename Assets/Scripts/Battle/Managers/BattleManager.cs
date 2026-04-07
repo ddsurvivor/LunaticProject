@@ -285,6 +285,11 @@ public class BattleManager : MonoBehaviour
                 break;
             }
         }
+        if (AIController.keyPieces.Count > 0 && AIController.keyPieces.All(k => k.isDead))
+        {
+            // 如果有关键棋子，且所有关键棋子都死了，也算敌方全灭
+            allEnemyDead = true;
+        }
 
         Debug.Log($"判定敌人棋子全灭：{allEnemyDead}");
         if (allEnemyDead)
@@ -310,6 +315,10 @@ public class BattleManager : MonoBehaviour
             }
         }
 
+        if (PlayerController.keyPieces.Count > 0 && PlayerController.keyPieces.All(k => k.isDead))
+        {
+            allPlayerDead = true;
+        }
         Debug.Log($"检查我方棋子全灭：{allPlayerDead}");
         if (allPlayerDead)
         {
@@ -323,17 +332,7 @@ public class BattleManager : MonoBehaviour
             }
         }
     }
-
-    /*public void CheckAllLadderMove(bool isPlayerTurn)
-    {
-        foreach (var ladder in ladderAreas)
-        {
-            ladder.StartMove(isPlayerTurn);
-        }
-    }*/
-
     
-
     public void ApplySKillEffect(SkillPack skillPack, PieceController caster = null
         , PieceController target = null
         , Vector3 targetPos = default)
