@@ -26,7 +26,7 @@ public class RangeUI : MonoBehaviour
     [SerializeField] private Image arcInnerMask; // 内圆覆盖（实现宽度）
     [SerializeField] private RectTransform arcLine1; // 边线1
     [SerializeField] private RectTransform arcLine2; // 边线2
-    private float circleRadiusFactor = 1f/11f; // 基础缩放系数（对应正圆图片的原始尺寸）
+    private float circleRadiusFactor = 1f / 11f; // 基础缩放系数（对应正圆图片的原始尺寸）
     private bool _isShowMoveIcon = false;
 
     private float circleRadius = 1f / 11f;
@@ -127,45 +127,34 @@ public class RangeUI : MonoBehaviour
         {
             arcRoot.SetActive(true);
 
-            float r = skillPack.arcRadius;
-            //float c = skillPack.rangeValue;
-            float w = skillPack.arcWeight;
-            float d = skillPack.arcCenterDis;
+            float w = skillPack.arcWeight; // 技能宽度
+            float d = skillPack.arcCenterDis; // 圆心距离
+            float l = skillPack.rangeValue; // 弦长
 
-            // --- 第一步：根据 arcRadius 确定正圆图片的缩放尺寸 ---
-            // 假设图片原始半径为 1，则 scale 为 r
-            float outerR = r + w * 0.5f;
-            float innerR = r - w * 0.5f;
+            float r = Mathf.Sqrt(d * d + (l * l) / 4); // 根据圆心距离和弦长计算半径
 
-            arcOuter.transform.localScale = outerR * 2 * circleRadiusFactor * Vector3.one;
-            arcInnerMask.transform.localScale = innerR * 2 * circleRadiusFactor * Vector3.one;
+            // 调整弧线的尺寸以匹配计算得到的半径r
+            arcOuter.transform.localScale = r * circleRadius * Vector3.one;
+            arcInnerMask.transform.localScale = r * circleRadius * Vector3.one;
 
-                // --- 第二步：根据 arcCenterDis 放置 arcRoot 的横向坐标 ---
-            // 这里的“横向”通常指 X 轴（相对于释放者的偏移）
-            arcOuter.rectTransform.localPosition = new Vector3(d*circleRadiusFactor * 2400f, 0, 0);
-            arcInnerMask.rectTransform.localPosition = new Vector3(d*circleRadiusFactor * 2400f, 0, 0);
+            // 调整弧线的位置
+            arcOuter.transform.localPosition = new Vector3(d - w / 2f, 0, l / 2f);
+            arcInnerMask.transform.localPosition = new Vector3(d + w / 2f, 0, l / 2f);
 
-            // --- 第三步：根据 rangeValue (弦长) 计算弧度和 fillAmount ---
-
-            float halfAngleRad = Mathf.Asin(2*r / (2 * r));
-            float totalAngleDeg = (halfAngleRad * 2) * Mathf.Rad2Deg;
-
-            float fill = totalAngleDeg / 360f;
-            arcOuter.fillAmount = fill;
-            arcInnerMask.fillAmount = fill;
-
-            // 旋转调整：让弧线的中点对齐前方（假设向上/向前为 0 度）
-            // Image 的 FillOrigin 通常是 Top，所以需要逆时针转半个角度
-            float rotationOffset = -totalAngleDeg * 0.5f;
-            arcOuter.rectTransform.localRotation = Quaternion.Euler(90, 0, rotationOffset);
-            arcInnerMask.rectTransform.localRotation = Quaternion.Euler(90, 0, rotationOffset);
+            // 根据弦长、半径，计算弧线的弧度值
+            float angle = 2 * Mathf.Asin(l / (2 * r)) * Mathf.Rad2Deg;
+            arcOuter.fillAmount = angle / 360f;
+            arcInnerMask.fillAmount = angle / 360f;
             
+            // 修改旋转为0.5倍的angle
+            arcOuter.transform.localRotation = Quaternion.Euler(90, 0, 180f - angle / 2f);
+            arcInnerMask.transform.localRotation = Quaternion.Euler(90, 0, 180f - angle / 2f);
 
             // --- 第五步：设置两条边线 arcLine1 & arcLine2 ---
-            arcLine1.transform.localScale= new Vector3(w, 1, 1);
-            arcLine2.transform.localScale= new Vector3(w, 1, 1);
+            arcLine1.transform.localScale = new Vector3(w, 1, 1);
+            arcLine2.transform.localScale = new Vector3(w, 1, 1);
             arcLine1.localPosition = new Vector3(0, 0, 0);
-            arcLine2.localPosition = new Vector3(0, 0, 2*r);
+            arcLine2.localPosition = new Vector3(0, 0, l);
         }
     }
 
@@ -334,46 +323,13 @@ public class RangeUI : MonoBehaviour
         }
         else if (arcRoot.activeInHierarchy)
         {
-            HashSet<PieceController> hitPieces = new HashSet<PieceController>();
-            float r = _curSkillPack.arcRadius;
-            float c = _curSkillPack.rangeValue;
-            float w = _curSkillPack.arcWeight;
-    
-            if (c > 2 * r) c = 2 * r;
+            float w = _curSkillPack.arcWeight; // 技能宽度
+            float d = _curSkillPack.arcCenterDis; // 圆心距离
+            float l = _curSkillPack.rangeValue; // 弦长
 
-            float halfAngleRad = Mathf.Asin(c / (2 * r));
-            float totalAngleDeg = (halfAngleRad * 2) * Mathf.Rad2Deg;
-    
-            // 计算弧长：L = r * θ (弧度)
-            float arcLength = r * (halfAngleRad * 2);
-    
-            // 确定检测球的数量。球体直径为 w，所以步长建议为 w，以实现无缝覆盖
-            int sphereCount = Mathf.CeilToInt(arcLength / w) + 1;
-            float sphereRadius = w * 0.5f;
-
-            Vector3 centerPos = arcRoot.transform.position;
-            Quaternion centerRot = arcRoot.transform.rotation;
-
-            for (int i = 0; i <= sphereCount; i++)
-            {
-                // 沿弧线线性插值角度
-                float currentAngle = - (totalAngleDeg * 0.5f) + (i * (totalAngleDeg / sphereCount));
-                Vector3 localPos = Quaternion.Euler(0, currentAngle, 0) * Vector3.forward * r;
-                Vector3 worldPos = centerPos + centerRot * localPos;
-
-                // 执行球体检测
-                Collider[] colliders = Physics.OverlapSphere(worldPos, sphereRadius);
-                foreach (var col in colliders)
-                {
-                    PieceController piece = col.GetComponent<PieceController>();
-                    if (piece != null) hitPieces.Add(piece);
-                }
-        
-                // 调试：显示检测球
-                // OnDrawGizmos 中使用更为合适
-            }
-
-            CheckTarget(hitPieces);
+            float r = Mathf.Sqrt(d * d + (l * l) / 4); // 根据圆心距离和弦长计算半径
+            
+            
         }
     }
 

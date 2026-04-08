@@ -132,6 +132,8 @@ public class PieceDisplay : SerializedMonoBehaviour
 
     #region 加载图片
 
+    #if UNITY_EDITOR
+   
     
 
     [Header(("加载图片"))]
@@ -275,7 +277,7 @@ public class PieceDisplay : SerializedMonoBehaviour
         // 将反射获取到的列表赋值回脚本变量
         field.SetValue(this, allSkills);
     }
-    
+#endif
     #endregion
 }
 
