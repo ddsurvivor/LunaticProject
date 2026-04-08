@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DG.Tweening;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
@@ -343,15 +344,6 @@ public class PieceController : MonoBehaviour
             return;
         }
 
-        Transform atkPos = rangeUI.GetSkillTransform();
-        if (atkPos != null && _curAttackPack.skillVFXType != 0)
-        {
-            ObjectPool.Ins.GenerateObject(
-                _curAttackPack.skillVFXType,
-                atkPos.position + Vector3.up * 3f,
-                atkPos.localRotation);
-        }
-
         Debug.Log("棋子攻击");
         CheckFace(targets[0].transform.position - transform.position);
         if (_curAtkType == ActionType.近战攻击)
@@ -387,8 +379,15 @@ public class PieceController : MonoBehaviour
             {
                 if (!unitAttrCenter.CostMP()) return;
                 BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack,Vector3.zero, _curAtkType);
-
                 rangeUI.CloseRange();
+                Transform atkPos = rangeUI.GetSkillTransform();
+                if (atkPos != null && _curAttackPack.skillVFXType != 0)
+                {
+                    ObjectPool.Ins.GenerateObject(
+                        _curAttackPack.skillVFXType,
+                        atkPos.position + Vector3.up * 3f,
+                        atkPos.localRotation);
+                }
             }, false);
 
         // 技能聚能充能
@@ -538,13 +537,7 @@ public class PieceController : MonoBehaviour
             return;
         }
 
-        if (atkPos != null && _skillPack.skillVFXType != 0)
-        {
-            ObjectPool.Ins.GenerateObject(
-                _skillPack.skillVFXType,
-                atkPos.position + Vector3.up * 3f,
-                atkPos.localRotation);
-        }
+        
 
         if (atkPos != null) CheckFace(atkPos.transform.position - transform.position);
         Debug.Log($"{this.name}发动技能攻击{_skillPack.skillName}，targets数量：{targets.Count}");
@@ -566,10 +559,26 @@ public class PieceController : MonoBehaviour
                 }
 
                 if (!unitAttrCenter.CostItem(_skillPack.consumeItems)) return;
-                BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack, atkPos.position);
-
+                Vector3 skillPos = atkPos != null ? atkPos.position : transform.position;
+                BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack, skillPos);
+    
                 Debug.Log("关闭显示范围");
                 rangeUI.CloseRange();
+                if (atkPos != null && _skillPack.skillVFXType != 0)
+                {
+                    ObjectPool.Ins.GenerateObject(
+                        _skillPack.skillVFXType,
+                        atkPos.position + Vector3.up * 3f,
+                        atkPos.localRotation);
+                }
+                else if (_skillPack.skillVFXType != 0)
+                {
+                    Vector3 pos = targets.Count>0 ? targets[0].transform.position : transform.position;
+                    ObjectPool.Ins.GenerateObject(
+                        _skillPack.skillVFXType,
+                        pos + Vector3.up * 3f,
+                        Quaternion.identity);
+                }
             }, false);
 
         // 技能聚能充能

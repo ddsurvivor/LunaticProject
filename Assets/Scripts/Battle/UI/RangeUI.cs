@@ -125,6 +125,9 @@ public class RangeUI : MonoBehaviour
         }
         else if (skillPack.rangeType == RangeType.Arc)
         {
+            skillCircle.SetActive(true);
+            skillCircle.transform.localScale = skillPack.rangeValue * circleRadius * Vector3.one;
+            
             arcRoot.SetActive(true);
 
             float w = skillPack.arcWeight; // 技能宽度
@@ -135,26 +138,26 @@ public class RangeUI : MonoBehaviour
 
             // 调整弧线的尺寸以匹配计算得到的半径r
             arcOuter.transform.localScale = r * circleRadius * Vector3.one;
-            arcInnerMask.transform.localScale = r * circleRadius * Vector3.one;
-
+            //arcInnerMask.transform.localScale = r * circleRadius * Vector3.one;
+            arcInnerMask.gameObject.SetActive(false);
             // 调整弧线的位置
-            arcOuter.transform.localPosition = new Vector3(d - w / 2f, 0, l / 2f);
-            arcInnerMask.transform.localPosition = new Vector3(d + w / 2f, 0, l / 2f);
+            arcOuter.transform.localPosition = new Vector3((-d)*100, 0, l*100 / 2f);
+            //arcInnerMask.transform.localPosition = new Vector3((-d + w / 2f)*100, 0, l*100 / 4f);
 
             // 根据弦长、半径，计算弧线的弧度值
             float angle = 2 * Mathf.Asin(l / (2 * r)) * Mathf.Rad2Deg;
             arcOuter.fillAmount = angle / 360f;
-            arcInnerMask.fillAmount = angle / 360f;
+            //arcInnerMask.fillAmount = angle / 360f;
             
             // 修改旋转为0.5倍的angle
-            arcOuter.transform.localRotation = Quaternion.Euler(90, 0, 180f - angle / 2f);
-            arcInnerMask.transform.localRotation = Quaternion.Euler(90, 0, 180f - angle / 2f);
+            arcOuter.transform.localRotation = Quaternion.Euler(90, 0, 90f + angle / 2f);//
+            //arcInnerMask.transform.localRotation = Quaternion.Euler(90, 0, 180f - angle / 2f);
 
             // --- 第五步：设置两条边线 arcLine1 & arcLine2 ---
             arcLine1.transform.localScale = new Vector3(w, 1, 1);
             arcLine2.transform.localScale = new Vector3(w, 1, 1);
             arcLine1.localPosition = new Vector3(0, 0, 0);
-            arcLine2.localPosition = new Vector3(0, 0, l);
+            arcLine2.localPosition = new Vector3(0, 0, l*100);
         }
     }
 
@@ -328,10 +331,54 @@ public class RangeUI : MonoBehaviour
             float l = _curSkillPack.rangeValue; // 弦长
 
             float r = Mathf.Sqrt(d * d + (l * l) / 4); // 根据圆心距离和弦长计算半径
+            float innerR = r - w / 2f; // 圆环内半径
+            float outerR = r + w / 2f; // 圆环外半径
+            HashSet<PieceController> hitPieces = new HashSet<PieceController>();
+
+            // 计算圆心角 (弧度转角度)
+            float halfAngleDeg = 2 * Mathf.Asin(l / (2 * r)) * Mathf.Rad2Deg;
             
+            Vector3 centerPos = arcOuter.transform.position;
+            // --- 2. 物理粗筛 (Broad-phase) ---
+            // 以 arcRoot 为圆心，外圆半径为范围，找出所有潜在碰撞体
+            int count = Physics.OverlapSphereNonAlloc(
+                centerPos, 
+                outerR, 
+                _overlapResults
+            );
+
+            Vector3 forward = arcRoot.transform.forward;
+
+            // --- 3. 几何精筛 (Narrow-phase) ---
+            for (int i = 0; i < count; i++)
+            {
+                Collider col = _overlapResults[i];
+                // 通过所有检查，记录目标
+                PieceController piece = col.GetComponent<PieceController>();
+                if (piece == null) continue;
+                
+                Vector3 targetPos = col.transform.position;
+                Vector3 dirToTarget = targetPos - centerPos;
+        
+                // A. 距离过滤 (是否在圆环带厚度内)
+                // 使用 sqrMagnitude (平方和) 避免开方运算，提升性能
+                float distSq = dirToTarget.sqrMagnitude;
+                if (distSq < innerR * innerR || distSq > outerR * outerR)
+                    continue;
+
+                // B. 角度过滤 (是否在圆弧开口内)
+                float angleToTarget = Vector3.Angle(forward, dirToTarget);
+                if (angleToTarget > halfAngleDeg)
+                    continue;
+
+                hitPieces.Add(piece);
+            }
+
+            CheckTarget(hitPieces);
             
         }
     }
+    private Collider[] _overlapResults = new Collider[20]; // 预分配数组提升性能
 
     private void CheckTarget(Collider[] hitColliders)
     {
