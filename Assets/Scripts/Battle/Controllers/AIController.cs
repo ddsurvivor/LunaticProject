@@ -383,7 +383,7 @@ public class AIController : PlayerController
             {
                 Debug.Log("移动到指定点");
                 Vector3 pos = retreatWin.targetPoint.position;
-                EnemyMove(aiPiece, pos, 0f);
+                EnemyMove(aiPiece, pos, 0.5f);
                 retreatWin.CheckTargetReached();// 行动后判定胜利
             }
         }

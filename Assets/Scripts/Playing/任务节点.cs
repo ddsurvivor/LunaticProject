@@ -30,13 +30,14 @@ public class 任务节点 : MonoBehaviour
     
     public void OnClick()
     {
-        detialInfoPanel.SetActive(true);
-        任务描述Text.text = missionDes;
+        大地图System.instance.开始剧情 (name.Replace("(Clone)",""));
+        //detialInfoPanel.SetActive(true);
+        //任务描述Text.text = missionDes;
     }
 
     public void OnClickStart()
     {
-        大地图System.instance.开始剧情 (name.Replace("(Clone)",""));
+        
     }
 
     public void UpdateState()

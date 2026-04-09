@@ -21,9 +21,12 @@ public class BattleManager : MonoBehaviour
 
     public int TunrNumber => _turnNumber;
     private int _turnNumber = 0;
+    
+    private bool inBattle = false;// 是否在战斗中，防止重复初始化
 
     public void Init()
     {
+        inBattle = true;
         _turnNumber = 0;
         PlayerController.Init();
         AIController.Init();
@@ -294,6 +297,8 @@ public class BattleManager : MonoBehaviour
         Debug.Log($"判定敌人棋子全灭：{allEnemyDead}");
         if (allEnemyDead)
         {
+            inBattle = false;
+            AIController.isInTurn = false;
             // 敌方棋子全灭，玩家胜利
             BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家胜利！");
             // 处理胜利事件
@@ -322,14 +327,21 @@ public class BattleManager : MonoBehaviour
         Debug.Log($"检查我方棋子全灭：{allPlayerDead}");
         if (allPlayerDead)
         {
-            Debug.Log("我方棋子全灭，玩家失败");
-            // 我方棋子全灭，玩家失败
-            BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家失败！");
-            // 激活重新开始按钮
-            if (BattleScene.Ins.UM.restartButton != null)
-            {
-                BattleScene.Ins.UM.restartButton.gameObject.SetActive(true);
-            }
+            PlayerLoss();
+        }
+    }
+
+    public void PlayerLoss()
+    {
+        inBattle = false;
+        AIController.isInTurn = false;
+        Debug.Log("我方棋子全灭，玩家失败");
+        // 我方棋子全灭，玩家失败
+        BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家失败！");
+        // 激活重新开始按钮
+        if (BattleScene.Ins.UM.restartButton != null)
+        {
+            BattleScene.Ins.UM.restartButton.gameObject.SetActive(true);
         }
     }
     
