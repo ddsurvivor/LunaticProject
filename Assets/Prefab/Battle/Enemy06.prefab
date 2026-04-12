@@ -25,7 +25,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 614766944702805818}
   m_LocalRotation: {x: 0.35355338, y: -0.35355338, z: 0.1464466, w: 0.8535535}
-  m_LocalPosition: {x: -3.8, y: 0.97, z: 2.64}
+  m_LocalPosition: {x: 1.8, y: 0, z: -0.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -348,6 +348,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3161548303212193212}
   - component: {fileID: 1498894680518421424}
+  - component: {fileID: 1394059289426670404}
   m_Layer: 0
   m_Name: "\u654C\u4EBA\u6807\u8BB0"
   m_TagString: Untagged
@@ -363,7 +364,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2269056485370246481}
   m_LocalRotation: {x: 0.35355338, y: -0.35355338, z: 0.1464466, w: 0.8535535}
-  m_LocalPosition: {x: 0, y: 9.79, z: 0}
+  m_LocalPosition: {x: 0, y: 6.1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -422,6 +423,24 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1394059289426670404
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2269056485370246481}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e9fb94e48a14ab5aa4a3980a150a283, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableRotation: 0
+  rotationSpeed: {x: 0, y: 0, z: 50}
+  enableFloating: 1
+  floatDistance: -1
+  floatDuration: 1
+  floatEase: 7
 --- !u!1 &2820315916246336207
 GameObject:
   m_ObjectHideFlags: 0
@@ -519,6 +538,7 @@ GameObject:
   - component: {fileID: 3435330606817873377}
   - component: {fileID: 190077875118252175}
   - component: {fileID: 439568009330001271}
+  - component: {fileID: 1433800631}
   m_Layer: 11
   m_Name: Enemy06
   m_TagString: Untagged
@@ -963,10 +983,23 @@ MonoBehaviour:
   OnDead:
     m_PersistentCalls:
       m_Calls: []
-  enemyAIType: 1
-  isActived: 0
+  enemyAIType: 6
+  isActived: 1
   deadNotDelete: 0
   navigate: 0
+--- !u!114 &1433800631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2820315917553685404}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c42b1af589deebd4ca8d2ff659e439f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetPoint: {fileID: 0}
 --- !u!1 &5877048452073769702
 GameObject:
   m_ObjectHideFlags: 0

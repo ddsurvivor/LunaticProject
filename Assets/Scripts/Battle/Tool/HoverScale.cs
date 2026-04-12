@@ -57,6 +57,7 @@ public class HoverScale : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         if (rectTransform != null)
             rectTransform.localScale = originalScale;
         isHovered = false;
+        if(originalColor!=null && text!=null) text.color = originalColor;
     }
 
     // Update 作为后备检测：当 OnPointerExit 由于遮挡未能触发时，手动检查鼠标位置

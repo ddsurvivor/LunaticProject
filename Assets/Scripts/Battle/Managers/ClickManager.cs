@@ -115,6 +115,7 @@ public class ClickManager : MonoBehaviour
             _selectedPiece?.CancelSelect();
             //BattleScene.Ins.BM.camera.SetFollow(piece.transform);
             _selectedPiece = piece;
+            piece.OnSelect();
             Debug.Log($"点击棋子{piece.name}");
             //piece.ShowActionList();
             BattleScene.Ins.UM.ShowPieceActionPanel(piece);

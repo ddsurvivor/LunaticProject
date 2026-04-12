@@ -14,6 +14,7 @@ public class RangeUI : MonoBehaviour
     public GameObject skillCircle;
     public GameObject grenadeCircle; // 爆炸范围圈
     public GameObject highlightCircle;
+    public GameObject selectCircle;
     public GameObject fanRoot; // 扇形范围根节点
     public Image fanCircle; // 扇形范围圈
     public GameObject fanLine1;
@@ -173,6 +174,7 @@ public class RangeUI : MonoBehaviour
         highlightCircle.SetActive(false);
         fanRoot.SetActive(false);
         arcRoot.SetActive(false);
+        ShowSelect(false);
         foreach (var piece in _curTargets)
         {
             piece.rangeUI?.ShowHighlight(false);
@@ -514,6 +516,11 @@ public class RangeUI : MonoBehaviour
         }
 
         return null;
+    }
+    
+    public void ShowSelect(bool option)
+    {
+        selectCircle.SetActive(option);
     }
 
 

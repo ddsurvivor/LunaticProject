@@ -234,11 +234,15 @@ public class PieceController : MonoBehaviour
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
     }
 
+    public void OnSelect()
+    {
+        rangeUI?.ShowSelect(true);
+    }
     public void CancelSelect()
     {
         Debug.Log("取消选择棋子");
         _isAttacking = false;
-        rangeUI.CloseRange();
+        rangeUI?.CloseRange();
         // _actionListPanel.gameObject.SetActive(false);
         BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
     }
