@@ -892,6 +892,17 @@ public class 剧本System : MonoBehaviour
                     player.spriteName = $"PC0{index + 1}01";
                 }
             }
+
+            if (key.Contains(Center.Command_LoadScene))
+            {
+                // 跳转场景
+                var prams = 指令切割(key);
+                if (prams.Length >= 1)
+                {
+                    string sceneName = prams[0];
+                    UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
+                }
+            }
         }
     }
 
