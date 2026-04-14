@@ -51,6 +51,15 @@ public class PlayerController : SerializedMonoBehaviour
         {
             piece.TurnStart();
         }
+        // 相机锁定第一个棋子
+        foreach (var piece in pieces)
+        {
+            if (piece.gameObject.activeInHierarchy && !piece.isDead)
+            {
+                BattleScene.Ins.BM.camera.SetFollow(piece.transform);
+                break;
+            }
+        }
 
         BattleScene.Ins.UM.endTurnButton.enabled = false;
         BattleScene.Ins.UM.OnTurnStart();

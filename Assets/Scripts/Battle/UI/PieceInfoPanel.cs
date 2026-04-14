@@ -1,4 +1,5 @@
 
+using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -108,4 +109,54 @@ using UnityEngine.UI;
         }
     }
 
+    private List<Coroutine> mpIconBlinkCoroutines = new();
+    // 启动前 count 个 mpIcons 的闪烁
+    public void StartMpIconsBlink(int count=1)
+    {
+        StopMpIconsBlink();
+        List<GameObject> activeIcons = new();
+        activeIcons.AddRange(mpIcons.FindAll(icon => icon.activeInHierarchy));
+        int total = activeIcons.Count;
+        for (int i = total - count; i < total; i++)
+        {
+            if (i >= 0 && i < total)
+            {
+                var coroutine = StartCoroutine(BlinkIcon(activeIcons[i]));
+                mpIconBlinkCoroutines.Add(coroutine);
+            }
+        }
+    }
+    // 停止所有 mpIcons 的闪烁
+    public void StopMpIconsBlink()
+    {
+        foreach (var coroutine in mpIconBlinkCoroutines)
+        {
+            if (coroutine != null)
+                StopCoroutine(coroutine);
+        }
+        mpIconBlinkCoroutines.Clear();
+
+        // 恢复所有 mpIcons 的正常显示
+        foreach (var icon in mpIcons)
+        {
+            var img = icon.GetComponent<Image>();
+            if (img != null)
+                img.color = Color.white;
+        }
+    }
+
+    // 闪烁协程
+    private IEnumerator BlinkIcon(GameObject icon)
+    {
+        var img = icon.GetComponent<Image>();
+        if (img == null) yield break;
+        bool visible = true;
+        while (true)
+        {
+            img.color = visible ? Color.white : new Color(1, 1, 1, 0.3f);
+            visible = !visible;
+            yield return new WaitForSeconds(0.3f);
+        }
+    }
+    
 }

@@ -96,6 +96,7 @@ public class ClickManager : MonoBehaviour
                 _rangeUI.CloseRange();
             }
             BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
+            BattleScene.Ins.UM.pieceInfoPanel.StopMpIconsBlink();
         }
     }
 
