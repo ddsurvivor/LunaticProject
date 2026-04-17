@@ -19,6 +19,8 @@ public class CharacterUIPage : MonoBehaviour
     // 在 Inspector 里将背包区域预先放好的 N 个格子全部拖进来
     public List<UIItemSlot> inventoryUISlots = new List<UIItemSlot>();
     
+    [SerializeField]
+    private List<AttrModRow> rowList = new List<AttrModRow>();
     public SkillPointPanel skillPointPanel;
     public void ShowPanel(Player player)
     {
@@ -26,6 +28,16 @@ public class CharacterUIPage : MonoBehaviour
         RefreshUI();
         gameObject.SetActive(true);
         detailPanel.gameObject.SetActive(false);
+        for (int i = 0; i < 10; i++)
+        {
+            if (i >= rowList.Count) break;
+            AttrModRow row = rowList[i];
+            // 直接通过编号读取属性名和当前值
+            string attrName = player.GetAttrName(i);
+            int currentVal = player.AccessAttribute(i, AttrOp.Get);
+
+            row.Setup(attrName, currentVal, 200);
+        }
     }
 
     

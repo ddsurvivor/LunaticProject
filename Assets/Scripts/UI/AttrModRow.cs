@@ -42,7 +42,7 @@ public class AttrModRow : MonoBehaviour {
 
     public void UpdateUI() {
         valueText.text = baseValue.ToString();
-        pendingAddText.text = pendingAdd > 0 ? "+" + pendingAdd : "0";
+        if(pendingAddText!=null) pendingAddText.text = pendingAdd > 0 ? "+" + pendingAdd : "0";
         progressBar.transform.localScale = new Vector3((float)baseValue / maxValue, 1, 1);
         modBar.transform.localScale = new Vector3((float)(baseValue + pendingAdd) / maxValue, 1, 1);
     }
