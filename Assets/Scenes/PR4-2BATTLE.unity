@@ -15636,6 +15636,7 @@ MonoBehaviour:
   pieceDataListSO: {fileID: 0}
   areaList: []
   finishDrop: {fileID: 0}
+  finishExp: 100
   gray: {fileID: 0}
   grayEnemy: {fileID: 0}
 --- !u!114 &1713777225
@@ -15699,6 +15700,7 @@ MonoBehaviour:
     SerializationNodes: []
   pieces:
   - {fileID: 439568009738135947}
+  keyPieces: []
   isInTurn: 0
   isBursting: 0
   burstCharge: 0
@@ -15766,6 +15768,7 @@ MonoBehaviour:
       Entry: 8
       Data: 
   turnPanel: {fileID: 1081070822}
+  turnImage: []
   endTurnButton: {fileID: 1052199133}
   infoBox: {fileID: 797644601}
   burstButton: {fileID: 588414090}
@@ -15779,6 +15782,7 @@ MonoBehaviour:
   skillNamText: {fileID: 0}
   logSystem: {fileID: 0}
   messagePanel: {fileID: 0}
+  logPanel: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15804,6 +15808,7 @@ MonoBehaviour:
   - {fileID: 320141623}
   - {fileID: 1554963771}
   - {fileID: 1663419304}
+  keyPieces: []
   isInTurn: 1
   isBursting: 0
   burstCharge: 0
@@ -17120,10 +17125,16 @@ MonoBehaviour:
   skillCircle: {fileID: 0}
   grenadeCircle: {fileID: 0}
   highlightCircle: {fileID: 0}
+  selectCircle: {fileID: 0}
   fanRoot: {fileID: 0}
   fanCircle: {fileID: 0}
   fanLine1: {fileID: 0}
   fanLine2: {fileID: 0}
+  arcRoot: {fileID: 0}
+  arcOuter: {fileID: 0}
+  arcInnerMask: {fileID: 0}
+  arcLine1: {fileID: 0}
+  arcLine2: {fileID: 0}
 --- !u!4 &1830372241
 Transform:
   m_ObjectHideFlags: 0
@@ -20135,6 +20146,10 @@ PrefabInstance:
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 250236510420190770, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+    - target: {fileID: 922511613884213275, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_RootOrder
+      value: 14
+      objectReference: {fileID: 0}
     - target: {fileID: 938954361116868618, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -20298,6 +20313,10 @@ PrefabInstance:
     - target: {fileID: 5450057616862123614, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5894177824596357264, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_RootOrder
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 6125615602083476748, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y
@@ -20468,6 +20487,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2123997333}
     - target: {fileID: 6793405397572969135, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: finishExp
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 6793405397572969135, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: ladderAreas.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -20506,6 +20529,10 @@ PrefabInstance:
     - target: {fileID: 7446548641573111303, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7716796170780293752, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_RootOrder
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 8034030942075161069, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y
