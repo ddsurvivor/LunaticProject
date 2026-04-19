@@ -66,20 +66,18 @@ public class Player
         switch (index) {
             
             // 自动读取属性系列
-            case 0: return Execute(ref _hpmax, op, val);//最大 生命值
-            case 1: return Execute(ref staying, op, val);//耐力
-            case 2: return Execute(ref stayingMax, op, val);//体力
-            case 3: return Execute(ref yizhi, op, val);//意志
-            case 4: return Execute(ref tactics, op, val);
-            case 5: return Execute(ref Physique, op, val);
-            case 6: return Execute(ref Talk, op, val);
-            case 7: return Execute(ref Recognition, op, val);
-            //case 9: return Execute(ref exp, op, val);
-            
+            case 0: return Execute(ref yizhi, op, val);//意志
+            case 1: return Execute(ref tactics, op, val);
+            case 2: return Execute(ref Physique, op, val);
+            case 3: return Execute(ref Talk, op, val);
+            case 4: return Execute(ref Recognition, op, val);
+
             // 手动修改属性系列
             case 21: return Execute(ref skillPoints, op, val);
             case 22: return ExecuteExp(ref exp, op, val);
             case 23: return Execute(ref level, op, val);
+            case 24: return Execute(ref curHealth, op, val);// 当前生命值
+            case 25: return Execute(ref curMana, op, val);// 当前能量
             default: return 0;
         }
     }
@@ -114,14 +112,12 @@ public class Player
     {
         return index switch
         {
-            0 => "最大生命",
-            1 => "耐力",
-            2 => "体力",
-            3 => "意志",
-            4 => "作战",
-            5 => "体能",
-            6 => "沟通",
-            7 => "模式识别",
+            0 => "意志",
+            1 => "作战",
+            2 => "体能",
+            3 => "沟通",
+            4 => "模式识别",
+            
             21 => "技能点",
             22 => "经验值",
             23 => "等级",

@@ -24,6 +24,7 @@ public class CharacterUnitUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public SkillPointPanel skillPointPanel;
     public CharacterUIPage characterUIPage;
+
     void OnEnable()
     {
         InitBasicInfo();
@@ -56,9 +57,12 @@ public class CharacterUnitUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         playerData = GM.Ins.PLAYERPROFILE.GetPlayer(unitID); // 确保数据是最新的
         for (int i = 0; i < 10; i++)
         {
-            string n = playerData.GetAttrName(i);
-            int v = playerData.AccessAttribute(i, AttrOp.Get);
-            if (i < cachedRows.Count) cachedRows[i].UpdateInfo(n, v);
+            if (i < cachedRows.Count)
+            {
+                string n = playerData.GetAttrName(i);
+                int v = playerData.AccessAttribute(i, AttrOp.Get);
+                cachedRows[i].UpdateInfo(n, v);
+            }
         }
     }
 

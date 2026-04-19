@@ -16,6 +16,8 @@ public class SkillPointPanel : MonoBehaviour
 
     [SerializeField]
     private List<AttrModRow> rowList = new List<AttrModRow>();
+
+    public AttrModRow expRow;
     private int tempPoints;
 
     private bool hasInited;
@@ -46,6 +48,9 @@ public class SkillPointPanel : MonoBehaviour
 
             row.Setup(attrName, currentVal, 200);
         }
+
+        int expMax = 20;// 从levelSO里读取
+        expRow.Setup(playerData.GetAttrName(22),playerData.AccessAttribute(22, AttrOp.Get),expMax);
     }
 
     void InitPanel()

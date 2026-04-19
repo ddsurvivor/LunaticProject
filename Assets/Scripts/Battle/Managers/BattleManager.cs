@@ -300,25 +300,7 @@ public class BattleManager : MonoBehaviour
         Debug.Log($"判定敌人棋子全灭：{allEnemyDead}");
         if (allEnemyDead)
         {
-            inBattle = false;
-            AIController.isInTurn = false;
-            // 敌方棋子全灭，玩家胜利
-            BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家胜利！");
-            // 处理胜利事件
-            if (finishDrop != null) finishDrop.DropItems();
-            if (finishExp > 0)
-            {
-                foreach (var player in  GM.Ins.PLAYERPROFILE.player)
-                {
-                    if (player != null && player.HP > 0)
-                    {
-                        player.AccessAttribute(23, AttrOp.Add, finishExp);
-                    }
-                }
-            }
-            PlayerController.EndBurstMode();// 结束聚能状态
-            // 延迟后退出战斗
-            DOVirtual.DelayedCall(1.0f, () => { BattleScene.Ins.BM.OnClickQuitBattle(); });
+            PlayerWin();
             return;
         }
 
@@ -342,6 +324,29 @@ public class BattleManager : MonoBehaviour
         {
             PlayerLoss();
         }
+    }
+
+    public void PlayerWin()
+    {
+        inBattle = false;
+        AIController.isInTurn = false;
+        // 敌方棋子全灭，玩家胜利
+        BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家胜利！");
+        // 处理胜利事件
+        if (finishDrop != null) finishDrop.DropItems();
+        if (finishExp > 0)
+        {
+            foreach (var player in  GM.Ins.PLAYERPROFILE.player)
+            {
+                if (player != null && player.HP > 0)
+                {
+                    player.AccessAttribute(22, AttrOp.Add, finishExp);
+                }
+            }
+        }
+        PlayerController.EndBurstMode();// 结束聚能状态
+        // 延迟后退出战斗
+        DOVirtual.DelayedCall(1.0f, () => { BattleScene.Ins.BM.OnClickQuitBattle(); });
     }
 
     public void PlayerLoss()
