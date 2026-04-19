@@ -71,6 +71,7 @@ public class PieceController : MonoBehaviour
     public bool isIdle; // 是否处于待机状态
 
     public bool cantControl; // 无法被控制（眩晕等状态）
+    public bool ableMove = true; // 是否能移动
 
     [FoldoutGroup("事件")] public UnityEvent OnInit;
     [FoldoutGroup("事件")] public UnityEvent OnTurnStart;

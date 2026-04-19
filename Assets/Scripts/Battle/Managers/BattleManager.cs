@@ -446,6 +446,7 @@ public class BattleManager : MonoBehaviour
     private void HitBackEffect(HitBackEffect hitBackEffect,  PieceController caster = null
         ,PieceController target = null, Vector3 targetPos = default)
     {
+        if(target.ableMove == false) return;
         Vector3 dir = (target.transform.position - caster.transform.position);
         dir.y = 0;
         dir.Normalize();
