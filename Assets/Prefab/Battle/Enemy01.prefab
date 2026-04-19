@@ -450,6 +450,9 @@ MonoBehaviour:
   _moveRange: 5
   _tauntValue: 0
   _ammoCount: 0
+  _maxAmmoCount: 3
+  _manaPoint: 0
+  _maxManaPoint: 0
   hpBarFill: {fileID: 7612674177862844641}
   OnDead:
     m_PersistentCalls:
@@ -509,6 +512,8 @@ MonoBehaviour:
   shootBackSprite: {fileID: 0}
   dodgeBackSprite: {fileID: 0}
   hitBackSprite: {fileID: 0}
+  path: "Assets/A\u7F8E\u672F/BattleSprites/\u9A6C\u8D5B\u6210\u5E74\u52A8\u4F5C"
+  pieceName: PC03A
 --- !u!114 &439568009330001271
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -542,6 +547,8 @@ MonoBehaviour:
       rangeValue: 0
       rangeAgle: 0
       explodeRadius: 0
+      arcWeight: 0
+      arcCenterDis: 0
       skillVFXType: 0
       attackPacks: []
       atkTimes: 1
@@ -561,6 +568,8 @@ MonoBehaviour:
       rangeValue: 0
       rangeAgle: 0
       explodeRadius: 0
+      arcWeight: 0
+      arcCenterDis: 0
       skillVFXType: 0
       attackPacks: []
       atkTimes: 1
@@ -579,6 +588,14 @@ MonoBehaviour:
     maxMana: 0
     dropItemList: []
     dropRate: 0
+  playerData:
+    curHealth: 0
+    curAmmo: 0
+    curMana: 0
+    spriteName: 
+    normalSlots: 000000000000000000000000
+    weaponSlots: 0000000000000000
+    componentInventory: 
   pieceID: 1001
   player: {fileID: 0}
   isPlayerPiece: 0
@@ -594,6 +611,8 @@ MonoBehaviour:
     rangeValue: 0
     rangeAgle: 0
     explodeRadius: 0
+    arcWeight: 0
+    arcCenterDis: 0
     skillVFXType: 0
     attackPacks: []
     atkTimes: 1
