@@ -19,13 +19,12 @@ public class BattleManager : MonoBehaviour
     //public List<LadderArea> ladderAreas = new();
     public List<HealArea> areaList = new(); // 
     public FinishDrop finishDrop;
-    [LabelText("战斗胜利经验值")]
-    public int finishExp = 100;
+    [LabelText("战斗胜利经验值")] public int finishExp = 100;
 
     public int TunrNumber => _turnNumber;
     private int _turnNumber = 0;
-    
-    private bool inBattle = false;// 是否在战斗中，防止重复初始化
+
+    private bool inBattle = false; // 是否在战斗中，防止重复初始化
 
     public void Init()
     {
@@ -34,6 +33,9 @@ public class BattleManager : MonoBehaviour
         PlayerController.Init();
         AIController.Init();
         PlayerStart();
+
+        //gray = Resources.Load<Material>("Materials/Gray");
+        //grayEnemy = Resources.Load<Material>("Materials/GrayEnemy");
     }
 
     public void ChangeTurn()
@@ -219,10 +221,10 @@ public class BattleManager : MonoBehaviour
                 {
                     damageInfos.Add(new DamageInfo(realDamage, attackPack.damageType.ToChinese()));
                 }
-                
             }
+
             damageInfoList.Add(damageInfos);
-            
+
 
             // 处理buff
             foreach (var buffPack in skillPack.buffPacks)
@@ -249,21 +251,22 @@ public class BattleManager : MonoBehaviour
             // 处理附加效果
             ApplySKillEffect(skillPack, attacker, target, targetPos);
             ApplyAddEffect(skillPack, attacker, target, targetPos);
-            if (attacker.player.isBursting)// 聚能状态下所有攻击附加击退效果
+            if (attacker.player.isBursting) // 聚能状态下所有攻击附加击退效果
             {
-                SpaceBombEffect(skillPack, attacker, target, targetPos);// 去除假死
+                SpaceBombEffect(skillPack, attacker, target, targetPos); // 去除假死
                 // 击退距离为默认值加上每10点伤害增加0.5f
                 float dis = 1f + damageInfos.Sum(d => d.damageValue) / 10f * 0.5f;
                 HitBackEffect(new HitBackEffect { dis = dis }, attacker, target, targetPos);
             }
         }
+
         // 操作记录系统
         BattleScene.Ins.UM.logPanel.PlayerLogAttack(attacker.pieceData.pieceName,
             actionType == 0 ? skillPack.skillName : actionType.ToString(),
             targets.Select(t => t.pieceData.pieceName).ToList(),
             damageInfoList
         );
-        if(targets.Count>0) BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
+        if (targets.Count > 0) BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
         // 处理聚能充能效果，多段伤害只充能一次
         if (attacker.isPlayerPiece)
         {
@@ -273,9 +276,10 @@ public class BattleManager : MonoBehaviour
                 PlayerController.ChargeBurst(GameConst.attackBurstCharge);
             }
         }
+
         // 处理附加效果
         ApplySKillEffectOnce(skillPack, attacker, targetPos);
-        
+
         //BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
     }
 
@@ -291,6 +295,7 @@ public class BattleManager : MonoBehaviour
                 break;
             }
         }
+
         if (AIController.keyPieces.Count > 0 && AIController.keyPieces.All(k => k.isDead))
         {
             // 如果有关键棋子，且所有关键棋子都死了，也算敌方全灭
@@ -319,6 +324,7 @@ public class BattleManager : MonoBehaviour
         {
             allPlayerDead = true;
         }
+
         Debug.Log($"检查我方棋子全灭：{allPlayerDead}");
         if (allPlayerDead)
         {
@@ -336,7 +342,7 @@ public class BattleManager : MonoBehaviour
         if (finishDrop != null) finishDrop.DropItems();
         if (finishExp > 0)
         {
-            foreach (var player in  GM.Ins.PLAYERPROFILE.player)
+            foreach (var player in GM.Ins.PLAYERPROFILE.player)
             {
                 if (player != null && player.HP > 0)
                 {
@@ -344,7 +350,8 @@ public class BattleManager : MonoBehaviour
                 }
             }
         }
-        PlayerController.EndBurstMode();// 结束聚能状态
+
+        PlayerController.EndBurstMode(); // 结束聚能状态
         // 延迟后退出战斗
         DOVirtual.DelayedCall(1.0f, () => { BattleScene.Ins.BM.OnClickQuitBattle(); });
     }
@@ -362,7 +369,7 @@ public class BattleManager : MonoBehaviour
             BattleScene.Ins.UM.restartButton.gameObject.SetActive(true);
         }
     }
-    
+
     public void ApplySKillEffect(SkillPack skillPack, PieceController caster = null
         , PieceController target = null
         , Vector3 targetPos = default)
@@ -373,7 +380,7 @@ public class BattleManager : MonoBehaviour
             {
                 case SkillEffect.SpaceBomb:
                     SpaceBombEffect(skillPack, caster, target, targetPos);
-                    
+
                     break;
                 default:
                     break;
@@ -398,6 +405,7 @@ public class BattleManager : MonoBehaviour
             }
         }
     }
+
     public void ApplySKillEffectOnce(SkillPack skillPack, PieceController caster = null
         , Vector3 targetPos = default)
     {
@@ -423,13 +431,14 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    private void ApplyAddEffect(SkillPack skillPack,  PieceController caster = null
-        ,PieceController target = null, Vector3 targetPos = default)
+    private void ApplyAddEffect(SkillPack skillPack, PieceController caster = null
+        , PieceController target = null, Vector3 targetPos = default)
     {
-        if (skillPack.additionalEffects==null || skillPack.additionalEffects.Count == 0)
+        if (skillPack.additionalEffects == null || skillPack.additionalEffects.Count == 0)
         {
             return;
         }
+
         foreach (var effectBase in skillPack.additionalEffects)
         {
             switch (effectBase)
@@ -443,10 +452,10 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    private void HitBackEffect(HitBackEffect hitBackEffect,  PieceController caster = null
-        ,PieceController target = null, Vector3 targetPos = default)
+    private void HitBackEffect(HitBackEffect hitBackEffect, PieceController caster = null
+        , PieceController target = null, Vector3 targetPos = default)
     {
-        if(target.ableMove == false) return;
+        if (target.ableMove == false) return;
         Vector3 dir = (target.transform.position - caster.transform.position);
         dir.y = 0;
         dir.Normalize();
@@ -507,9 +516,10 @@ public class BattleManager : MonoBehaviour
             {
                 PieceController piece = collider.transform.GetComponent<PieceController>();
                 if (piece == null) continue;
-                if(!piece.gameObject.activeInHierarchy) continue;
+                if (!piece.gameObject.activeInHierarchy) continue;
                 newTargets.Add(piece);
             }
+
             if (_delaySkillTargetPos != null && _delaySkillPack.skillVFXType != 0)
             {
                 ObjectPool.Ins.GenerateObject(
@@ -517,17 +527,42 @@ public class BattleManager : MonoBehaviour
                     _delaySkillTargetPos + Vector3.up * 3f,
                     Quaternion.identity);
             }
+
             PieceSkill(_delaySkillCaster, newTargets, _delaySkillPack, _delaySkillTargetPos);
             _delaySkillEffectObj.SetActive(false);
             _delaySkillPack = null;
         }
     }
-    
+
     [SerializeField] private Material gray;
     [SerializeField] private Material grayEnemy;
+
     /// <summary>
     /// 聚能状态下的特殊视觉效果（如屏幕变灰）
     /// </summary>
+    // public void ShowBurstGray(bool option)
+    // {
+    //     if (gray != null && grayEnemy != null)
+    //     {
+    //         // 获取场景中所有Renderer
+    //         var renderers = FindObjectsOfType<Renderer>();
+    //         foreach (var renderer in renderers)
+    //         {
+    //             foreach (var mat in renderer.sharedMaterials)
+    //             {
+    //                 if (mat == null) continue;
+    //
+    //                 if (option)
+    //                     mat.EnableKeyword("GREYSCALE_ON");
+    //                 else
+    //                     mat.DisableKeyword("GREYSCALE_ON");
+    //             }
+    //         }
+    //
+    //         Debug.Log("设置灰色滤镜: " + option);
+    //     }
+    // }
+
     public void ShowBurstGray(bool option)
     {
         // 把 gray材质上的shader里的GREYSCALE_ON属性打开，所有使用这个材质的图片就会变灰
@@ -535,6 +570,9 @@ public class BattleManager : MonoBehaviour
         {
             if (option)
             {
+                // 获取场景中所有这个材质的物品
+                
+                
                 gray.EnableKeyword("GREYSCALE_ON");
                 grayEnemy.EnableKeyword("GREYSCALE_ON");
             }
@@ -549,8 +587,7 @@ public class BattleManager : MonoBehaviour
     // 或者在程序退出时
     void OnApplicationQuit()
     {
-        gray.DisableKeyword("GREYSCALE_ON");
-        grayEnemy.DisableKeyword("GREYSCALE_ON");
+        ShowBurstGray(false);
     }
 
 
@@ -565,13 +602,14 @@ public class BattleManager : MonoBehaviour
                 var playerPiece = PlayerController.pieces[i];
                 if (playerPiece != null)
                 {
-                    GM.Ins.PLAYERPROFILE.SetPlayer(i, 
-                        playerPiece.unitAttrCenter.CurHealth, 
-                        playerPiece.unitAttrCenter.AmmoCount, 
+                    GM.Ins.PLAYERPROFILE.SetPlayer(i,
+                        playerPiece.unitAttrCenter.CurHealth,
+                        playerPiece.unitAttrCenter.AmmoCount,
                         playerPiece.unitAttrCenter.ManaPoint);
                 }
             }
         }
+
         // 退出战斗，返回主界面
         GM.Ins.BattleEnd();
     }
