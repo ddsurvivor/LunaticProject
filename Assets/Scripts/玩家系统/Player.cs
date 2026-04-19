@@ -13,9 +13,9 @@ public class Player
     [ShowInInspector][ReadOnly]private string name;
     [ShowInInspector][ReadOnly]private int hp;
     [ShowInInspector][ReadOnly]private int _hpmax;
-    [ShowInInspector][ReadOnly]private int staying;
-    [ShowInInspector][ReadOnly]private int stayingMax;
-    [ShowInInspector][ReadOnly]private int yizhi;
+    [ShowInInspector][ReadOnly]private int staying;//耐力
+    [ShowInInspector][ReadOnly]private int stayingMax;//体力
+    [ShowInInspector][ReadOnly]private int yizhi;//意志
     [ShowInInspector][ReadOnly]private int tactics;//作战
     [ShowInInspector][ReadOnly]int Physique;//体能
     [ShowInInspector][ReadOnly]private int Talk;//沟通
@@ -66,10 +66,10 @@ public class Player
         switch (index) {
             
             // 自动读取属性系列
-            case 0: return Execute(ref _hpmax, op, val);
-            case 1: return Execute(ref staying, op, val);
-            case 2: return Execute(ref stayingMax, op, val);
-            case 3: return Execute(ref yizhi, op, val);
+            case 0: return Execute(ref _hpmax, op, val);//最大 生命值
+            case 1: return Execute(ref staying, op, val);//耐力
+            case 2: return Execute(ref stayingMax, op, val);//体力
+            case 3: return Execute(ref yizhi, op, val);//意志
             case 4: return Execute(ref tactics, op, val);
             case 5: return Execute(ref Physique, op, val);
             case 6: return Execute(ref Talk, op, val);

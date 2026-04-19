@@ -240,8 +240,8 @@ public class PLAYERPROFILE
         if (index < 0 || index >= player.Length)
         {
             
-            Debug.LogError($"修改属性时index越界!index = {index}");
-            return new Player();
+            Debug.LogWarning($"修改属性时index越界!index = {index}");
+            return null;
         }
         return player[index];
     }

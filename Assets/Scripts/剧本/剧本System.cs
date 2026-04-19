@@ -271,8 +271,8 @@ public class 剧本System : MonoBehaviour
     public void LoadImageWithFade(string imageName, Image targetimg, int fadeType = 3
         , float duration = -1)
     {
-        if (FULLCG.gameObject.activeInHierarchy) FULLCG.gameObject.SetActive(false);
-        if (HALFCG.gameObject.activeInHierarchy) HALFCG.gameObject.SetActive(false);
+        if (FULLCG.gameObject.activeInHierarchy) FULLCG.transform.parent.gameObject.SetActive(false);
+        if (HALFCG.gameObject.activeInHierarchy) HALFCG.transform.parent.gameObject.SetActive(false);
         if (duration < 0)
         {
             duration = CG淡入淡出时间;
@@ -749,13 +749,13 @@ public class 剧本System : MonoBehaviour
                 Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height)
                     , new Vector2(0.5f, 0.5f));
                 FULLCG.sprite = sprite;
-                FULLCG.gameObject.SetActive(true);
+                FULLCG.transform.parent.gameObject.SetActive(true);
                 FULLCG.color = new Color(1, 1, 1, 0);
                 Sequence sequence = DOTween.Sequence();
                 sequence.Append(FULLCG.DOFade(1f, fadeTime));
                 sequence.AppendInterval(duration);
                 sequence.Append(FULLCG.DOFade(0f, fadeTime));
-                sequence.AppendCallback(() => FULLCG.gameObject.SetActive(false));
+                sequence.AppendCallback(() => FULLCG.transform.parent.gameObject.SetActive(false));
             }
 
             if (key.Contains(Center.Command_HalfCG)) // 半屏CG
@@ -783,7 +783,7 @@ public class 剧本System : MonoBehaviour
                 Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height)
                     , new Vector2(0.5f, 0.5f));
                 HALFCG.sprite = sprite;
-                HALFCG.gameObject.SetActive(true);
+                HALFCG.transform.parent.gameObject.SetActive(true);
                 HALFCG.color = new Color(1, 1, 1, 0);
                 Sequence sequence = DOTween.Sequence();
                 sequence.Append(HALFCG.DOFade(1f, fadeTime));

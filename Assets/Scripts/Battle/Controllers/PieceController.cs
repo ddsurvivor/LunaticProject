@@ -31,6 +31,8 @@ public class PieceController : MonoBehaviour
 
     public PieceData pieceData => _pieceData;
 
+    public Player playerData;
+
     public int pieceID; // 棋子ID
 
     [HideInInspector] public PlayerController player;
@@ -79,6 +81,7 @@ public class PieceController : MonoBehaviour
     public void Init(PlayerController player, PieceData pieceData = null)
     {
         this.player = player;
+        this.playerData = GM.Ins.PLAYERPROFILE.GetPlayer(pieceID - 1);
         //unitAttrCenter.Init();
         if (isPlayerPiece)
         {
@@ -97,7 +100,7 @@ public class PieceController : MonoBehaviour
         {
             _pieceData = pieceData;
             availableSkills = pieceData?.skillPacks;
-            unitAttrCenter.SetData(_pieceData);
+            unitAttrCenter.SetData(_pieceData,playerData);
             if (isPlayerPiece && GM.Ins.pieceHPInherit)
             {
                 Player playerData = GM.Ins.PLAYERPROFILE.GetPlayer(pieceID - 1);

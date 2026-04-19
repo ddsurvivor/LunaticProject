@@ -55,11 +55,11 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     private int _ammoCount;
 
     public int AmmoCount => _ammoCount;
-    private int _maxAmmoCount = 3;
+    [SerializeField] [ReadOnly]private int _maxAmmoCount = 3;
     public int MaxAmmoCount => _maxAmmoCount;
 
-    private int _manaPoint;
-    private int _maxManaPoint;
+    [SerializeField] [ReadOnly] private int _manaPoint;
+    [SerializeField] [ReadOnly]private int _maxManaPoint;
     public int ManaPoint => _manaPoint;
     public int MaxManaPoint => _maxManaPoint;
 
@@ -75,11 +75,12 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     public void Init()
     {
         _curHealth = _maxHealth;
+        //_manaPoint = _maxManaPoint;
         InitBuffAttrDic();
         FullAmmo();
     }
 
-    public void SetData(PieceData pieceData)
+    public void SetData(PieceData pieceData, Player playerData = null)
     {
         _maxAmmoCount = pieceData.maxAmmoCount;
         _maxHealth = pieceData.maxHealth;
@@ -88,6 +89,13 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         elementType = pieceData.elementType;
         _maxManaPoint = pieceData.maxMana;
         _manaPoint = pieceData.initialMana;
+        if (playerData != null)
+        {
+            // 根据玩家属性调整单位属性
+            _maxHealth += playerData.AccessAttribute(5, AttrOp.Get) * 2; // 体能每点增加2点生命
+            _maxManaPoint += playerData.AccessAttribute(3, AttrOp.Get) * 2; // 意志每点增加2点能量
+            // 其他属性调整可以在这里添加
+        }
         Init();
         buffAttrDic[BuffAttrType.EvasionRate] = pieceData.evasionRate;
     }
