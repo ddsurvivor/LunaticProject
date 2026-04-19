@@ -78,7 +78,11 @@ public class PieceActionListPanel : SerializedMonoBehaviour
         {
             // 计算棋子在屏幕中的位置，更新行动面板的位置
             Vector3 screenPos = Camera.main.WorldToScreenPoint(pc.transform.position);
-            transform.position = screenPos + new Vector3(150, 0, 0);
+            float offsetX = 150;
+            if (screenPos.x + 400f > 1920f) {
+                offsetX = -220f;
+            }
+            transform.position = screenPos + new Vector3(offsetX, 100, 0);
         }
     }
 

@@ -50,14 +50,16 @@ public class 大地图System : SerializedMonoBehaviour
 
     private void OnEnable()
     {
-        //进入大地图调用特殊剧情();
+        
     }
 
-    public void 进入大地图调用特殊剧情()
+    public void StartFirstNode()
     {
         if (GM.Ins.PLAYERPROFILE.isNewGame)
         {
+            Debug.Log("检测到新游戏,开始第一章剧情");
             大地图System.instance.开始剧情("PR1");
+            GM.Ins.PLAYERPROFILE.isNewGame = false;
         }
     }
 
@@ -90,7 +92,7 @@ public class 大地图System : SerializedMonoBehaviour
         Debug.Log("测试中,打开第一张地图");
         // TODO:根据存档打开地图
         //打开地图("TEST");
-        if(!isDebugMode) UpdateMission();
+        
         foreach (var VARIABLE in 地图)
         {
             if (VARIABLE.gameObject.activeInHierarchy)
@@ -99,6 +101,11 @@ public class 大地图System : SerializedMonoBehaviour
                 当前地图.transform.localScale = Vector3.one;
                 VARIABLE.SetActive(true);
             }
+        }
+        if (!isDebugMode)
+        {
+            UpdateMission();
+            StartFirstNode();
         }
     }
 

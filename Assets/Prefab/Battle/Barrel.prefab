@@ -169,7 +169,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 9f81f637447f9994faa623d845f67cec, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -421,6 +421,9 @@ MonoBehaviour:
   _moveRange: 0
   _tauntValue: 0
   _ammoCount: 0
+  _maxAmmoCount: 3
+  _manaPoint: 0
+  _maxManaPoint: 0
   hpBarFill: {fileID: 0}
   OnDead:
     m_PersistentCalls:
@@ -470,6 +473,8 @@ MonoBehaviour:
       rangeValue: 0
       rangeAgle: 0
       explodeRadius: 0
+      arcWeight: 0
+      arcCenterDis: 0
       skillVFXType: 0
       attackPacks: []
       atkTimes: 1
@@ -489,6 +494,8 @@ MonoBehaviour:
       rangeValue: 0
       rangeAgle: 0
       explodeRadius: 0
+      arcWeight: 0
+      arcCenterDis: 0
       skillVFXType: 0
       attackPacks: []
       atkTimes: 1
@@ -507,6 +514,14 @@ MonoBehaviour:
     maxMana: 0
     dropItemList: []
     dropRate: 0
+  playerData:
+    curHealth: 0
+    curAmmo: 0
+    curMana: 0
+    spriteName: 
+    normalSlots: 000000000000000000000000
+    weaponSlots: 0000000000000000
+    componentInventory: 
   pieceID: 0
   player: {fileID: 0}
   isPlayerPiece: 0
@@ -522,6 +537,8 @@ MonoBehaviour:
     rangeValue: 0
     rangeAgle: 0
     explodeRadius: 0
+    arcWeight: 0
+    arcCenterDis: 0
     skillVFXType: 0
     attackPacks: []
     atkTimes: 1

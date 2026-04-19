@@ -23,7 +23,7 @@ using UnityEngine.SceneManagement;
         [LabelText("棋子血量继承")]
         public bool pieceHPInherit = false;
 
-        private void Start()
+        private void Awake()
         {
             DM.Init();
             // 临时使用全新游戏存档
