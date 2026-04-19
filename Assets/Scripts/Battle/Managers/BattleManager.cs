@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
 using JetBrains.Annotations;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class BattleManager : MonoBehaviour
@@ -18,6 +19,8 @@ public class BattleManager : MonoBehaviour
     //public List<LadderArea> ladderAreas = new();
     public List<HealArea> areaList = new(); // 
     public FinishDrop finishDrop;
+    [LabelText("战斗胜利经验值")]
+    public int finishExp = 100;
 
     public int TunrNumber => _turnNumber;
     private int _turnNumber = 0;
@@ -303,6 +306,16 @@ public class BattleManager : MonoBehaviour
             BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家胜利！");
             // 处理胜利事件
             if (finishDrop != null) finishDrop.DropItems();
+            if (finishExp > 0)
+            {
+                foreach (var player in  GM.Ins.PLAYERPROFILE.player)
+                {
+                    if (player != null && player.HP > 0)
+                    {
+                        player.AccessAttribute(23, AttrOp.Add, finishExp);
+                    }
+                }
+            }
             PlayerController.EndBurstMode();// 结束聚能状态
             // 延迟后退出战斗
             DOVirtual.DelayedCall(1.0f, () => { BattleScene.Ins.BM.OnClickQuitBattle(); });
