@@ -271,8 +271,10 @@ public class 剧本System : MonoBehaviour
     public void LoadImageWithFade(string imageName, Image targetimg, int fadeType = 3
         , float duration = -1)
     {
-        if (FULLCG.gameObject.activeInHierarchy) FULLCG.transform.parent.gameObject.SetActive(false);
-        if (HALFCG.gameObject.activeInHierarchy) HALFCG.transform.parent.gameObject.SetActive(false);
+        if (FULLCG.gameObject.activeInHierarchy)
+            FULLCG.transform.parent.gameObject.SetActive(false);
+        if (HALFCG.gameObject.activeInHierarchy)
+            HALFCG.transform.parent.gameObject.SetActive(false);
         if (duration < 0)
         {
             duration = CG淡入淡出时间;
@@ -362,24 +364,27 @@ public class 剧本System : MonoBehaviour
 
             if (key.Contains(Center.Command_background))
             {
-                var prams = 指令切割(key);
-                if (prams.Length >= 3)
+                if (!key.Contains(Center.Command_FullCG) && !key.Contains(Center.Command_HalfCG))
                 {
-                    // 有淡入淡出类型和自定义时长
-                    int fadeType = Convert.ToInt32(prams[1]);
-                    float duration = float.Parse(prams[2]);
-                    LoadImageWithFade(prams[0], BG, fadeType, duration);
-                }
-                else if (prams.Length >= 2)
-                {
-                    // 有淡入淡出类型，使用默认时长
-                    int fadeType = Convert.ToInt32(prams[1]);
-                    LoadImageWithFade(prams[0], BG, fadeType);
-                }
-                else
-                {
-                    // 使用默认淡出后淡入效果
-                    LoadImageWithFade(prams[0], BG, 3);
+                    var prams = 指令切割(key);
+                    if (prams.Length >= 3)
+                    {
+                        // 有淡入淡出类型和自定义时长
+                        int fadeType = Convert.ToInt32(prams[1]);
+                        float duration = float.Parse(prams[2]);
+                        LoadImageWithFade(prams[0], BG, fadeType, duration);
+                    }
+                    else if (prams.Length >= 2)
+                    {
+                        // 有淡入淡出类型，使用默认时长
+                        int fadeType = Convert.ToInt32(prams[1]);
+                        LoadImageWithFade(prams[0], BG, fadeType);
+                    }
+                    else
+                    {
+                        // 使用默认淡出后淡入效果
+                        LoadImageWithFade(prams[0], BG, 3);
+                    }
                 }
             }
 
@@ -512,7 +517,7 @@ public class 剧本System : MonoBehaviour
 
             if (key.Contains(Center.Command_If))
             {
-                if(key.Contains(Center.Command_Modify)) continue;
+                if (key.Contains(Center.Command_Modify)) continue;
                 var prams = 指令切割(key);
                 if (prams[0] == 已阅读.ToString())
                 {
