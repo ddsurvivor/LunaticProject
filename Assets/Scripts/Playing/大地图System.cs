@@ -98,6 +98,7 @@ public class 大地图System : SerializedMonoBehaviour
             if (VARIABLE.gameObject.activeInHierarchy)
             {
                 当前地图 = VARIABLE;
+                GM.Ins.PLAYERPROFILE.currentMap = VARIABLE.name;
                 当前地图.transform.localScale = Vector3.one;
                 VARIABLE.SetActive(true);
             }
