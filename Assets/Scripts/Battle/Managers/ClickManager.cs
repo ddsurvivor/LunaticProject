@@ -98,6 +98,38 @@ public class ClickManager : MonoBehaviour
             BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
             BattleScene.Ins.UM.pieceInfoPanel.StopMpIconsBlink();
         }
+        
+        // 按下123的时候，按顺序切换选中的玩家棋子
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            ClickPieceByIndex(0);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            ClickPieceByIndex(1);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            ClickPieceByIndex(2);
+        }
+    }
+    
+    private void ClickPieceByIndex(int index)
+    {
+        var playerPieces = BattleScene.Ins.BM.PlayerController.pieces;
+        if (index < playerPieces.Count)
+        {
+            var piece = playerPieces[index];
+            if (piece.cantControl || piece.isDead) return;
+            _selectedPiece?.CancelSelect();
+            _selectedPiece = piece;
+            piece.OnSelect();
+            Debug.Log($"通过快捷键点击棋子{piece.name}");
+            BattleScene.Ins.UM.ShowPieceActionPanel(piece);
+            BattleScene.Ins.UM.ShowPieceState(piece);
+            BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(piece);
+            BattleScene.Ins.BM.camera.SetFollow(piece.transform);
+        }
     }
 
     private void ClickPiece()
@@ -251,9 +283,10 @@ public class ClickManager : MonoBehaviour
             Vector3 targetPos = new Vector3(point.x, _selectedPiece.transform.position.y, point.z);
             _selectedPiece.CheckFace(targetPos - _dragStartPos);
             _selectedPiece.StartMove();
-            _selectedPiece.transform.DOMove(targetPos, 1.0f).OnComplete(() =>
+            var piece = _selectedPiece;
+            piece.transform.DOMove(targetPos, 1.0f).OnComplete(() =>
             {
-                _selectedPiece.StopMove();
+                piece.StopMove();
             });
             _rangeUI.CloseRange();
             //_selectedPiece = null;

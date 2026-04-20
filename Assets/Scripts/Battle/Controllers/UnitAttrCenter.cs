@@ -342,7 +342,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     {
         _curHealth = health;
         _manaPoint = mana;
-        _ammoCount = ammo;
+        _ammoCount = _maxAmmoCount;// 弹药数量直接设置为满
     }
     
 }

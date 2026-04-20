@@ -382,9 +382,9 @@ public class AIController : PlayerController
             if (retreatWin!=null)
             {
                 Debug.Log("移动到指定点");
-                Vector3 pos = retreatWin.targetPoint.position;
+                Vector3 pos = retreatWin.targetPoint.position; 
                 EnemyMove(aiPiece, pos, 0.5f);
-                retreatWin.CheckTargetReached();// 行动后判定胜利
+                DOVirtual.DelayedCall(1.0f, ()=> retreatWin.CheckTargetReached());// 行动后判定胜利
             }
         }
     }
