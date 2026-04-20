@@ -21,6 +21,7 @@ public class BattleManager : MonoBehaviour
     public FinishDrop finishDrop;
     [LabelText("战斗胜利经验值")] public int finishExp = 100;
 
+    public BattleSetController battleSetController;
     public int TunrNumber => _turnNumber;
     private int _turnNumber = 0;
 
@@ -36,6 +37,16 @@ public class BattleManager : MonoBehaviour
 
         //gray = Resources.Load<Material>("Materials/Gray");
         //grayEnemy = Resources.Load<Material>("Materials/GrayEnemy");
+    }
+
+    public void ApplySetting(int setting = 0)
+    {
+        // 执行特定战斗设置，如特殊规则、初始状态等
+        if (battleSetController != null)
+        {
+            Debug.Log($"应用战斗设置: {setting}");
+            battleSetController.ApplyAllPreset();
+        }
     }
 
     public void ChangeTurn()
@@ -136,6 +147,17 @@ public class BattleManager : MonoBehaviour
         foreach (var target in targets)
         {
             Debug.Log($"Skill Attack: Attacker={attacker.name}, Target={target.name}");
+            // 楼层判定
+            if (skillPack.layerSkill)
+            {
+                // 攻击者和被攻击者不在同一个y值则不受伤害
+                if (Mathf.Abs(attacker.transform.position.y - target.transform.position.y) > 0.1f)
+                {
+                    Debug.Log("Skill Attack: Target is on a different layer, no damage applied");
+                    return;
+                }
+            }
+            
             // 命中判定
             bool isHit = false;
             if (attacker.player.isBursting)
@@ -167,16 +189,15 @@ public class BattleManager : MonoBehaviour
                 Debug.Log("Skill Attack: Missed");
                 return;
             }
-
-            if (skillPack.layerSkill)
+            
+            // 暴击判定
+            bool isCrit = false;
+            if (Random.Range(1, 101) <= attacker.unitAttrCenter.critRate)
             {
-                // 攻击者和被攻击者不在同一个y值则不受伤害
-                if (Mathf.Abs(attacker.transform.position.y - target.transform.position.y) > 0.1f)
-                {
-                    Debug.Log("Skill Attack: Target is on a different layer, no damage applied");
-                    return;
-                }
+                isCrit = true;
             }
+
+            
 
             int addAtk =
                 attacker.unitAttrCenter.attr.GetAddDamage(target.unitAttrCenter.elementType);
@@ -185,6 +206,7 @@ public class BattleManager : MonoBehaviour
             {
                 Debug.Log($"依次计算伤害");
                 int realDamage = attackPack.damage + addAtk;
+                if(isCrit) realDamage = (int)(realDamage * (attacker.unitAttrCenter.critDamageRate / 100f));// 暴击伤害增加
                 int armor = target.unitAttrCenter.attr.GetArmor(attackPack.damageType);
                 if (attackPack.damageType == DamageType.Melee)
                 {
@@ -210,7 +232,7 @@ public class BattleManager : MonoBehaviour
                 Debug.Log(
                     $"Skill Attack: BaseDamage={attackPack.damage}, AddAtk={addAtk}, Armor={armor}, RealDamage={realDamage}");
                 // TODO: 临时护盾功能
-                target.unitAttrCenter.TakeDamage(new AttackPack(realDamage, attackPack.damageType));
+                target.unitAttrCenter.TakeDamage(new AttackPack(realDamage, attackPack.damageType, isCrit));
 
                 if (target is EnemyController enemy)
                 {
@@ -219,7 +241,7 @@ public class BattleManager : MonoBehaviour
 
                 if (realDamage > 0)
                 {
-                    damageInfos.Add(new DamageInfo(realDamage, attackPack.damageType.ToChinese()));
+                    damageInfos.Add(new DamageInfo(realDamage, attackPack.damageType.ToChinese(), isCrit));
                 }
             }
 

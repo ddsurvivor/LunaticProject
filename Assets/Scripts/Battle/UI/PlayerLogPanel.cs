@@ -2,23 +2,29 @@ using UnityEngine;
 using UnityEngine.UI; // 使用旧版 UGUI Text
 using System.Text;
 using System.Collections.Generic;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 
 public class PlayerLogPanel : MonoBehaviour
 {
-    [Header("UI Components")]
-    [SerializeField] private Text logDisplayText; 
+    [Header("UI Components")] [SerializeField]
+    private Text logDisplayText;
+
     [SerializeField] private int maxLogLines = 15;
 
-    [Header("Attack & Skill Settings")]
-    [SerializeField] private Color unitColor = Color.yellow;
+    [Header("Attack & Skill Settings")] [SerializeField]
+    private Color unitColor = Color.yellow;
+
     [SerializeField] private Color targetColor = Color.cyan;
     [SerializeField] private Color skillColor = Color.magenta; // 技能颜色
+
     [SerializeField] private Color damageColor = Color.red;
+
     //[SerializeField, TextArea] 
     private string attackTemplate = "{0} 施展 [{1}] 对 {2}，造成 {3} 点 <color=white>[{4}]</color> 伤害";
 
-    [Header("Item Settings")]
-    [SerializeField] private Color itemColor = Color.green; // 道具颜色
+    [Header("Item Settings")] [SerializeField]
+    private Color itemColor = Color.green; // 道具颜色
+
     //[SerializeField, TextArea] 
     private string itemTemplate = "{0} 使用了道具 [{1}]";
 
@@ -28,14 +34,15 @@ public class PlayerLogPanel : MonoBehaviour
 
     private StringBuilder sb = new StringBuilder();
     private List<string> logEntries = new List<string>();
-    
-    
+
+
     // --- 扩展接口部分 ---
 
     /// <summary>
     /// 记录带技能名称的攻击行为
     /// </summary>
-    public void PlayerLogAttack(string attacker, string skillName, string target, int damage, string damageType)
+    public void PlayerLogAttack(string attacker, string skillName, string target, int damage
+        , string damageType)
     {
         string cAttacker = GetColoredText(attacker, unitColor);
         string cSkill = GetColoredText(skillName, skillColor);
@@ -43,14 +50,17 @@ public class PlayerLogPanel : MonoBehaviour
         string cDamage = GetColoredText(damage.ToString("F0"), damageColor);
 
         // 填充模板: {0}攻击者, {1}技能, {2}目标, {3}伤害数值, {4}伤害类型
-        string finalLog = string.Format(attackTemplate, cAttacker, cSkill, cTarget, cDamage, damageType);
+        string finalLog =
+            string.Format(attackTemplate, cAttacker, cSkill, cTarget, cDamage, damageType);
         AddEntry(finalLog);
     }
     // ... 之前的变量定义 (logDisplayText, unitColor, targetColor 等) ...
 
-    [Header("Complex AOE Settings")]
-    [SerializeField] private string targetLineSeparator = "；"; // 不同敌人之间的分隔符
+    [Header("Complex AOE Settings")] [SerializeField]
+    private string targetLineSeparator = "；"; // 不同敌人之间的分隔符
+
     [SerializeField] private string damageDetailSeparator = "、"; // 同一敌人多种伤害的分隔符
+
     //[SerializeField, TextArea] 
     private string complexAoeTemplate = "{0}发动{1}：{2}";
 
@@ -60,7 +70,8 @@ public class PlayerLogPanel : MonoBehaviour
     /// <param name="attacker">攻击者名称</param>
     /// <param name="targets">目标名称列表</param>
     /// <param name="allDamages">外层 List 对应每个目标，内层 List 对应该目标的多种伤害</param>
-    public void PlayerLogAttack(string attacker, string skillName, List<string> targets, List<List<DamageInfo>> allDamages)
+    public void PlayerLogAttack(string attacker, string skillName, List<string> targets
+        , List<List<DamageInfo>> allDamages)
     {
         if (targets == null || allDamages == null || targets.Count != allDamages.Count)
         {
@@ -76,13 +87,20 @@ public class PlayerLogPanel : MonoBehaviour
             string cTarget = GetColoredText(targets[i], targetColor);
             mainContentBuilder.Append($"对 {cTarget} 造成了 ");
 
+
             // 2. 格式化该目标受到的所有伤害
             List<DamageInfo> currentTargetDamages = allDamages[i];
             for (int j = 0; j < currentTargetDamages.Count; j++)
             {
                 DamageInfo info = currentTargetDamages[j];
                 string cVal = GetColoredText(info.damageValue.ToString("F0"), damageColor);
-                
+
+                // 暴击
+                if (info.isCritical)
+                {
+                    mainContentBuilder.Append($"<color=orange>暴击！</color>");
+                }
+
                 // 格式：xx点伤害（xx类型）
                 mainContentBuilder.Append($"{cVal}点伤害({info.damageType})");
 
@@ -102,7 +120,8 @@ public class PlayerLogPanel : MonoBehaviour
 
         // 4. 组装最终文本
         string cAttacker = GetColoredText(attacker, unitColor);
-        string finalLog = string.Format(complexAoeTemplate, cAttacker,skillName, mainContentBuilder.ToString());
+        string finalLog = string.Format(complexAoeTemplate, cAttacker, skillName
+            , mainContentBuilder.ToString());
 
         AddEntry(finalLog);
         Debug.Log(finalLog);
@@ -141,6 +160,7 @@ public class PlayerLogPanel : MonoBehaviour
         {
             logEntries.RemoveAt(0);
         }
+
         logEntries.Add(entry);
         RefreshUI();
     }
@@ -154,6 +174,7 @@ public class PlayerLogPanel : MonoBehaviour
         {
             sb.AppendLine(log);
         }
+
         logDisplayText.text = sb.ToString();
     }
 
@@ -170,9 +191,12 @@ public class DamageInfo
     public float damageValue;
     public string damageType;
 
-    public DamageInfo(float value, string type)
+    public bool isCritical; // 可选：是否暴击
+
+    public DamageInfo(float value, string type, bool isCrit = false)
     {
         damageValue = value;
         damageType = type;
+        isCritical = isCrit;
     }
 }

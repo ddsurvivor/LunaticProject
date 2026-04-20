@@ -39,14 +39,15 @@ using UnityEngine.SceneManagement;
         //     PlayingSystem.特殊剧情 = "";
         // }
         
-        public void StartBattle(string battleScene, string endLog)
+        public void StartBattle(string battleScene, string endLog, int setting = 0)
         {
             this.battleScene = battleScene;
             this.endLog = endLog;
-            StartCoroutine(StartBattleCoroutine(battleScene));
+            StartCoroutine(StartBattleCoroutine(battleScene, 
+                ()=>BattleScene.Ins.BM.ApplySetting(setting)));
         }
 
-        private IEnumerator StartBattleCoroutine(string sceneName)
+        private IEnumerator StartBattleCoroutine(string sceneName, Action onComplete = null)
         {
             AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
 
@@ -60,6 +61,7 @@ using UnityEngine.SceneManagement;
 
             // 场景加载完成后执行
             PlayingSystem.特殊剧情 = "";
+            onComplete?.Invoke();
         }
 
         public void StartBattle(string battleScene)

@@ -62,6 +62,11 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     [SerializeField] [ReadOnly]private int _maxManaPoint;
     public int ManaPoint => _manaPoint;
     public int MaxManaPoint => _maxManaPoint;
+    
+    // 暴击率
+    public int critRate;
+    // 暴击伤害
+   public int critDamageRate;
 
     [Header("Buff")] [SerializeField] [ReadOnly]
     public List<BuffState> buffStates = new();
@@ -89,6 +94,8 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         elementType = pieceData.elementType;
         _maxManaPoint = pieceData.maxMana;
         _manaPoint = pieceData.initialMana;
+        critRate = pieceData.critRate;
+        critDamageRate = pieceData.critDamageRate;
         if (playerData != null)
         {
             // 根据玩家属性调整单位属性
@@ -115,6 +122,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
             {
                 buffAttrDic[type] = 0f;
             }
+            
         }
     }
 

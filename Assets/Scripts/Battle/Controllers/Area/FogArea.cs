@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -6,6 +7,7 @@ using UnityEngine;
 public class FogArea : InteractArea
 {
     public GameObject fogEffect;
+    public GameObject hightlightEffect;
     /// <summary>
     /// 关闭迷雾效果
     /// </summary>
@@ -16,5 +18,22 @@ public class FogArea : InteractArea
         gameObject.SetActive(false);
         BattleScene.Ins.BM.AIController.OnScanFog(fogEffect);
         piece?.interactAreas.Remove(this);
+    }
+    
+    // 鼠标移入时显示高亮
+    private void OnMouseEnter()
+    {
+        if (hightlightEffect != null)
+        {
+            hightlightEffect.SetActive(true);
+        }
+    }
+
+    private void OnMouseExit()
+    {
+        if (hightlightEffect != null)
+        {
+            hightlightEffect.SetActive(false);
+        }
     }
 }

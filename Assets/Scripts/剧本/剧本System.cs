@@ -665,7 +665,14 @@ public class 剧本System : MonoBehaviour
             if (key.Contains(Center.Command_Battle)) // 进入战斗
             {
                 var prams = 指令切割(key);
-                if (prams.Length >= 2)
+                if (prams.Length >= 3)
+                {
+                    string battleScene = prams[0];
+                    string endLog = prams[1];
+                    int.TryParse(prams[2], out int result);
+                    GM.Ins.StartBattle(battleScene, endLog, result);
+                }
+                else if (prams.Length >= 2)
                 {
                     string battleScene = prams[0];
                     string endLog = prams[1];
@@ -728,7 +735,7 @@ public class 剧本System : MonoBehaviour
             {
                 var prams = 指令切割(key);
                 float duration = 2;
-                float fadeTime = CG淡入淡出时间;
+                float fadeTime = 1.5f;
                 if (prams.Length >= 2)
                 {
                     //自定义时长

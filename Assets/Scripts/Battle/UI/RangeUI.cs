@@ -164,6 +164,15 @@ public class RangeUI : MonoBehaviour
 
     public void CloseRange()
     {
+        foreach (var piece in _curTargets)
+        {
+            piece.rangeUI?.ShowHighlight(false);
+            if (piece is EnemyController enemy)
+            {
+                enemy.hightlightEffect?.SetActive(false);
+            }
+        }
+        _curTargets.Clear();
         circle.SetActive(false);
         moveIcon.SetActive(false);
         attackCircle.SetActive(false);
@@ -175,12 +184,7 @@ public class RangeUI : MonoBehaviour
         fanRoot.SetActive(false);
         arcRoot.SetActive(false);
         ShowSelect(false);
-        foreach (var piece in _curTargets)
-        {
-            piece.rangeUI?.ShowHighlight(false);
-        }
-
-        _curTargets.Clear();
+        
     }
 
 
