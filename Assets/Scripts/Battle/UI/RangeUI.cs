@@ -37,6 +37,9 @@ public class RangeUI : MonoBehaviour
     public List<PieceController> GetCurTargets => _curTargets;
     private SkillPack _curSkillPack;
 
+    public bool isPlayerRange = false;
+
+    private PieceController _owner;
     // public void Awake()
     // {
     //     circle.SetActive(false);
@@ -50,6 +53,11 @@ public class RangeUI : MonoBehaviour
     //     fanRoot.SetActive(false);
     //         
     // }
+    private void Awake()
+    {
+        // 从上一级组件获取控制器引用
+        if(_owner==null) _owner = GetComponentInParent<PieceController>();
+    }
 
     public void ShowCircleRange(float radius)
     {
@@ -169,7 +177,7 @@ public class RangeUI : MonoBehaviour
             piece.rangeUI?.ShowHighlight(false);
             if (piece is EnemyController enemy)
             {
-                enemy.hightlightEffect?.SetActive(false);
+                enemy.ShowHighlight(false);
             }
         }
         _curTargets.Clear();
@@ -196,6 +204,7 @@ public class RangeUI : MonoBehaviour
 
     public void Update()
     {
+        if(!isPlayerRange) return;
         // attackIcon跟随鼠标移动
         if (attackIcon.activeInHierarchy)
         {
@@ -433,9 +442,15 @@ public class RangeUI : MonoBehaviour
             }
 
             piece.ShowHighlight(false);
+            piece.hitInfoPanel?.gameObject.SetActive(false);
         }
 
         _curTargets = newTargets;
+        foreach (var target in _curTargets)
+        {
+            // 显示命中率、伤害等
+            target.hitInfoPanel?.UpdateDisplay(_owner, _curSkillPack, target);
+        }
     }
 
     private void CheckTarget(HashSet<PieceController> hitPieces)
@@ -483,9 +498,15 @@ public class RangeUI : MonoBehaviour
             }
 
             piece.ShowHighlight(false);
+            piece.hitInfoPanel?.gameObject.SetActive(false);
         }
 
         _curTargets = newTargets;
+        foreach (var target in _curTargets)
+        {
+            // 显示命中率、伤害等
+            target.hitInfoPanel?.UpdateDisplay(_owner, _curSkillPack, target);
+        }
     }
 
 

@@ -144,6 +144,7 @@ public class BattleManager : MonoBehaviour
         BattleScene.Ins.UM.PopSkillName(skillPack.skillName);
         List<List<DamageInfo>> damageInfoList = new();
 
+        bool isCrit = false;
         foreach (var target in targets)
         {
             Debug.Log($"Skill Attack: Attacker={attacker.name}, Target={target.name}");
@@ -191,7 +192,6 @@ public class BattleManager : MonoBehaviour
             }
             
             // 暴击判定
-            bool isCrit = false;
             if (Random.Range(1, 101) <= attacker.unitAttrCenter.critRate)
             {
                 isCrit = true;
@@ -205,7 +205,7 @@ public class BattleManager : MonoBehaviour
             foreach (var attackPack in skillPack.attackPacks)
             {
                 Debug.Log($"依次计算伤害");
-                int realDamage = attackPack.damage + addAtk;
+                int realDamage = attackPack.damage + attacker.unitAttrCenter.ATK;
                 if(isCrit) realDamage = (int)(realDamage * (attacker.unitAttrCenter.critDamageRate / 100f));// 暴击伤害增加
                 int armor = target.unitAttrCenter.attr.GetArmor(attackPack.damageType);
                 if (attackPack.damageType == DamageType.Melee)
@@ -288,7 +288,7 @@ public class BattleManager : MonoBehaviour
             targets.Select(t => t.pieceData.pieceName).ToList(),
             damageInfoList
         );
-        if (targets.Count > 0) BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
+        if (isCrit && targets.Count > 0) BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
         // 处理聚能充能效果，多段伤害只充能一次
         if (attacker.isPlayerPiece)
         {

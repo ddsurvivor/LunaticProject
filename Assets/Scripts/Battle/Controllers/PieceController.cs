@@ -25,6 +25,7 @@ public class PieceController : MonoBehaviour
 
     [SerializeField] public PieceDisplay pieceDisplay;
     public GameObject uiCanvas; // UI画布
+    public HitInfoPanel hitInfoPanel;
 
     [Header("配置")] [SerializeField] [ReadOnly]
     private PieceData _pieceData;
@@ -459,10 +460,12 @@ public class PieceController : MonoBehaviour
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
         }
 
+        // TODO: 根据受伤的数值改变振动的强度
         pieceDisplay.pieceSpriteRenderer.transform.DOShakePosition(0.5f, 0.8f);
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
         if (uiCanvas != null) uiCanvas.SetActive(true);
         ShowHighlight(false);
+        
     }
 
     public virtual void Dead()
@@ -617,6 +620,7 @@ public class PieceController : MonoBehaviour
     {
         rangeUI?.ShowHighlight(option);
         if (hightlightEffect != null) hightlightEffect.SetActive(option);
+        if(!option) hitInfoPanel?.gameObject.SetActive(false);
     }
 
     // ======= 道具 ====== //

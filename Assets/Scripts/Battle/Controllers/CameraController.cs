@@ -93,7 +93,7 @@ public class CameraController : MonoBehaviour
     //public float shakeMagnitude;
     public Cinemachine.CinemachineImpulseSource impulse;
 
-    public void FocusShake(Transform transform)
+    public void FocusShake(Transform transform, float amplitude = 1f)
     {
         virtualCamera.Follow = transform;
         //virtualCamera.m_Lens.OrthographicSize = minZoom;
@@ -110,6 +110,7 @@ public class CameraController : MonoBehaviour
             // 调用impulse的方法让相机震动
             if (impulse != null)
             {
+                impulse.m_ImpulseDefinition.m_AmplitudeGain = amplitude; // 设置震动强度
                 impulse.GenerateImpulse();
                 Debug.Log("相机震动");
             }
