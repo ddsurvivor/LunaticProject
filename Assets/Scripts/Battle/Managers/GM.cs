@@ -46,6 +46,7 @@ using UnityEngine.SceneManagement;
             this.battleScene = battleScene;
             this.endLog = endLog;
             this.battleSetting = setting;
+            StartCoroutine(StartBattleCoroutine(battleScene));
         }
 
         private IEnumerator StartBattleCoroutine(string sceneName, Action onComplete = null)
