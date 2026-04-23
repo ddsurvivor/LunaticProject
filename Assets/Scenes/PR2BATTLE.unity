@@ -16564,13 +16564,21 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1449785372, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
     - target: {fileID: 1449785373, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
+      propertyPath: battleSetting
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1449785373, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
       propertyPath: pieceHPInherit
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1449785373, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1449785373, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
+    - target: {fileID: 640456764101210058, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 640456764101210058, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
     - target: {fileID: 3815781300908005228, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
       propertyPath: m_Name
       value: "\u5355\u4F8B"
@@ -20114,6 +20122,30 @@ PrefabInstance:
     - target: {fileID: 8650936795375690168, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8860265404098101663, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: presetDatas.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8860265404098101663, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: presetDatas.Array.data[0].presetID
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8860265404098101663, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: presetDatas.Array.data[0].targetID
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8860265404098101663, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: presetDatas.Array.data[0].targetType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8860265404098101663, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: presetDatas.Array.data[0].buffAttrType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8860265404098101663, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: presetDatas.Array.data[0].buffAttrValue
+      value: -30
       objectReference: {fileID: 0}
     - target: {fileID: 8902595909463613481, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y

@@ -348,4 +348,68 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         _ammoCount = _maxAmmoCount;// 弹药数量直接设置为满
     }
     
+    /// <summary>
+    /// 通过枚举统一修改属性数值
+    /// </summary>
+    /// <param name="type">要修改的属性类型</param>
+    /// <param name="value">修改的增量（可以是负数）</param>
+    public void ModifyAttribute(UnitAttrType type, float value)
+    {
+        // 将 float 转换为 int 供整数属性使用
+        int intValue = Mathf.RoundToInt(value);
+
+        switch (type)
+        {
+            case UnitAttrType.CurHealth:
+                _curHealth = Mathf.Clamp(_curHealth + intValue, 0, _maxHealth);
+                //UpdateHealthUI();
+                break;
+            case UnitAttrType.MaxHealth:
+                _maxHealth += intValue;
+                //UpdateHealthUI(); // 最大生命变化通常也需要刷新血条比例
+                break;
+            case UnitAttrType.CurMana:
+                _manaPoint = Mathf.Clamp(_manaPoint + intValue, 0, _maxManaPoint);
+                break;
+            case UnitAttrType.MaxMana:
+                _maxManaPoint += intValue;
+                break;
+            case UnitAttrType.CurMovePoint:
+                _curMovePoint = Mathf.Clamp(_curMovePoint + intValue, 0, _maxMovePoint);
+                break;
+            case UnitAttrType.MaxMovePoint:
+                _maxMovePoint += intValue;
+                break;
+            case UnitAttrType.MoveRange:
+                _moveRange += value; // 移动范围通常是 float
+                break;
+            case UnitAttrType.TauntValue:
+                _tauntValue += intValue;
+                break;
+            case UnitAttrType.CurAmmo:
+                _ammoCount = Mathf.Clamp(_ammoCount + intValue, 0, _maxAmmoCount);
+                break;
+            case UnitAttrType.MaxAmmo:
+                _maxAmmoCount += intValue;
+                break;
+            case UnitAttrType.CritRate:
+                critRate += intValue;
+                break;
+            case UnitAttrType.CritDamageRate:
+                critDamageRate += intValue;
+                break;
+            case UnitAttrType.ATK:
+                ATK += intValue;
+                break;
+        }
+
+        // 每次修改属性后，同步战斗管理器的状态
+        if (BattleScene.Ins != null && BattleScene.Ins.UM != null)
+        {
+            BattleScene.Ins.UM.OnPieceStateChance(pc);
+        }
+    
+        Debug.Log($"属性 {type} 已修改，改变量为: {value}，当前值见检视面板。");
+    }
+    
 }

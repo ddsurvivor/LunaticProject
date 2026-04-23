@@ -34,7 +34,7 @@ public class BattleManager : MonoBehaviour
         PlayerController.Init();
         AIController.Init();
         PlayerStart();
-
+        ApplySetting(GM.Ins.battleSetting);
         //gray = Resources.Load<Material>("Materials/Gray");
         //grayEnemy = Resources.Load<Material>("Materials/GrayEnemy");
     }
@@ -45,7 +45,7 @@ public class BattleManager : MonoBehaviour
         if (battleSetController != null)
         {
             Debug.Log($"应用战斗设置: {setting}");
-            battleSetController.ApplyAllPreset();
+            battleSetController.ApplyAllPreset(setting);
         }
     }
 

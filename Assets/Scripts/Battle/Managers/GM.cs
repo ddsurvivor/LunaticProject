@@ -13,6 +13,8 @@ using UnityEngine.SceneManagement;
         public string battleScene;
         [ReadOnly]
         public string endLog;
+        [ReadOnly]
+        public int battleSetting = 0;// 战斗设置，默认为0，特殊战斗会有不同的设置
         [OdinSerialize]
         public PLAYERPROFILE PLAYERPROFILE;
         
@@ -43,8 +45,7 @@ using UnityEngine.SceneManagement;
         {
             this.battleScene = battleScene;
             this.endLog = endLog;
-            StartCoroutine(StartBattleCoroutine(battleScene, 
-                ()=>BattleScene.Ins.BM.ApplySetting(setting)));
+            this.battleSetting = setting;
         }
 
         private IEnumerator StartBattleCoroutine(string sceneName, Action onComplete = null)

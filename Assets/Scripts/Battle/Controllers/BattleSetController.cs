@@ -9,11 +9,12 @@ using UnityEngine;
 public class BattleSetController : MonoBehaviour
 {
     public List<PresetData> presetDatas = new();
-    public void ApplyAllPreset()
+    public void ApplyAllPreset(int presetID)
     {
         List<PieceController> targetList = new();
         foreach (var presetData in presetDatas)
         {
+            if(presetData.presetID != presetID) continue;
             switch (presetData.targetType)
             {
                 case TargetType.ALL:
@@ -34,6 +35,28 @@ public class BattleSetController : MonoBehaviour
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+            foreach (var target in targetList)
+            {
+                // 1.应用属性修改
+                if (presetData.AttrID != UnitAttrType.None)
+                {
+                    target.unitAttrCenter.ModifyAttribute(presetData.AttrID, presetData.attrValue);
+                }
+                // 2.应用buff状态
+                if (presetData.buffState != null)
+                {
+                    BattleScene.Ins.BM.buffManager.AddBuff(target.unitAttrCenter, presetData.buffState.buffType,
+                        presetData.buffState.stacks);
+                }
+                // 3.应用buff属性修改
+                if (presetData.buffAttrType != BuffAttrType.None)
+                {
+                    target.unitAttrCenter.AddBuffAttr(presetData.buffAttrType,
+                        presetData.buffAttrValue);
+                }
+            }
+            
+            Debug.Log($"应用预设{presetID}，目标数量{targetList.Count}");
         }
     }
 }
@@ -41,13 +64,18 @@ public class BattleSetController : MonoBehaviour
 [System.Serializable]
 public class PresetData
 {
+    public int presetID;
+    
     public TargetType targetType;
     public int targetID;
     
     public BuffState buffState;
 
-    public int AttrID;
+    public UnitAttrType AttrID;
     public int attrValue;
+    
+    public BuffAttrType buffAttrType;
+    public int buffAttrValue;
 }
 
 public enum TargetType

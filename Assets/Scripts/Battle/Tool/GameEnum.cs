@@ -174,5 +174,54 @@ public enum Daytime
     轰炸 = 3,
 }
 
+
+/// <summary>
+/// 单位属性类型枚举
+/// </summary>
+public enum UnitAttrType
+{
+    [LabelText("无")]
+    None = 0,
+
+    [LabelText("当前生命")]
+    CurHealth = 1,
+    
+    [LabelText("最大生命")]
+    MaxHealth = 2,
+    
+    [LabelText("当前能量")]
+    CurMana = 3,
+    
+    [LabelText("最大能量")]
+    MaxMana = 4,
+    
+    [LabelText("当前行动点")]
+    CurMovePoint = 5,
+    
+    [LabelText("最大行动点")]
+    MaxMovePoint = 6,
+    
+    [LabelText("移动范围")]
+    MoveRange = 7,
+    
+    [LabelText("嘲讽值")]
+    TauntValue = 8,
+    
+    [LabelText("当前弹药")]
+    CurAmmo = 9,
+    
+    [LabelText("最大弹药")]
+    MaxAmmo = 10,
+    
+    [LabelText("暴击率")]
+    CritRate = 11,
+    
+    [LabelText("暴击伤害")]
+    CritDamageRate = 12,
+    
+    [LabelText("攻击力")]
+    ATK = 13
+}
+
 #endregion
 
