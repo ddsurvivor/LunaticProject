@@ -317,6 +317,37 @@ public class RangeUI : MonoBehaviour
         }
         else if (fanRoot.activeInHierarchy)
         {
+            // 1. 获取扇形参数
+            float halfAngle = _curSkillPack.rangeAgle / 2f;
+            float range = _curSkillPack.rangeValue;
+            Vector3 origin = fanRoot.transform.position;
+            Vector3 forward = fanRoot.transform.forward;
+
+            // 2. 获取范围内所有碰撞体
+            Collider[] colliders = Physics.OverlapSphere(origin, range);
+
+            HashSet<PieceController> hitPieces = new HashSet<PieceController>();
+            foreach (var collider in colliders)
+            {
+                PieceController piece = collider.GetComponent<PieceController>();
+                if (piece == null) continue;
+
+                // 3. 判断是否在扇形角度范围内
+                Vector3 dir = (piece.transform.position - origin);
+                dir.y = 0; // 忽略y轴
+                if (dir.magnitude > range || dir.magnitude < 1f) continue; // 超出半径
+
+                float angle = Vector3.Angle(forward, dir);
+                if (angle <= halfAngle)
+                {
+                    hitPieces.Add(piece);
+                }
+            }
+
+            CheckTarget(hitPieces);
+        }
+        /*else if (fanRoot.activeInHierarchy)
+        {
             // 进行扇形有限距离的穿透射线检测
             // 根据扇形角度，等间距的发射多根射线进行检测，结果需要去掉重复
             float halfAngle = _curSkillPack.rangeAgle / 2f;
@@ -338,7 +369,7 @@ public class RangeUI : MonoBehaviour
             }
 
             CheckTarget(hitPieces);
-        }
+        }*/
         else if (arcRoot.activeInHierarchy)
         {
             float w = _curSkillPack.arcWeight; // 技能宽度

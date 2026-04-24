@@ -28,6 +28,7 @@ public enum ItemType
     SKILL_AREA=17,
     // 轨道轰炸特效
     ORBITAL_STRIKE=18,
+    GEL_BOMB=19,// 粘性炸弹特效
 
     // 治疗区域
     HEAL_AREA=20,

@@ -161,7 +161,7 @@ public class BattleManager : MonoBehaviour
             
             // 命中判定
             bool isHit = false;
-            if (attacker.player.isBursting)
+            if (attacker.player!=null && attacker.player.isBursting)
             {
                 isHit = true; // 聚能状态下必中
             }
@@ -223,7 +223,7 @@ public class BattleManager : MonoBehaviour
                     (100 - target.unitAttrCenter.buffAttrDic[
                         BuffAttrType.DamageReduction]) / 100f); // 伤害减免
                 // 聚能伤害
-                if (attacker.player.isBursting)
+                if (attacker.player!=null && attacker.player.isBursting)
                 {
                     realDamage = attacker.player.AddBurstDamage(target, realDamage);
                 }
@@ -273,7 +273,7 @@ public class BattleManager : MonoBehaviour
             // 处理附加效果
             ApplySKillEffect(skillPack, attacker, target, targetPos);
             ApplyAddEffect(skillPack, attacker, target, targetPos);
-            if (attacker.player.isBursting) // 聚能状态下所有攻击附加击退效果
+            if (attacker.player!=null && attacker.player.isBursting) // 聚能状态下所有攻击附加击退效果
             {
                 SpaceBombEffect(skillPack, attacker, target, targetPos); // 去除假死
                 // 击退距离为默认值加上每10点伤害增加0.5f

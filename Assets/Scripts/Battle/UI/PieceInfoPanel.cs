@@ -41,6 +41,7 @@ using UnityEngine.UI;
     public override void UpdateDisplay()
     {
         if(piece == null) return;
+        StopMpIconsBlink();
         int pieceId = piece.pieceID;
         //if(pieceId < 1 || pieceId > headSprites.Length) return;
         // 更新头像和名称
