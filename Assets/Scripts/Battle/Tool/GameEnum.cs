@@ -223,5 +223,31 @@ public enum UnitAttrType
     ATK = 13
 }
 
+/// <summary>
+/// 被动能力
+/// </summary>
+public enum PassiveType
+{
+    [LabelText("无")] // 原生 Unity 支持的显示名称
+    // [LabelText("无")] // Odin 支持的标签
+    None = 0,
+
+    [LabelText("鞭挞")]
+    Lash = 1,
+
+    [LabelText("长远利益")]
+    LongTermInterests = 2,
+}
+
+public enum PassiveTriggerType
+{
+    OnMeleeAttack = 1,// 攻击时触发
+    OnRangedAttack = 2,// 远程攻击时触发
+    OnDamaged = 3,// 受伤时触发
+    OnSkillUse = 4,// 使用技能时触发
+}
+
+
+
 #endregion
 

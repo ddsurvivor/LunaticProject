@@ -66,6 +66,8 @@ public class PieceController : MonoBehaviour
     public List<ActionType> availableActions = new(); // 可用动作列表
 
     public List<SkillPack> availableSkills = new(); // 可用技能列表
+    
+    public List<PassiveType> availablePassives = new(); // 可用被动技能列表
 
     //public bool isActived = false; // 是否被激活
 
@@ -119,6 +121,7 @@ public class PieceController : MonoBehaviour
             unitAttrCenter.Init();
         }
 
+        InitComp();
         //if (_actionListPanel != null) _actionListPanel.Init(this);
         isIdle = true;
         OnInit?.Invoke();
@@ -359,6 +362,7 @@ public class PieceController : MonoBehaviour
         {
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Attack, false, 1f);
             PlayAudio(ActionType.近战攻击);
+            PassiveTrigger(PassiveTriggerType.OnMeleeAttack);
         }
         else if (_curAtkType == ActionType.远程攻击)
         {
@@ -366,6 +370,7 @@ public class PieceController : MonoBehaviour
             // 消耗弹药
             unitAttrCenter.CostAmmo();
             PlayAudio(ActionType.远程攻击);
+            PassiveTrigger(PassiveTriggerType.OnRangedAttack);
         }
 
 
@@ -570,6 +575,7 @@ public class PieceController : MonoBehaviour
                 }
 
                 if (!unitAttrCenter.CostItem(_skillPack.consumeItems)) return;
+                PassiveTrigger(PassiveTriggerType.OnSkillUse, _skillPack);
                 Vector3 skillPos = atkPos != null ? atkPos.position : transform.position;
                 BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack, skillPos);
     
@@ -680,6 +686,52 @@ public class PieceController : MonoBehaviour
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    /// <summary>
+    /// 初始化插件系统
+    /// </summary>
+    private void InitComp()
+    {
+        foreach (var i in playerData.normalSlots)
+        {
+            availablePassives.Add(GM.Ins.DM.componentConfig.GetData(i).passiveType);
+        }
+        foreach (var i in playerData.weaponSlots)
+        {
+            // 添加武器效果
+        }
+    }
+
+    private void PassiveTrigger(PassiveTriggerType passiveTriggerType, SkillPack skillPack = null)
+    {
+        switch (passiveTriggerType)
+        {
+            case PassiveTriggerType.OnMeleeAttack:
+                if (availablePassives.Contains(PassiveType.Lash))
+                {
+                    unitAttrCenter.AddMana(3);
+                }
+                break;
+            case PassiveTriggerType.OnRangedAttack:
+                break;
+            case PassiveTriggerType.OnDamaged:
+                break;
+            case PassiveTriggerType.OnSkillUse:
+                if (availablePassives.Contains(PassiveType.LongTermInterests))
+                {
+                    // 35%概率不消耗能量
+                    int randomValue = UnityEngine.Random.Range(0, 100);
+                    if (randomValue < 35)
+                    {
+                        unitAttrCenter.AddMana(skillPack.mpCost);
+                        Debug.Log("长远利益被动触发，技能能量返还");
+                    }
+                }
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(passiveTriggerType), passiveTriggerType, null);
         }
     }
 

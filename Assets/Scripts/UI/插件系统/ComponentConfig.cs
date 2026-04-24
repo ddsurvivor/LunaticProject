@@ -32,7 +32,7 @@ public class ComponentData
     [ShowIf("@this.effectType == ComponentEffect.AttrBonus")][LabelText("属性加成值")]
     public int attrValue;
     [ShowIf("@this.effectType == ComponentEffect.PassiveEffect")][LabelText("被动技能id")]
-    public int passiveEffectId; // 被动效果ID
+    public PassiveType passiveType; // 被动效果ID
     [ShowIf("@this.effectType == ComponentEffect.ActiveSkill")][LabelText("主动技能")]
     public SkillPack skillPack; // 主动技能数据包
 }
