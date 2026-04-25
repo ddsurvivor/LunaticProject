@@ -48,4 +48,6 @@ public class HitBackEffect : SkillEffectBase
 {
     [LabelText("击退距离")]
     public float dis;// 击退距离
+    [LabelText("碰撞伤害")]
+    public int hitBackDamage;// 击退伤害
 }

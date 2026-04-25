@@ -143,13 +143,21 @@ public class PlayerLogPanel : MonoBehaviour
     /// <summary>
     /// 记录移动行为
     /// </summary>
-    private void PlayerLogMove(string unitName, Vector3 destination)
+    public void PlayerLogMove(string unitName, Vector3 destination)
     {
         string cUnit = GetColoredText(unitName, unitColor);
         string posStr = $"({destination.x:F1}, {destination.z:F1})";
 
         string finalLog = string.Format(moveTemplate, cUnit, posStr);
         AddEntry(finalLog);
+    }
+    /// <summary>
+    /// 记录普通文本日志（不带特殊格式）
+    /// </summary>
+    /// <param name="message"></param>
+    public void PlayerLog(string message)
+    {
+        AddEntry(message);
     }
 
     // --- 内部逻辑 ---

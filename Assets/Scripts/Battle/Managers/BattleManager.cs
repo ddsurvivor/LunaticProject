@@ -158,10 +158,10 @@ public class BattleManager : MonoBehaviour
                     return;
                 }
             }
-            
+
             // 命中判定
             bool isHit = false;
-            if (attacker.player!=null && attacker.player.isBursting)
+            if (attacker.player != null && attacker.player.isBursting)
             {
                 isHit = true; // 聚能状态下必中
             }
@@ -190,14 +190,13 @@ public class BattleManager : MonoBehaviour
                 Debug.Log("Skill Attack: Missed");
                 return;
             }
-            
+
             // 暴击判定
             if (Random.Range(1, 101) <= attacker.unitAttrCenter.critRate)
             {
                 isCrit = true;
             }
 
-            
 
             int addAtk =
                 attacker.unitAttrCenter.attr.GetAddDamage(target.unitAttrCenter.elementType);
@@ -206,7 +205,10 @@ public class BattleManager : MonoBehaviour
             {
                 Debug.Log($"依次计算伤害");
                 int realDamage = attackPack.damage + attacker.unitAttrCenter.ATK;
-                if(isCrit) realDamage = (int)(realDamage * (attacker.unitAttrCenter.critDamageRate / 100f));// 暴击伤害增加
+                if (isCrit)
+                    realDamage =
+                        (int)(realDamage *
+                              (attacker.unitAttrCenter.critDamageRate / 100f)); // 暴击伤害增加
                 int armor = target.unitAttrCenter.attr.GetArmor(attackPack.damageType);
                 if (attackPack.damageType == DamageType.Melee)
                 {
@@ -223,7 +225,7 @@ public class BattleManager : MonoBehaviour
                     (100 - target.unitAttrCenter.buffAttrDic[
                         BuffAttrType.DamageReduction]) / 100f); // 伤害减免
                 // 聚能伤害
-                if (attacker.player!=null && attacker.player.isBursting)
+                if (attacker.player != null && attacker.player.isBursting)
                 {
                     realDamage = attacker.player.AddBurstDamage(target, realDamage);
                 }
@@ -232,7 +234,8 @@ public class BattleManager : MonoBehaviour
                 Debug.Log(
                     $"Skill Attack: BaseDamage={attackPack.damage}, AddAtk={addAtk}, Armor={armor}, RealDamage={realDamage}");
                 // TODO: 临时护盾功能
-                target.unitAttrCenter.TakeDamage(new AttackPack(realDamage, attackPack.damageType, isCrit));
+                target.unitAttrCenter.TakeDamage(new AttackPack(realDamage, attackPack.damageType
+                    , isCrit));
 
                 if (target is EnemyController enemy)
                 {
@@ -241,7 +244,8 @@ public class BattleManager : MonoBehaviour
 
                 if (realDamage > 0)
                 {
-                    damageInfos.Add(new DamageInfo(realDamage, attackPack.damageType.ToChinese(), isCrit));
+                    damageInfos.Add(new DamageInfo(realDamage, attackPack.damageType.ToChinese()
+                        , isCrit));
                 }
             }
 
@@ -273,12 +277,17 @@ public class BattleManager : MonoBehaviour
             // 处理附加效果
             ApplySKillEffect(skillPack, attacker, target, targetPos);
             ApplyAddEffect(skillPack, attacker, target, targetPos);
-            if (attacker.player!=null && attacker.player.isBursting) // 聚能状态下所有攻击附加击退效果
+            if (attacker.player != null && attacker.player.isBursting) // 聚能状态下所有攻击附加击退效果
             {
                 SpaceBombEffect(skillPack, attacker, target, targetPos); // 去除假死
                 // 击退距离为默认值加上每10点伤害增加0.5f
                 float dis = 1f + damageInfos.Sum(d => d.damageValue) / 10f * 0.5f;
-                HitBackEffect(new HitBackEffect { dis = dis }, attacker, target, targetPos);
+                HitBackEffect(
+                    new HitBackEffect 
+                    { 
+                        dis = dis, 
+                        hitBackDamage = (int)(damageInfos.Sum(d => d.damageValue) *0.4f) 
+                    }, attacker, target, targetPos);
             }
         }
 
@@ -428,10 +437,16 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 只处理一次的技能附加效果
+    /// </summary>
+    /// <param name="skillPack"></param>
+    /// <param name="caster"></param>
+    /// <param name="targetPos"></param>
     public void ApplySKillEffectOnce(SkillPack skillPack, PieceController caster = null
         , Vector3 targetPos = default)
     {
-        Debug.Log("处理一次性效果");
+        //Debug.Log("处理一次性效果");
         foreach (var effect in skillPack.skillEffects)
         {
             switch (effect)
@@ -453,6 +468,13 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 每个目标都要处理的技能附加效果（如击退）
+    /// </summary>
+    /// <param name="skillPack"></param>
+    /// <param name="caster"></param>
+    /// <param name="target"></param>
+    /// <param name="targetPos"></param>
     private void ApplyAddEffect(SkillPack skillPack, PieceController caster = null
         , PieceController target = null, Vector3 targetPos = default)
     {
@@ -474,7 +496,7 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    private void HitBackEffect(HitBackEffect hitBackEffect, PieceController caster = null
+    /*private void HitBackEffect(HitBackEffect hitBackEffect, PieceController caster = null
         , PieceController target = null, Vector3 targetPos = default)
     {
         if (target.ableMove == false) return;
@@ -483,7 +505,104 @@ public class BattleManager : MonoBehaviour
         dir.Normalize();
         Vector3 hitBackPos = target.transform.position + dir * hitBackEffect.dis;
         target.transform.DOMove(hitBackPos, 0.2f);
+    }*/
+    private void HitBackEffect(HitBackEffect hitBackEffect, PieceController caster = null,
+        PieceController target = null, Vector3 targetPos = default)
+    {
+        if (target.ableMove == false) return;
+
+        Vector3 startPos = target.transform.position;
+        Vector3 dir = (startPos - caster.transform.position);
+        dir.y = 0;
+        dir.Normalize();
+
+        float totalDis = hitBackEffect.dis;
+        float step = 0.5f;
+        Vector3 lastValidPos = startPos;
+        bool hasCollision = false; // 是否触发了碰撞
+
+        List<PieceController> hitPieces = new List<PieceController>(); // 记录被击退路径上碰到的棋子，避免重复伤害
+        for (float i = step; i <= totalDis; i += step)
+        {
+            Vector3 nextStepPos = startPos + dir * i;
+
+            // 1. 前向碰撞检测 (墙壁、单位、边界)
+            // 建议使用 Raycast 或 SphereCast (更厚实)
+            Ray forwardRay = new Ray(nextStepPos + Vector3.up * 50f, Vector3.down);
+            if (Physics.Raycast(forwardRay, out RaycastHit wallHit, 100f))
+            {
+                if (wallHit.collider.CompareTag("Wall") ||
+                    wallHit.collider.CompareTag("Piece")&& wallHit.collider.gameObject!=target.gameObject)
+                {
+                    if(wallHit.collider.CompareTag("Piece"))
+                    {
+                        PieceController hitPiece = wallHit.collider.GetComponent<PieceController>();
+                        if (hitPiece != null && !hitPieces.Contains(hitPiece))
+                        {
+                            hitPieces.Add(hitPiece);
+                            Debug.Log($"{target.name} 击退时撞到了 {hitPiece.name}，造成碰撞伤害");
+                        }
+                    }
+                    lastValidPos = wallHit.point - dir * 0.2f; // 撞到硬物，退后一点
+                    hasCollision = true;
+                    Debug.Log($"{target.name} 击退时撞到了 {wallHit.collider.name}");
+                    break;
+                }
+            }
+            
+            // 2. 地面检测 (垂直向下检测)
+            Ray groundRay = new Ray(nextStepPos + Vector3.up * 10f, Vector3.down);
+            if (Physics.Raycast(groundRay, out RaycastHit groundHit, 30f))
+            {
+                if (groundHit.collider.CompareTag("Ground"))
+                {
+                    // 是合法地面，更新落点并进入下一次循环
+                    lastValidPos = groundHit.point;
+                }
+                else
+                {
+                    // 检测到了碰撞体但不是 Ground (比如悬崖外的装饰物)，视为碰撞
+                    hasCollision = true;
+                    Debug.Log($"{target.name} 击退路径出现非地面物体，停止移动");
+                    break;
+                }
+            }
+            else
+            {
+                // 完全没有检测到物体 (虚空)，视为碰撞
+                hasCollision = true;
+                Debug.Log($"{target.name} 击退至地图边缘/虚空，停止移动");
+                break;
+            }
+        }
+
+        lastValidPos.y = target.transform.position.y; // 保持原有高度，避免被击退技能弄到空中
+        // 3. 执行位移
+        target.transform.DOMove(lastValidPos, 0.2f).SetEase(Ease.OutQuad).OnComplete(() =>
+        {
+            // 4. 碰撞结果处理
+            if (hasCollision)
+            {
+                hitPieces.Add(target); // 碰撞伤害也作用于被击退的目标自身
+                TriggerCollisionDamage(hitPieces, hitBackEffect.hitBackDamage);
+            }
+        });
     }
+
+    /// <summary>
+    /// 触发碰撞伤害
+    /// </summary>
+    private void TriggerCollisionDamage(List<PieceController> hitPieces, int damage = 10)
+    {
+        foreach (var piece in hitPieces)
+        {
+            // 所有被撞到的棋子都受伤
+            piece.unitAttrCenter.TakeDamage(new AttackPack(damage,DamageType.Melee));
+            BattleScene.Ins.UM.logPanel.PlayerLog($"{piece.pieceData.pieceName} 受到碰撞伤害 <color=red>{damage}</color>！");
+            Debug.Log($"<color=red>{piece.name} 受到碰撞伤害{damage}！</color>");
+        }
+    }
+
 
     public void CheckAllArea()
     {
@@ -584,7 +703,6 @@ public class BattleManager : MonoBehaviour
     //         Debug.Log("设置灰色滤镜: " + option);
     //     }
     // }
-
     public void ShowBurstGray(bool option)
     {
         // 把 gray材质上的shader里的GREYSCALE_ON属性打开，所有使用这个材质的图片就会变灰
@@ -593,8 +711,8 @@ public class BattleManager : MonoBehaviour
             if (option)
             {
                 // 获取场景中所有这个材质的物品
-                
-                
+
+
                 gray.EnableKeyword("GREYSCALE_ON");
                 grayEnemy.EnableKeyword("GREYSCALE_ON");
             }
@@ -603,9 +721,11 @@ public class BattleManager : MonoBehaviour
                 gray.DisableKeyword("GREYSCALE_ON");
                 grayEnemy.DisableKeyword("GREYSCALE_ON");
             }
+
             Debug.Log("设置灰色滤镜: " + option);
         }
     }
+
     // 或者在程序退出时
     void OnApplicationQuit()
     {

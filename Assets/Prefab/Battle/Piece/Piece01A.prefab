@@ -183,7 +183,7 @@ GameObject:
   - component: {fileID: 9066005200974287038}
   m_Layer: 13
   m_Name: Piece01A
-  m_TagString: Untagged
+  m_TagString: Piece
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -227,6 +227,7 @@ MonoBehaviour:
   _actionListPanel: {fileID: 1246171515386722531}
   pieceDisplay: {fileID: 9066005200974287038}
   uiCanvas: {fileID: 0}
+  hitInfoPanel: {fileID: 0}
   _pieceData:
     pieceId: 0
     pieceName: 
@@ -324,6 +325,7 @@ MonoBehaviour:
   interactAreas: []
   availableActions: 
   availableSkills: []
+  availablePassives: 
   isIdle: 0
   cantControl: 0
   ableMove: 1
@@ -574,6 +576,7 @@ MonoBehaviour:
   _maxManaPoint: 0
   critRate: 0
   critDamageRate: 0
+  ATK: 0
   hpBarFill: {fileID: 0}
   OnDead:
     m_PersistentCalls:

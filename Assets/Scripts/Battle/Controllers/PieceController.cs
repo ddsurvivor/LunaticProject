@@ -694,9 +694,12 @@ public class PieceController : MonoBehaviour
     /// </summary>
     private void InitComp()
     {
+        if(playerData == null) return;
         foreach (var i in playerData.normalSlots)
         {
-            availablePassives.Add(GM.Ins.DM.componentConfig.GetData(i).passiveType);
+            var data = GM.Ins.DM.componentConfig.GetData(i);
+            if (data == null) continue;
+            availablePassives.Add(data.passiveType);
         }
         foreach (var i in playerData.weaponSlots)
         {
