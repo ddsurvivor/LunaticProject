@@ -93,11 +93,11 @@ public class HitInfoPanel : MonoBehaviour
                     BuffAttrType.DamageIncrease]) / 100f * // 伤害增加
                 (100 - target.unitAttrCenter.buffAttrDic[
                     BuffAttrType.DamageReduction]) / 100f); // 伤害减免
-            // 聚能伤害
+            /*// 聚能伤害
             if (attacker.player.isBursting)
             {
                 realDamage = attacker.player.AddBurstDamage(target, realDamage);
-            }
+            }*/
 
             if (realDamage < 0) realDamage = 0;
             

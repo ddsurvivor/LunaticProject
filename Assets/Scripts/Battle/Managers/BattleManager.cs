@@ -35,6 +35,7 @@ public class BattleManager : MonoBehaviour
         AIController.Init();
         PlayerStart();
         ApplySetting(GM.Ins.battleSetting);
+        _delaySkillPack = null;
         //gray = Resources.Load<Material>("Materials/Gray");
         //grayEnemy = Resources.Load<Material>("Materials/GrayEnemy");
     }
@@ -56,8 +57,11 @@ public class BattleManager : MonoBehaviour
         {
             PlayerController.isInTurn = false;
             PlayerController.TurnEnd();
-            AIController.isInTurn = true;
-            AIController.TurnStart();
+            DOVirtual.DelayedCall(1.5f, () =>
+            {
+                AIController.isInTurn = true;
+                AIController.TurnStart();
+            });
             //BattleScene.Ins.UM.turnPanel.ShowTurnChange("敌人回合");
             BattleScene.Ins.UM.ShowTurnChange(false);
         }
@@ -279,15 +283,19 @@ public class BattleManager : MonoBehaviour
             ApplyAddEffect(skillPack, attacker, target, targetPos);
             if (attacker.player != null && attacker.player.isBursting) // 聚能状态下所有攻击附加击退效果
             {
-                SpaceBombEffect(skillPack, attacker, target, targetPos); // 去除假死
-                // 击退距离为默认值加上每10点伤害增加0.5f
-                float dis = 1f + damageInfos.Sum(d => d.damageValue) / 10f * 0.5f;
-                HitBackEffect(
-                    new HitBackEffect 
-                    { 
-                        dis = dis, 
-                        hitBackDamage = (int)(damageInfos.Sum(d => d.damageValue) *0.4f) 
-                    }, attacker, target, targetPos);
+                if (skillPack.additionalEffects == null ||
+                    !skillPack.additionalEffects.Any(e => e is HitBackEffect))
+                {
+                    SpaceBombEffect(skillPack, attacker, target, targetPos); // 去除假死
+                    // 击退距离为默认值加上每10点伤害增加0.5f
+                    float dis = 1f + damageInfos.Sum(d => d.damageValue) / 10f * 0.5f;
+                    HitBackEffect(
+                        new HitBackEffect
+                        {
+                            dis = dis
+                            , hitBackDamage = (int)(damageInfos.Sum(d => d.damageValue) * 0.4f)
+                        }, attacker, target, targetPos);
+                }
             }
         }
 
@@ -333,7 +341,7 @@ public class BattleManager : MonoBehaviour
             allEnemyDead = true;
         }
 
-        Debug.Log($"判定敌人棋子全灭：{allEnemyDead}");
+        //Debug.Log($"判定敌人棋子全灭：{allEnemyDead}");
         if (allEnemyDead)
         {
             PlayerWin();
@@ -356,7 +364,7 @@ public class BattleManager : MonoBehaviour
             allPlayerDead = true;
         }
 
-        Debug.Log($"检查我方棋子全灭：{allPlayerDead}");
+        //Debug.Log($"检查我方棋子全灭：{allPlayerDead}");
         if (allPlayerDead)
         {
             PlayerLoss();
@@ -532,9 +540,10 @@ public class BattleManager : MonoBehaviour
             if (Physics.Raycast(forwardRay, out RaycastHit wallHit, 100f))
             {
                 if (wallHit.collider.CompareTag("Wall") ||
-                    wallHit.collider.CompareTag("Piece")&& wallHit.collider.gameObject!=target.gameObject)
+                    wallHit.collider.CompareTag("Piece") &&
+                    wallHit.collider.gameObject != target.gameObject)
                 {
-                    if(wallHit.collider.CompareTag("Piece"))
+                    if (wallHit.collider.CompareTag("Piece"))
                     {
                         PieceController hitPiece = wallHit.collider.GetComponent<PieceController>();
                         if (hitPiece != null && !hitPieces.Contains(hitPiece))
@@ -543,13 +552,14 @@ public class BattleManager : MonoBehaviour
                             Debug.Log($"{target.name} 击退时撞到了 {hitPiece.name}，造成碰撞伤害");
                         }
                     }
+
                     lastValidPos = wallHit.point - dir * 0.2f; // 撞到硬物，退后一点
                     hasCollision = true;
                     Debug.Log($"{target.name} 击退时撞到了 {wallHit.collider.name}");
                     break;
                 }
             }
-            
+
             // 2. 地面检测 (垂直向下检测)
             Ray groundRay = new Ray(nextStepPos + Vector3.up * 10f, Vector3.down);
             if (Physics.Raycast(groundRay, out RaycastHit groundHit, 30f))
@@ -559,7 +569,7 @@ public class BattleManager : MonoBehaviour
                     // 是合法地面，更新落点并进入下一次循环
                     lastValidPos = groundHit.point;
                 }
-                else if(groundHit.collider.gameObject != target.gameObject)
+                else if (groundHit.collider.gameObject != target.gameObject)
                 {
                     // 检测到了碰撞体但不是 Ground (比如悬崖外的装饰物)，视为碰撞
                     hasCollision = true;
@@ -597,8 +607,9 @@ public class BattleManager : MonoBehaviour
         foreach (var piece in hitPieces)
         {
             // 所有被撞到的棋子都受伤
-            piece.unitAttrCenter.TakeDamage(new AttackPack(damage,DamageType.Melee));
-            BattleScene.Ins.UM.logPanel.PlayerLog($"{piece.pieceData.pieceName} 受到碰撞伤害 <color=red>{damage}</color>！");
+            piece.unitAttrCenter.TakeDamage(new AttackPack(damage, DamageType.Melee));
+            BattleScene.Ins.UM.logPanel.PlayerLog(
+                $"{piece.pieceData.pieceName} 受到碰撞伤害 <color=red>{damage}</color>！");
             Debug.Log($"<color=red>{piece.name} 受到碰撞伤害{damage}！</color>");
         }
     }
@@ -629,6 +640,7 @@ public class BattleManager : MonoBehaviour
         , Vector3 targetPos = default)
     {
         // 存储技能数据，等待回合结束时触发攻击
+        Debug.Log($"存储延时技能效果{skillPack.skillName}, 位置{targetPos}，将在回合结束时触发");
         _delaySkillCaster = caster;
         _delaySkillPack = skillPack;
         _delaySkillTargetPos = targetPos;
@@ -646,8 +658,9 @@ public class BattleManager : MonoBehaviour
     // 处理临时效果
     public void HandleDelaySkill()
     {
-        if (_delaySkillPack != null)
+        if (_delaySkillPack != null && _delaySkillCaster != null)
         {
+            Debug.Log($"处理延时技能效果{_delaySkillPack.skillName}");
             float explodeRadius = _delaySkillPack.explodeRadius;
             // 检测球体范围内的所有敌人
             Collider[] hitColliders =
@@ -672,6 +685,7 @@ public class BattleManager : MonoBehaviour
             PieceSkill(_delaySkillCaster, newTargets, _delaySkillPack, _delaySkillTargetPos);
             _delaySkillEffectObj.SetActive(false);
             _delaySkillPack = null;
+            _delaySkillCaster = null;
         }
     }
 
@@ -722,7 +736,7 @@ public class BattleManager : MonoBehaviour
                 grayEnemy.DisableKeyword("GREYSCALE_ON");
             }
 
-            Debug.Log("设置灰色滤镜: " + option);
+            //Debug.Log("设置灰色滤镜: " + option);
         }
     }
 

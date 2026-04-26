@@ -28,19 +28,22 @@ public class SelfRevive : MonoBehaviour
 
     public void Revive()
     {
-        if (piece != null && isFakeDead)
+        if (piece != null && isFakeDead && piece.gameObject.activeInHierarchy)
         {
             // 满血满状态复活
+            Debug.Log($"[SelfRevive] {piece.name} is reviving with {revivePercent}% health.");
             piece.Init(piece.player);
             piece.isActived = true;
             piece.unitAttrCenter.SetHealth(revivePercent);
             isFakeDead = false;
-            //reviveCount--;
+            reviveCount--;
         }
     }
 
     public void TrueDeath()
     {
+        reviveCount = 0;
+        isFakeDead = false;
         DOVirtual.DelayedCall(0.5f, () =>
         {
             piece.pieceDisplay.PlayFrame(deadSpriteList, () =>

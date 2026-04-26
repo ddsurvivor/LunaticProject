@@ -95,31 +95,37 @@ public class CameraController : MonoBehaviour
 
     public void FocusShake(Transform transform, float amplitude = 1f)
     {
-        virtualCamera.Follow = transform;
+        virtualCamera.Priority = 0;
+        followVCam.Priority = 10;
+        followVCam.Follow = transform;
         //virtualCamera.m_Lens.OrthographicSize = minZoom;
-        float currentSize = virtualCamera.m_Lens.OrthographicSize;
+        float currentSize = followVCam.m_Lens.OrthographicSize;
         shakeTweener?.Kill();
         shakeTweener = DOTween.To(
-            () => virtualCamera.m_Lens.OrthographicSize,
-            x => virtualCamera.m_Lens.OrthographicSize = x,
+            () => followVCam.m_Lens.OrthographicSize,
+            x => followVCam.m_Lens.OrthographicSize = x,
             minZoom,
             shakeDelay/10f
         ).OnComplete(() =>
         {
-            virtualCamera.Follow = null;
+            followVCam.Follow = null;
             // 调用impulse的方法让相机震动
             if (impulse != null)
             {
                 impulse.m_ImpulseDefinition.m_AmplitudeGain = amplitude; // 设置震动强度
                 impulse.GenerateImpulse();
-                Debug.Log("相机震动");
+                //Debug.Log("相机震动");
             }
 
             DOTween.To(
-                () => virtualCamera.m_Lens.OrthographicSize,
-                x => virtualCamera.m_Lens.OrthographicSize = x,
+                () => followVCam.m_Lens.OrthographicSize,
+                x => followVCam.m_Lens.OrthographicSize = x,
                 currentSize,
-                shakeDelay).SetDelay(0.8f);
+                shakeDelay).SetDelay(0.8f).OnComplete(() =>
+            {
+                virtualCamera.Priority = 10;
+                followVCam.Priority = 0;
+            });
         });
     }
 

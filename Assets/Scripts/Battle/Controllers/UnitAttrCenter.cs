@@ -19,7 +19,8 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     public AttrCenter attr => _attr;
 
     // 生命值 hp
-    [SerializeField] [ReadOnly] private int _curHealth;
+    //[ReadOnly]
+    [SerializeField]  private int _curHealth;
 
     public int CurHealth => _curHealth;
 
@@ -161,6 +162,8 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     public void SetHealth(float healthPercent)
     {
         _curHealth = Mathf.CeilToInt(_maxHealth * healthPercent / 100f);
+        if (hpBarFill != null)
+            hpBarFill.localScale = new Vector3((float)_curHealth / _maxHealth, 1f, 1f);
     }
 
     public void TakeDamage(AttackPack attackPack)

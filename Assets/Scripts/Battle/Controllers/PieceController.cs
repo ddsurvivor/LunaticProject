@@ -579,7 +579,7 @@ public class PieceController : MonoBehaviour
                 Vector3 skillPos = atkPos != null ? atkPos.position : transform.position;
                 BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack, skillPos);
     
-                Debug.Log("关闭显示范围");
+                //Debug.Log("关闭显示范围");
                 rangeUI.CloseRange();
                 if (atkPos != null && _skillPack.skillVFXType != 0)
                 {
@@ -662,8 +662,8 @@ public class PieceController : MonoBehaviour
 
     public void UseItem(ItemData itemData)
     {
-        if (!unitAttrCenter.HasItem(new List<ItemPack>()
-                { new ItemPack(itemData.itemName, 1) })) return;
+        var items = new List<ItemPack>() { new ItemPack(itemData.itemName, 1) };
+        if (!unitAttrCenter.HasItem(items)) return;
         if (!unitAttrCenter.CostMP()) return;
         switch (itemData.itemName)
         {
@@ -687,6 +687,8 @@ public class PieceController : MonoBehaviour
             default:
                 throw new ArgumentOutOfRangeException();
         }
+
+        unitAttrCenter.CostItem(items);
     }
 
     // ======= 插件 ====== //
