@@ -559,11 +559,11 @@ public class BattleManager : MonoBehaviour
                     // 是合法地面，更新落点并进入下一次循环
                     lastValidPos = groundHit.point;
                 }
-                else
+                else if(groundHit.collider.gameObject != target.gameObject)
                 {
                     // 检测到了碰撞体但不是 Ground (比如悬崖外的装饰物)，视为碰撞
                     hasCollision = true;
-                    Debug.Log($"{target.name} 击退路径出现非地面物体，停止移动");
+                    Debug.Log($"{target.name} 击退路径出现非地面物体{groundHit.collider.name}，停止移动");
                     break;
                 }
             }
