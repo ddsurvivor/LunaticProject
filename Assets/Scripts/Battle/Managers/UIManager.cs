@@ -90,6 +90,7 @@ public class UIManager : SerializedMonoBehaviour
     public void OnPieceStateChance(PieceController pc)
     {
         pieceStatePanel.OpenPanel(pc);
+        pieceStatePanel.UpdateDisplay();
         pieceInfoPanel.OnSelectPiece(pc);
     }
 

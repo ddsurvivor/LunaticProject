@@ -11,7 +11,7 @@ public class PieceStatePanel : UIPanel
     //public Text healthText;
     //public Text mpText;
     public Text ammoText;
-    
+    public Text mpText;
     public Image healthBar;
     //public Image mpBar;
     public Image manaBar;
@@ -54,6 +54,7 @@ public class PieceStatePanel : UIPanel
             healthBar.fillAmount = (float)pc.unitAttrCenter.CurHealth / pc.unitAttrCenter.MaxHealth;
             //mpBar.fillAmount = (float)pc.unitAttrCenter.CurMovePoint / pc.unitAttrCenter.MaxMovePoint;
             ammoText.text =  $"{pc.unitAttrCenter.AmmoCount}/{pc.unitAttrCenter.MaxAmmoCount}";
+            mpText.text = $"{pc.unitAttrCenter.CurMovePoint}/{pc.unitAttrCenter.MaxMovePoint}";
             manaBar.fillAmount = (float)pc.unitAttrCenter.ManaPoint / pc.unitAttrCenter.MaxManaPoint;
             //manaText.text = $"{pc.unitAttrCenter.ManaPoint}/{pc.unitAttrCenter.MaxManaPoint}";
         }

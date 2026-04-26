@@ -28,6 +28,7 @@ public class CameraController : MonoBehaviour
     {
         virtualCamera.Priority = 0;
         followVCam.Priority = 10;
+        impulse = followVCam.GetComponent<Cinemachine.CinemachineImpulseSource>();
     }
 
     void Update()
@@ -101,10 +102,11 @@ public class CameraController : MonoBehaviour
         //virtualCamera.m_Lens.OrthographicSize = minZoom;
         float currentSize = followVCam.m_Lens.OrthographicSize;
         shakeTweener?.Kill();
+        float zoom = minZoom + (maxZoom - minZoom) * 0.2f;
         shakeTweener = DOTween.To(
             () => followVCam.m_Lens.OrthographicSize,
             x => followVCam.m_Lens.OrthographicSize = x,
-            minZoom,
+            zoom,
             shakeDelay/10f
         ).OnComplete(() =>
         {

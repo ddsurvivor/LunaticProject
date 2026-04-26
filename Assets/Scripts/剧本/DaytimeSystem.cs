@@ -8,9 +8,7 @@ using UnityEngine.UI;
 
 public class DaytimeSystem : SerializedMonoBehaviour
 {
-    private int startYear = 1567;
-    private int startMonth = 1;
-    private int startDay = 45;
+    
     
     public Text dateText;
     public Text timeText;
@@ -37,7 +35,7 @@ public class DaytimeSystem : SerializedMonoBehaviour
         {
             if (GM.Ins.PLAYERPROFILE.daytime == Daytime.夜晚)
             {
-                GM.Ins.PLAYERPROFILE.date += 1;
+                GM.Ins.PLAYERPROFILE.dateDay += 1;
                 GM.Ins.PLAYERPROFILE.daytime = Daytime.上午;
             }
             else
@@ -50,7 +48,7 @@ public class DaytimeSystem : SerializedMonoBehaviour
 
     public void NextDay()
     {
-        GM.Ins.PLAYERPROFILE.date += 1;
+        GM.Ins.PLAYERPROFILE.dateDay += 1;
         GM.Ins.PLAYERPROFILE.daytime = Daytime.上午;
         UpdateDaytimeImage();
     }
@@ -58,7 +56,7 @@ public class DaytimeSystem : SerializedMonoBehaviour
     public void UpdateDaytimeImage()
     {
         // 更新日期文本
-        dateText.text = $"{startYear} / Q{startMonth} / {startDay + GM.Ins.PLAYERPROFILE.date}";
+        dateText.text = $"{GM.Ins.PLAYERPROFILE.dateYear} / Q{GM.Ins.PLAYERPROFILE.dateMonth} / {GM.Ins.PLAYERPROFILE.dateDay}";
         timeText.text = GM.Ins.PLAYERPROFILE.daytime == Daytime.轰炸 ? 
             "夜晚" : GM.Ins.PLAYERPROFILE.daytime.ToString();
         if (daytimeSprites.ContainsKey(GM.Ins.PLAYERPROFILE.daytime))

@@ -902,6 +902,8 @@ public class 剧本System : MonoBehaviour
                 {
                     var player = GM.Ins.PLAYERPROFILE.player[index];
                     player.spriteName = $"PC0{index + 1}01";
+                    GM.Ins.PLAYERPROFILE.dateYear = 1573;//6年后
+                    GM.Ins.PLAYERPROFILE.dateMonth = 3;
                 }
             }
 

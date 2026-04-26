@@ -12,30 +12,27 @@ using UnityEngine;
 public class PLAYERPROFILE
 {
     //public static PLAYERPROFILE instance;
-    [OdinSerialize]
-    public Dictionary<string, int> finishNodeDic=new Dictionary<string, int>();
-    
+    [OdinSerialize] public Dictionary<string, int> finishNodeDic = new Dictionary<string, int>();
+
     [OdinSerialize]
     /// <summary>
     /// 棋子角色数据
     /// </summary>
     public Player[] player = new Player[20];
 
-    [Header("进度存档")]
-    public int date = 0;
+    [Header("进度存档")] public int dateYear = 1567;
+    public int dateMonth = 1;
+    public int dateDay = 45;
     public Daytime daytime = Daytime.上午;
     public string currentMap = "TEST";
     public int curSmallMapIndex = 0;
 
-    [Header("道具存档")] 
-    public List<ItemPack> itemPacks = new();
-    public int coins;// 金币数量
-    
-    [Header("教程存档")]
-    public List<string> seenTutorials = new List<string>();
+    [Header("道具存档")] public List<ItemPack> itemPacks = new();
+    public int coins; // 金币数量
 
-    [Header("存档信息")]
-    public DateTime lastSaveTime;
+    [Header("教程存档")] public List<string> seenTutorials = new List<string>();
+
+    [Header("存档信息")] public DateTime lastSaveTime;
     public bool isNewGame = false;
 
     // private void Awake()
@@ -47,20 +44,20 @@ public class PLAYERPROFILE
     public void 新游戏初始化数值()
     {
         Debug.Log("检测为新游戏,初始化数值");
-        coins = GameConst.initialCoins; 
-        
+        coins = GameConst.initialCoins;
+
         player = new Player[20];
         player[0] = new Player();
         player[0].NAME = "邱悟";
-        player[0].HP = 15;//体力
+        player[0].HP = 15; //体力
         player[0].HPMAX = 15;
-        player[0].STAYING = 30;//耐力
+        player[0].STAYING = 30; //耐力
         player[0].STAYINGMAX = 30;
-        player[0].PHYSIQUE = 4;//体能
-        player[0].TACTICS = 5;//作战
+        player[0].PHYSIQUE = 4; //体能
+        player[0].TACTICS = 5; //作战
         player[0].YIZHI = 5;
         player[0].TALK = 5;
-        player[0].RECOGNITION = 3;//模式识别
+        player[0].RECOGNITION = 3; //模式识别
         player[0].spriteName = "PC01C1";
         player[0].Level = 1;
         foreach (var data in GM.Ins.DM.componentConfig.componentList)
@@ -68,17 +65,18 @@ public class PLAYERPROFILE
             int i = data.id;
             player[0].componentInventory.Add(i);
         }
-        player[1] = new Player(); 
+
+        player[1] = new Player();
         // player[2] ── 绿
-        player[1].NAME        = "绿";
-        player[1].PHYSIQUE    = 2;          // 体能
-        player[1].YIZHI       = 4;          // 意志
-        player[1].TALK        = 3;      // 沟通 
-        player[1].TACTICS     = 4;      // 作战
-        player[1].RECOGNITION = 7;      // 模式识别 
-        player[1].HP          = 10;         // 当前生命
-        player[1].HPMAX       = 10;         // 生命上限
-        player[1].STAYING     = 20;         // 耐力
+        player[1].NAME = "绿";
+        player[1].PHYSIQUE = 2; // 体能
+        player[1].YIZHI = 4; // 意志
+        player[1].TALK = 3; // 沟通 
+        player[1].TACTICS = 4; // 作战
+        player[1].RECOGNITION = 7; // 模式识别 
+        player[1].HP = 10; // 当前生命
+        player[1].HPMAX = 10; // 生命上限
+        player[1].STAYING = 20; // 耐力
         player[1].STAYINGMAX = 20;
         player[1].spriteName = "PC02C1";
         player[1].Level = 1;
@@ -87,18 +85,19 @@ public class PLAYERPROFILE
             int i = data.id;
             player[1].componentInventory.Add(i);
         }
+
 // player[2] ── 马赛
         player[2] = new Player();
-        player[2].NAME        = "马赛";
-        player[2].PHYSIQUE    = 4;      // 体能 
-        player[2].YIZHI       = 3;      // 意志 
-        player[2].TALK        = 5;          // 沟通
-        player[2].TACTICS     = 6;      // 作战 
-        player[2].RECOGNITION = 2;          // 模式识别
-        player[2].HP          = 30;         // 当前生命
-        player[2].HPMAX       = 30;         // 生命上限
-        player[2].STAYING     = 20;       
-        player[2].STAYINGMAX  = 20;   
+        player[2].NAME = "马赛";
+        player[2].PHYSIQUE = 4; // 体能 
+        player[2].YIZHI = 3; // 意志 
+        player[2].TALK = 5; // 沟通
+        player[2].TACTICS = 6; // 作战 
+        player[2].RECOGNITION = 2; // 模式识别
+        player[2].HP = 30; // 当前生命
+        player[2].HPMAX = 30; // 生命上限
+        player[2].STAYING = 20;
+        player[2].STAYINGMAX = 20;
         player[2].spriteName = "PC03C1";
         player[2].Level = 1;
         foreach (var data in GM.Ins.DM.componentConfig.componentList)
@@ -106,13 +105,13 @@ public class PLAYERPROFILE
             int i = data.id;
             player[2].componentInventory.Add(i);
         }
-        
+
         // 技能点测试
         /*player[0].SkillPoints = 5;
         player[1].SkillPoints = 5;
         player[2].SkillPoints = 5;*/
-        
-        
+
+
         // 道具
         itemPacks.Clear();
         itemPacks.Add(new ItemPack(ItemName.能量包, 6));
@@ -120,8 +119,12 @@ public class PLAYERPROFILE
         itemPacks.Add(new ItemPack(ItemName.专速达, 3));
         //初始化
         isNewGame = true;
+
+        dateYear = 1567;
+        dateMonth = 1;
+        dateDay = 45;
     }
-    
+
 
     public void 保存任务进度(string 任务, int 进度)
     {
@@ -133,9 +136,10 @@ public class PLAYERPROFILE
         {
             finishNodeDic.Add(任务, 进度);
         }
-        if(isNewGame) isNewGame = false; // 只要保存过一次任务进度，就不再是新游戏了
+
+        if (isNewGame) isNewGame = false; // 只要保存过一次任务进度，就不再是新游戏了
     }
-    
+
     public void Modify(int index, string fieldName, int value)
     {
         if (index < 0 || index >= player.Length)
@@ -143,6 +147,7 @@ public class PLAYERPROFILE
             Debug.LogError($"修改属性时index越界!");
             return;
         }
+
         PropertyInfo propertyInfo = typeof(Player).GetProperty(fieldName,
             BindingFlags.Public | BindingFlags.Instance);
         if (propertyInfo == null)
@@ -150,16 +155,18 @@ public class PLAYERPROFILE
             Debug.LogError($"修改属性失败：Player 中不存在属性 {fieldName}!");
             return;
         }
+
         if (propertyInfo.PropertyType != typeof(int))
         {
             Debug.LogError($"修改属性失败：{fieldName} 不是 int 类型");
             return;
         }
+
         Player p = player[index];
         int oldVal = (int)propertyInfo.GetValue(p);
         int newVal = oldVal + value;
         propertyInfo.SetValue(p, newVal);
-        player[index] = p; 
+        player[index] = p;
         Debug.Log($"修改属性测试: {index} 的 {fieldName} 从 {oldVal} 改为 {newVal}");
     }
 
@@ -168,18 +175,21 @@ public class PLAYERPROFILE
         Player[] players = player;
 
         if (index < 0 || index >= players.Length)
-            throw new IndexOutOfRangeException($"Index {index} is out of range for the players array.");
+            throw new IndexOutOfRangeException(
+                $"Index {index} is out of range for the players array.");
 
         Player selectedPlayer = players[index];
-        PropertyInfo propertyInfo = typeof(Player).GetProperty(fieldName, BindingFlags.Public | BindingFlags.Instance);
+        PropertyInfo propertyInfo =
+            typeof(Player).GetProperty(fieldName, BindingFlags.Public | BindingFlags.Instance);
 
         if (propertyInfo == null)
             throw new ArgumentException($"Property '{fieldName}' not found in Player.");
 
         if (propertyInfo.PropertyType != typeof(T))
-            throw new InvalidOperationException($"Property '{fieldName}' is not of type {typeof(T).Name}.");
+            throw new InvalidOperationException(
+                $"Property '{fieldName}' is not of type {typeof(T).Name}.");
         object baseValue = propertyInfo.GetValue(selectedPlayer);
-        
+
         if (typeof(T) == typeof(int))
         {
             int intValue = (int)baseValue;
@@ -189,8 +199,8 @@ public class PLAYERPROFILE
             if (index == 0)
             {
                 bool isTargetField =
-                    fieldName == nameof(Player.YIZHI)     ||
-                    fieldName == nameof(Player.PHYSIQUE)  ||
+                    fieldName == nameof(Player.YIZHI) ||
+                    fieldName == nameof(Player.PHYSIQUE) ||
                     fieldName == nameof(Player.TALK);
                 int skillLevel = 0;
                 剧本技能.当前技能.TryGetValue("继承者", out skillLevel);
@@ -201,7 +211,7 @@ public class PLAYERPROFILE
             }
 
             #endregion
-           
+
             return (T)(object)intValue;
         }
 
@@ -214,7 +224,7 @@ public class PLAYERPROFILE
         int rt = 0;
         if (finishNodeDic.ContainsKey(t))
         {
-            rt = finishNodeDic[t];  
+            rt = finishNodeDic[t];
         }
         // try
         // {
@@ -237,12 +247,13 @@ public class PLAYERPROFILE
         {
             index = index -= 100;
         }
+
         if (index < 0 || index >= player.Length)
         {
-            
             Debug.LogWarning($"修改属性时index越界!index = {index}");
             return null;
         }
+
         return player[index];
     }
 
@@ -253,6 +264,7 @@ public class PLAYERPROFILE
             Debug.LogError($"修改属性时index越界!index = {index}");
             return;
         }
+
         player[index].curHealth = curHealth;
         player[index].curAmmo = curAmmo;
         player[index].curMana = curMana;
@@ -260,21 +272,24 @@ public class PLAYERPROFILE
 
     public void ModPlayer(int index, int attr, int mod, int val = 0)
     {
-        if(player.Length <= index || index < 0)
+        if (player.Length <= index || index < 0)
         {
             Debug.LogError($"修改属性时index越界!index = {index}");
             return;
         }
+
         player[index].AccessAttribute(attr, (AttrOp)mod, val);
     }
 
     #region 仓库存档
+
     public int GetItemNum(ItemName itemName)
     {
         var item = GM.Ins.PLAYERPROFILE.itemPacks
             .Find(t => t.itemName == itemName);
         return item != null ? item.itemNum : 0;
     }
+
     public void CostItem(ItemName itemName, int num)
     {
         var item = GM.Ins.PLAYERPROFILE.itemPacks
@@ -289,7 +304,7 @@ public class PLAYERPROFILE
             }
         }
     }
-    
+
     public void AddItem(ItemName itemName, int num)
     {
         Debug.Log($"添加道具: {itemName} 数量: {num}");
@@ -305,16 +320,17 @@ public class PLAYERPROFILE
                 .Add(new ItemPack(itemName, num));
         }
     }
-    
+
     public bool HasEnoughMoney(int cost)
     {
         return coins >= cost;
     }
-    
+
     public void CostMoney(int cost)
     {
         coins -= cost;
         if (coins < 0) coins = 0;
     }
-    #endregion 
+
+    #endregion
 }

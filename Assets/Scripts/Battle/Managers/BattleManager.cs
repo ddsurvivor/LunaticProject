@@ -20,6 +20,7 @@ public class BattleManager : MonoBehaviour
     public List<HealArea> areaList = new(); // 
     public FinishDrop finishDrop;
     [LabelText("战斗胜利经验值")] public int finishExp = 100;
+    [LabelText("坚持回合胜利")]public int winTurnCondition = 999; // 胜利条件：在多少回合内获胜，999表示不限制
 
     public BattleSetController battleSetController;
     public int TunrNumber => _turnNumber;
@@ -85,6 +86,13 @@ public class BattleManager : MonoBehaviour
         //BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家回合");
         _turnNumber++;
         BattleScene.Ins.UM.turnNumberText.text = TunrNumber.ToString();
+        
+        // 胜利条件：坚持回合数
+        if (TunrNumber >= winTurnCondition)
+        {
+            Debug.Log($"达到胜利回合数{TunrNumber}，玩家胜利");
+            PlayerWin();
+        }
     }
 
     /*public void PieceAttack(PieceController attacker, PieceController defender
