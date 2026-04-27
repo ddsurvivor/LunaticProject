@@ -33,6 +33,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 2d1927f565305d24e9ae473ceea52d2d, type: 3}
     - {fileID: 8300000, guid: 994a763418d61cc46b53f049d5ddee76, type: 3}
     - {fileID: 8300000, guid: 0223ea67f4b52c84fba3488ab1216ff2, type: 3}
+    - {fileID: 8300000, guid: dcb57b57934c1ee4fbd3f162bec8f4ef, type: 3}
     - {fileID: 8300000, guid: 5aaa312eaf85fae4ea0341ff5298d8b8, type: 3}
     - {fileID: 8300000, guid: 90252c2ca83f8e9498210473f93a3fa9, type: 3}
     - {fileID: 8300000, guid: 9a59580c91f8009499c7116c002f21d5, type: 3}
@@ -4343,7 +4344,7 @@ MonoBehaviour:
       Data: 193|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
-      Data: "\u6CBB\u7597\u5F39"
+      Data: "\u4FEE\u590D\u5F39"
     - Name: description
       Entry: 1
       Data: "\u5411\u573A\u5730\u5185\u91CA\u653E\u8303\u56F4\u6CBB\u6108\u533A\u57DF\u3002\u5F53\u6211\u65B9\u68CB\u5B50\u5438\u9644\u5728\u8FD9\u7247\u533A\u57DF\u5E76\u505C\u7559\u65F6\uFF0C\u4F1A\u83B7\u5F973\u5C42\u81EA\u52A8\u6CBB\u7597"
@@ -4747,8 +4748,8 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: skillSound
-      Entry: 6
-      Data: 
+      Entry: 10
+      Data: 17
     - Name: consumeItems
       Entry: 7
       Data: 214|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
@@ -5796,7 +5797,7 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 17
+      Data: 18
     - Name: consumeItems
       Entry: 7
       Data: 261|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
@@ -5933,7 +5934,7 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 18
+      Data: 19
     - Name: consumeItems
       Entry: 7
       Data: 268|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
@@ -6535,7 +6536,7 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 19
+      Data: 20
     - Name: consumeItems
       Entry: 7
       Data: 298|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
@@ -6675,7 +6676,7 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 20
+      Data: 21
     - Name: consumeItems
       Entry: 7
       Data: 305|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
@@ -7100,7 +7101,7 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 21
+      Data: 22
     - Name: consumeItems
       Entry: 7
       Data: 325|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
@@ -7278,7 +7279,7 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 22
+      Data: 23
     - Name: consumeItems
       Entry: 7
       Data: 334|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
@@ -7507,7 +7508,7 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 19
+      Data: 20
     - Name: consumeItems
       Entry: 7
       Data: 343|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
@@ -7647,7 +7648,7 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 20
+      Data: 21
     - Name: consumeItems
       Entry: 7
       Data: 350|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
@@ -8082,7 +8083,7 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 21
+      Data: 22
     - Name: consumeItems
       Entry: 7
       Data: 371|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
@@ -8550,7 +8551,7 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 23
+      Data: 24
     - Name: consumeItems
       Entry: 7
       Data: 394|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
@@ -9386,7 +9387,7 @@ MonoBehaviour:
     critRate: 10
     critDamageRate: 180
     skillPacks:
-    - skillName: "\u6CBB\u7597\u5F39"
+    - skillName: "\u4FEE\u590D\u5F39"
       description: "\u5411\u573A\u5730\u5185\u91CA\u653E\u8303\u56F4\u6CBB\u6108\u533A\u57DF\u3002\u5F53\u6211\u65B9\u68CB\u5B50\u5438\u9644\u5728\u8FD9\u7247\u533A\u57DF\u5E76\u505C\u7559\u65F6\uFF0C\u4F1A\u83B7\u5F973\u5C42\u81EA\u52A8\u6CBB\u7597"
       mpCost: 2
       target: 5
@@ -9465,7 +9466,7 @@ MonoBehaviour:
         rate: 100
         target: 2
       skillEffects: 
-      skillSound: {fileID: 0}
+      skillSound: {fileID: 8300000, guid: dcb57b57934c1ee4fbd3f162bec8f4ef, type: 3}
       consumeItems: []
       animationIndex: 2
       isDelaySkill: 0
