@@ -45,6 +45,7 @@ public class SkillManager : MonoBehaviour
             // 进行扇形有限距离的穿透射线检测
             // 根据扇形角度，等间距的发射多根射线进行检测，结果需要去掉重复
             float halfAngle = _curSkillPack.rangeAgle / 2f;
+            if(halfAngle <= 0f) halfAngle = 5f; // 最小5度
             int rayCount = Mathf.CeilToInt(_curSkillPack.rangeAgle / 5f); // 每5度发射一根射线
             //HashSet<PieceController> hitPieces = new HashSet<PieceController>();
             for (int i = 0; i <= rayCount; i++)

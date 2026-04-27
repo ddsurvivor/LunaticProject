@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class SelfHeal : MonoBehaviour
 {
+    
     public void FullHp()
     {
         var piece = GetComponent<PieceController>();

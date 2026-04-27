@@ -22,6 +22,7 @@ public class SkillPointPanel : MonoBehaviour
 
     private bool hasInited;
     private int unitID;
+    public CharacterUIPage characterUIPage;
     void Start()
     {
         //InitPanel();
@@ -100,11 +101,12 @@ public class SkillPointPanel : MonoBehaviour
             rowList[i].Commit();
         }
 
+        
         //GM.Ins.PLAYERPROFILE.player[unitID] = playerData;
         // 2. 【重点：存档回写】
         // 在这里将修改后的 playerData 结构体存入你的存档系统或全局管理器
         // SaveToDisk(playerData); 
-
+        characterUIPage.ShowPanel(playerData); // 刷新主界面显示
         Debug.Log("数据已更新至结构体并触发保存逻辑");
     }
 

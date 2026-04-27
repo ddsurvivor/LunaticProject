@@ -42,7 +42,7 @@ public class AudioFxManager : MonoBehaviour
         {
             // PlayOneShot 允许重叠播放，不会切断正在播放的同类声音
             sfxSource.PlayOneShot(clip, volumeScale);
-            AudioSource.PlayClipAtPoint(clip, Camera.main.transform.position, volumeScale);
+            //AudioSource.PlayClipAtPoint(clip, Camera.main.transform.position, volumeScale);
         }
         else
         {

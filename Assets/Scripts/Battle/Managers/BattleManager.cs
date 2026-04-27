@@ -192,6 +192,7 @@ public class BattleManager : MonoBehaviour
                 {
                     isHit = true;
                 }
+                //Debug.Log($"Skill Attack: HitRoll={hitRoll}, HitRate={hitRate}, Evade={evade}, IsHit={isHit}");
             }
 
             if (isHit == false)
@@ -294,7 +295,7 @@ public class BattleManager : MonoBehaviour
                 if (skillPack.additionalEffects == null ||
                     !skillPack.additionalEffects.Any(e => e is HitBackEffect))
                 {
-                    SpaceBombEffect(skillPack, attacker, target, targetPos); // 去除假死
+                    SpaceBombEffect(skillPack, attacker, target, targetPos, true); // 去除假死
                     // 击退距离为默认值加上每10点伤害增加0.5f
                     float dis = 1f + damageInfos.Sum(d => d.damageValue) / 10f * 0.5f;
                     HitBackEffect(
@@ -349,7 +350,7 @@ public class BattleManager : MonoBehaviour
             allEnemyDead = true;
         }
 
-        //Debug.Log($"判定敌人棋子全灭：{allEnemyDead}");
+        Debug.Log($"判定敌人棋子全灭：{allEnemyDead}");
         if (allEnemyDead)
         {
             PlayerWin();
@@ -384,7 +385,7 @@ public class BattleManager : MonoBehaviour
         inBattle = false;
         AIController.isInTurn = false;
         // 敌方棋子全灭，玩家胜利
-        BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家胜利！");
+        //BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家胜利！");
         // 处理胜利事件
         if (finishDrop != null) finishDrop.DropItems();
         if (finishExp > 0)
@@ -397,10 +398,11 @@ public class BattleManager : MonoBehaviour
                 }
             }
         }
+        BattleScene.Ins.UM.battleFinishPanel.ShowPanel(true, finishDrop, finishExp);
 
         PlayerController.EndBurstMode(); // 结束聚能状态
         // 延迟后退出战斗
-        DOVirtual.DelayedCall(1.0f, () => { BattleScene.Ins.BM.OnClickQuitBattle(); });
+        //DOVirtual.DelayedCall(1.0f, () => { BattleScene.Ins.BM.OnClickQuitBattle(); });
     }
 
     public void PlayerLoss()
@@ -409,7 +411,8 @@ public class BattleManager : MonoBehaviour
         AIController.isInTurn = false;
         Debug.Log("我方棋子全灭，玩家失败");
         // 我方棋子全灭，玩家失败
-        BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家失败！");
+        BattleScene.Ins.UM.battleFinishPanel.ShowPanel(false);
+        //BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家失败！");
         // 激活重新开始按钮
         if (BattleScene.Ins.UM.restartButton != null)
         {
@@ -437,7 +440,7 @@ public class BattleManager : MonoBehaviour
 
     private void SpaceBombEffect(SkillPack skillPack, PieceController caster = null
         , PieceController target = null
-        , Vector3 targetPos = default)
+        , Vector3 targetPos = default, bool isBurstHit = false)
     {
         if (target.gameObject.activeInHierarchy)
         {
@@ -447,7 +450,7 @@ public class BattleManager : MonoBehaviour
             {
                 if (revive.isFakeDead)
                 {
-                    revive.TrueDeath();
+                    revive.TrueDeath(isBurstHit);
                 }
             }
         }

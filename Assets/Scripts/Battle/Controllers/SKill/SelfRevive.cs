@@ -16,6 +16,8 @@ public class SelfRevive : MonoBehaviour
     public List<Sprite> deadSpriteList; // 死亡时的图片列表
     public List<Sprite> reviveSpriteList; // 复活时的图片列表
 
+    public int compId;
+
     public void OnDead()
     {
         if (reviveCount > 0)
@@ -40,10 +42,15 @@ public class SelfRevive : MonoBehaviour
         }
     }
 
-    public void TrueDeath()
+    public void TrueDeath(bool isBurstHit = false)
     {
         reviveCount = 0;
         isFakeDead = false;
+        if (isBurstHit)
+        {
+            // 如果是聚能杀死，则奖励玩家一个插件
+            GM.Ins.PLAYERPROFILE.AddComponentToInventory(compId);
+        }
         DOVirtual.DelayedCall(0.5f, () =>
         {
             piece.pieceDisplay.PlayFrame(deadSpriteList, () =>

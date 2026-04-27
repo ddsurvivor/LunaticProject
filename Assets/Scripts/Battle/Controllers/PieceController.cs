@@ -765,4 +765,19 @@ public class PieceController : MonoBehaviour
             AudioSource.PlayClipAtPoint(skillPack.skillSound, Camera.main.transform.position);
         }
     }
+    
+    
+    // ===== 描边效果 ======//
+    
+    public GameObject outlineEffect;
+    // 鼠标进入时显示
+    private void OnMouseEnter()
+    {
+        if (outlineEffect != null) outlineEffect.SetActive(true);
+    }
+    // 鼠标离开时隐藏
+    private void OnMouseExit()
+    {
+        if (outlineEffect != null) outlineEffect.SetActive(false);
+    }
 }

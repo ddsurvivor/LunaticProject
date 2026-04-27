@@ -59,7 +59,7 @@ public class CharacterUIPage : MonoBehaviour
         // 3. 刷新背包 (预置格子循环利用)
         for (int i = 0; i < inventoryUISlots.Count; i++) {
             // 如果玩家背包里的物品数量超过了预设格数，这里会截断（建议预设足够多）
-            int id = (i < player.componentInventory.Count) ? player.componentInventory[i] : 0;
+            int id = (i < GM.Ins.PLAYERPROFILE.componentInventory.Count) ? GM.Ins.PLAYERPROFILE.componentInventory[i] : 0;
             inventoryUISlots[i].Init(id, this);
         }
     }

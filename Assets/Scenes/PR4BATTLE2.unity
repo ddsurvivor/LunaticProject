@@ -129,7 +129,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh483654
+  m_Name: pb_Mesh419610
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -2026,6 +2026,7 @@ MonoBehaviour:
   actionType: 6
   ableToTrigger: 1
   fogEffect: {fileID: 0}
+  hightlightEffect: {fileID: 0}
 --- !u!65 &101851123
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2393,7 +2394,7 @@ MonoBehaviour:
     itemNum: 4
   - itemName: 5
     itemNum: 3
-  finishExp: 100
+  dropCompIds: 0d000000
 --- !u!1001 &180457541
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2766,6 +2767,7 @@ MonoBehaviour:
   actionType: 6
   ableToTrigger: 1
   fogEffect: {fileID: 1564675299}
+  hightlightEffect: {fileID: 0}
 --- !u!43 &261357977
 Mesh:
   m_ObjectHideFlags: 0
@@ -5053,7 +5055,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh483522
+  m_Name: pb_Mesh419478
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -12410,6 +12412,7 @@ MonoBehaviour:
   actionType: 6
   ableToTrigger: 1
   fogEffect: {fileID: 0}
+  hightlightEffect: {fileID: 0}
 --- !u!65 &1156488170
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -14001,7 +14004,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh483918
+  m_Name: pb_Mesh419874
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -16946,6 +16949,8 @@ MonoBehaviour:
   areaList: []
   finishDrop: {fileID: 0}
   finishExp: 100
+  winTurnCondition: 999
+  battleSetController: {fileID: 0}
   gray: {fileID: 0}
   grayEnemy: {fileID: 0}
 --- !u!114 &1713777225
@@ -18319,6 +18324,7 @@ MonoBehaviour:
   arcInnerMask: {fileID: 0}
   arcLine1: {fileID: 0}
   arcLine2: {fileID: 0}
+  isPlayerRange: 0
 --- !u!4 &1830372241
 Transform:
   m_ObjectHideFlags: 0

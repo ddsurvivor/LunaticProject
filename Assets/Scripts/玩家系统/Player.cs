@@ -126,8 +126,7 @@ public class Player
     }
     
     
-    // 插件仓库
-    public List<int> componentInventory = new List<int>();
+    
 
     public void Equip(int id)
     {
@@ -141,7 +140,7 @@ public class Player
             if (targetSlots[i] == 0) // 寻找空格子
             {
                 targetSlots[i] = id;
-                componentInventory.Remove(id); // 从背包移除
+                GM.Ins.PLAYERPROFILE.componentInventory.Remove(id); // 从背包移除
                 break;
             }
         }
@@ -156,7 +155,7 @@ public class Player
         for (int i = 0; i < weaponSlots.Length; i++)
             if (weaponSlots[i] == id) { weaponSlots[i] = 0; break; }
 
-        componentInventory.Add(id); // 回到背包
+        GM.Ins.PLAYERPROFILE.componentInventory.Add(id); // 回到背包
     }
 
     

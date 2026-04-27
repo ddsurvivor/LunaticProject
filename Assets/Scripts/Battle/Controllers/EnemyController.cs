@@ -109,21 +109,21 @@ public class EnemyController : PieceController
         if (_curAtkType == ActionType.近战攻击)
         {
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Attack, false, 1f);
-            PlayAudio(ActionType.近战攻击);
+            PlayAudio(_curAttackPack);
         }
         else if (_curAtkType == ActionType.远程攻击)
         {
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
             // 消耗弹药
             unitAttrCenter.CostAmmo();
-            PlayAudio(ActionType.远程攻击);
+            PlayAudio(_curAttackPack);
         }
 
         // 延迟0.3f
         DOVirtual.DelayedCall(0.3f, () =>
         {
             Debug.Log($"攻击命中数量{targets.Count}");
-            BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack);
+            BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack, targets[0].transform.position, _curAtkType);
             rangeUI?.CloseRange();
         }, false);
         // 技能聚能充能

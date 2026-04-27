@@ -35,6 +35,8 @@ public class PLAYERPROFILE
     [Header("存档信息")] public DateTime lastSaveTime;
     public bool isNewGame = false;
 
+    // 插件仓库
+    public List<int> componentInventory = new List<int>();
     // private void Awake()
     // {
     //     //instance = this;
@@ -60,11 +62,7 @@ public class PLAYERPROFILE
         player[0].RECOGNITION = 3; //模式识别
         player[0].spriteName = "PC01C1";
         player[0].Level = 1;
-        foreach (var data in GM.Ins.DM.componentConfig.componentList)
-        {
-            int i = data.id;
-            player[0].componentInventory.Add(i);
-        }
+        
 
         player[1] = new Player();
         // player[2] ── 绿
@@ -80,11 +78,7 @@ public class PLAYERPROFILE
         player[1].STAYINGMAX = 20;
         player[1].spriteName = "PC02C1";
         player[1].Level = 1;
-        foreach (var data in GM.Ins.DM.componentConfig.componentList)
-        {
-            int i = data.id;
-            player[1].componentInventory.Add(i);
-        }
+        
 
 // player[2] ── 马赛
         player[2] = new Player();
@@ -100,11 +94,7 @@ public class PLAYERPROFILE
         player[2].STAYINGMAX = 20;
         player[2].spriteName = "PC03C1";
         player[2].Level = 1;
-        foreach (var data in GM.Ins.DM.componentConfig.componentList)
-        {
-            int i = data.id;
-            player[2].componentInventory.Add(i);
-        }
+        
 
         // 技能点测试
         /*player[0].SkillPoints = 5;
@@ -330,6 +320,19 @@ public class PLAYERPROFILE
     {
         coins -= cost;
         if (coins < 0) coins = 0;
+    }
+    
+    public void AddComponentToInventory(int componentId)
+    {
+        if (!componentInventory.Contains(componentId))
+        {
+            componentInventory.Add(componentId);
+            Debug.Log($"添加组件 {componentId} 到仓库");
+        }
+        else
+        {
+            Debug.LogWarning($"组件 {componentId} 已经在仓库中");
+        }
     }
 
     #endregion

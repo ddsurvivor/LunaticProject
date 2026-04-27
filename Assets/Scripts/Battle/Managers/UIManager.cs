@@ -27,7 +27,7 @@ public class UIManager : SerializedMonoBehaviour
 
     public MessagePanel messagePanel;
     public PlayerLogPanel logPanel;
-    
+    public BattleFinishPanel battleFinishPanel;
     
     public Dictionary<KeyCode, GameObject> keyPanelDic = new();
     

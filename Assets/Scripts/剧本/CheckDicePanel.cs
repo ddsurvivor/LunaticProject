@@ -5,29 +5,27 @@ using System.Collections.Generic;
 
 public class CheckDicePanel : MonoBehaviour
 {
-    [Header("骰子六面图片")]
-    public Sprite[] diceSprites; // 0-5分别代表1-6点
+    [Header("骰子六面图片")] public Sprite[] diceSprites; // 0-5分别代表1-6点
 
     //[Header("判定结果图片")]
     //public Sprite successSprite;
     //public Sprite failSprite;
 
-    
-   
 
-    [Header("判定结果UI")]
-    public GameObject success;
+    [Header("判定结果UI")] public GameObject success;
 
     public GameObject fail;
-    [Header("滚动动画设置")]
-    public float rollDuration = 1.0f; // 滚动总时长
-    public float rollSpeed = 0.1f;    // 每次切换图片间隔
+    [Header("滚动动画设置")] public float rollDuration = 1.0f; // 滚动总时长
+    public float rollSpeed = 0.1f; // 每次切换图片间隔
     public float closeDelay = 3f; // 显示结果后自动关闭的延迟时间
 
-    [Header("骰子UI对象（场景预放置）")]
-    public List<Image> diceImages = new List<Image>();
+    [Header("骰子UI对象（场景预放置）")] public List<Image> diceImages = new List<Image>();
 
     //public GameObject blur;
+
+    public AudioClip rollSound; // 滚动音效
+    public AudioClip successSound; // 成功音效
+    public AudioClip failSound; // 失败音效
 
     /// <summary>
     /// 展示骰子检定结果
@@ -45,8 +43,14 @@ public class CheckDicePanel : MonoBehaviour
         {
             diceImages[i].gameObject.SetActive(i < diceCount);
         }
-        
+
         //blur.SetActive(true);
+        // 播放音效
+        if (rollSound != null)
+        {
+            AudioSource.PlayClipAtPoint(rollSound, Camera.main.transform.position);
+        }
+
         // 开始滚动动画
         StartCoroutine(RollDiceCoroutine(diceCount, diceResult, isSuccess));
     }
@@ -63,6 +67,7 @@ public class CheckDicePanel : MonoBehaviour
                 int randomFace = Random.Range(0, diceSprites.Length);
                 diceImages[i].sprite = diceSprites[randomFace];
             }
+
             timer += rollSpeed;
             yield return new WaitForSeconds(rollSpeed);
         }
@@ -79,12 +84,22 @@ public class CheckDicePanel : MonoBehaviour
         {
             success.gameObject.SetActive(true);
             fail.gameObject.SetActive(false);
+            if (successSound != null)
+            {
+                AudioSource.PlayClipAtPoint(successSound, Camera.main.transform.position);
+            }
         }
         else
         {
             success.gameObject.SetActive(false);
             fail.gameObject.SetActive(true);
+            // 播放音效
+            if (rollSound != null)
+            {
+                AudioSource.PlayClipAtPoint(rollSound, Camera.main.transform.position);
+            }
         }
+
         yield return new WaitForSeconds(closeDelay);
         // 关闭界面
         gameObject.SetActive(false);

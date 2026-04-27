@@ -347,6 +347,10 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     public void SetValues(int health, int mana, int ammo)
     {
         _curHealth = health;
+        if (_curHealth > _maxHealth)
+        {
+            _curHealth = _maxHealth;
+        }
         _manaPoint = mana;
         _ammoCount = _maxAmmoCount;// 弹药数量直接设置为满
     }
