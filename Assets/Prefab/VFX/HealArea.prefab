@@ -178,6 +178,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2898764156931913036}
   - component: {fileID: 2898764156931913027}
+  - component: {fileID: 369504115329003785}
   m_Layer: 0
   m_Name: HealArea
   m_TagString: Untagged
@@ -219,5 +220,18 @@ MonoBehaviour:
     stacks: 0
     rate: 0
     target: 0
-  range: 3
+  range: 1
   turnsDuration: 1
+--- !u!135 &369504115329003785
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2898764156931913026}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 1
+  m_Center: {x: 0, y: 0, z: 0}

@@ -237,6 +237,7 @@ public class PieceController : MonoBehaviour
     public void StopMove()
     {
         CheckActionPos();
+        CheckArea();
         _actionListPanel.gameObject.SetActive(true);
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
@@ -284,9 +285,24 @@ public class PieceController : MonoBehaviour
                 interactAreas.Add(ladderSlot);
                 result = true;
             }
+            
+            HealArea healArea = collider.transform.GetComponent<HealArea>();
+            if (healArea != null)
+            {
+                healArea.AddBuffToUnit(this);
+            }
         }
 
         return result;
+    }
+
+    public void CheckArea()
+    {
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, 3f);
+        foreach (var collider in hitColliders)
+        {
+            
+        }
     }
 
     public void StartNormalAttack(bool range = false)

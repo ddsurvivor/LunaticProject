@@ -33,7 +33,8 @@ public class FinishDrop : MonoBehaviour
         foreach (var dropCompId in dropCompIds)
         {
             Debug.Log($"掉落了组件ID: {dropCompId}");
-            sb.AppendLine($"掉落了组件ID: {dropCompId}");
+            ComponentData compData = GM.Ins.DM.componentConfig.GetData(dropCompId);
+            sb.AppendLine($"掉落了组件: {compData.itemName}");
             // 添加组件到存档里
             GM.Ins.PLAYERPROFILE.AddComponentToInventory(dropCompId);
         }

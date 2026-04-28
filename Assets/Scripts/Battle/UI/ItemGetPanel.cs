@@ -32,4 +32,19 @@ public class ItemGetPanel : MonoBehaviour
         itemDescText.text = itemData.itemDescription;
         itemNumText.text = itemPack.itemNum.ToString();
     }
+
+    public void ShowPanel(ComponentData componentData)
+    {
+        if (componentData == null)
+        {
+            Debug.LogError("ComponentData is null!");
+            return;
+        }
+        
+        gameObject.SetActive(true);
+        icon.sprite = componentData.icon;
+        itemNameText.text = componentData.itemName.ToString();
+        itemDescText.text = componentData.description;
+        itemNumText.text = "1";
+    }
 }

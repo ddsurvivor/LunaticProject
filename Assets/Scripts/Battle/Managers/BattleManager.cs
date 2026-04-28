@@ -72,7 +72,7 @@ public class BattleManager : MonoBehaviour
         }
 
         //CheckAllLadderMove(PlayerController.isInTurn);
-        CheckAllArea();
+        //CheckAllArea();
     }
 
     public void PlayerStart()
@@ -476,10 +476,11 @@ public class BattleManager : MonoBehaviour
                     break;
                 case SkillEffect.HealArea:
                     Debug.Log("生成治疗区");
+                    // 直接范围回血
                     HealArea healArea = ObjectPool.Ins.GenerateObject(ItemType.HEAL_AREA,
                         targetPos,
                         Quaternion.identity).GetComponent<HealArea>();
-                    healArea.SetData(skillPack.buffPacks[0], 1);
+                    healArea.SetData(skillPack.buffPacks[0], 1, skillPack.explodeRadius);
                     break;
                 default:
                     break;

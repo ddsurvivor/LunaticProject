@@ -94,9 +94,9 @@ public class CheckDicePanel : MonoBehaviour
             success.gameObject.SetActive(false);
             fail.gameObject.SetActive(true);
             // 播放音效
-            if (rollSound != null)
+            if (failSound != null)
             {
-                AudioSource.PlayClipAtPoint(rollSound, Camera.main.transform.position);
+                AudioSource.PlayClipAtPoint(failSound, Camera.main.transform.position);
             }
         }
 

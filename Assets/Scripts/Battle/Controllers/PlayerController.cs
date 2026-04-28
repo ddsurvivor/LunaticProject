@@ -156,6 +156,7 @@ public class PlayerController : SerializedMonoBehaviour
 
     public void OnClickBurst()
     {
+        if(!this.isInTurn) return;//只能在回合内发动聚能
         Debug.Log("发动聚能");
         //BattleScene.Ins.UM.ShowBurstReady(false);
         BattleScene.Ins.UM.burstButton.interactable = false;

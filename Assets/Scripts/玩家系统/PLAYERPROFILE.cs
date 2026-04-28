@@ -328,6 +328,9 @@ public class PLAYERPROFILE
         {
             componentInventory.Add(componentId);
             Debug.Log($"添加组件 {componentId} 到仓库");
+            ComponentData compData = GM.Ins.DM.componentConfig.GetData(componentId);
+            // 显示提示
+            BattleScene.Ins.UM.itemGetPanel.ShowPanel(compData);
         }
         else
         {

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 public class CharacterUIPage : MonoBehaviour
 {
     public Player player;
+    public Text nameText;
     public Image avatarImage;
     public UIDetailPanel detailPanel;
 
@@ -20,7 +21,7 @@ public class CharacterUIPage : MonoBehaviour
     public List<UIItemSlot> inventoryUISlots = new List<UIItemSlot>();
     
     [SerializeField]
-    private List<AttrModRow> rowList = new List<AttrModRow>();
+    private List<DetailAttributeRow> rowList = new ();
     public SkillPointPanel skillPointPanel;
     public void ShowPanel(Player player)
     {
@@ -31,18 +32,20 @@ public class CharacterUIPage : MonoBehaviour
         for (int i = 0; i < 10; i++)
         {
             if (i >= rowList.Count) break;
-            AttrModRow row = rowList[i];
+            DetailAttributeRow row = rowList[i];
             // 直接通过编号读取属性名和当前值
             string attrName = player.GetAttrName(i);
             int currentVal = player.AccessAttribute(i, AttrOp.Get);
 
-            row.Setup(attrName, currentVal, 200);
+            row.UpdateInfo(attrName, currentVal, 200);
         }
     }
 
     
     public void RefreshUI() {
+        
         avatarImage.sprite  = Resources.Load<Sprite>("CG/" + player.spriteName);
+        nameText.text = player.NAME;
         
         // 1. 刷新普通装备槽
         for (int i = 0; i < normalUISlots.Count; i++) {
