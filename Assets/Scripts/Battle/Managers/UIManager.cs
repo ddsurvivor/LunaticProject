@@ -13,6 +13,7 @@ public class UIManager : SerializedMonoBehaviour
     public Button endTurnButton;
     public InfoBox infoBox;
     public Button burstButton;
+    public Image burstBtnImage;
     public TeamPanel teamPanel;
     public PieceInfoPanel pieceInfoPanel;
     public GameObject restartButton; // 重启战斗

@@ -124,7 +124,7 @@ public class PlayerController : SerializedMonoBehaviour
 
         // 用相机滤镜模式
         //BattleScene.Ins.BM.camera.ActiveBurstMode(true);
-
+        BattleScene.Ins.UM.burstBtnImage.gameObject.SetActive(true);
         // 所有图片变色
         BattleScene.Ins.BM.ShowBurstGray(true);
 
@@ -143,6 +143,7 @@ public class PlayerController : SerializedMonoBehaviour
         //BattleScene.Ins.BM.camera.ActiveBurstMode(false);
         BattleScene.Ins.BM.ShowBurstGray(false);
         BattleScene.Ins.UM.ShowBurstReady(false);
+        BattleScene.Ins.UM.burstBtnImage.gameObject.SetActive(false);
         Debug.Log("聚能状态结束");
     }
 
