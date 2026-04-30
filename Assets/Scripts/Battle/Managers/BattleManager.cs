@@ -20,7 +20,7 @@ public class BattleManager : MonoBehaviour
     public List<HealArea> areaList = new(); // 
     public FinishDrop finishDrop;
     [LabelText("战斗胜利经验值")] public int finishExp = 100;
-    [LabelText("坚持回合胜利")]public int winTurnCondition = 999; // 胜利条件：在多少回合内获胜，999表示不限制
+    [LabelText("坚持回合胜利")] public int winTurnCondition = 999; // 胜利条件：在多少回合内获胜，999表示不限制
 
     public BattleSetController battleSetController;
     public int TunrNumber => _turnNumber;
@@ -86,7 +86,7 @@ public class BattleManager : MonoBehaviour
         //BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家回合");
         _turnNumber++;
         BattleScene.Ins.UM.turnNumberText.text = TunrNumber.ToString();
-        
+
         // 胜利条件：坚持回合数
         if (TunrNumber >= winTurnCondition)
         {
@@ -159,6 +159,25 @@ public class BattleManager : MonoBehaviour
         bool isCrit = false;
         foreach (var target in targets)
         {
+            // --- [掩体判定开始] ---
+            CaverSlot activeCover = CheckCoverObstruction(attacker, target);
+            int coverHitPenalty = 0;
+            int coverDamageReduction = 0;
+
+            if (activeCover != null)
+            {
+                // TODO: 在此处根据 activeCover.coverConfig.attribute 提取命中率和伤害修正数值
+                coverHitPenalty = activeCover.evadeChance; // 示例：直接使用掩体的闪避率作为命中率惩罚
+                coverDamageReduction = activeCover.damageReduction; 
+                Debug.Log($"掩体生效！命中率惩罚={coverHitPenalty}%，伤害减免={coverDamageReduction}%");
+            }
+            else
+            {
+                Debug.Log("没有掩体，正常攻击");
+            }
+            // --- [掩体判定结束] ---
+            
+            
             Debug.Log($"Skill Attack: Attacker={attacker.name}, Target={target.name}");
             // 楼层判定
             if (skillPack.layerSkill)
@@ -188,7 +207,7 @@ public class BattleManager : MonoBehaviour
                 float hitRate = attacker.unitAttrCenter.buffAttrDic[BuffAttrType.HitRate];
                 float evade = target.unitAttrCenter.buffAttrDic[BuffAttrType.EvasionRate];
                 int hitRoll = Random.Range(1, 101);
-                if (hitRoll <= hitRate - evade)
+                if (hitRoll <= (hitRate - evade - coverHitPenalty))
                 {
                     isHit = true;
                 }
@@ -218,6 +237,7 @@ public class BattleManager : MonoBehaviour
             {
                 Debug.Log($"依次计算伤害");
                 int realDamage = attackPack.damage + attacker.unitAttrCenter.ATK;
+                if(coverDamageReduction > 0) realDamage = (int)(realDamage * (100 - coverDamageReduction) / 100f); // 掩体伤害减免
                 if (isCrit)
                     realDamage =
                         (int)(realDamage *
@@ -398,6 +418,7 @@ public class BattleManager : MonoBehaviour
                 }
             }
         }
+
         BattleScene.Ins.UM.battleFinishPanel.ShowPanel(true, finishDrop, finishExp);
 
         PlayerController.EndBurstMode(); // 结束聚能状态
@@ -516,97 +537,34 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    /*private void HitBackEffect(HitBackEffect hitBackEffect, PieceController caster = null
-        , PieceController target = null, Vector3 targetPos = default)
-    {
-        if (target.ableMove == false) return;
-        Vector3 dir = (target.transform.position - caster.transform.position);
-        dir.y = 0;
-        dir.Normalize();
-        Vector3 hitBackPos = target.transform.position + dir * hitBackEffect.dis;
-        target.transform.DOMove(hitBackPos, 0.2f);
-    }*/
+
     private void HitBackEffect(HitBackEffect hitBackEffect, PieceController caster = null,
         PieceController target = null, Vector3 targetPos = default)
     {
-        if (target.ableMove == false) return;
+        if (target == null || target.ableMove == false) return;
 
-        Vector3 startPos = target.transform.position;
-        Vector3 dir = (startPos - caster.transform.position);
+        Vector3 dir = (target.transform.position - caster.transform.position);
         dir.y = 0;
         dir.Normalize();
 
-        float totalDis = hitBackEffect.dis;
-        float step = 0.5f;
-        Vector3 lastValidPos = startPos;
-        bool hasCollision = false; // 是否触发了碰撞
+        // 调用提取出的算法函数
+        MoveResult moveResult = CalculateValidMovePos(target.transform.position, dir
+            , hitBackEffect.dis, target.gameObject);
 
-        List<PieceController> hitPieces = new List<PieceController>(); // 记录被击退路径上碰到的棋子，避免重复伤害
-        for (float i = step; i <= totalDis; i += step)
+        // 锁定Y轴，防止击退造成高度偏差
+        Vector3 finalPos = moveResult.FinalPosition;
+        finalPos.y = target.transform.position.y;
+
+        // 执行位移
+        target.transform.DOMove(finalPos, 0.2f).SetEase(Ease.OutQuad).OnComplete(() =>
         {
-            Vector3 nextStepPos = startPos + dir * i;
-
-            // 1. 前向碰撞检测 (墙壁、单位、边界)
-            // 建议使用 Raycast 或 SphereCast (更厚实)
-            Ray forwardRay = new Ray(nextStepPos + Vector3.up * 50f, Vector3.down);
-            if (Physics.Raycast(forwardRay, out RaycastHit wallHit, 100f))
+            if (moveResult.IsCollided)
             {
-                if (wallHit.collider.CompareTag("Wall") ||
-                    wallHit.collider.CompareTag("Piece") &&
-                    wallHit.collider.gameObject != target.gameObject)
-                {
-                    if (wallHit.collider.CompareTag("Piece"))
-                    {
-                        PieceController hitPiece = wallHit.collider.GetComponent<PieceController>();
-                        if (hitPiece != null && !hitPieces.Contains(hitPiece))
-                        {
-                            hitPieces.Add(hitPiece);
-                            Debug.Log($"{target.name} 击退时撞到了 {hitPiece.name}，造成碰撞伤害");
-                        }
-                    }
+                // 将自身加入伤害列表，处理碰撞反馈
+                if (!moveResult.HitPieces.Contains(target))
+                    moveResult.HitPieces.Add(target);
 
-                    lastValidPos = wallHit.point - dir * 0.2f; // 撞到硬物，退后一点
-                    hasCollision = true;
-                    Debug.Log($"{target.name} 击退时撞到了 {wallHit.collider.name}");
-                    break;
-                }
-            }
-
-            // 2. 地面检测 (垂直向下检测)
-            Ray groundRay = new Ray(nextStepPos + Vector3.up * 10f, Vector3.down);
-            if (Physics.Raycast(groundRay, out RaycastHit groundHit, 30f))
-            {
-                if (groundHit.collider.CompareTag("Ground"))
-                {
-                    // 是合法地面，更新落点并进入下一次循环
-                    lastValidPos = groundHit.point;
-                }
-                else if (groundHit.collider.gameObject != target.gameObject)
-                {
-                    // 检测到了碰撞体但不是 Ground (比如悬崖外的装饰物)，视为碰撞
-                    hasCollision = true;
-                    Debug.Log($"{target.name} 击退路径出现非地面物体{groundHit.collider.name}，停止移动");
-                    break;
-                }
-            }
-            else
-            {
-                // 完全没有检测到物体 (虚空)，视为碰撞
-                hasCollision = true;
-                Debug.Log($"{target.name} 击退至地图边缘/虚空，停止移动");
-                break;
-            }
-        }
-
-        lastValidPos.y = target.transform.position.y; // 保持原有高度，避免被击退技能弄到空中
-        // 3. 执行位移
-        target.transform.DOMove(lastValidPos, 0.2f).SetEase(Ease.OutQuad).OnComplete(() =>
-        {
-            // 4. 碰撞结果处理
-            if (hasCollision)
-            {
-                hitPieces.Add(target); // 碰撞伤害也作用于被击退的目标自身
-                TriggerCollisionDamage(hitPieces, hitBackEffect.hitBackDamage);
+                TriggerCollisionDamage(moveResult.HitPieces, hitBackEffect.hitBackDamage);
             }
         });
     }
@@ -758,6 +716,133 @@ public class BattleManager : MonoBehaviour
         ShowBurstGray(false);
     }
 
+    // ====== 移动判定 =========//
+    /// <summary>
+    /// 移动检测结果数据
+    /// </summary>
+    public class MoveResult
+    {
+        public Vector3 FinalPosition; // 最终可达到的位置
+        public bool IsCollided; // 路径中是否发生了碰撞
+        public List<PieceController> HitPieces = new List<PieceController>(); // 碰撞到的目标列表
+    }
+
+    /// <summary>
+    /// 计算有效的移动位置
+    /// </summary>
+    /// <param name="origin">起始点</param>
+    /// <param name="direction">移动方向（已归一化）</param>
+    /// <param name="maxDistance">最大移动距离</param>
+    /// <param name="selfObj">调用者自身，用于排除碰撞</param>
+    /// <returns>包含终点和碰撞信息的 MoveResult</returns>
+    public MoveResult CalculateValidMovePos(Vector3 origin, Vector3 direction, float maxDistance
+        , GameObject selfObj)
+    {
+        MoveResult result = new MoveResult();
+        float step = 0.5f;
+        Vector3 lastValidPos = origin;
+
+        // 确保方向忽略Y轴
+        direction.y = 0;
+        direction.Normalize();
+
+        for (float i = step; i <= maxDistance; i += step)
+        {
+            Vector3 nextStepPos = origin + direction * i;
+
+            // 1. 前向障碍物/单位检测 (从高空向下探测，适配不平整地面)
+            Ray forwardRay = new Ray(nextStepPos + Vector3.up * 50f, Vector3.down);
+            if (Physics.Raycast(forwardRay, out RaycastHit wallHit, 100f))
+            {
+                // 判定是否撞到墙壁或非自身的棋子
+                bool isWall = wallHit.collider.CompareTag("Wall");
+                bool isPiece = wallHit.collider.CompareTag("Piece") &&
+                               wallHit.collider.gameObject != selfObj;
+
+                if (isWall || isPiece)
+                {
+                    if (isPiece)
+                    {
+                        PieceController pc = wallHit.collider.GetComponent<PieceController>();
+                        if (pc != null && !result.HitPieces.Contains(pc))
+                        {
+                            result.HitPieces.Add(pc);
+                        }
+                    }
+
+                    // 记录碰撞并计算最终停留点（向后微调 0.2f 避免模型穿插）
+                    result.FinalPosition = wallHit.point - direction * 0.2f;
+                    result.IsCollided = true;
+                    break;
+                }
+            }
+
+            // 2. 地面检测 (垂直向下检测路径是否合法)
+            Ray groundRay = new Ray(nextStepPos + Vector3.up * 10f, Vector3.down);
+            if (Physics.Raycast(groundRay, out RaycastHit groundHit, 30f))
+            {
+                if (groundHit.collider.CompareTag("Ground"))
+                {
+                    lastValidPos = groundHit.point;
+                }
+                else if (groundHit.collider.gameObject != selfObj)
+                {
+                    // 检测到非地面物体（如装饰物或阻挡层）
+                    result.IsCollided = true;
+                    break;
+                }
+            }
+            else
+            {
+                // 虚空，停止移动
+                result.IsCollided = true;
+                break;
+            }
+
+            // 如果循环到最后一步仍正常，更新位置
+            result.FinalPosition = lastValidPos;
+        }
+
+        // 补偿：如果循环因为步长未开始或初始就在边缘，确保有默认值
+        if (result.FinalPosition == Vector3.zero && !result.IsCollided)
+            result.FinalPosition = origin;
+
+        return result;
+    }
+
+    // ===== 掩体判定 ========== //
+    /// <summary>
+    /// 判定掩体是否在攻击射线上生效
+    /// </summary>
+    /// <param name="attacker">攻击者</param>
+    /// <param name="target">被攻击者</param>
+    /// <returns>返回有效的掩体脚本，若未被遮挡则返回 null</returns>
+    public CaverSlot CheckCoverObstruction(PieceController attacker, PieceController target)
+    {
+        // 1. 基础判定：目标当前是否有掩体引用
+        if (target.CurCaverSlot == null) return null;
+
+        // 2. 射线路径计算（从发射点到目标点，稍微抬高 y 轴模拟射击线）
+        Vector3 start = attacker.transform.position + Vector3.up * 1.2f;
+        Vector3 end = target.transform.position + Vector3.up * 1.2f;
+        Vector3 direction = end - start;
+        float distance = direction.magnitude;
+
+        // 3. 使用 RaycastAll 获取路径上所有的碰撞体（解决被其他物体遮挡的问题）
+        RaycastHit[] hits = Physics.RaycastAll(start, direction.normalized, distance);
+
+        foreach (var hit in hits)
+        {
+            // 判定击中的物体是否为目标关联的那个掩体
+            if (hit.collider.gameObject == target.CurCaverSlot.gameObject)
+            {
+                // 找到匹配掩体，返回脚本
+                return target.CurCaverSlot;
+            }
+        }
+
+        return null;
+    }
 
     // ===== Test ======//
     public void OnClickQuitBattle()

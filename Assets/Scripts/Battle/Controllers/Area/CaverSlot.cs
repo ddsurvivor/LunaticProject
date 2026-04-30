@@ -12,6 +12,9 @@
         private Dictionary<Transform, Transform> piecesDic = new();
         public GameObject highlightEffect;
         
+        public int evadeChance = 20; // 闪避率
+        public int damageReduction = 20; // 减伤率
+        
         public bool isFull => piecesDic.Values.Count >= slotTransforms.Length;
 
         public void AddToSlot(Transform target)

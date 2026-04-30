@@ -48,6 +48,7 @@ public class PieceController : MonoBehaviour
     //private Vector3 _originalPosition; // 原始位置
 
     private CaverSlot _curCaverSlot; // 当前绑定的点位
+    public CaverSlot CurCaverSlot => _curCaverSlot;
     private LadderArea _curLadderArea; // 当前绑定的梯子区域
 
     // 当前攻击数据
@@ -267,7 +268,8 @@ public class PieceController : MonoBehaviour
             CaverSlot caverSlot = collider.transform.GetComponent<CaverSlot>();
             if (caverSlot != null && !caverSlot.isFull)
             {
-                caverSlot.AddToSlot(transform);
+                // 取消吸附机制
+                //caverSlot.AddToSlot(transform);
                 _curCaverSlot = caverSlot;
                 result = true;
             }

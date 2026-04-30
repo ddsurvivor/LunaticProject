@@ -420,7 +420,7 @@ public class AIController : PlayerController
         }
     }
 
-    /// <summary>
+    /*/// <summary>
     /// AI移动函数
     /// </summary>
     /// <param name="aiPiece"></param>
@@ -491,14 +491,69 @@ public class AIController : PlayerController
             Mathf.Clamp(moveTargetPos.z, groundBounds.min.z + 3.5f, groundBounds.max.z - 3.5f);
 
         /*Debug.Log(
-            $"边界范围 X:{groundBounds.min.x}~{groundBounds.max.x} Z:{groundBounds.min.z}~{groundBounds.max.z}");*/
+            $"边界范围 X:{groundBounds.min.x}~{groundBounds.max.x} Z:{groundBounds.min.z}~{groundBounds.max.z}");#1#
         Debug.Log(
             $"{aiPiece.enemyAIType}AI{aiPiece.name}移动到 {moveTargetPos}");
         aiPiece.transform.DOMove(moveTargetPos, 1.0f);
         aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
         aiPiece.CheckFace(moveTargetPos - aiPiece.transform.position);
     }
+    */
+    // <summary>
+    /// AI 移动函数 - 使用 BattleManager 通用路径判定进行重构
+    /// </summary>
+    /// <param name="aiPiece">AI 控制器</param>
+    /// <param name="targetPos">目标位置（通常是玩家位置）</param>
+    /// <param name="range">希望保持的距离范围</param>
+    /// <param name="leave">是否执行远离逻辑</param>
+    private void EnemyMove(EnemyController aiPiece, Vector3 targetPos, float range, bool leave = false)
+    {
+        // 获取 AI 当前的属性：最大移动距离
+        float moveRange = aiPiece.unitAttrCenter.MoveRange;
+        Vector3 currentPos = aiPiece.transform.position;
 
+        // 1. 计算方向向量（忽略 Y 轴高度差）
+        Vector3 direction = (targetPos - currentPos);
+        direction.y = 0;
+        direction.Normalize();
+
+        // 2. 确定逻辑目标点
+        // 理想位置：距离目标点 range - 0.5f 的位置
+        Vector3 idealAttackPos = targetPos - direction * (range - 0.5f);
+
+        if (leave)
+        {
+            // 如果是“逃跑/远离”模式，理想位置应设在反方向的远处
+            // 这里基于移动距离 moveRange 计算逃跑点
+            idealAttackPos = currentPos - direction * moveRange;
+        }
+
+        // 3. 计算想要移动的总距离
+        float distanceToIdeal = Vector3.Distance(currentPos, idealAttackPos);
+        // 实际尝试移动的距离不能超过 AI 自身的行动上限
+        float testDistance = Mathf.Min(distanceToIdeal, moveRange);
+
+        // 4. 调用 BM 的通用判定函数（核心重构部分）
+        // 该函数会自动处理：1. 墙壁阻挡 2. 棋子阻挡 3. 地面边界/虚空
+        var moveResult = BattleScene.Ins.BM.CalculateValidMovePos(
+            currentPos, 
+            leave ? -direction : direction, // 如果是远离，则向反方向探测
+            testDistance, 
+            aiPiece.gameObject
+        );
+
+        Vector3 moveTargetPos = moveResult.FinalPosition;
+
+        // 5. 执行位移表现
+        Debug.Log($"{aiPiece.enemyAIType} AI {aiPiece.name} 发起移动。目标：{moveTargetPos}，碰撞中止：{moveResult.IsCollided}");
+
+        // 使用 DOTween 进行平滑位移
+        aiPiece.transform.DOMove(moveTargetPos, 1.0f).SetEase(Ease.InOutQuad);
+    
+        // 更新动画状态与朝向
+        aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
+        aiPiece.CheckFace(moveTargetPos - currentPos);
+    }
     /// <summary>
     /// 敌人移动到梯子位置的函数
     /// </summary>
