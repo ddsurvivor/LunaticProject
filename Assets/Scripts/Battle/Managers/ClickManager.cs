@@ -113,7 +113,40 @@ public class ClickManager : MonoBehaviour
             ClickPieceByIndex(2);
         }
     }
-    
+
+    private PieceController lastHoveredPiece = null;
+
+    // LateUpdate 保持不变，只需修改射线检测部分
+    public void LateUpdate()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit[] hits = Physics.RaycastAll(ray);
+
+        PieceController currentHoveredPiece = null;
+        foreach (var hit in hits)
+        {
+            var piece = hit.collider.GetComponent<PieceController>();
+            if (piece != null)
+            {
+                currentHoveredPiece = piece;
+                break; // 只取第一个被射线穿透命中的棋子
+            }
+        }
+
+        if (lastHoveredPiece != currentHoveredPiece)
+        {
+            if (lastHoveredPiece != null)
+            {
+                lastHoveredPiece.ShowOutline(false);
+            }
+            if (currentHoveredPiece != null)
+            {
+                currentHoveredPiece.ShowOutline(true);
+            }
+            lastHoveredPiece = currentHoveredPiece;
+        }
+    }
+
     private void ClickPieceByIndex(int index)
     {
         var playerPieces = BattleScene.Ins.BM.PlayerController.pieces;

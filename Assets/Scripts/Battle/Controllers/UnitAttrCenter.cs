@@ -422,6 +422,9 @@ public class UnitAttrCenter : SerializedMonoBehaviour
             case UnitAttrType.ATK:
                 ATK += intValue;
                 break;
+            case UnitAttrType.CON:
+                CON += intValue;
+                break;
         }
 
         // 每次修改属性后，同步战斗管理器的状态

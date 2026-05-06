@@ -789,7 +789,7 @@ public class PieceController : MonoBehaviour
     
     public GameObject outlineEffect;
     // 鼠标进入时显示
-    private void OnMouseEnter()
+    /*private void OnMouseEnter()
     {
         if (outlineEffect != null) outlineEffect.SetActive(true);
     }
@@ -797,5 +797,10 @@ public class PieceController : MonoBehaviour
     private void OnMouseExit()
     {
         if (outlineEffect != null) outlineEffect.SetActive(false);
+    }*/
+    public void ShowOutline(bool option)
+    {
+        if (outlineEffect != null) outlineEffect.SetActive(option);
+        //ShowHighlight(option);
     }
 }
