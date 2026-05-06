@@ -70,8 +70,11 @@ public class UnitAttrCenter : SerializedMonoBehaviour
    public int critDamageRate;
 
    public int ATK;// 攻击力
+   
+   // 对抗
+   public int CON;
 
-    [Header("Buff")] [SerializeField] [ReadOnly]
+   [Header("Buff")] [SerializeField] [ReadOnly]
     public List<BuffState> buffStates = new();
 
     [SerializeField] [ReadOnly] public Dictionary<BuffAttrType, float> buffAttrDic = new();
@@ -104,9 +107,20 @@ public class UnitAttrCenter : SerializedMonoBehaviour
             // 根据玩家属性调整单位属性
             _maxHealth += playerData.AccessAttribute(2, AttrOp.Get) * 2; // 体能每点增加2点生命
             _maxManaPoint += playerData.AccessAttribute(0, AttrOp.Get) * 2; // 意志每点增加2点能量
+            ATK += (int)(playerData.AccessAttribute(1, AttrOp.Get) * 0.5f); // 作战每点增加0.5点攻击力
+            CON += (int)(playerData.AccessAttribute(4, AttrOp.Get) * 0.5f); // 模式识别每点增加0.5点对抗
             // 其他属性调整可以在这里添加
             critRate += (playerData.AccessAttribute(3, AttrOp.Get) + playerData.AccessAttribute(4, AttrOp.Get) ) * 2; // 技巧每点增加1%暴击率
         }
+        // 应用特殊修改数值
+        if (pieceData.attrDic != null && pieceData.attrDic.Count > 0)
+        {
+            foreach (var pair in pieceData.attrDic)
+            {
+                ModifyAttribute(pair.Key, pair.Value);
+            }
+        }
+        
         Init();
         buffAttrDic[BuffAttrType.EvasionRate] = pieceData.evasionRate;
     }

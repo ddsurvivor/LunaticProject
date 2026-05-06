@@ -220,7 +220,10 @@ public enum UnitAttrType
     CritDamageRate = 12,
     
     [LabelText("攻击力")]
-    ATK = 13
+    ATK = 13,
+        
+    [LabelText("对抗")] 
+    CON = 14,
 }
 
 /// <summary>

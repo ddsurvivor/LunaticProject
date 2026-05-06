@@ -33,4 +33,5 @@ public class PieceData
     [LabelText("最大能量值")] public int maxMana;
     [LabelText("掉落道具")] public List<ItemPack> dropItemList = new();
     [LabelText("掉落概率")]  public int dropRate;
+    [LabelText("扩展属性")] public Dictionary<UnitAttrType, int> attrDic = new Dictionary<UnitAttrType, int>();// 其他属性
 }

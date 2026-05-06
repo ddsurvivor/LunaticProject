@@ -16,12 +16,13 @@
             // 攻击方模式识别属性加成
             int modeRecognition = attacker.playerData.RECOGNITION;
             // 敌人对抗
-            int counterAttr = 0;// defender.unitAttrCenter.buffAttrDic[BuffAttrType.CounterAttribute];
+            int counterAttr = defender.unitAttrCenter.CON;
 
             // 投掷3D6
             int diceSum = Random.Range(1, 7) + Random.Range(1, 7) + Random.Range(1, 7);
 
-            float total = modeRecognition + diceSum;
+            //float total = modeRecognition + diceSum;// 方案1：属性加成 + 骰子
+            float total = diceSum; // 方案2：只计算骰子
 
             if (total < counterAttr)
             {
