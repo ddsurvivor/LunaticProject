@@ -29,6 +29,7 @@ public class SkillPack
     public int animationIndex = 0; // 技能动画索引
     public bool isDelaySkill = false; // 是否为延迟技能
     public bool layerSkill = false; // 是否为单层技能
+    [LabelText("模式识别技能")]public bool isRecognitionCheck = false; // 是否进行模式识别检定
     public List<SkillEffectBase> additionalEffects = new(); // 额外效果列表
 }
 

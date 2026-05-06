@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
 using JetBrains.Annotations;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class BattleManager : MonoBehaviour
 {
@@ -13,6 +15,7 @@ public class BattleManager : MonoBehaviour
     public BuffManager buffManager;
     public SkillManager skillManager;
     public SpriteManager spriteManager;
+    public DiceCheckManager diceCheckManager;
 
     public PieceDataListSO pieceDataListSO;
 
@@ -41,6 +44,10 @@ public class BattleManager : MonoBehaviour
         //grayEnemy = Resources.Load<Material>("Materials/GrayEnemy");
     }
 
+    /// <summary>
+    ///  应用战斗设置, 在棋子初始化后调用
+    /// </summary>
+    /// <param name="setting"></param>
     public void ApplySetting(int setting = 0)
     {
         // 执行特定战斗设置，如特殊规则、初始状态等
@@ -159,26 +166,8 @@ public class BattleManager : MonoBehaviour
         bool isCrit = false;
         foreach (var target in targets)
         {
-            // --- [掩体判定开始] ---
-            CaverSlot activeCover = CheckCoverObstruction(attacker, target);
-            int coverHitPenalty = 0;
-            int coverDamageReduction = 0;
-
-            if (activeCover != null)
-            {
-                // TODO: 在此处根据 activeCover.coverConfig.attribute 提取命中率和伤害修正数值
-                coverHitPenalty = activeCover.evadeChance; // 示例：直接使用掩体的闪避率作为命中率惩罚
-                coverDamageReduction = activeCover.damageReduction; 
-                Debug.Log($"掩体生效！命中率惩罚={coverHitPenalty}%，伤害减免={coverDamageReduction}%");
-            }
-            else
-            {
-                Debug.Log("没有掩体，正常攻击");
-            }
-            // --- [掩体判定结束] ---
-            
-            
             Debug.Log($"Skill Attack: Attacker={attacker.name}, Target={target.name}");
+
             // 楼层判定
             if (skillPack.layerSkill)
             {
@@ -189,6 +178,24 @@ public class BattleManager : MonoBehaviour
                     return;
                 }
             }
+
+            // --- [掩体判定开始] ---
+            CaverSlot activeCover = CheckCoverObstruction(attacker, target);
+            int coverHitPenalty = 0;
+            int coverDamageReduction = 0;
+
+            if (activeCover != null)
+            {
+                // TODO: 在此处根据 activeCover.coverConfig.attribute 提取命中率和伤害修正数值
+                coverHitPenalty = activeCover.evadeChance; // 示例：直接使用掩体的闪避率作为命中率惩罚
+                coverDamageReduction = activeCover.damageReduction;
+                Debug.Log($"掩体生效！命中率惩罚={coverHitPenalty}%，伤害减免={coverDamageReduction}%");
+            }
+            else
+            {
+                Debug.Log("没有掩体，正常攻击");
+            }
+            // --- [掩体判定结束] ---
 
             // 命中判定
             bool isHit = false;
@@ -228,16 +235,40 @@ public class BattleManager : MonoBehaviour
             {
                 isCrit = true;
             }
+            
+            // 模式识别判定
+            float damageModifier = 1f;
+            if (skillPack.isRecognitionCheck)
+            {
+                CheckResult checkResult = diceCheckManager.ModeRecognitionCheck(attacker, target);
+                switch (checkResult)
+                {
+                    case CheckResult.DamageReduced:
+                        damageModifier = 0.4f;
+                        break;
+                    case CheckResult.DamageIncreased:
+                        damageModifier = 1.3f;
+                        break;
+                    case CheckResult.MustCrit:
+                        damageModifier = 1.3f;
+                        isCrit = true;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+                Debug.Log($"模式识别检定结果: {checkResult}, 伤害修正={damageModifier}, 必定暴击={isCrit}");
+            }
 
 
             int addAtk =
-                attacker.unitAttrCenter.attr.GetAddDamage(target.unitAttrCenter.elementType);
+                attacker.unitAttrCenter.attr.GetAddDamage(target.unitAttrCenter.elementType)+ attacker.unitAttrCenter.ATK;
             List<DamageInfo> damageInfos = new();
             foreach (var attackPack in skillPack.attackPacks)
             {
                 Debug.Log($"依次计算伤害");
-                int realDamage = attackPack.damage + attacker.unitAttrCenter.ATK;
-                if(coverDamageReduction > 0) realDamage = (int)(realDamage * (100 - coverDamageReduction) / 100f); // 掩体伤害减免
+                int realDamage = attackPack.damage;
+                if (coverDamageReduction > 0)
+                    realDamage = (int)(realDamage * (100 - coverDamageReduction) / 100f); // 掩体伤害减免
                 if (isCrit)
                     realDamage =
                         (int)(realDamage *
@@ -256,7 +287,9 @@ public class BattleManager : MonoBehaviour
                     * (100 + attacker.unitAttrCenter.buffAttrDic[
                         BuffAttrType.DamageIncrease]) / 100f * // 伤害增加
                     (100 - target.unitAttrCenter.buffAttrDic[
-                        BuffAttrType.DamageReduction]) / 100f); // 伤害减免
+                        BuffAttrType.DamageReduction]) / 100f // 伤害减免
+                    *damageModifier); 
+                
                 // 聚能伤害
                 if (attacker.player != null && attacker.player.isBursting)
                 {
