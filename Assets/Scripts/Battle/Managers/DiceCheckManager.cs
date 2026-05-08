@@ -3,7 +3,7 @@
 
     public class DiceCheckManager: MonoBehaviour
     {
-        
+        public CheckDicePanel checkDicePanel;
         /// <summary>
         /// 检定功能函数：模式识别对抗
         /// </summary>
@@ -18,8 +18,19 @@
             // 敌人对抗
             int counterAttr = defender.unitAttrCenter.CON;
 
-            // 投掷3D6
-            int diceSum = Random.Range(1, 7) + Random.Range(1, 7) + Random.Range(1, 7);
+            /*// 投掷3D6
+            int diceSum = Random.Range(1, 7) + Random.Range(1, 7) + Random.Range(1, 7);*/
+            int[] diceResult = new int[3];
+            for (int i = 0; i < 3; i++)
+            {
+                diceResult[i] = Random.Range(1, 7); // 1-6
+            }
+            int diceSum = diceResult[0] + diceResult[1] + diceResult[2];
+
+            // 这里以骰子和大于等于10为成功示例
+            bool isSuccess = diceSum >= counterAttr;
+
+            checkDicePanel.ShowResult(3, diceResult, isSuccess);
 
             //float total = modeRecognition + diceSum;// 方案1：属性加成 + 骰子
             float total = diceSum; // 方案2：只计算骰子
@@ -40,6 +51,7 @@
     }
     public enum CheckResult
     {
+        None,            // 无效果
         DamageReduced,   // 伤害减少
         DamageIncreased, // 伤害增加
         MustCrit         // 必定暴击

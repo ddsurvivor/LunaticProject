@@ -158,7 +158,7 @@ public class BattleManager : MonoBehaviour
     }*/
 
     public void PieceSkill(PieceController attacker, List<PieceController> targets
-        , SkillPack skillPack, Vector3 targetPos = default, ActionType actionType = 0)
+        , SkillPack skillPack, Vector3 targetPos = default, ActionType actionType = 0, CheckResult checkResult = CheckResult.None)
     {
         BattleScene.Ins.UM.PopSkillName(skillPack.skillName);
         List<List<DamageInfo>> damageInfoList = new();
@@ -190,10 +190,13 @@ public class BattleManager : MonoBehaviour
                 coverHitPenalty = activeCover.evadeChance; // 示例：直接使用掩体的闪避率作为命中率惩罚
                 coverDamageReduction = activeCover.damageReduction;
                 Debug.Log($"掩体生效！命中率惩罚={coverHitPenalty}%，伤害减免={coverDamageReduction}%");
+                SpriteEffectPlayer shieldEffect 
+                    = ObjectPool.Ins.GenerateObject(ItemType.SHIELD, target.transform.position, Quaternion.identity)
+                        .GetComponent<SpriteEffectPlayer>();
             }
             else
             {
-                Debug.Log("没有掩体，正常攻击");
+                //Debug.Log("没有掩体，正常攻击");
             }
             // --- [掩体判定结束] ---
 
@@ -240,7 +243,6 @@ public class BattleManager : MonoBehaviour
             float damageModifier = 1f;
             if (skillPack.isRecognitionCheck)
             {
-                CheckResult checkResult = diceCheckManager.ModeRecognitionCheck(attacker, target);
                 switch (checkResult)
                 {
                     case CheckResult.DamageReduced:
@@ -252,6 +254,9 @@ public class BattleManager : MonoBehaviour
                     case CheckResult.MustCrit:
                         damageModifier = 1.3f;
                         isCrit = true;
+                        break;
+                    case CheckResult.None:
+                        damageModifier = 1f;
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

@@ -54,6 +54,7 @@ public class PieceController : MonoBehaviour
     // 当前攻击数据
     private bool _isAttacking = false; // 是否正在攻击
     private bool _isUsingSkill = false; // 是否正在使用技能
+    public bool IsUsingSkill => _isUsingSkill || _isAttacking;
     [SerializeField] [ReadOnly] private AttackPack _attackPack; // 当前正在使用的攻击
     protected SkillPack _curAttackPack;
     protected ActionType _curAtkType;
@@ -266,11 +267,15 @@ public class PieceController : MonoBehaviour
         foreach (var collider in hitColliders)
         {
             CaverSlot caverSlot = collider.transform.GetComponent<CaverSlot>();
-            if (caverSlot != null && !caverSlot.isFull)
+            if (caverSlot != null && !caverSlot.isFull)// 掩体判定规则
             {
                 // 取消吸附机制
                 //caverSlot.AddToSlot(transform);
                 _curCaverSlot = caverSlot;
+                // 播放掩体特效
+                SpriteEffectPlayer shieldEffect 
+                    = ObjectPool.Ins.GenerateObject(ItemType.SHIELD, transform.position, Quaternion.identity)
+                    .GetComponent<SpriteEffectPlayer>();
                 result = true;
             }
 
@@ -552,6 +557,7 @@ public class PieceController : MonoBehaviour
     public virtual void CastSkill()
     {
         if (_skillPack == null) return;
+        Sequence sequence = DOTween.Sequence();
         Transform atkPos = rangeUI.GetSkillTransform();
         if (_skillPack.isDelaySkill) // 延时类技能跳过结算
         {
@@ -571,19 +577,27 @@ public class PieceController : MonoBehaviour
             return;
         }
 
-        
-
-        if (atkPos != null) CheckFace(atkPos.transform.position - transform.position);
-        Debug.Log($"{this.name}发动技能攻击{_skillPack.skillName}，targets数量：{targets.Count}");
-        // 播放技能动画
-        pieceDisplay.ChangeDisplayState(PieceDisplayState.Skill, false, 1f,
-            null, _skillPack.animationIndex);
-        PlayAudio(_skillPack);
-        // 结束攻击状态
         _isUsingSkill = false;
+        CheckResult checkResult = CheckResult.None;
+        if (_skillPack.isRecognitionCheck && targets.Count > 0)
+        {
+            checkResult = BattleScene.Ins.BM.diceCheckManager.ModeRecognitionCheck(this, targets[0]);
+            sequence.AppendInterval(2.5f);
+        }
+        Vector3 atkPosValue = atkPos != null ? atkPos.position : Vector3.zero;
+        sequence.AppendCallback(() =>
+        {
+            if (atkPos != null) CheckFace(atkPosValue - transform.position);
+            Debug.Log($"{this.name}发动技能攻击{_skillPack.skillName}，targets数量：{targets.Count}");
+            // 播放技能动画
+            pieceDisplay.ChangeDisplayState(PieceDisplayState.Skill, false, 1f,
+                null, _skillPack.animationIndex);
+            PlayAudio(_skillPack);
+        });
+        sequence.AppendInterval(0.3f);
         // 延迟0.3f
-        DOVirtual.DelayedCall(0.3f
-            , () =>
+        sequence.AppendCallback(
+            () =>
             {
                 if (!unitAttrCenter.CostMP()) return;
                 if (!unitAttrCenter.CostMana(_skillPack.mpCost))
@@ -595,7 +609,7 @@ public class PieceController : MonoBehaviour
                 if (!unitAttrCenter.CostItem(_skillPack.consumeItems)) return;
                 PassiveTrigger(PassiveTriggerType.OnSkillUse, _skillPack);
                 Vector3 skillPos = atkPos != null ? atkPos.position : transform.position;
-                BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack, skillPos);
+                BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack, skillPos, ActionType.技能, checkResult);
     
                 //Debug.Log("关闭显示范围");
                 rangeUI.CloseRange();
@@ -614,7 +628,7 @@ public class PieceController : MonoBehaviour
                         pos + Vector3.up * 3f,
                         Quaternion.identity);
                 }
-            }, false);
+            });
 
         // 技能聚能充能
     }

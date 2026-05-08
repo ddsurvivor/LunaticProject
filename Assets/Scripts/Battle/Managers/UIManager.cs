@@ -30,6 +30,7 @@ public class UIManager : SerializedMonoBehaviour
     public ItemGetPanel itemGetPanel;
     public PlayerLogPanel logPanel;
     public BattleFinishPanel battleFinishPanel;
+    public CheckDicePanel checkDicePanel;
     
     public Dictionary<KeyCode, GameObject> keyPanelDic = new();
     

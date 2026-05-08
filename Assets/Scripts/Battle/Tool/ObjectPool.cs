@@ -10,7 +10,8 @@ public enum ItemType
     /*EMO_HAPPY=1,
     EMO_NORMAL=2,
     EMO_SAD=3,*/
-    
+    SHIELD=9,// 盾牌特效
+
     // 爆炸特效
     EXPLOSION=10,
     // 伤害跳字

@@ -19,6 +19,7 @@ public class RangeUI : MonoBehaviour
     public Image fanCircle; // 扇形范围圈
     public GameObject fanLine1;
     public GameObject fanLine2;
+    public Transform fanPos;
 
     [Header("Arc Settings")] [SerializeField]
     private GameObject arcRoot;
@@ -205,6 +206,7 @@ public class RangeUI : MonoBehaviour
     public void Update()
     {
         if(!isPlayerRange) return;
+        if(_owner != null && !_owner.IsUsingSkill) return;
         // attackIcon跟随鼠标移动
         if (attackIcon.activeInHierarchy)
         {
@@ -568,7 +570,7 @@ public class RangeUI : MonoBehaviour
         }
         else if (fanRoot.activeInHierarchy)
         {
-            return fanRoot.transform;
+            if(fanPos!=null) return fanPos;
         }
 
         return null;
