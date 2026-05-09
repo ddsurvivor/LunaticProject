@@ -140,7 +140,7 @@ public class PieceDisplay : SerializedMonoBehaviour
     
     [SerializeField] private string path = "Assets/A美术/BattleSprites/马赛成年动作";
     [SerializeField] private string pieceName = "PC03A";
-    //[Button("测试加载图片")]
+    [Button("测试加载图片")]
     private void TestLoadSprite()
     {
         if (!Directory.Exists(path))
