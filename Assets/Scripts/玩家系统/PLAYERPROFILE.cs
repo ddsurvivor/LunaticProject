@@ -287,7 +287,7 @@ public class PLAYERPROFILE
         if (item != null)
         {
             item.itemNum -= num;
-            if (item.itemNum <= 0)
+            if (item.itemNum <= 0)// 数量不足时全部扣除，并从列表中移除
             {
                 item.itemNum = 0;
                 itemPacks.Remove(item);
