@@ -24,7 +24,7 @@ public class PieceController : MonoBehaviour
     [SerializeField] private PieceActionListPanel _actionListPanel; // 棋子动作列表面板
 
     [SerializeField] public PieceDisplay pieceDisplay;
-    public GameObject uiCanvas; // UI画布
+    //public GameObject uiCanvas; // UI画布
     //public HitInfoPanel hitInfoPanel;
 
     [Header("配置")] [SerializeField] [ReadOnly]
@@ -493,7 +493,6 @@ public class PieceController : MonoBehaviour
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
         //if (uiCanvas != null) uiCanvas.SetActive(true);
         ShowHighlight(false);
-        
     }
 
     public virtual void Dead()

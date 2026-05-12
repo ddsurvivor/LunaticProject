@@ -29,6 +29,7 @@ public class HpBarUI : MonoBehaviour
     }
     public void UpdateHpBar(float precent)
     {
+        gameObject.SetActive(true);
         shadowTweener?.Kill(); // 结束当前的拖影动画
         hpBarAlphaTweener?.Kill();
         SetHpBarAlpha(1f);
@@ -47,6 +48,7 @@ public class HpBarUI : MonoBehaviour
 
     public void ShowPreDamage(float damagePercent)
     {
+        gameObject.SetActive(true);
         float afterDamagePercent = Mathf.Clamp01(currentHpPercent - damagePercent);
 
         // 立即显示预伤害血条
@@ -66,6 +68,8 @@ public class HpBarUI : MonoBehaviour
         hpBarAlphaTweener?.Kill();
         SetHpBarAlpha(1f);
         preDamageFill.gameObject.SetActive(false);
+        if(currentHpPercent > 0.99f)
+            gameObject.SetActive(false);
     }
     private void SetHpBarAlpha(float alpha)
     {
