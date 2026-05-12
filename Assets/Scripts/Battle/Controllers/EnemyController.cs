@@ -14,6 +14,8 @@ public class EnemyController : PieceController
     //public bool ableFakeDeath = false; // 是否具有假死能力
     //private bool isFakeDead = false; // 是否处于假死状态
     //public bool FakeDead => isFakeDead;
+    
+    public EnemyCanvas enemyCanvas; // 敌人专用UI画布，包含血条、buff等显示组件
 
     public Dictionary<PieceController, int> damageDic = new(); // 记录各个单位造成的伤害
 
@@ -36,6 +38,7 @@ public class EnemyController : PieceController
         Debug.Log($"{this.name} 死亡");
         OnDead?.Invoke();
         isActived = false;
+        enemyCanvas?.gameObject.SetActive(false);
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Death, false, -1, () =>
         {
             CheckDrop();
@@ -146,6 +149,14 @@ public class EnemyController : PieceController
                     BattleScene.Ins.UM.itemGetPanel.ShowPanel(dropItem);
                 }
             }
+        }
+    }
+
+    public override void OnBeTarget(PieceController attacker, SkillPack skillPack)
+    {
+        if (isActived)
+        {
+            enemyCanvas.hitInfoPanel.UpdateDisplay(attacker, skillPack, this);
         }
     }
 }

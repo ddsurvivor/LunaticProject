@@ -25,7 +25,7 @@ public class PieceController : MonoBehaviour
 
     [SerializeField] public PieceDisplay pieceDisplay;
     public GameObject uiCanvas; // UI画布
-    public HitInfoPanel hitInfoPanel;
+    //public HitInfoPanel hitInfoPanel;
 
     [Header("配置")] [SerializeField] [ReadOnly]
     private PieceData _pieceData;
@@ -491,7 +491,7 @@ public class PieceController : MonoBehaviour
         // TODO: 根据受伤的数值改变振动的强度
         pieceDisplay.pieceSpriteRenderer.transform.DOShakePosition(0.5f, 0.8f);
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
-        if (uiCanvas != null) uiCanvas.SetActive(true);
+        //if (uiCanvas != null) uiCanvas.SetActive(true);
         ShowHighlight(false);
         
     }
@@ -500,7 +500,7 @@ public class PieceController : MonoBehaviour
     {
         Debug.Log($"{this.name} 死亡");
         OnDead?.Invoke();
-        if (uiCanvas != null) uiCanvas.SetActive(false);
+        //if (uiCanvas != null) uiCanvas.SetActive(false);
         if (pieceDisplay == null)
         {
             gameObject.SetActive(false);
@@ -658,7 +658,8 @@ public class PieceController : MonoBehaviour
     {
         rangeUI?.ShowHighlight(option);
         if (hightlightEffect != null) hightlightEffect.SetActive(option);
-        if(!option) hitInfoPanel?.gameObject.SetActive(false);
+        //if(!option) hitInfoPanel?.gameObject.SetActive(false);
+        if(!option && this is EnemyController enemy) enemy.enemyCanvas.hitInfoPanel.gameObject.SetActive(false);
     }
 
     // ======= 道具 ====== //
@@ -772,6 +773,18 @@ public class PieceController : MonoBehaviour
             default:
                 throw new ArgumentOutOfRangeException(nameof(passiveTriggerType), passiveTriggerType, null);
         }
+    }
+
+    /// <summary>
+    /// 被选中时
+    /// </summary>
+    public virtual void OnBeTarget(PieceController attacker, SkillPack skillPack)
+    {
+        
+    }
+    public virtual void OnCloseHitInfo()
+    {
+        
     }
 
     // ======= 音效 ======= //

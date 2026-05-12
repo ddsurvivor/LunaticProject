@@ -29,6 +29,10 @@ public class CameraController : MonoBehaviour
         virtualCamera.Priority = 0;
         followVCam.Priority = 10;
         impulse = followVCam.GetComponent<Cinemachine.CinemachineImpulseSource>();
+        // 初始将相机设置到中等缩放
+        float initialZoom = 10f;
+        virtualCamera.m_Lens.OrthographicSize = initialZoom;
+        followVCam.m_Lens.OrthographicSize = initialZoom;
     }
 
     void Update()

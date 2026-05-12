@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI; // 使用旧版 UI 系统
@@ -13,7 +14,7 @@ public class HitInfoPanel : MonoBehaviour
     [SerializeField] private Text critRateText;  // 暴击率文本
 
    
-    
+    public HpBarUI hpBarUI; // 生命值显示组件，显示目标当前HP和预期HP
 
     /// <summary>
     /// 更新面板信息的公共接口
@@ -30,6 +31,7 @@ public class HitInfoPanel : MonoBehaviour
         gameObject.SetActive(true);
 
         // 显示面板
+        Debug.Log($"更新命中信息面板: 攻击者={attacker.name}, 目标={target.name}, 技能={skillPack.skillName}");
 
         // 计算战斗数据（逻辑建议放在单独的战斗计算类中，这里演示直接调用）
         float hitRate = CalculateHitRate(attacker,skillPack, target);
@@ -44,6 +46,20 @@ public class HitInfoPanel : MonoBehaviour
             damageText.text += $"{damagePack.damage:F0} ({damagePack.damageType.ToChinese()}) | ";
         }
         critRateText.text = $"暴击率: {critRate:F0}%";
+        
+        // 显示掉血结果
+        float targetHpPercent = (float)target.unitAttrCenter.CurHealth / target.unitAttrCenter.MaxHealth;
+        float damagePercent = 0f;
+        if (damagePacks.Count > 0)
+        {
+            int totalDamage = 0;
+            foreach (var damagePack in damagePacks)
+            {
+                totalDamage += damagePack.damage;
+            }
+            damagePercent = (float)totalDamage / target.unitAttrCenter.MaxHealth;
+        }
+        hpBarUI.ShowPreDamage(damagePercent);
     }
 
     // --- 模拟战斗计算逻辑 ---
@@ -113,5 +129,10 @@ public class HitInfoPanel : MonoBehaviour
     {
         // 示例：暴击率
         return a.unitAttrCenter.critRate;
+    }
+
+    private void OnDisable()
+    {
+        hpBarUI.ClosePreDamage();
     }
 }

@@ -80,7 +80,10 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     [SerializeField] [ReadOnly] public Dictionary<BuffAttrType, float> buffAttrDic = new();
 
 
-    [Header("UI")] public Transform hpBarFill;
+    [Header("UI")] 
+    public Transform hpBarFill;
+    public HpBarUI hpBarUI;
+    [Header("Events")]
     public UnityEvent OnDead;
 
     public void Init()
@@ -192,8 +195,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         ).GetComponent<DamageText>();
         damageText.JumpOutNum(attackPack.damage);
         if (_curHealth <= 0) _curHealth = 0;
-        if (hpBarFill != null)
-            hpBarFill.localScale = new Vector3((float)_curHealth / _maxHealth, 1f, 1f);
+        UpdateHpBar();
         if (_curHealth <= 0)
         {
             if (pc != null)
@@ -228,10 +230,17 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         if (healAmount <= 0) return;
         _curHealth += healAmount;
         if (_curHealth > _maxHealth) _curHealth = _maxHealth;
-        if (hpBarFill != null)
-            hpBarFill.localScale = new Vector3((float)_curHealth / _maxHealth, 1f, 1f);
+        UpdateHpBar();
         Debug.Log($"恢复生命{healAmount}");
         BattleScene.Ins.UM.OnPieceStateChance(pc);
+    }
+
+    private void UpdateHpBar()
+    {
+        if (hpBarFill != null)
+            hpBarFill.localScale = new Vector3((float)_curHealth / _maxHealth, 1f, 1f);
+        if(pc is EnemyController enemy)
+            enemy.enemyCanvas.hpBarUI.UpdateHpBar((float)_curHealth / _maxHealth);
     }
 
     public bool CostMP(int costPoint = 1)

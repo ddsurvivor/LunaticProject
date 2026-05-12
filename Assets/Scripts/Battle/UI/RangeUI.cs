@@ -41,6 +41,7 @@ public class RangeUI : MonoBehaviour
     public bool isPlayerRange = false;
 
     private PieceController _owner;
+
     // public void Awake()
     // {
     //     circle.SetActive(false);
@@ -57,7 +58,7 @@ public class RangeUI : MonoBehaviour
     private void Awake()
     {
         // 从上一级组件获取控制器引用
-        if(_owner==null) _owner = GetComponentInParent<PieceController>();
+        if (_owner == null) _owner = GetComponentInParent<PieceController>();
     }
 
     public void ShowCircleRange(float radius)
@@ -137,7 +138,7 @@ public class RangeUI : MonoBehaviour
         {
             skillCircle.SetActive(true);
             skillCircle.transform.localScale = skillPack.rangeValue * circleRadius * Vector3.one;
-            
+
             arcRoot.SetActive(true);
 
             float w = skillPack.arcWeight; // 技能宽度
@@ -151,23 +152,23 @@ public class RangeUI : MonoBehaviour
             //arcInnerMask.transform.localScale = r * circleRadius * Vector3.one;
             arcInnerMask.gameObject.SetActive(false);
             // 调整弧线的位置
-            arcOuter.transform.localPosition = new Vector3((-d)*100, 0, l*100 / 2f);
+            arcOuter.transform.localPosition = new Vector3((-d) * 100, 0, l * 100 / 2f);
             //arcInnerMask.transform.localPosition = new Vector3((-d + w / 2f)*100, 0, l*100 / 4f);
 
             // 根据弦长、半径，计算弧线的弧度值
             float angle = 2 * Mathf.Asin(l / (2 * r)) * Mathf.Rad2Deg;
             arcOuter.fillAmount = angle / 360f;
             //arcInnerMask.fillAmount = angle / 360f;
-            
+
             // 修改旋转为0.5倍的angle
-            arcOuter.transform.localRotation = Quaternion.Euler(90, 0, 90f + angle / 2f);//
+            arcOuter.transform.localRotation = Quaternion.Euler(90, 0, 90f + angle / 2f); //
             //arcInnerMask.transform.localRotation = Quaternion.Euler(90, 0, 180f - angle / 2f);
 
             // --- 第五步：设置两条边线 arcLine1 & arcLine2 ---
             arcLine1.transform.localScale = new Vector3(w, 1, 1);
             arcLine2.transform.localScale = new Vector3(w, 1, 1);
             arcLine1.localPosition = new Vector3(0, 0, 0);
-            arcLine2.localPosition = new Vector3(0, 0, l*100);
+            arcLine2.localPosition = new Vector3(0, 0, l * 100);
         }
     }
 
@@ -181,6 +182,7 @@ public class RangeUI : MonoBehaviour
                 enemy.ShowHighlight(false);
             }
         }
+
         _curTargets.Clear();
         circle.SetActive(false);
         moveIcon.SetActive(false);
@@ -193,7 +195,6 @@ public class RangeUI : MonoBehaviour
         fanRoot.SetActive(false);
         arcRoot.SetActive(false);
         ShowSelect(false);
-        
     }
 
 
@@ -205,8 +206,8 @@ public class RangeUI : MonoBehaviour
 
     public void Update()
     {
-        if(!isPlayerRange) return;
-        if(_owner != null && !_owner.IsUsingSkill) return;
+        if (!isPlayerRange) return;
+        if (_owner != null && !_owner.IsUsingSkill) return;
         // attackIcon跟随鼠标移动
         if (attackIcon.activeInHierarchy)
         {
@@ -385,13 +386,13 @@ public class RangeUI : MonoBehaviour
 
             // 计算圆心角 (弧度转角度)
             float halfAngleDeg = 2 * Mathf.Asin(l / (2 * r)) * Mathf.Rad2Deg;
-            
+
             Vector3 centerPos = arcOuter.transform.position;
             // --- 2. 物理粗筛 (Broad-phase) ---
             // 以 arcRoot 为圆心，外圆半径为范围，找出所有潜在碰撞体
             int count = Physics.OverlapSphereNonAlloc(
-                centerPos, 
-                outerR, 
+                centerPos,
+                outerR,
                 _overlapResults
             );
 
@@ -404,10 +405,10 @@ public class RangeUI : MonoBehaviour
                 // 通过所有检查，记录目标
                 PieceController piece = col.GetComponent<PieceController>();
                 if (piece == null) continue;
-                
+
                 Vector3 targetPos = col.transform.position;
                 Vector3 dirToTarget = targetPos - centerPos;
-        
+
                 // A. 距离过滤 (是否在圆环带厚度内)
                 // 使用 sqrMagnitude (平方和) 避免开方运算，提升性能
                 float distSq = dirToTarget.sqrMagnitude;
@@ -423,9 +424,9 @@ public class RangeUI : MonoBehaviour
             }
 
             CheckTarget(hitPieces);
-            
         }
     }
+
     private Collider[] _overlapResults = new Collider[20]; // 预分配数组提升性能
 
     private void CheckTarget(Collider[] hitColliders)
@@ -475,20 +476,20 @@ public class RangeUI : MonoBehaviour
             }
 
             piece.ShowHighlight(false);
-            piece.hitInfoPanel?.gameObject.SetActive(false);
         }
 
-        _curTargets = newTargets;
-        foreach (var target in _curTargets)
+        foreach (var target in newTargets)
         {
+            if(_curTargets.Contains(target)) continue;
             // 显示命中率、伤害等
-            target.hitInfoPanel?.UpdateDisplay(_owner, _curSkillPack, target);
+            target.OnBeTarget(_owner, _curSkillPack);
         }
+        _curTargets = newTargets;
     }
 
     private void CheckTarget(HashSet<PieceController> hitPieces)
     {
-        Debug.Log("Hit Pieces Count: " + hitPieces.Count);
+        //Debug.Log("Hit Pieces Count: " + hitPieces.Count);
         List<PieceController> newTargets = new();
         foreach (var piece in hitPieces)
         {
@@ -531,15 +532,15 @@ public class RangeUI : MonoBehaviour
             }
 
             piece.ShowHighlight(false);
-            piece.hitInfoPanel?.gameObject.SetActive(false);
         }
 
-        _curTargets = newTargets;
-        foreach (var target in _curTargets)
+        foreach (var target in newTargets)
         {
+            if(_curTargets.Contains(target)) continue;
             // 显示命中率、伤害等
-            target.hitInfoPanel?.UpdateDisplay(_owner, _curSkillPack, target);
+            target.OnBeTarget(_owner, _curSkillPack);
         }
+        _curTargets = newTargets;
     }
 
 
@@ -570,12 +571,12 @@ public class RangeUI : MonoBehaviour
         }
         else if (fanRoot.activeInHierarchy)
         {
-            if(fanPos!=null) return fanPos;
+            if (fanPos != null) return fanPos;
         }
 
         return null;
     }
-    
+
     public void ShowSelect(bool option)
     {
         selectCircle.SetActive(option);
