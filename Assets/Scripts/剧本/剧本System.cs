@@ -449,7 +449,7 @@ public class 剧本System : MonoBehaviour
                 {
                     已阅读++;
                     GameObject go = 生成剧本预制体();
-                    GameObject text = go.GetComponent<打字机>().textComponent.gameObject;
+                    GameObject text = go.GetComponent<打字机>()._textComponent.gameObject;
                     text.AddComponent<Button>();
                     text.GetComponent<Text>().color = choiceColor;
                     text.GetComponent<Text>().raycastTarget = true;
