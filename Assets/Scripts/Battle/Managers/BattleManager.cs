@@ -809,7 +809,8 @@ public class BattleManager : MonoBehaviour
                     }
 
                     // 记录碰撞并计算最终停留点（向后微调 0.2f 避免模型穿插）
-                    result.FinalPosition = wallHit.point - direction * 0.2f;
+                    //result.FinalPosition = wallHit.point - direction * 0.2f;
+                    result.FinalPosition = lastValidPos;
                     result.IsCollided = true;
                     break;
                 }

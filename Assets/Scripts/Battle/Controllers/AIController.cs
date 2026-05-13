@@ -202,7 +202,7 @@ public class AIController : PlayerController
     {
         if (target == null) return;
 
-        if (aiPiece.navigate)// 如果正在导航中，优先保持导航状态，不进行攻击
+        if (aiPiece.navigate) // 如果正在导航中，优先保持导航状态，不进行攻击
         {
             if (Mathf.Abs(target.transform.position.y - aiPiece.transform.position.y) > 1.0f)
             {
@@ -330,23 +330,26 @@ public class AIController : PlayerController
                 EnemyNormalAttack(aiPiece, target, distanceToTarget, meleeRange, rangedRange);
             }
         }
-        else if (enemyAIType == EnemyAIType.Combine)// 远程和近战混合型AI
+        else if (enemyAIType == EnemyAIType.Combine) // 远程和近战混合型AI
         {
-            if (aiPiece.unitAttrCenter.CurMovePoint >= 2 && 
-                distanceToTarget <= (moveRange + meleeRange))// 一步后可以近战的情况
+            if (aiPiece.unitAttrCenter.CurMovePoint >= 2 &&
+                distanceToTarget <= (moveRange + meleeRange)) // 一步后可以近战的情况
             {
-                Debug.Log($"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动到近战范围攻击{distanceToTarget} <= {moveRange + meleeRange}");
+                Debug.Log(
+                    $"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动到近战范围攻击{distanceToTarget} <= {moveRange + meleeRange}");
                 EnemyMove(aiPiece, target.transform.position, meleeRange);
             }
-            else if (aiPiece.unitAttrCenter.CurMovePoint >= 2 && 
-                distanceToTarget <= (moveRange + rangedRange))// 一步后可以远程的情况
+            else if (aiPiece.unitAttrCenter.CurMovePoint >= 2 &&
+                     distanceToTarget <= (moveRange + rangedRange)) // 一步后可以远程的情况
             {
-                Debug.Log($"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动到远程范围攻击{distanceToTarget} <= {moveRange + rangedRange}");
+                Debug.Log(
+                    $"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动到远程范围攻击{distanceToTarget} <= {moveRange + rangedRange}");
                 EnemyMove(aiPiece, target.transform.position, rangedRange);
             }
             else if (distanceToTarget <= meleeRange)
             {
-                Debug.Log($"{aiPiece.enemyAIType}AI{aiPiece.name}选择近战攻击{distanceToTarget} <= {meleeRange}");
+                Debug.Log(
+                    $"{aiPiece.enemyAIType}AI{aiPiece.name}选择近战攻击{distanceToTarget} <= {meleeRange}");
                 // 近战攻击
                 aiPiece.StartNormalAttack();
                 aiPiece.CastAttackOnTarget(target);
@@ -361,8 +364,8 @@ public class AIController : PlayerController
                 }
                 else
                 {
-                    
-                    Debug.Log($"{aiPiece.enemyAIType}AI{aiPiece.name}选择远程攻击{distanceToTarget} <= {rangedRange}");
+                    Debug.Log(
+                        $"{aiPiece.enemyAIType}AI{aiPiece.name}选择远程攻击{distanceToTarget} <= {rangedRange}, 目标在{target.name}");
                     // 远程攻击
                     aiPiece.StartNormalAttack(true);
                     aiPiece.CastAttackOnTarget(target);
@@ -374,17 +377,17 @@ public class AIController : PlayerController
                 EnemyMove(aiPiece, target.transform.position, rangedRange);
             }
         }
-        else if(enemyAIType == EnemyAIType.Special)
+        else if (enemyAIType == EnemyAIType.Special)
         {
             // 特殊行为由关卡设计决定，这里暂时不实现具体逻辑
             // 撤退到指定点时胜利
             RetreatWin retreatWin = aiPiece.GetComponent<RetreatWin>();
-            if (retreatWin!=null)
+            if (retreatWin != null)
             {
                 Debug.Log("移动到指定点");
-                Vector3 pos = retreatWin.targetPoint.position; 
+                Vector3 pos = retreatWin.targetPoint.position;
                 EnemyMove(aiPiece, pos, 0.5f);
-                DOVirtual.DelayedCall(1.0f, ()=> retreatWin.CheckTargetReached());// 行动后判定胜利
+                DOVirtual.DelayedCall(1.0f, () => retreatWin.CheckTargetReached()); // 行动后判定胜利
             }
         }
     }
@@ -506,7 +509,8 @@ public class AIController : PlayerController
     /// <param name="targetPos">目标位置（通常是玩家位置）</param>
     /// <param name="range">希望保持的距离范围</param>
     /// <param name="leave">是否执行远离逻辑</param>
-    private void EnemyMove(EnemyController aiPiece, Vector3 targetPos, float range, bool leave = false)
+    private void EnemyMove(EnemyController aiPiece, Vector3 targetPos, float range
+        , bool leave = false)
     {
         // 获取 AI 当前的属性：最大移动距离
         float moveRange = aiPiece.unitAttrCenter.MoveRange;
@@ -536,24 +540,101 @@ public class AIController : PlayerController
         // 4. 调用 BM 的通用判定函数（核心重构部分）
         // 该函数会自动处理：1. 墙壁阻挡 2. 棋子阻挡 3. 地面边界/虚空
         var moveResult = BattleScene.Ins.BM.CalculateValidMovePos(
-            currentPos, 
+            currentPos,
             leave ? -direction : direction, // 如果是远离，则向反方向探测
-            testDistance, 
+            testDistance,
             aiPiece.gameObject
         );
 
         Vector3 moveTargetPos = moveResult.FinalPosition;
 
         // 5. 执行位移表现
-        Debug.Log($"{aiPiece.enemyAIType} AI {aiPiece.name} 发起移动。目标：{moveTargetPos}，碰撞中止：{moveResult.IsCollided}");
+        Debug.Log(
+            $"{aiPiece.enemyAIType} AI {aiPiece.name} 发起移动。目标：{moveTargetPos}，碰撞中止：{moveResult.IsCollided}");
 
         // 使用 DOTween 进行平滑位移
         aiPiece.transform.DOMove(moveTargetPos, 1.0f).SetEase(Ease.InOutQuad);
-    
+
         // 更新动画状态与朝向
         aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
         aiPiece.CheckFace(moveTargetPos - currentPos);
     }
+
+    private void EnemyMove(EnemyController aiPiece, Vector3 targetPos, float range
+        , bool leave, bool useBM)
+    {
+        float moveRange = aiPiece.unitAttrCenter.MoveRange;
+        Vector3 currentPos = aiPiece.transform.position;
+
+        // 1. 计算基础方向向量
+        Vector3 direction = (targetPos - currentPos);
+        direction.y = 0;
+        direction.Normalize();
+
+        // 最终要探测的方向（处理远离逻辑）
+        Vector3 mainDir = leave ? -direction : direction;
+
+        // 2. 确定逻辑目标点距离
+        Vector3 idealAttackPos = leave
+            ? (currentPos + mainDir * moveRange)
+            : (targetPos - direction * (range - 0.5f));
+        float distanceToIdeal = Vector3.Distance(currentPos, idealAttackPos);
+        float testDistance = Mathf.Min(distanceToIdeal, moveRange);
+
+        // 3. 第一次尝试移动
+        var moveResult =
+            BattleScene.Ins.BM.CalculateValidMovePos(currentPos, mainDir, testDistance
+                , aiPiece.gameObject);
+        float originalDist = Vector3.Distance(currentPos, moveResult.FinalPosition);
+
+        // 4. 判定是否“撞墙死顶”：发生了碰撞 且 行进路程不足 30%
+        if (moveResult.IsCollided && originalDist < (moveRange * 0.3f))
+        {
+            Debug.Log($"{aiPiece.name} 遇到障碍物阻挡，尝试左右侧滑绕开...");
+
+            // 计算正负 90 度的方向
+            Vector3 leftDir = Quaternion.Euler(0, -90, 0) * mainDir;
+            Vector3 rightDir = Quaternion.Euler(0, 90, 0) * mainDir;
+
+            // 执行左右两次判定（探测完整的移动范围）
+            var leftResult = BattleScene.Ins.BM.CalculateValidMovePos(currentPos, leftDir, moveRange
+                , aiPiece.gameObject);
+            var rightResult = BattleScene.Ins.BM.CalculateValidMovePos(currentPos, rightDir
+                , moveRange, aiPiece.gameObject);
+
+            float leftDist = Vector3.Distance(currentPos, leftResult.FinalPosition);
+            float rightDist = Vector3.Distance(currentPos, rightResult.FinalPosition);
+
+            // 对比哪条路径更长
+            if (leftDist > originalDist || rightDist > originalDist)
+            {
+                // 选择最长的那条路径更新 moveResult
+                if (leftDist >= rightDist)
+                {
+                    moveResult = leftResult;
+                    Debug.Log($"{aiPiece.name} 选择左侧绕行，距离：{leftDist}");
+                }
+                else
+                {
+                    moveResult = rightResult;
+                    Debug.Log($"{aiPiece.name} 选择右侧绕行，距离：{rightDist}");
+                }
+            }
+        }
+
+        // 5. 最终执行位移
+        Vector3 moveTargetPos = moveResult.FinalPosition;
+
+        // 强制锁定 Y 轴（根据你的需求，也可以不锁，让 CalculateValidMovePos 决定）
+        // moveTargetPos.y = currentPos.y; 
+
+        Debug.Log($"{aiPiece.enemyAIType} AI {aiPiece.name} 最终移动到：{moveTargetPos}");
+
+        aiPiece.transform.DOMove(moveTargetPos, 1.0f).SetEase(Ease.InOutQuad);
+        aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
+        aiPiece.CheckFace(moveTargetPos - currentPos);
+    }
+
     /// <summary>
     /// 敌人移动到梯子位置的函数
     /// </summary>
@@ -586,6 +667,7 @@ public class AIController : PlayerController
             {
                 CheckEnemyAction(aiPiece);
             }
+
             if (!aiPiece.unitAttrCenter.CostMP()) continue;
             BattleScene.Ins.BM.camera.SetFollow(aiPiece.transform);
             return;
