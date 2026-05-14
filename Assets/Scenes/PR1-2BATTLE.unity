@@ -2398,7 +2398,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh79574
+  m_Name: pb_Mesh52932
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -5009,7 +5009,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh79386
+  m_Name: pb_Mesh52744
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -5514,7 +5514,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh79870
+  m_Name: pb_Mesh53228
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -5940,7 +5940,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh79466
+  m_Name: pb_Mesh52824
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -7152,6 +7152,8 @@ MonoBehaviour:
   - {fileID: 1598945330}
   - {fileID: 1580472316}
   highlightEffect: {fileID: 931639682}
+  evadeChance: 20
+  damageReduction: 20
 --- !u!65 &805328093
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -7189,7 +7191,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh79588
+  m_Name: pb_Mesh52946
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -9681,7 +9683,7 @@ MonoBehaviour:
   m_Follow: {fileID: 320141619}
   m_Lens:
     FieldOfView: 60
-    OrthographicSize: 30
+    OrthographicSize: 12
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
@@ -12499,7 +12501,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh79732
+  m_Name: pb_Mesh53090
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -15168,6 +15170,7 @@ MonoBehaviour:
   buffManager: {fileID: 1713777230}
   skillManager: {fileID: 0}
   spriteManager: {fileID: 0}
+  diceCheckManager: {fileID: 0}
   pieceDataListSO: {fileID: 0}
   areaList: []
   finishDrop: {fileID: 0}
@@ -15323,6 +15326,7 @@ MonoBehaviour:
   itemGetPanel: {fileID: 0}
   logPanel: {fileID: 0}
   battleFinishPanel: {fileID: 0}
+  checkDicePanel: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15679,7 +15683,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 30
+  orthographic size: 12
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -15703,7 +15707,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1734752369}
   m_LocalRotation: {x: 0.35355338, y: -0.35355338, z: 0.1464466, w: 0.8535535}
-  m_LocalPosition: {x: 44.546722, y: 36.549118, z: -19.604023}
+  m_LocalPosition: {x: 40.099995, y: 34.4, z: -27.09}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -16354,6 +16358,7 @@ MonoBehaviour:
   fanCircle: {fileID: 0}
   fanLine1: {fileID: 0}
   fanLine2: {fileID: 0}
+  fanPos: {fileID: 0}
   arcRoot: {fileID: 0}
   arcOuter: {fileID: 0}
   arcInnerMask: {fileID: 0}
@@ -16413,6 +16418,8 @@ MonoBehaviour:
   - {fileID: 689035693}
   - {fileID: 422393545}
   highlightEffect: {fileID: 1733852695}
+  evadeChance: 20
+  damageReduction: 20
 --- !u!65 &1842989457
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -18000,7 +18007,7 @@ MonoBehaviour:
   m_Follow: {fileID: 0}
   m_Lens:
     FieldOfView: 60
-    OrthographicSize: 30
+    OrthographicSize: 12
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
@@ -18245,7 +18252,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh79040
+  m_Name: pb_Mesh52398
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
