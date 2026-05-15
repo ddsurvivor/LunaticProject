@@ -98,6 +98,12 @@ public class CameraController : MonoBehaviour
     //public float shakeMagnitude;
     public Cinemachine.CinemachineImpulseSource impulse;
 
+    public void FocusTarget(Transform transform)
+    {
+        virtualCamera.Priority = 0;
+        followVCam.Priority = 10;
+        followVCam.Follow = transform;
+    }
     public void FocusShake(Transform transform, float amplitude = 1f)
     {
         virtualCamera.Priority = 0;

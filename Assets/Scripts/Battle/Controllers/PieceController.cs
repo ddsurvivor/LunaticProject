@@ -469,6 +469,8 @@ public class PieceController : MonoBehaviour
 
     public void Hurt()
     {
+        BattleScene.Ins.TM.RequestHitStop();
+        
         // 聚能充能
         if (isPlayerPiece)
         {

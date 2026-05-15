@@ -35,6 +35,7 @@ public class EnemyController : PieceController
 
     public override void Dead()
     {
+        BattleScene.Ins.TM.RequestHitStop();
         Debug.Log($"{this.name} 死亡");
         OnDead?.Invoke();
         isActived = false;

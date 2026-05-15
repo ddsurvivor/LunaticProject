@@ -103,7 +103,7 @@ public class UIManager : SerializedMonoBehaviour
         skillNamText.text = skillName;
         skillNameDisplay.gameObject.SetActive(true);
         Sequence seq = DOTween.Sequence();
-
+        seq.SetUpdate(true);
         seq.Append(skillNameDisplay.DOMoveX(280, 0.3f));
         seq.AppendInterval(1f);
         seq.Append(skillNameDisplay.DOMoveX(-280, 0.3f));

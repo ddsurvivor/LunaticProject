@@ -158,7 +158,8 @@ public class BattleManager : MonoBehaviour
     }*/
 
     public void PieceSkill(PieceController attacker, List<PieceController> targets
-        , SkillPack skillPack, Vector3 targetPos = default, ActionType actionType = 0, CheckResult checkResult = CheckResult.None)
+        , SkillPack skillPack, Vector3 targetPos = default, ActionType actionType = 0
+        , CheckResult checkResult = CheckResult.None)
     {
         BattleScene.Ins.UM.PopSkillName(skillPack.skillName);
         List<List<DamageInfo>> damageInfoList = new();
@@ -190,8 +191,9 @@ public class BattleManager : MonoBehaviour
                 coverHitPenalty = activeCover.evadeChance; // 示例：直接使用掩体的闪避率作为命中率惩罚
                 coverDamageReduction = activeCover.damageReduction;
                 Debug.Log($"掩体生效！命中率惩罚={coverHitPenalty}%，伤害减免={coverDamageReduction}%");
-                SpriteEffectPlayer shieldEffect 
-                    = ObjectPool.Ins.GenerateObject(ItemType.SHIELD, target.transform.position, Quaternion.identity)
+                SpriteEffectPlayer shieldEffect
+                    = ObjectPool.Ins.GenerateObject(ItemType.SHIELD, target.transform.position
+                            , Quaternion.identity)
                         .GetComponent<SpriteEffectPlayer>();
             }
             else
@@ -238,7 +240,7 @@ public class BattleManager : MonoBehaviour
             {
                 isCrit = true;
             }
-            
+
             // 模式识别判定
             float damageModifier = 1f;
             if (skillPack.isRecognitionCheck)
@@ -261,12 +263,14 @@ public class BattleManager : MonoBehaviour
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+
                 Debug.Log($"模式识别检定结果: {checkResult}, 伤害修正={damageModifier}, 必定暴击={isCrit}");
             }
 
 
             int addAtk =
-                attacker.unitAttrCenter.attr.GetAddDamage(target.unitAttrCenter.elementType)+ attacker.unitAttrCenter.ATK;
+                attacker.unitAttrCenter.attr.GetAddDamage(target.unitAttrCenter.elementType) +
+                attacker.unitAttrCenter.ATK;
             List<DamageInfo> damageInfos = new();
             foreach (var attackPack in skillPack.attackPacks)
             {
@@ -289,12 +293,12 @@ public class BattleManager : MonoBehaviour
                 realDamage -= armor;
                 // 减伤
                 realDamage = (int)(realDamage
-                    * (100 + attacker.unitAttrCenter.buffAttrDic[
-                        BuffAttrType.DamageIncrease]) / 100f * // 伤害增加
-                    (100 - target.unitAttrCenter.buffAttrDic[
-                        BuffAttrType.DamageReduction]) / 100f // 伤害减免
-                    *damageModifier); 
-                
+                                   * (100 + attacker.unitAttrCenter.buffAttrDic[
+                                       BuffAttrType.DamageIncrease]) / 100f * // 伤害增加
+                                   (100 - target.unitAttrCenter.buffAttrDic[
+                                       BuffAttrType.DamageReduction]) / 100f // 伤害减免
+                                   * damageModifier);
+
                 // 聚能伤害
                 if (attacker.player != null && attacker.player.isBursting)
                 {
@@ -372,7 +376,18 @@ public class BattleManager : MonoBehaviour
             targets.Select(t => t.pieceData.pieceName).ToList(),
             damageInfoList
         );
-        if (isCrit && targets.Count > 0) BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
+        if (targets.Count > 0)
+        {
+            if (isCrit)
+            {
+                BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
+            }
+            else
+            {
+                BattleScene.Ins.BM.camera.FocusTarget(targets[0].transform);
+            }
+        }
+
         // 处理聚能充能效果，多段伤害只充能一次
         if (attacker.isPlayerPiece)
         {
