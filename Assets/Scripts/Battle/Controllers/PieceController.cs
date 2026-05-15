@@ -68,7 +68,7 @@ public class PieceController : MonoBehaviour
     public List<ActionType> availableActions = new(); // 可用动作列表
 
     public List<SkillPack> availableSkills = new(); // 可用技能列表
-    
+
     public List<PassiveType> availablePassives = new(); // 可用被动技能列表
 
     //public bool isActived = false; // 是否被激活
@@ -81,6 +81,7 @@ public class PieceController : MonoBehaviour
     [FoldoutGroup("事件")] public UnityEvent OnInit;
     [FoldoutGroup("事件")] public UnityEvent OnTurnStart;
     [FoldoutGroup("事件")] public UnityEvent OnTurnEnd;
+    [FoldoutGroup("事件")] public UnityEvent OnHurt;
     [FoldoutGroup("事件")] public UnityEvent OnDead;
 
 
@@ -106,7 +107,7 @@ public class PieceController : MonoBehaviour
         {
             _pieceData = pieceData;
             availableSkills = pieceData?.skillPacks;
-            unitAttrCenter.SetData(_pieceData,playerData);
+            unitAttrCenter.SetData(_pieceData, playerData);
             if (isPlayerPiece && GM.Ins.pieceHPInherit)
             {
                 Player playerData = GM.Ins.PLAYERPROFILE.GetPlayer(pieceID - 1);
@@ -138,6 +139,7 @@ public class PieceController : MonoBehaviour
             if (Input.GetMouseButtonDown(0))
             {
                 CastAttack();
+                //CastSkill();
             }
 
             // 点击右键取消
@@ -249,6 +251,7 @@ public class PieceController : MonoBehaviour
     {
         rangeUI?.ShowSelect(true);
     }
+
     public void CancelSelect()
     {
         Debug.Log("取消选择棋子");
@@ -267,15 +270,16 @@ public class PieceController : MonoBehaviour
         foreach (var collider in hitColliders)
         {
             CaverSlot caverSlot = collider.transform.GetComponent<CaverSlot>();
-            if (caverSlot != null && !caverSlot.isFull)// 掩体判定规则
+            if (caverSlot != null && !caverSlot.isFull) // 掩体判定规则
             {
                 // 取消吸附机制
                 //caverSlot.AddToSlot(transform);
                 _curCaverSlot = caverSlot;
                 // 播放掩体特效
-                SpriteEffectPlayer shieldEffect 
-                    = ObjectPool.Ins.GenerateObject(ItemType.SHIELD, transform.position, Quaternion.identity)
-                    .GetComponent<SpriteEffectPlayer>();
+                SpriteEffectPlayer shieldEffect
+                    = ObjectPool.Ins.GenerateObject(ItemType.SHIELD, transform.position
+                            , Quaternion.identity)
+                        .GetComponent<SpriteEffectPlayer>();
                 result = true;
             }
 
@@ -292,7 +296,7 @@ public class PieceController : MonoBehaviour
                 interactAreas.Add(ladderSlot);
                 result = true;
             }
-            
+
             HealArea healArea = collider.transform.GetComponent<HealArea>();
             if (healArea != null)
             {
@@ -308,7 +312,6 @@ public class PieceController : MonoBehaviour
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, 3f);
         foreach (var collider in hitColliders)
         {
-            
         }
     }
 
@@ -371,6 +374,7 @@ public class PieceController : MonoBehaviour
 
     private void CastAttack()
     {
+        if(!_isAttacking) return;
         // 根据范围获取所有棋子
         List<PieceController> targets = rangeUI.GetCurTargets;
         if (targets.Count < 1)
@@ -410,12 +414,18 @@ public class PieceController : MonoBehaviour
 
         // 结束攻击状态
         _isAttacking = false;
+        if (targets.Count > 0)
+        {
+            ShootBolt(targets[0].transform.position, _curAttackPack.bulletVFXType);
+        }
+
         // 延迟0.3f
         DOVirtual.DelayedCall(0.3f
             , () =>
             {
                 if (!unitAttrCenter.CostMP()) return;
-                BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack,Vector3.zero, _curAtkType);
+                BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack, Vector3.zero
+                    , _curAtkType);
                 rangeUI.CloseRange();
                 Transform atkPos = rangeUI.GetSkillTransform();
                 if (atkPos != null && _curAttackPack.skillVFXType != 0)
@@ -470,7 +480,7 @@ public class PieceController : MonoBehaviour
     public void Hurt()
     {
         BattleScene.Ins.TM.RequestHitStop();
-        
+        OnHurt?.Invoke();
         // 聚能充能
         if (isPlayerPiece)
         {
@@ -558,6 +568,7 @@ public class PieceController : MonoBehaviour
     public virtual void CastSkill()
     {
         if (_skillPack == null) return;
+        if(!_isUsingSkill) return;
         Sequence sequence = DOTween.Sequence();
         Transform atkPos = rangeUI.GetSkillTransform();
         if (_skillPack.isDelaySkill) // 延时类技能跳过结算
@@ -579,23 +590,45 @@ public class PieceController : MonoBehaviour
         }
 
         _isUsingSkill = false;
+        
         CheckResult checkResult = CheckResult.None;
         if (_skillPack.isRecognitionCheck && targets.Count > 0)
         {
-            checkResult = BattleScene.Ins.BM.diceCheckManager.ModeRecognitionCheck(this, targets[0]);
+            checkResult =
+                BattleScene.Ins.BM.diceCheckManager.ModeRecognitionCheck(this, targets[0]);
             sequence.AppendInterval(2.5f);
         }
+
         Vector3 atkPosValue = atkPos != null ? atkPos.position : Vector3.zero;
         sequence.AppendCallback(() =>
         {
-            if (atkPos != null) CheckFace(atkPosValue - transform.position);
+            if (atkPos != null)
+            {
+                CheckFace(atkPosValue - transform.position);
+            }
+            else if (targets.Count > 0)
+            {
+                CheckFace(targets[0].transform.position - transform.position);
+            }
+
             Debug.Log($"{this.name}发动技能攻击{_skillPack.skillName}，targets数量：{targets.Count}");
+
+
             // 播放技能动画
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Skill, false, 1f,
                 null, _skillPack.animationIndex);
+
+
             PlayAudio(_skillPack);
         });
         sequence.AppendInterval(0.3f);
+        sequence.AppendCallback(() =>
+        {
+            if (targets.Count > 0)
+            {
+                ShootBolt(targets[0].transform.position, _skillPack.bulletVFXType);
+            }
+        });
         // 延迟0.3f
         sequence.AppendCallback(
             () =>
@@ -610,8 +643,9 @@ public class PieceController : MonoBehaviour
                 if (!unitAttrCenter.CostItem(_skillPack.consumeItems)) return;
                 PassiveTrigger(PassiveTriggerType.OnSkillUse, _skillPack);
                 Vector3 skillPos = atkPos != null ? atkPos.position : transform.position;
-                BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack, skillPos, ActionType.技能, checkResult);
-    
+                BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack, skillPos, ActionType.技能
+                    , checkResult);
+
                 //Debug.Log("关闭显示范围");
                 rangeUI.CloseRange();
                 if (atkPos != null && _skillPack.skillVFXType != 0)
@@ -623,7 +657,9 @@ public class PieceController : MonoBehaviour
                 }
                 else if (_skillPack.skillVFXType != 0)
                 {
-                    Vector3 pos = targets.Count>0 ? targets[0].transform.position : transform.position;
+                    Vector3 pos = targets.Count > 0
+                        ? targets[0].transform.position
+                        : transform.position;
                     ObjectPool.Ins.GenerateObject(
                         _skillPack.skillVFXType,
                         pos + Vector3.up * 3f,
@@ -660,7 +696,24 @@ public class PieceController : MonoBehaviour
         rangeUI?.ShowHighlight(option);
         if (hightlightEffect != null) hightlightEffect.SetActive(option);
         //if(!option) hitInfoPanel?.gameObject.SetActive(false);
-        if(!option && this is EnemyController enemy) enemy.enemyCanvas.hitInfoPanel.gameObject.SetActive(false);
+        if (!option && this is EnemyController enemy)
+            enemy.enemyCanvas.hitInfoPanel.gameObject.SetActive(false);
+    }
+
+    private void ShootBolt(Vector3 tagetPos, ItemType itemType)
+    {
+        if (itemType == ItemType.NONE)
+        {
+            Debug.Log("没有子弹特效");
+            return;
+        }
+        Debug.Log("生成子弹");
+        Transform bolt = ObjectPool.Ins
+            .GenerateObject(itemType, transform.position + Vector3.up * 1.5f, Quaternion.identity)
+            .transform;
+        //bolt.LookAt(tagetPos);
+        bolt.DOMove(tagetPos+ Vector3.up * 1.5f, 0.3f)
+            .OnComplete(() => { ObjectPool.Ins.HideObject(bolt.gameObject); });
     }
 
     // ======= 道具 ====== //
@@ -726,19 +779,20 @@ public class PieceController : MonoBehaviour
     }
 
     // ======= 插件 ====== //
-    
+
     /// <summary>
     /// 初始化插件系统
     /// </summary>
     private void InitComp()
     {
-        if(playerData == null) return;
+        if (playerData == null) return;
         foreach (var i in playerData.normalSlots)
         {
             var data = GM.Ins.DM.componentConfig.GetData(i);
             if (data == null) continue;
             availablePassives.Add(data.passiveType);
         }
+
         foreach (var i in playerData.weaponSlots)
         {
             // 添加武器效果
@@ -754,6 +808,7 @@ public class PieceController : MonoBehaviour
                 {
                     unitAttrCenter.AddMana(3);
                 }
+
                 break;
             case PassiveTriggerType.OnRangedAttack:
                 break;
@@ -770,9 +825,11 @@ public class PieceController : MonoBehaviour
                         Debug.Log("长远利益被动触发，技能能量返还");
                     }
                 }
+
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(passiveTriggerType), passiveTriggerType, null);
+                throw new ArgumentOutOfRangeException(nameof(passiveTriggerType), passiveTriggerType
+                    , null);
         }
     }
 
@@ -781,11 +838,10 @@ public class PieceController : MonoBehaviour
     /// </summary>
     public virtual void OnBeTarget(PieceController attacker, SkillPack skillPack)
     {
-        
     }
+
     public virtual void OnCloseHitInfo()
     {
-        
     }
 
     // ======= 音效 ======= //
@@ -811,11 +867,12 @@ public class PieceController : MonoBehaviour
             AudioSource.PlayClipAtPoint(skillPack.skillSound, Camera.main.transform.position);
         }
     }
-    
-    
+
+
     // ===== 描边效果 ======//
-    
+
     public GameObject outlineEffect;
+
     // 鼠标进入时显示
     /*private void OnMouseEnter()
     {

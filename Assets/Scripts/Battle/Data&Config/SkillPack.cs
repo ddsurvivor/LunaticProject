@@ -20,6 +20,7 @@ public class SkillPack
     [ShowIf("@this.rangeType == RangeType.Arc")] public float arcCenterDis;// 弧线中心距离（仅弧线范围有效）
     
     public ItemType skillVFXType;// 技能特效类型
+    public ItemType bulletVFXType;// 子弹特效类型
     public List<AttackPack> attackPacks = new();// 伤害列表
     public int atkTimes = 1; // 攻击次数
     public List<BuffPack> buffPacks = new();    // 附加效果列表

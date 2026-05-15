@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
@@ -37,6 +38,11 @@ public enum ItemType
     // 物品拾取
     PICKABLE_ITEM=30,
     
+    // 电击弹道
+    ELECTRIC_BOLT=40,
+    // 火焰弹道
+    FLAME_BOLT=41,
+    
 }
 /// <summary>
 /// 对象池
@@ -49,26 +55,28 @@ public class ObjectPool : MonoSingleton<ObjectPool>
     /// </summary>
     public Dictionary<ItemType, List<GameObject>> itemPoolDic = new();
     
-    [SerializeField]
-    /// <summary>
-    /// 物品字典
-    /// </summary>
-    public Dictionary<ItemType, GameObject> itemPrefabDic = new();
-    
+    // [SerializeField]
+    // /// <summary>
+    // /// 物品字典
+    // /// </summary>
+    // public Dictionary<ItemType, GameObject> itemPrefabDic = new();
+
+    [InlineEditor]
+    public ObjectPoolSO objectPoolSO;
     
     // Start is called before the first frame update
-    public  void Init()
-    {
-        
-
-        // 初始化普通物体对象池
-        foreach (var pair in itemPrefabDic)
-        {
-            itemPoolDic.Add(pair.Key, new List<GameObject>());
-        }
-
-        
-    }
+    // public  void Init()
+    // {
+    //     
+    //
+    //     // 初始化普通物体对象池
+    //     foreach (var pair in itemPrefabDic)
+    //     {
+    //         itemPoolDic.Add(pair.Key, new List<GameObject>());
+    //     }
+    //
+    //     
+    // }
 
     
 
@@ -81,9 +89,9 @@ public class ObjectPool : MonoSingleton<ObjectPool>
     /// <returns>返回该物体</returns>
     public GameObject GenerateObject(ItemType _type, Transform _transform)
     {
-        if (!itemPrefabDic.ContainsKey(_type)) return null;
+        if (!objectPoolSO.itemPrefabDic.ContainsKey(_type)) return null;
 
-        if (!itemPoolDic.ContainsKey(_type)) InitPool(_type, itemPrefabDic[_type]);
+        if (!itemPoolDic.ContainsKey(_type)) InitPool(_type, objectPoolSO.itemPrefabDic[_type]);
 
         foreach (var item in itemPoolDic[_type])
         {
@@ -96,7 +104,7 @@ public class ObjectPool : MonoSingleton<ObjectPool>
             return item;
         }
 
-        GameObject go = Instantiate(itemPrefabDic[_type], _transform);
+        GameObject go = Instantiate(objectPoolSO.itemPrefabDic[_type], _transform);
         go.transform.localPosition = Vector3.zero;
         go.transform.localRotation = Quaternion.identity;
         itemPoolDic[_type].Add(go);
@@ -109,6 +117,7 @@ public class ObjectPool : MonoSingleton<ObjectPool>
         GameObject go = GenerateObject(_type, null);
         if (go==null)
         {
+            Debug.LogError("生成物体失败，类型：" + _type);
             return null;
         }
         go.transform.position = _position;
@@ -138,11 +147,6 @@ public class ObjectPool : MonoSingleton<ObjectPool>
     
     public void InitPool(ItemType _type, GameObject _prefab)
     {
-        if (!itemPrefabDic.ContainsKey(_type))
-        {
-            itemPrefabDic.Add(_type, _prefab);
-        }
-
         if (!itemPoolDic.ContainsKey(_type))
         {
             itemPoolDic.Add(_type, new List<GameObject>());
