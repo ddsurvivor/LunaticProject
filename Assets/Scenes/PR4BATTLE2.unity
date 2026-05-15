@@ -2395,6 +2395,7 @@ MonoBehaviour:
   - itemName: 5
     itemNum: 3
   dropCompIds: 0d000000
+  dropSummary: 
 --- !u!1001 &180457541
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7929,6 +7930,8 @@ MonoBehaviour:
   - {fileID: 1598945330}
   - {fileID: 1580472316}
   highlightEffect: {fileID: 931639682}
+  evadeChance: 20
+  damageReduction: 20
 --- !u!65 &805328093
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -15522,7 +15525,7 @@ MonoBehaviour:
   m_Follow: {fileID: 320141619}
   m_Lens:
     FieldOfView: 60
-    OrthographicSize: 21
+    OrthographicSize: 12
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
@@ -16945,6 +16948,7 @@ MonoBehaviour:
   buffManager: {fileID: 1713777230}
   skillManager: {fileID: 0}
   spriteManager: {fileID: 0}
+  diceCheckManager: {fileID: 0}
   pieceDataListSO: {fileID: 0}
   areaList: []
   finishDrop: {fileID: 0}
@@ -17086,6 +17090,7 @@ MonoBehaviour:
   endTurnButton: {fileID: 1052199133}
   infoBox: {fileID: 797644601}
   burstButton: {fileID: 588414090}
+  burstBtnImage: {fileID: 0}
   teamPanel: {fileID: 208797652}
   pieceInfoPanel: {fileID: 0}
   restartButton: {fileID: 0}
@@ -17096,7 +17101,10 @@ MonoBehaviour:
   skillNamText: {fileID: 0}
   logSystem: {fileID: 0}
   messagePanel: {fileID: 0}
+  itemGetPanel: {fileID: 0}
   logPanel: {fileID: 0}
+  battleFinishPanel: {fileID: 0}
+  checkDicePanel: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17453,7 +17461,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 21
+  orthographic size: 12
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -18319,6 +18327,7 @@ MonoBehaviour:
   fanCircle: {fileID: 0}
   fanLine1: {fileID: 0}
   fanLine2: {fileID: 0}
+  fanPos: {fileID: 0}
   arcRoot: {fileID: 0}
   arcOuter: {fileID: 0}
   arcInnerMask: {fileID: 0}
@@ -18378,6 +18387,8 @@ MonoBehaviour:
   - {fileID: 689035693}
   - {fileID: 422393545}
   highlightEffect: {fileID: 1733852695}
+  evadeChance: 20
+  damageReduction: 20
 --- !u!65 &1842989457
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -20194,7 +20205,7 @@ MonoBehaviour:
   m_Follow: {fileID: 0}
   m_Lens:
     FieldOfView: 60
-    OrthographicSize: 21
+    OrthographicSize: 12
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
