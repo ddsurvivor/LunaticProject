@@ -43,6 +43,8 @@ MonoBehaviour:
     - {fileID: 8300000, guid: ca092c4e97d95524395afc5e3e50deb3, type: 3}
     - {fileID: 8300000, guid: 85225af067911fa4392db7f35f94e6da, type: 3}
     - {fileID: 8300000, guid: ba00453dcf29eca4598b9de57c4fdb90, type: 3}
+    - {fileID: 8300000, guid: 2a29c80e9bd001a4786413d42bd681cf, type: 3}
+    - {fileID: 8300000, guid: c371feed524ca0349a8fb702f7aee15e, type: 3}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -9530,10 +9532,10 @@ MonoBehaviour:
       Data: "\u4EF2\u88C1\u8005"
     - Name: maxHealth
       Entry: 3
-      Data: 300
+      Data: 450
     - Name: maxMovePoint
       Entry: 3
-      Data: 2
+      Data: 3
     - Name: moveRange
       Entry: 4
       Data: 15
@@ -9557,7 +9559,7 @@ MonoBehaviour:
       Data: 2
     - Name: rangeValue
       Entry: 4
-      Data: 5
+      Data: 7
     - Name: rangeAgle
       Entry: 4
       Data: 110
@@ -9585,7 +9587,7 @@ MonoBehaviour:
       Data: 435|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
-      Data: 9
+      Data: 10
     - Name: damageType
       Entry: 3
       Data: 1
@@ -9600,7 +9602,7 @@ MonoBehaviour:
       Data: 436|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
-      Data: 6
+      Data: 20
     - Name: damageType
       Entry: 3
       Data: 2
@@ -9843,7 +9845,7 @@ MonoBehaviour:
       Data: 0
     - Name: evasionRate
       Entry: 3
-      Data: 0
+      Data: 15
     - Name: critRate
       Entry: 3
       Data: 10
@@ -9869,7 +9871,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 12
-      Data: 2
+      Data: 3
     - Name: 
       Entry: 7
       Data: 
@@ -9890,7 +9892,19 @@ MonoBehaviour:
       Data: 3
     - Name: $v
       Entry: 10
-      Data: 26
+      Data: 16
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 3
+      Data: 1
+    - Name: $v
+      Entry: 10
+      Data: 27
     - Name: 
       Entry: 8
       Data: 
@@ -9906,7 +9920,175 @@ MonoBehaviour:
         mscorlib
     - Name: 
       Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 451|SkillPack, Assembly-CSharp
+    - Name: skillName
+      Entry: 1
+      Data: "\u706B\u7BAD\u5DE2"
+    - Name: description
+      Entry: 6
+      Data: 
+    - Name: mpCost
+      Entry: 3
+      Data: 1
+    - Name: target
+      Entry: 3
+      Data: 7
+    - Name: rangeType
+      Entry: 3
+      Data: 3
+    - Name: rangeValue
+      Entry: 4
+      Data: 45
+    - Name: rangeAgle
+      Entry: 4
       Data: 0
+    - Name: explodeRadius
+      Entry: 4
+      Data: 15
+    - Name: arcWeight
+      Entry: 4
+      Data: 0
+    - Name: arcCenterDis
+      Entry: 4
+      Data: 0
+    - Name: skillVFXType
+      Entry: 3
+      Data: 18
+    - Name: attackPacks
+      Entry: 7
+      Data: 452|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 2
+    - Name: 
+      Entry: 7
+      Data: 453|AttackPack, Assembly-CSharp
+    - Name: damage
+      Entry: 3
+      Data: 10
+    - Name: damageType
+      Entry: 3
+      Data: 1
+    - Name: isCritical
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 454|AttackPack, Assembly-CSharp
+    - Name: damage
+      Entry: 3
+      Data: 20
+    - Name: damageType
+      Entry: 3
+      Data: 2
+    - Name: isCritical
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: atkTimes
+      Entry: 3
+      Data: 3
+    - Name: buffPacks
+      Entry: 7
+      Data: 455|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 456|BuffPack, Assembly-CSharp
+    - Name: buffType
+      Entry: 3
+      Data: 104
+    - Name: stacks
+      Entry: 3
+      Data: 6
+    - Name: rate
+      Entry: 3
+      Data: 100
+    - Name: target
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: skillEffects
+      Entry: 7
+      Data: 457|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: skillSound
+      Entry: 10
+      Data: 28
+    - Name: consumeItems
+      Entry: 7
+      Data: 458|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: animationIndex
+      Entry: 3
+      Data: 0
+    - Name: isDelaySkill
+      Entry: 5
+      Data: false
+    - Name: layerSkill
+      Entry: 5
+      Data: false
+    - Name: isRecognitionCheck
+      Entry: 5
+      Data: false
+    - Name: additionalEffects
+      Entry: 7
+      Data: 459|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: 
       Entry: 13
       Data: 
@@ -9915,11 +10097,11 @@ MonoBehaviour:
       Data: 
     - Name: _armorDic
       Entry: 7
-      Data: 451|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
+      Data: 460|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 452|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
+      Data: 461|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -9941,7 +10123,7 @@ MonoBehaviour:
       Data: 1
     - Name: $v
       Entry: 3
-      Data: 6
+      Data: 10
     - Name: 
       Entry: 8
       Data: 
@@ -9989,13 +10171,13 @@ MonoBehaviour:
       Data: 0
     - Name: dropItemList
       Entry: 7
-      Data: 453|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 462|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 454|ItemPack, Assembly-CSharp
+      Data: 463|ItemPack, Assembly-CSharp
     - Name: itemName
       Entry: 3
       Data: 5
@@ -10016,11 +10198,11 @@ MonoBehaviour:
       Data: 35
     - Name: attrDic
       Entry: 7
-      Data: 455|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
+      Data: 464|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 456|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
+      Data: 465|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
         Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
@@ -11478,8 +11660,8 @@ MonoBehaviour:
     dropRate: 35
   - pieceId: 1009
     pieceName: "\u4EF2\u88C1\u8005"
-    maxHealth: 300
-    maxMovePoint: 2
+    maxHealth: 450
+    maxMovePoint: 3
     moveRange: 15
     meleeAtk:
       skillName: 
@@ -11487,17 +11669,17 @@ MonoBehaviour:
       mpCost: 0
       target: 1
       rangeType: 2
-      rangeValue: 5
+      rangeValue: 7
       rangeAgle: 110
       explodeRadius: 0
       arcWeight: 0
       arcCenterDis: 0
       skillVFXType: 13
       attackPacks:
-      - damage: 9
+      - damage: 10
         damageType: 1
         isCritical: 0
-      - damage: 6
+      - damage: 20
         damageType: 2
         isCritical: 0
       atkTimes: 3
@@ -11543,10 +11725,41 @@ MonoBehaviour:
       layerSkill: 0
       isRecognitionCheck: 0
     maxAmmoCount: 0
-    evasionRate: 0
+    evasionRate: 15
     critRate: 10
     critDamageRate: 180
-    skillPacks: []
+    skillPacks:
+    - skillName: "\u706B\u7BAD\u5DE2"
+      description: 
+      mpCost: 1
+      target: 7
+      rangeType: 3
+      rangeValue: 45
+      rangeAgle: 0
+      explodeRadius: 15
+      arcWeight: 0
+      arcCenterDis: 0
+      skillVFXType: 18
+      attackPacks:
+      - damage: 10
+        damageType: 1
+        isCritical: 0
+      - damage: 20
+        damageType: 2
+        isCritical: 0
+      atkTimes: 3
+      buffPacks:
+      - buffType: 104
+        stacks: 6
+        rate: 100
+        target: 0
+      skillEffects: 
+      skillSound: {fileID: 8300000, guid: c371feed524ca0349a8fb702f7aee15e, type: 3}
+      consumeItems: []
+      animationIndex: 0
+      isDelaySkill: 0
+      layerSkill: 0
+      isRecognitionCheck: 0
     elementType: 0
     initialMana: 0
     maxMana: 0

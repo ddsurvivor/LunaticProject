@@ -415,8 +415,10 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
+    - {fileID: 21300000, guid: cda1de2748cb9084382dd5a1329647f4, type: 3}
     - {fileID: 21300000, guid: 6d234f4af1c973349b280cfae9d39d94, type: 3}
     - {fileID: 21300000, guid: 11a0f8cc9c467a34ab061ff9bf830c58, type: 3}
+    - {fileID: 21300000, guid: a5c798f4c6c937641b2591e2e1392936, type: 3}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -435,13 +437,19 @@ MonoBehaviour:
         mscorlib
     - Name: 
       Entry: 12
-      Data: 2
+      Data: 4
     - Name: 
       Entry: 10
       Data: 0
     - Name: 
       Entry: 10
       Data: 1
+    - Name: 
+      Entry: 10
+      Data: 2
+    - Name: 
+      Entry: 10
+      Data: 3
     - Name: 
       Entry: 13
       Data: 
@@ -457,7 +465,9 @@ MonoBehaviour:
   pieceSpriteRenderer: {fileID: 1142199792870587360}
   idleSprite: {fileID: 21300000, guid: e50343cef67cff444a9d813b90a2f20e, type: 3}
   moveSprite: {fileID: 21300000, guid: 1bfe9c44ddede6549afc58d1f6109a52, type: 3}
-  meleeSprites: []
+  meleeSprites:
+  - {fileID: 21300000, guid: 1bfe9c44ddede6549afc58d1f6109a52, type: 3}
+  - {fileID: 21300000, guid: 20be96c4d241bb541a116ba8847c2c83, type: 3}
   rangeSprites:
   - {fileID: 21300000, guid: cda1de2748cb9084382dd5a1329647f4, type: 3}
   - {fileID: 21300000, guid: 1c63c2b864fd7b84a8fbdd095d5d5647, type: 3}
@@ -466,7 +476,7 @@ MonoBehaviour:
   dodgeSprite: {fileID: 21300000, guid: 1f1684051d4731b43aa404002257fa4d, type: 3}
   hitSprite: {fileID: 21300000, guid: a38e8fc1594817245b81fc683da834d7, type: 3}
   deathSprites: []
-  idleBackSprite: {fileID: 0}
+  idleBackSprite: {fileID: 21300000, guid: e50343cef67cff444a9d813b90a2f20e, type: 3}
   moveBackSprite: {fileID: 0}
   attackBackSprite: {fileID: 0}
   shootBackSprite: {fileID: 0}
@@ -1430,8 +1440,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4545fa1e7904f3c82204a8e5cef576b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hitRateIcon: {fileID: 0}
   hitRateText: {fileID: 8884220097989453293}
-  damageText: {fileID: 3411198080380557811}
+  damageSlots: []
   critRateText: {fileID: 2047791556085539807}
   hpBarUI: {fileID: 0}
 --- !u!114 &7792763206020825467
