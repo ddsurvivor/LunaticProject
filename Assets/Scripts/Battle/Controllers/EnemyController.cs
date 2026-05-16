@@ -9,7 +9,7 @@ public class EnemyController : PieceController
 {
     public EnemyAIType enemyAIType;
     public bool isActived = false; // 是否被激活
-    public bool deadNotDelete = false; // 死亡后不删除，用于剧情需要
+    
     public bool navigate;/// 是否正在导航中
     //public bool ableFakeDeath = false; // 是否具有假死能力
     //private bool isFakeDead = false; // 是否处于假死状态

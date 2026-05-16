@@ -77,7 +77,7 @@ public class PieceController : MonoBehaviour
 
     public bool cantControl; // 无法被控制（眩晕等状态）
     public bool ableMove = true; // 是否能移动
-
+    public bool deadNotDelete = false; // 死亡后不删除，用于剧情需要
     [FoldoutGroup("事件")] public UnityEvent OnInit;
     [FoldoutGroup("事件")] public UnityEvent OnTurnStart;
     [FoldoutGroup("事件")] public UnityEvent OnTurnEnd;
@@ -512,6 +512,7 @@ public class PieceController : MonoBehaviour
         Debug.Log($"{this.name} 死亡");
         OnDead?.Invoke();
         //if (uiCanvas != null) uiCanvas.SetActive(false);
+        if(deadNotDelete) return;
         if (pieceDisplay == null)
         {
             gameObject.SetActive(false);
@@ -521,14 +522,6 @@ public class PieceController : MonoBehaviour
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Death, false, -1, () =>
         {
             BattleScene.Ins.BM.PlayerCheckWin();
-            // if (!isPlayerPiece)
-            // {
-            //     pieceDisplay.pieceSpriteRenderer.DOFade(0f, 0.8f).OnComplete(() =>
-            //     {
-            //         this.gameObject.SetActive(false);
-            //         BattleScene.Ins.BM.PlayerCheckWin();
-            //     });
-            // }
         });
     }
 
@@ -708,11 +701,20 @@ public class PieceController : MonoBehaviour
             return;
         }
         Debug.Log("生成子弹");
+        Vector3 startPos = transform.position + Vector3.up * 1.5f;
+        Vector3 targetPosFixed = new Vector3(tagetPos.x, startPos.y, tagetPos.z);
         Transform bolt = ObjectPool.Ins
-            .GenerateObject(itemType, transform.position + Vector3.up * 1.5f, Quaternion.identity)
+            .GenerateObject(itemType, startPos, Quaternion.identity)
             .transform;
         //bolt.LookAt(tagetPos);
-        bolt.DOMove(tagetPos+ Vector3.up * 1.5f, 0.3f)
+        // 计算方向并设置bolt的rotation，使其x轴指向目标点
+        Vector3 direction = (targetPosFixed - startPos).normalized;
+        if (direction != Vector3.zero)
+        {
+            // 让bolt的forward（z轴）指向目标点，然后旋转90度使x轴指向目标
+            bolt.rotation = Quaternion.LookRotation(direction) * Quaternion.Euler(0, -90, 0);
+        }
+        bolt.DOMove(targetPosFixed, 0.3f).SetEase(Ease.Linear)
             .OnComplete(() => { ObjectPool.Ins.HideObject(bolt.gameObject); });
     }
 

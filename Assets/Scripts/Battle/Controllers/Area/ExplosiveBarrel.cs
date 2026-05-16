@@ -41,7 +41,7 @@ public class ExplosiveBarrel : MonoBehaviour
         if (_hasExploded) return;
         _hasExploded = true;
 
-        DOVirtual.DelayedCall(0.5f, Explode);
+        DOVirtual.DelayedCall(0.5f, Explode, false);
         //Explode();
     }
 
