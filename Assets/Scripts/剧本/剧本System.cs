@@ -736,7 +736,13 @@ public class 剧本System : MonoBehaviour
                 var prams = 指令切割(key);
                 float duration = 2;
                 float fadeTime = 1.5f;
-                if (prams.Length >= 2)
+                if (prams.Length >= 3)
+                {
+                    //自定义时长
+                    duration = float.Parse(prams[1]);
+                    fadeTime = float.Parse(prams[2]);
+                }
+                else if (prams.Length >= 2)
                 {
                     //自定义时长
                     duration = float.Parse(prams[1]);
