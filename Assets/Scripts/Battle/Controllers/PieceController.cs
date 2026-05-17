@@ -684,13 +684,11 @@ public class PieceController : MonoBehaviour
         return isNormalAtk ? _pieceData.meleeAtk.rangeValue : _pieceData.rangedAtk.rangeValue;
     }
 
-    public void ShowHighlight(bool option)
+    public virtual void ShowHighlight(bool option)
     {
         rangeUI?.ShowHighlight(option);
         if (hightlightEffect != null) hightlightEffect.SetActive(option);
         //if(!option) hitInfoPanel?.gameObject.SetActive(false);
-        if (!option && this is EnemyController enemy)
-            enemy.enemyCanvas.hitInfoPanel.gameObject.SetActive(false);
     }
 
     private void ShootBolt(Vector3 tagetPos, ItemType itemType)

@@ -158,7 +158,20 @@ public class EnemyController : PieceController
     {
         if (isActived)
         {
-            enemyCanvas.hitInfoPanel.UpdateDisplay(attacker, skillPack, this);
+            if(enemyCanvas!=null) enemyCanvas.hitInfoPanel.UpdateDisplay(attacker, skillPack, this);
         }
+    }
+
+    public override void ShowHighlight(bool option)
+    {
+        base.ShowHighlight(option);
+        if (!option && enemyCanvas != null)
+            enemyCanvas.hitInfoPanel.gameObject.SetActive(false);
+    }
+
+    public void UpdateHpBar(float hpPercent)
+    {
+        if(enemyCanvas!=null)
+            enemyCanvas.hpBarUI.UpdateHpBar(hpPercent);
     }
 }

@@ -237,10 +237,13 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
     private void UpdateHpBar()
     {
+        float healthPercent = (float)_curHealth / _maxHealth;
         if (hpBarFill != null)
-            hpBarFill.localScale = new Vector3((float)_curHealth / _maxHealth, 1f, 1f);
-        if(pc is EnemyController enemy)
-            enemy.enemyCanvas.hpBarUI.UpdateHpBar((float)_curHealth / _maxHealth);
+            hpBarFill.localScale = new Vector3(healthPercent, 1f, 1f);
+        if (pc is EnemyController enemy)
+        {
+            enemy.UpdateHpBar(healthPercent);
+        }
     }
 
     public bool CostMP(int costPoint = 1)
