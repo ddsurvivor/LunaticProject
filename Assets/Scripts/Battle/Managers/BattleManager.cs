@@ -37,11 +37,16 @@ public class BattleManager : MonoBehaviour
         _turnNumber = 0;
         PlayerController.Init();
         AIController.Init();
-        PlayerStart();
-        ApplySetting(GM.Ins.battleSetting);
         _delaySkillPack = null;
+        StartBattle();
         //gray = Resources.Load<Material>("Materials/Gray");
         //grayEnemy = Resources.Load<Material>("Materials/GrayEnemy");
+    }
+
+    public void StartBattle()
+    {
+        PlayerStart();
+        ApplySetting(GM.Ins.battleSetting);
     }
 
     /// <summary>

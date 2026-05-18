@@ -465,7 +465,8 @@ public class 剧本System : MonoBehaviour
                             VARIABLE.GetComponent<Text>().color = Color.gray;
                         }
 
-                        text.GetComponent<Text>().color = Color.yellow;
+                        text.GetComponent<Text>().color = Color.white;
+                        go.GetComponent<打字机>().ShowSelect();
                     });
                     选项按钮.Add(text);
                 }

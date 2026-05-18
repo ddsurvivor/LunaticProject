@@ -1,5 +1,240 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &671393859565383785
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7735868407385727045}
+  - component: {fileID: 44979939845419974}
+  - component: {fileID: 7633894325145958786}
+  - component: {fileID: 3546842601631441007}
+  m_Layer: 0
+  m_Name: Canvas
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &7735868407385727045
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 671393859565383785}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0, y: 0, z: 0}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 577405725858810132}
+  m_Father: {fileID: 3815781300908005230}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0, y: 0}
+--- !u!223 &44979939845419974
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 671393859565383785}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 0
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
+--- !u!114 &7633894325145958786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 671393859565383785}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_UiScaleMode: 0
+  m_ReferencePixelsPerUnit: 100
+  m_ScaleFactor: 1
+  m_ReferenceResolution: {x: 800, y: 600}
+  m_ScreenMatchMode: 0
+  m_MatchWidthOrHeight: 0
+  m_PhysicalUnit: 3
+  m_FallbackScreenDPI: 96
+  m_DefaultSpriteDPI: 96
+  m_DynamicPixelsPerUnit: 1
+  m_PresetInfoIsWorld: 0
+--- !u!114 &3546842601631441007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 671393859565383785}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!1 &921894432094838055
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3860140951761119469}
+  - component: {fileID: 3559556232874353638}
+  - component: {fileID: 7522889349133422176}
+  m_Layer: 0
+  m_Name: black
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &3860140951761119469
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 921894432094838055}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 577405725858810132}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &3559556232874353638
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 921894432094838055}
+  m_CullTransparentMesh: 1
+--- !u!114 &7522889349133422176
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 921894432094838055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: -113701722, guid: b42d5aecf0ce97146ba91bf572207233, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!1 &2032864130885543968
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 577405725858810132}
+  - component: {fileID: 8825810547568489088}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &577405725858810132
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2032864130885543968}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3860140951761119469}
+  - {fileID: 6197739171055164721}
+  - {fileID: 1447401923760496123}
+  m_Father: {fileID: 7735868407385727045}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &8825810547568489088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2032864130885543968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c36b92eda31d4a1db4a922efbd39370e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fadeCanvasGroup: {fileID: 0}
+  loadingPanel: {fileID: 0}
+  progressBar: {fileID: 0}
+  progressText: {fileID: 0}
+  fadeDuration: 0.5
+  fakeLoadingDuration: 2
 --- !u!1 &3815781300908005228
 GameObject:
   m_ObjectHideFlags: 0
@@ -33,7 +268,8 @@ Transform:
   m_LocalPosition: {x: 1077.5394, y: 338.7166, z: -14.359716}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 7735868407385727045}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -193,9 +429,6 @@ MonoBehaviour:
     - Name: weaponSlots
       Entry: 6
       Data: 
-    - Name: componentInventory
-      Entry: 6
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -218,9 +451,6 @@ MonoBehaviour:
       Entry: 6
       Data: 
     - Name: weaponSlots
-      Entry: 6
-      Data: 
-    - Name: componentInventory
       Entry: 6
       Data: 
     - Name: 
@@ -247,9 +477,6 @@ MonoBehaviour:
     - Name: weaponSlots
       Entry: 6
       Data: 
-    - Name: componentInventory
-      Entry: 6
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -272,9 +499,6 @@ MonoBehaviour:
       Entry: 6
       Data: 
     - Name: weaponSlots
-      Entry: 6
-      Data: 
-    - Name: componentInventory
       Entry: 6
       Data: 
     - Name: 
@@ -301,9 +525,6 @@ MonoBehaviour:
     - Name: weaponSlots
       Entry: 6
       Data: 
-    - Name: componentInventory
-      Entry: 6
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -326,9 +547,6 @@ MonoBehaviour:
       Entry: 6
       Data: 
     - Name: weaponSlots
-      Entry: 6
-      Data: 
-    - Name: componentInventory
       Entry: 6
       Data: 
     - Name: 
@@ -355,9 +573,6 @@ MonoBehaviour:
     - Name: weaponSlots
       Entry: 6
       Data: 
-    - Name: componentInventory
-      Entry: 6
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -380,9 +595,6 @@ MonoBehaviour:
       Entry: 6
       Data: 
     - Name: weaponSlots
-      Entry: 6
-      Data: 
-    - Name: componentInventory
       Entry: 6
       Data: 
     - Name: 
@@ -409,9 +621,6 @@ MonoBehaviour:
     - Name: weaponSlots
       Entry: 6
       Data: 
-    - Name: componentInventory
-      Entry: 6
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -434,9 +643,6 @@ MonoBehaviour:
       Entry: 6
       Data: 
     - Name: weaponSlots
-      Entry: 6
-      Data: 
-    - Name: componentInventory
       Entry: 6
       Data: 
     - Name: 
@@ -463,9 +669,6 @@ MonoBehaviour:
     - Name: weaponSlots
       Entry: 6
       Data: 
-    - Name: componentInventory
-      Entry: 6
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -488,9 +691,6 @@ MonoBehaviour:
       Entry: 6
       Data: 
     - Name: weaponSlots
-      Entry: 6
-      Data: 
-    - Name: componentInventory
       Entry: 6
       Data: 
     - Name: 
@@ -517,9 +717,6 @@ MonoBehaviour:
     - Name: weaponSlots
       Entry: 6
       Data: 
-    - Name: componentInventory
-      Entry: 6
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -542,9 +739,6 @@ MonoBehaviour:
       Entry: 6
       Data: 
     - Name: weaponSlots
-      Entry: 6
-      Data: 
-    - Name: componentInventory
       Entry: 6
       Data: 
     - Name: 
@@ -571,9 +765,6 @@ MonoBehaviour:
     - Name: weaponSlots
       Entry: 6
       Data: 
-    - Name: componentInventory
-      Entry: 6
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -596,9 +787,6 @@ MonoBehaviour:
       Entry: 6
       Data: 
     - Name: weaponSlots
-      Entry: 6
-      Data: 
-    - Name: componentInventory
       Entry: 6
       Data: 
     - Name: 
@@ -625,9 +813,6 @@ MonoBehaviour:
     - Name: weaponSlots
       Entry: 6
       Data: 
-    - Name: componentInventory
-      Entry: 6
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -650,9 +835,6 @@ MonoBehaviour:
       Entry: 6
       Data: 
     - Name: weaponSlots
-      Entry: 6
-      Data: 
-    - Name: componentInventory
       Entry: 6
       Data: 
     - Name: 
@@ -679,9 +861,6 @@ MonoBehaviour:
     - Name: weaponSlots
       Entry: 6
       Data: 
-    - Name: componentInventory
-      Entry: 6
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -706,9 +885,6 @@ MonoBehaviour:
     - Name: weaponSlots
       Entry: 6
       Data: 
-    - Name: componentInventory
-      Entry: 6
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -718,7 +894,13 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: date
+    - Name: dateYear
+      Entry: 3
+      Data: 0
+    - Name: dateMonth
+      Entry: 3
+      Data: 0
+    - Name: dateDay
       Entry: 3
       Data: 0
     - Name: daytime
@@ -769,11 +951,15 @@ MonoBehaviour:
     - Name: isNewGame
       Entry: 5
       Data: false
+    - Name: componentInventory
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
   battleScene: 
   endLog: 
+  battleSetting: 0
   PLAYERPROFILE:
     player:
     - curHealth: 0
@@ -782,141 +968,123 @@ MonoBehaviour:
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
     - curHealth: 0
       curAmmo: 0
       curMana: 0
       spriteName: 
       normalSlots: 
       weaponSlots: 
-      componentInventory: 
-    date: 0
+    dateYear: 0
+    dateMonth: 0
+    dateDay: 0
     daytime: 0
     currentMap: TEST
     curSmallMapIndex: 0
@@ -924,6 +1092,7 @@ MonoBehaviour:
     coins: 0
     seenTutorials: []
     isNewGame: 0
+    componentInventory: 
   DM: {fileID: 640456764101210058}
   marketSystem: {fileID: 180363243980686535}
   pieceHPInherit: 0
@@ -985,3 +1154,155 @@ MonoBehaviour:
       Data: 
   levelUpConfig: {fileID: 11400000, guid: de013d6c130ec034a854fa41acfca3dc, type: 2}
   componentConfig: {fileID: 11400000, guid: 2f42288e3738fc6498026cfa3f26d832, type: 2}
+--- !u!1 &7379810599757491085
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6197739171055164721}
+  - component: {fileID: 5859091273850526879}
+  - component: {fileID: 4964818001922417619}
+  m_Layer: 0
+  m_Name: Image
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &6197739171055164721
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7379810599757491085}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.68, y: 0.68, z: 0.68}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 577405725858810132}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 3071.9998, y: 1619.9998}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &5859091273850526879
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7379810599757491085}
+  m_CullTransparentMesh: 1
+--- !u!114 &4964818001922417619
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7379810599757491085}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 34840b2b0272d5d4b91775996dfa6250, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!1 &8931560414118402413
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1447401923760496123}
+  - component: {fileID: 7625595016154222245}
+  - component: {fileID: 9208766825677836132}
+  m_Layer: 0
+  m_Name: Image (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1447401923760496123
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8931560414118402413}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 577405725858810132}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 7686.864, y: 1400}
+  m_Pivot: {x: 0.5, y: 0}
+--- !u!222 &7625595016154222245
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8931560414118402413}
+  m_CullTransparentMesh: 1
+--- !u!114 &9208766825677836132
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8931560414118402413}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 164658a96f6a93143816aec8b61934e5, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1

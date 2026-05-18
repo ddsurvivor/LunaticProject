@@ -16,6 +16,11 @@ public class 打字机 : MonoBehaviour
 
     private string currentText = "";
 
+    [SerializeField]
+    private GameObject outline;
+    [SerializeField]
+    private RectTransform fill;
+
     public float 初始化(string 文本)
     {
         float 框大小 = 0;
@@ -33,6 +38,8 @@ public class 打字机 : MonoBehaviour
             // 启动打字机效果
             StartCoroutine(TypeText(文本));
             //StartCoroutine(ShowText());
+            fill.gameObject.SetActive(false);
+            outline.SetActive(false);
         }
         // 返回计算出的高度
         return 框大小;
@@ -190,5 +197,22 @@ public class 打字机 : MonoBehaviour
         }
 
         return input;
+    }
+
+    /// <summary>
+    /// 将文本显示为选项
+    /// </summary>
+    public void ShowSelect()
+    {
+        fill.gameObject.SetActive(true);
+        fill.sizeDelta = _textComponent.GetComponent<RectTransform>().sizeDelta + new Vector2(20, 20); // 根据文本大小调整背景框
+    }
+    /// <summary>
+    /// 设置为关闭的选项
+    /// </summary>
+    public void EndOption()
+    {
+        _textComponent.GetComponent<Button>().enabled = false;
+        _textComponent.GetComponent<Text>().color = Color.gray;
     }
 }
