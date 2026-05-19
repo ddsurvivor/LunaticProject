@@ -40,6 +40,16 @@ using UnityEngine.SceneManagement;
             PLAYERPROFILE.新游戏初始化数值();
         }
 
+        private void DebugBattleScene()
+        {
+            // 仅供测试用
+            // 如果当前场景名称包含battle，则调用战斗
+            if (SceneManager.GetActiveScene().name.Contains("BATTLE"))
+            {
+               BattleScene.Ins.BM.StartBattle();
+            }
+        }
+
         // public void StartBattle(string battleScene, string endLog)
         // {
         //     this.battleScene = battleScene;

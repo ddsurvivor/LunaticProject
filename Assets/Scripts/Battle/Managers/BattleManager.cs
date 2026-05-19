@@ -38,7 +38,7 @@ public class BattleManager : MonoBehaviour
         PlayerController.Init();
         AIController.Init();
         _delaySkillPack = null;
-        //StartBattle();
+        StartBattle();
         //gray = Resources.Load<Material>("Materials/Gray");
         //grayEnemy = Resources.Load<Material>("Materials/GrayEnemy");
     }

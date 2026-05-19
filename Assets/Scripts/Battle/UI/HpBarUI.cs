@@ -4,9 +4,9 @@ using UnityEngine.UI;
 
 public class HpBarUI : MonoBehaviour
 {
-    public Transform hpBarFill; // 血条填充部分的 Transform
-    public Transform shadowFill; // 拖影血条
-    public Transform preDamageFill; // 伤害显示血条
+    public Image hpBarFill; // 血条填充部分的 Transform
+    public Image shadowFill; // 拖影血条
+    public Image preDamageFill; // 伤害显示血条
     public Image hpBarRenderer; // 血条的 Image 组件，用于调整透明度
 
     private float currentHpPercent = 1f; // 当前血量百分比
@@ -19,9 +19,9 @@ public class HpBarUI : MonoBehaviour
     public void FullHp()
     {
         currentHpPercent = 1f;
-        hpBarFill.localScale = new Vector3(1f, 1f, 1f);
-        shadowFill.localScale = new Vector3(1f, 1f, 1f);
-        preDamageFill.localScale = new Vector3(1f, 1f, 1f);
+        hpBarFill.fillAmount = 1f;
+        shadowFill.fillAmount = 1f;
+        preDamageFill.fillAmount = 1f;
         // 全部隐藏
         hpBarFill.gameObject.SetActive(false);
         shadowFill.gameObject.SetActive(false);
@@ -38,11 +38,10 @@ public class HpBarUI : MonoBehaviour
         currentHpPercent = precent;
 
         // 直接更新血条填充部分
-        hpBarFill.localScale = new Vector3(currentHpPercent, 1f, 1f);
+        hpBarFill.fillAmount = currentHpPercent;
 
         // 启动拖影动画Dotween
-        shadowTweener = shadowFill.DOScaleX(currentHpPercent, shadowSpeed)
-            .SetEase(Ease.OutQuad);
+        shadowTweener = shadowFill.DOFillAmount(currentHpPercent, shadowSpeed).SetEase(Ease.OutQuad);
         preDamageFill.gameObject.SetActive(false);
     }
 
@@ -52,7 +51,7 @@ public class HpBarUI : MonoBehaviour
         float afterDamagePercent = Mathf.Clamp01(currentHpPercent - damagePercent);
 
         // 立即显示预伤害血条
-        preDamageFill.localScale = new Vector3(afterDamagePercent, 1f, 1f);
+        preDamageFill.fillAmount = afterDamagePercent;
         preDamageFill.gameObject.SetActive(true);
 
         // 让本体血条透明度循环渐变

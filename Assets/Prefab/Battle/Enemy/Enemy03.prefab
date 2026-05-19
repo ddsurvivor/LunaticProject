@@ -1010,7 +1010,6 @@ MonoBehaviour:
   hightlightEffect: {fileID: 7860577312186152912}
   _actionListPanel: {fileID: 0}
   pieceDisplay: {fileID: 5695186063273423355}
-  uiCanvas: {fileID: 4575429080532708680}
   _pieceData:
     pieceId: 0
     pieceName: 
@@ -1029,6 +1028,7 @@ MonoBehaviour:
       arcWeight: 0
       arcCenterDis: 0
       skillVFXType: 0
+      bulletVFXType: 0
       attackPacks: []
       atkTimes: 1
       buffPacks: []
@@ -1051,6 +1051,7 @@ MonoBehaviour:
       arcWeight: 0
       arcCenterDis: 0
       skillVFXType: 0
+      bulletVFXType: 0
       attackPacks: []
       atkTimes: 1
       buffPacks: []
@@ -1097,6 +1098,7 @@ MonoBehaviour:
     arcWeight: 0
     arcCenterDis: 0
     skillVFXType: 0
+    bulletVFXType: 0
     attackPacks: []
     atkTimes: 1
     buffPacks: []
@@ -1114,6 +1116,7 @@ MonoBehaviour:
   isIdle: 0
   cantControl: 0
   ableMove: 1
+  deadNotDelete: 0
   OnInit:
     m_PersistentCalls:
       m_Calls: []
@@ -1123,13 +1126,15 @@ MonoBehaviour:
   OnTurnEnd:
     m_PersistentCalls:
       m_Calls: []
+  OnHurt:
+    m_PersistentCalls:
+      m_Calls: []
   OnDead:
     m_PersistentCalls:
       m_Calls: []
   outlineEffect: {fileID: 0}
   enemyAIType: 3
   isActived: 0
-  deadNotDelete: 0
   navigate: 0
   enemyCanvas: {fileID: 1815853846978426095}
 --- !u!1 &7676897098729591739
@@ -1516,8 +1521,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4545fa1e7904f3c82204a8e5cef576b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hitRateIcon: {fileID: 0}
   hitRateText: {fileID: 5381549820043653271}
-  damageText: {fileID: 7090598613698575399}
+  damageSlots: []
   critRateText: {fileID: 2461096459745551719}
   hpBarUI: {fileID: 0}
 --- !u!114 &3121990729260733380
@@ -1608,6 +1614,10 @@ PrefabInstance:
     - target: {fileID: 6859646292886576078, guid: 9489048dfeadca0479bd65decb465939, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: -118.385
+      objectReference: {fileID: 0}
+    - target: {fileID: 7380988422323634926, guid: 9489048dfeadca0479bd65decb465939, type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8163333651908193335, guid: 9489048dfeadca0479bd65decb465939, type: 3}
       propertyPath: m_Pivot.x
@@ -1705,14 +1715,9 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7562353423400641759, guid: 9489048dfeadca0479bd65decb465939, type: 3}
   m_PrefabInstance: {fileID: 8197067185553526832}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4575429080532708680}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dfd70be391d04713a7cb0350251d1d37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &4575429080532708680 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5674225112577555832, guid: 9489048dfeadca0479bd65decb465939, type: 3}
-  m_PrefabInstance: {fileID: 8197067185553526832}
-  m_PrefabAsset: {fileID: 0}
