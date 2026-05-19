@@ -20,14 +20,21 @@ using UnityEngine.SceneManagement;
         
         // 系统
         public DataManager DM;
+        public AudioManager AM;
         public MarketSystem marketSystem;
         
         [LabelText("棋子血量继承")]
         public bool pieceHPInherit = false;
+        
+        [LabelText("战斗转场面板")]
+        public BattleTransitionPanel battleTransitionPanel;
 
-        private void Awake()
+        protected  void Awake()
         {
+            base.Awake();
+            DontDestroyOnLoad(this);
             DM.Init();
+            AM.初始化();
             // 临时使用全新游戏存档
             PLAYERPROFILE = new PLAYERPROFILE();
             PLAYERPROFILE.新游戏初始化数值();
@@ -46,7 +53,10 @@ using UnityEngine.SceneManagement;
             this.battleScene = battleScene;
             this.endLog = endLog;
             this.battleSetting = setting;
-            StartCoroutine(StartBattleCoroutine(battleScene));
+            battleTransitionPanel.TransitionToBattle(battleScene);
+            // 场景加载完成后执行
+            PlayingSystem.特殊剧情 = "";
+            //StartCoroutine(StartBattleCoroutine(battleScene));
         }
 
         private IEnumerator StartBattleCoroutine(string sceneName, Action onComplete = null)

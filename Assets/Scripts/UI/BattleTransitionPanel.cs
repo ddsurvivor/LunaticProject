@@ -14,12 +14,15 @@ using UnityEngine.SceneManagement;
     [SerializeField] private GameObject loadingPanel;
     [Tooltip("进度条图片，Image Type 需设置为 Filled")]
     [SerializeField] private Image progressBar;
+
+    [SerializeField]
+    private Image progressBar2;
     [Tooltip("提示文本或百分比文本（使用旧版 Text）")]
     [SerializeField] private Text progressText;
 
     [Header("转场配置")]
     [Tooltip("黑屏渐入/渐出的持续时间（秒）")]
-    [SerializeField] private float fadeDuration = 0.5f;
+    [SerializeField] private float fadeDuration = 1.0f;
     [Tooltip("手动的假加载持续时间（秒）")]
     [SerializeField] private float fakeLoadingDuration = 2.0f;
 
@@ -50,6 +53,7 @@ using UnityEngine.SceneManagement;
 
     private IEnumerator TransitionRoutine(string battleSceneName)
     {
+        fadeCanvasGroup.gameObject.SetActive(true);
         // ==========================================
         // 1. 黑色背景渐入 (Fade In)
         // ==========================================
@@ -60,6 +64,7 @@ using UnityEngine.SceneManagement;
         // ==========================================
         if (loadingPanel != null) loadingPanel.SetActive(true);
         if (progressBar != null) progressBar.fillAmount = 0f;
+        if (progressBar2 != null)progressBar2.fillAmount = 0f;
         if (progressText != null) progressText.text = "0%";
 
         // ==========================================
@@ -92,6 +97,7 @@ using UnityEngine.SceneManagement;
 
             // 更新 UI
             if (progressBar != null) progressBar.fillAmount = currentProgress;
+            if (progressBar2 != null)progressBar2.fillAmount = currentProgress;
             if (progressText != null) progressText.text = $"{(currentProgress * 100f):F0}%";
 
             yield return null;
@@ -99,6 +105,7 @@ using UnityEngine.SceneManagement;
 
         // 强行平滑到 100% 并稍微停顿，视觉体验更佳
         if (progressBar != null) progressBar.fillAmount = 1f;
+        if (progressBar2 != null)progressBar2.fillAmount = 1f;
         if (progressText != null) progressText.text = "100%";
         yield return new WaitForSeconds(0.1f);
 
@@ -163,5 +170,6 @@ using UnityEngine.SceneManagement;
         {
             Debug.LogWarning("[BattleTransition] 转场已完成，但在新场景中未找到 BattleManager。");
         }
+        fadeCanvasGroup.gameObject.SetActive(false);
     }
 }

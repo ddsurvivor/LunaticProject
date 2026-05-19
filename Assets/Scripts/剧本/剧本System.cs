@@ -123,7 +123,7 @@ public class 剧本System : MonoBehaviour
 
         当文本更新时?.Invoke();
 
-        AudioManager.instance.播放音效("Key");
+        GM.Ins.AM.播放音效("Key");
         进行指令(当前事件);
         生成剧本预制体();
         已阅读++;
@@ -153,7 +153,7 @@ public class 剧本System : MonoBehaviour
     public void OnClickSkip(int num = 0)
     {
         Debug.Log($"跳过{已储存剧本.Length - 已阅读}条剧本");
-        AudioManager.instance.播放音效("Key");
+        GM.Ins.AM.播放音效("Key");
         int skipCount = 已储存剧本.Length - 已阅读 - num;
         for (int i = 0; i < skipCount; i++)
         {
@@ -456,7 +456,7 @@ public class 剧本System : MonoBehaviour
                     string 事件 = 当前事件;
                     text.GetComponent<Button>().onClick.AddListener(() =>
                     {
-                        AudioManager.instance.播放音效("Key");
+                        GM.Ins.AM.播放音效("Key");
                         if (事件 != null) 进行指令(事件);
 
                         foreach (var VARIABLE in 选项按钮)
@@ -587,24 +587,24 @@ public class 剧本System : MonoBehaviour
             if (key.Contains(Center.Command_Sound))
             {
                 var prams = 指令切割(key);
-                if (AudioManager.instance != null)
+                if (GM.Ins.AM != null)
                 {
                     if (prams.Length >= 2)
                     {
                         // 检查是否为STOP命令
                         if (prams[1].ToUpper() == "STOP")
                         {
-                            AudioManager.instance.停止音效(prams[0]);
+                            GM.Ins.AM.停止音效(prams[0]);
                         }
                         else
                         {
                             int loopParam = Convert.ToInt32(prams[1]);
-                            AudioManager.instance.播放音效(prams[0], loopParam);
+                            GM.Ins.AM.播放音效(prams[0], loopParam);
                         }
                     }
                     else
                     {
-                        AudioManager.instance.播放音效(prams[0]);
+                        GM.Ins.AM.播放音效(prams[0]);
                     }
                 }
                 else
@@ -616,15 +616,15 @@ public class 剧本System : MonoBehaviour
             if (key.Contains(Center.Command_Music))
             {
                 var prams = 指令切割(key);
-                if (AudioManager.instance != null)
+                if (GM.Ins.AM != null)
                 {
                     if (prams[0] != "STOP")
                     {
-                        AudioManager.instance.播放音乐(prams[0]);
+                        GM.Ins.AM.播放音乐(prams[0]);
                     }
                     else
                     {
-                        AudioManager.instance.停止音乐();
+                        GM.Ins.AM.停止音乐();
                     }
                 }
                 else

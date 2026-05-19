@@ -56,7 +56,7 @@ public class MonoSingleton<T> : SerializedMonoBehaviour where T : SerializedMono
         }
     }
 
-    private void Awake()
+    protected virtual void Awake()
     {
         if (Ins != this)
         {

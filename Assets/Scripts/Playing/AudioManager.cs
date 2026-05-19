@@ -8,7 +8,7 @@ using UnityEngine.Networking;
 
 public class AudioManager : SerializedMonoBehaviour
 {
-    public static AudioManager instance;
+    //public static AudioManager instance;
     public float BGM音量 => Options.Volume_BGM;
     public float SE音量 => Options.Volume_SE; 
     
@@ -19,21 +19,9 @@ public class AudioManager : SerializedMonoBehaviour
     private Dictionary<string, GameObject> 循环音效字典 = new Dictionary<string, GameObject>();
     [OdinSerialize]
     private Dictionary<string, List<GameObject>> 所有音效字典 = new Dictionary<string, List<GameObject>>();
-    private void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-            初始化();
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
+    
 
-    private void 初始化()
+    public void 初始化()
     {
         bgmAudioSource = gameObject.AddComponent<AudioSource>();
         bgmAudioSource.loop = true;
@@ -309,13 +297,6 @@ public class AudioManager : SerializedMonoBehaviour
                 return AudioType.UNKNOWN;
         }
     }
-
-    private void OnDestroy()
-    {
-        if (instance == this)
-        {
-            instance = null;
-        }
-    }
+    
 }
 
