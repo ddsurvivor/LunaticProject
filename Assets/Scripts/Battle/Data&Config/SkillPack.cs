@@ -20,6 +20,10 @@ public class SkillPack
     [ShowIf("@this.rangeType == RangeType.Arc")] public float arcCenterDis;// 弧线中心距离（仅弧线范围有效）
     
     public ItemType skillVFXType;// 技能特效类型
+    [ShowIf("@this.skillVFXType != ItemType.NONE")]  
+    public bool isBullet = false; // 是否为子弹技能
+    [ShowIf("@this.skillVFXType != ItemType.NONE")] 
+    public bool isRotate = false; // 是否旋转子弹特效
     public ItemType bulletVFXType;// 子弹特效类型
     public List<AttackPack> attackPacks = new();// 伤害列表
     public int atkTimes = 1; // 攻击次数
@@ -52,4 +56,34 @@ public class HitBackEffect : SkillEffectBase
     public float dis;// 击退距离
     [LabelText("碰撞伤害")]
     public int hitBackDamage;// 击退伤害
+}
+
+public class ShootFxEffect : SkillEffectBase
+{
+    public ItemType shootFxType;// 射击特效类型
+    public bool isRotate;
+    
+    public void ApplyEffect(PieceController attacker, Vector3 targetPos)
+    {
+        // 在射击点生成特效
+        GameObject fx = ObjectPool.Ins.GenerateObject(shootFxType, targetPos, Quaternion.identity);
+        // 根据设置决定是否旋转特效
+        
+        
+        if (isRotate)
+        {
+            //z轴旋转，从attacker 指向targetPos
+            Vector3 direction = targetPos - attacker.transform.position;
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            fx.transform.rotation = Quaternion.Euler(0, 0, angle);
+            
+            Debug.Log($"生成射击特效 {shootFxType} at {targetPos}, rotate: {angle}");
+        }
+        else
+        {
+            fx.transform.rotation = Quaternion.identity;
+        }
+        
+        
+    }
 }

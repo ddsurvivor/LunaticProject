@@ -1,11 +1,14 @@
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI; // 确保引入旧版 UI 命名空间
+using Sirenix.OdinInspector;
 
 [RequireComponent(typeof(CanvasGroup))]
 public class BattleStartUIPanel : MonoBehaviour
 {
-    [Header("UI Elements")]
+    [Header("UI Elements")] 
+    [SerializeField] private GameObject bg;
     [SerializeField] private RectTransform bgBlock;       // 长方形色块
     [SerializeField] private RectTransform startIcon;     // 战斗开始 Icon
     
@@ -15,22 +18,15 @@ public class BattleStartUIPanel : MonoBehaviour
     [SerializeField]private CanvasGroup canvasGroup;
     private Vector2 originalIconAnchoredPos;
 
-    private void Awake()
-    {
-        // 缓存 CanvasGroup 组件，避免运行时频繁 GetComponent
-        canvasGroup = GetComponent<CanvasGroup>();
-        
-        // 记录 Icon 的初始位置，以便动效可以重复正确播放
-        if (startIcon != null)
-        {
-            originalIconAnchoredPos = startIcon.anchoredPosition;
-        }
-    }
+    private float posX = -1922f;
+
+    
 
     /// <summary>
     /// 播放战斗开始动画的主入口
     /// </summary>
     /// <param name="totalDuration">动画总持续时间（秒）</param>
+    [Button("测试")]
     public void PlayBattleStartAnimation(float totalDuration)
     {
         if (bgBlock == null || startIcon == null || canvasGroup == null)
@@ -41,13 +37,28 @@ public class BattleStartUIPanel : MonoBehaviour
 
         // 确保面板激活，并停止之前可能正在运行的动画协程
         gameObject.SetActive(true);
-        StopAllCoroutines();
+        canvasGroup.alpha = 1f;
+        bgBlock.localPosition = Vector3.zero;
+        startIcon.localPosition = Vector3.zero;
+        //StopAllCoroutines();
         // 记录 Icon 的初始位置，以便动效可以重复正确播放
-        if (startIcon != null)
+        // if (startIcon != null)
+        // {
+        //     originalIconAnchoredPos = startIcon.anchoredPosition;
+        // }
+        float introDuration = totalDuration * 0.3f;
+        float iconMoveDuration = totalDuration * 0.6f; // Icon 横移与色块变高同步进行
+        float fadeDuration = totalDuration * 0.3f;
+        bgBlock.DOLocalMoveX(posX, introDuration).From();
+        startIcon.DOLocalMoveX(posX, iconMoveDuration).From().OnComplete(() =>
         {
-            originalIconAnchoredPos = startIcon.anchoredPosition;
-        }
-        StartCoroutine(AnimatePanelRoutine(totalDuration));
+            canvasGroup.DOFade(0f, fadeDuration).OnComplete(() =>
+            {
+                gameObject.SetActive(false); // 隐藏面板，释放 DrawCall
+            });
+        });
+        
+        //StartCoroutine(AnimatePanelRoutine(totalDuration));
     }
 
     private IEnumerator AnimatePanelRoutine(float totalDuration)

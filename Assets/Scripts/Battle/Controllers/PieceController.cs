@@ -167,7 +167,7 @@ public class PieceController : MonoBehaviour
         }
     }
 
-    public void TurnStart()
+    public virtual void TurnStart()
     {
         OnTurnStart?.Invoke();
         if (isDead) return;
@@ -418,23 +418,33 @@ public class PieceController : MonoBehaviour
         {
             ShootBolt(targets[0].transform.position, _curAttackPack.bulletVFXType);
         }
-
+        Transform atkPos = rangeUI.GetSkillTransform();
+        if (atkPos != null && _curAttackPack.skillVFXType != 0)
+        {
+                    
+            GameObject fx  = ObjectPool.Ins.GenerateObject(
+                _curAttackPack.skillVFXType,
+                atkPos.position + Vector3.up * 0.1f,
+                atkPos.localRotation);
+            if (_curAttackPack.isRotate)
+            {
+                // fx沿 z轴 旋转，方向为从transfrom指向atkPos
+                Vector3 dir = (atkPos.position - transform.position).normalized;
+                dir.y = 0;
+                float angle = Mathf.Atan2(dir.z, dir.x) * Mathf.Rad2Deg;
+                fx.transform.rotation = Quaternion.Euler(45,  -45, angle + 90f);
+                Debug.Log($"生成技能特效{_curAttackPack.skillVFXType},{dir}旋转角度{angle}");
+            }
+        }
         // 延迟0.3f
         DOVirtual.DelayedCall(0.3f
             , () =>
             {
                 if (!unitAttrCenter.CostMP()) return;
-                BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack, Vector3.zero
+                BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack,
+                    atkPos !=null ? atkPos.position : Vector3.zero
                     , _curAtkType);
                 rangeUI.CloseRange();
-                Transform atkPos = rangeUI.GetSkillTransform();
-                if (atkPos != null && _curAttackPack.skillVFXType != 0)
-                {
-                    ObjectPool.Ins.GenerateObject(
-                        _curAttackPack.skillVFXType,
-                        atkPos.position + Vector3.up * 3f,
-                        atkPos.localRotation);
-                }
             }, false);
 
         // 技能聚能充能

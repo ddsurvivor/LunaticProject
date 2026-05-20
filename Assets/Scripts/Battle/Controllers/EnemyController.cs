@@ -20,6 +20,12 @@ public class EnemyController : PieceController
     public Dictionary<PieceController, int> damageDic = new(); // 记录各个单位造成的伤害
 
 
+    public override void TurnStart()
+    {
+        base.TurnStart();
+        enemyCanvas.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
+    }
+
     // 添加伤害记录
     public void AddDamageRecord(PieceController pc, int damage)
     {
@@ -87,6 +93,7 @@ public class EnemyController : PieceController
         {
             Debug.Log($"技能命中数量{targets.Count}");
             BattleScene.Ins.BM.PieceSkill(this, targets, skill, targets[0].transform.position);
+            enemyCanvas.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
             rangeUI?.CloseRange();
         }, false);
         // 技能聚能充能
@@ -129,6 +136,7 @@ public class EnemyController : PieceController
             if(targets.Count == 0) return;
             Debug.Log($"攻击命中数量{targets.Count}");
             BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack, targets[0].transform.position, _curAtkType);
+            enemyCanvas.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
             rangeUI?.CloseRange();
         }, false);
         // 技能聚能充能
@@ -158,7 +166,11 @@ public class EnemyController : PieceController
     {
         if (isActived)
         {
-            if(enemyCanvas!=null) enemyCanvas.hitInfoPanel.UpdateDisplay(attacker, skillPack, this);
+            if (enemyCanvas != null)
+            {
+                enemyCanvas.hitInfoPanel.UpdateDisplay(attacker, skillPack, this);
+                enemyCanvas.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
+            }
         }
     }
 
@@ -166,12 +178,18 @@ public class EnemyController : PieceController
     {
         base.ShowHighlight(option);
         if (!option && enemyCanvas != null)
+        {
             enemyCanvas.hitInfoPanel.gameObject.SetActive(false);
+        }
     }
 
     public void UpdateHpBar(float hpPercent)
     {
-        if(enemyCanvas!=null)
+        if (enemyCanvas != null)
+        {
             enemyCanvas.hpBarUI.UpdateHpBar(hpPercent);
+            enemyCanvas.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
+        }
+        
     }
 }

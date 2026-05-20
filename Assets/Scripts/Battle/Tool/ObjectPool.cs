@@ -42,6 +42,8 @@ public enum ItemType
     ELECTRIC_BOLT=40,
     // 火焰弹道
     FLAME_BOLT=41,
+    // 扇形爆炸弹道
+    FAN_EXPLOSION=42,
     
 }
 /// <summary>

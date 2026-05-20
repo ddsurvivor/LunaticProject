@@ -1,13 +1,19 @@
+using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// 敌人的生命值面板
+/// </summary>
 public class HpBarUI : MonoBehaviour
 {
     public Image hpBarFill; // 血条填充部分的 Transform
     public Image shadowFill; // 拖影血条
     public Image preDamageFill; // 伤害显示血条
     public Image hpBarRenderer; // 血条的 Image 组件，用于调整透明度
+    public List<GameObject> mpIcons;
+
 
     private float currentHpPercent = 1f; // 当前血量百分比
 
@@ -77,6 +83,14 @@ public class HpBarUI : MonoBehaviour
             var c = hpBarRenderer.color;
             c.a = alpha;
             hpBarRenderer.color = c;
+        }
+    }
+    
+    public void UpdateMpIcons(int mpCount)
+    {
+        for (int i = 0; i < mpIcons.Count; i++)
+        {
+            mpIcons[i].SetActive(i < mpCount);
         }
     }
 }

@@ -48,12 +48,12 @@ public class BattleManager : MonoBehaviour
     public void StartBattle()
     {
         Sequence sequence = DOTween.Sequence();
-        sequence.AppendInterval(0.4f);
-        sequence.AppendCallback(() =>
-        {
-            BattleScene.Ins.UM.battleStartUIPanel.PlayBattleStartAnimation(2f);
-        });
-        sequence.AppendInterval(2.2f);
+        sequence.AppendInterval(0.5f);
+        // sequence.AppendCallback(() =>
+        // {
+        //     BattleScene.Ins.UM.battleStartUIPanel.PlayBattleStartAnimation(2f);
+        // });
+        // sequence.AppendInterval(2.2f);
         
         sequence.AppendCallback(() =>
         {
@@ -607,6 +607,9 @@ public class BattleManager : MonoBehaviour
             {
                 case HitBackEffect hitBackEffect:
                     HitBackEffect(hitBackEffect, caster, target, targetPos);
+                    break;
+                case ShootFxEffect shootFxEffect:
+                    shootFxEffect.ApplyEffect(caster, targetPos);
                     break;
                 default:
                     break;

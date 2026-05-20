@@ -8,6 +8,8 @@ public class RangeUI : MonoBehaviour
 {
     public GameObject circle;
     public GameObject moveIcon;
+    public GameObject moveStart;
+    public SpriteRenderer moveLine;
     public GameObject attackCircle;
     public GameObject attackIcon;
     public GameObject skillIcon;
@@ -27,11 +29,14 @@ public class RangeUI : MonoBehaviour
     [SerializeField] private Image arcOuter; // 外圆环
     [SerializeField] private Image arcInnerMask; // 内圆覆盖（实现宽度）
     [SerializeField] private RectTransform arcLine1; // 边线1
+
     [SerializeField] private RectTransform arcLine2; // 边线2
-    private float circleRadiusFactor = 1f / 11f; // 基础缩放系数（对应正圆图片的原始尺寸）
+
+    //private float circleRadiusFactor = 1f / 11f / 1.6f; // 基础缩放系数（对应正圆图片的原始尺寸）
     private bool _isShowMoveIcon = false;
 
-    private float circleRadius = 1f / 11f;
+    private float circleRadius = 1f / 11f / 1.8f;
+    private float movelineLengthFactor = 3.8f;
     private float _curRange;
 
     private List<PieceController> _curTargets = new();
@@ -185,7 +190,8 @@ public class RangeUI : MonoBehaviour
 
         _curTargets.Clear();
         circle.SetActive(false);
-        moveIcon.SetActive(false);
+        //moveIcon.SetActive(false);
+        ShowMoveIcon(false);
         attackCircle.SetActive(false);
         attackIcon.SetActive(false);
         skillIcon.SetActive(false);
@@ -202,6 +208,42 @@ public class RangeUI : MonoBehaviour
     {
         _isShowMoveIcon = option;
         moveIcon.SetActive(option);
+        moveStart.SetActive(option);
+        moveLine.gameObject.SetActive(option);
+    }
+
+    public void UpdateMove(Vector3 pos)
+    {
+        moveIcon.transform.position =
+            (new Vector3(pos.x, moveIcon.transform.position.y, pos.z)); //保持y轴不变
+        moveIcon.transform.position =
+            new Vector3(pos.x, moveIcon.transform.position.y, pos.z); // 保持y轴不变
+
+        // 标志旋转指向 move icon
+        Vector3 dir = moveIcon.transform.position - moveStart.transform.position;
+        dir.y = 0; // 忽略y轴
+
+        if (dir != Vector3.zero)
+        {
+            // 1. 使用你之前注释掉的这行，计算 XZ 平面上的夹角
+            float angle = Mathf.Atan2(dir.z, dir.x) * Mathf.Rad2Deg;
+
+            // 2. 完美的解法：因为你的图片是 X 轴拉伸，直接让 transform.right 指向目标
+            // Unity 会自动处理好平躺的姿态，这是最不易出错的方法
+            //moveStart.transform.right = dir;
+            //moveLine.transform.right = dir;
+
+            // 备用显式 Euler 解法：如果用 transform.right 发现图片翻转了，
+            // 可以解开下方注释，假设图片原本绕 X 轴旋转了 90 度躺在地上，则直接控制它的本地 Z 轴：
+            moveStart.transform.localRotation = Quaternion.Euler(0, 0, -angle);
+            moveLine.transform.localRotation = Quaternion.Euler(0, 0, -angle);
+            
+        }
+
+        // move line 缩放 width
+        float distance = dir.magnitude * movelineLengthFactor;
+        moveLine.size = new Vector2(distance, moveLine.size.y);
+        // move line 缩放 width，长度根据 move start 和 move icon 之间的距离调整
     }
 
     public void Update()
@@ -480,10 +522,11 @@ public class RangeUI : MonoBehaviour
 
         foreach (var target in newTargets)
         {
-            if(_curTargets.Contains(target)) continue;
+            if (_curTargets.Contains(target)) continue;
             // 显示命中率、伤害等
             target.OnBeTarget(_owner, _curSkillPack);
         }
+
         _curTargets = newTargets;
     }
 
@@ -536,10 +579,11 @@ public class RangeUI : MonoBehaviour
 
         foreach (var target in newTargets)
         {
-            if(_curTargets.Contains(target)) continue;
+            if (_curTargets.Contains(target)) continue;
             // 显示命中率、伤害等
             target.OnBeTarget(_owner, _curSkillPack);
         }
+
         _curTargets = newTargets;
     }
 

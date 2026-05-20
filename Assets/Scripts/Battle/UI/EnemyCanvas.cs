@@ -9,4 +9,5 @@
         
         // 受击信息显示组件
         public HitInfoPanel hitInfoPanel;
+        
     }

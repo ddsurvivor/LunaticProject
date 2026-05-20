@@ -43,6 +43,7 @@ public class 大地图System : SerializedMonoBehaviour
     public TutorialUI tutorial;
     public ItemGetPanel itemGetPanel;
     public MessagePanel messagePanel;
+    public BattleStartUIPanel battleStartUIPanel;
     public void 失败()
     {
         失败Obj.SetActive(true);

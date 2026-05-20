@@ -219,7 +219,7 @@ public class ClickManager : MonoBehaviour
         }
         else
         {
-            _rangeUI.moveIcon.SetActive(true);
+            _rangeUI.ShowMoveIcon(true);
         }
     }
 
@@ -287,8 +287,7 @@ public class ClickManager : MonoBehaviour
             offset = offset.normalized * _dragRange;
             point = _dragStartPos + offset;
         }
-        _rangeUI.moveIcon.transform.position = (new Vector3(point.x
-            , _rangeUI.moveIcon.transform.position.y, point.z));
+        _rangeUI.UpdateMove(point);
     }
 
     private void StopDrag()

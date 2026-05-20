@@ -1,6 +1,7 @@
 
     using System;
     using System.Collections;
+    using DG.Tweening;
     using UnityEngine;
 using UnityEngine.SceneManagement;
     using Sirenix.OdinInspector;
@@ -63,7 +64,11 @@ using UnityEngine.SceneManagement;
             this.battleScene = battleScene;
             this.endLog = endLog;
             this.battleSetting = setting;
-            battleTransitionPanel.TransitionToBattle(battleScene);
+            大地图System.instance.battleStartUIPanel.PlayBattleStartAnimation(1f);
+            DOVirtual.DelayedCall(1f, () =>
+            {
+                battleTransitionPanel.TransitionToBattle(battleScene);
+            });
             // 场景加载完成后执行
             PlayingSystem.特殊剧情 = "";
             //StartCoroutine(StartBattleCoroutine(battleScene));
