@@ -14,6 +14,7 @@ public class DataManager : SerializedMonoBehaviour
     
     public LevelUpConfig levelUpConfig;
     public ComponentConfig componentConfig;
+    public PieceDataListSO pieceDataListSO;
     public void Init()
     {
         // 测试加载

@@ -28,9 +28,9 @@ public class SkillPointPanel : MonoBehaviour
         //InitPanel();
     }
     
-    public void ShowPanel(Player playerData)
+    public void ShowPanel(Player playerData, int unitID)
     {
-        //this.unitID = unitID;
+        this.unitID = unitID;
         this.playerData = playerData; //GM.Ins.PLAYERPROFILE.GetPlayer(unitID); // 接收外部传入的数据副本
         if(!hasInited) InitPanel();
         gameObject.SetActive(true);
@@ -106,7 +106,7 @@ public class SkillPointPanel : MonoBehaviour
         // 2. 【重点：存档回写】
         // 在这里将修改后的 playerData 结构体存入你的存档系统或全局管理器
         // SaveToDisk(playerData); 
-        characterUIPage.ShowPanel(playerData); // 刷新主界面显示
+        characterUIPage.ShowPanel(playerData,unitID); // 刷新主界面显示
         Debug.Log("数据已更新至结构体并触发保存逻辑");
     }
 

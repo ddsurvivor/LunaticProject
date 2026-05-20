@@ -8,9 +8,12 @@ using System.Collections.Generic;
 public class CharacterUIPage : MonoBehaviour
 {
     public Player player;
+    private int unitID;
     public Text nameText;
+    public Text skillPointNumText;
     public Image avatarImage;
     public UIDetailPanel detailPanel;
+    
 
     [Header("Pre-placed UI Slots")]
     // 在 Inspector 里手动拖入 3 个固定格子
@@ -20,12 +23,16 @@ public class CharacterUIPage : MonoBehaviour
     // 在 Inspector 里将背包区域预先放好的 N 个格子全部拖进来
     public List<UIItemSlot> inventoryUISlots = new List<UIItemSlot>();
     
+
     [SerializeField]
     private List<DetailAttributeRow> rowList = new ();
+    [SerializeField]
+    public List<DetailAttributeRow> armorRowList  = new ();
     public SkillPointPanel skillPointPanel;
-    public void ShowPanel(Player player)
+    public void ShowPanel(Player player, int unitID)
     {
         this.player = player;
+        this.unitID = unitID;
         RefreshUI();
         gameObject.SetActive(true);
         detailPanel.gameObject.SetActive(false);
@@ -39,6 +46,25 @@ public class CharacterUIPage : MonoBehaviour
 
             row.UpdateInfo(attrName, currentVal, 200);
         }
+
+        PieceData piece = GM.Ins.DM.pieceDataListSO.GetPieceData(unitID);
+        // for (int i = 0; i < 3; i++)
+        // {
+        //     if (i >= rowList.Count) break;
+        //     DetailAttributeRow row = rowList[i];
+        //     string attrName = piece._armorDic;
+        // }
+
+        //遍历enum DamageType
+        for (int i = 0; i < 3; i++)
+        {
+            if (i >= armorRowList.Count) break;
+            DetailAttributeRow row = armorRowList[i];
+            string attrName = ((DamageType)i+1).ToChinese() + "防御";
+            int currentVal = piece._armorDic[(DamageType)i+1];
+            row.UpdateInfo(attrName, currentVal, 100);
+        }
+        skillPointNumText.text = player.SkillPoints.ToString();
     }
 
     
@@ -89,6 +115,6 @@ public class CharacterUIPage : MonoBehaviour
     
     public void OnClickSkillPoints() {
         // 打开技能点面板
-        skillPointPanel.ShowPanel(player);
+        skillPointPanel.ShowPanel(player, unitID);
     }
 }
