@@ -12,23 +12,25 @@ public class TutorialManager : MonoBehaviour
     private void OnEnable()
     {
         // 组件被启用时（场景加载后）立即检查当前场景
-        CheckAndShowTutorial();
+        //CheckAndShowTutorial();
     }
 
-    private void CheckAndShowTutorial()
+    public bool CheckAndShowTutorial()
     {
         string levelName = SceneManager.GetActiveScene().name;
 
         // 已看过则跳过
         if (GM.Ins.PLAYERPROFILE.seenTutorials.Contains(levelName))
-            return;
+            return false;
 
         // 使用接口获取教程数据
         TutorialData data = database.GetTutorial(levelName);
         if (data != null)
         {
-            tutorialPanel.Show(data, levelName);
+            tutorialPanel.Show(data, levelName, true);
+            return true;
         }
+        return false;
     }
 
     

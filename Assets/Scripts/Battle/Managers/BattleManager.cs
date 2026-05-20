@@ -16,6 +16,7 @@ public class BattleManager : MonoBehaviour
     public SkillManager skillManager;
     public SpriteManager spriteManager;
     public DiceCheckManager diceCheckManager;
+    public TutorialManager tutorialManager;
 
     public PieceDataListSO pieceDataListSO;
 
@@ -37,6 +38,7 @@ public class BattleManager : MonoBehaviour
         _turnNumber = 0;
         PlayerController.Init();
         AIController.Init();
+        ApplySetting(GM.Ins.battleSetting);
         _delaySkillPack = null;
         StartBattle();
         //gray = Resources.Load<Material>("Materials/Gray");
@@ -45,8 +47,25 @@ public class BattleManager : MonoBehaviour
 
     public void StartBattle()
     {
-        PlayerStart();
-        ApplySetting(GM.Ins.battleSetting);
+        Sequence sequence = DOTween.Sequence();
+        sequence.AppendInterval(0.4f);
+        sequence.AppendCallback(() =>
+        {
+            BattleScene.Ins.UM.battleStartUIPanel.PlayBattleStartAnimation(2f);
+        });
+        sequence.AppendInterval(2.2f);
+        
+        sequence.AppendCallback(() =>
+        {
+            if (tutorialManager.CheckAndShowTutorial())
+            {
+                
+            }
+            else
+            {
+                PlayerStart();
+            }
+        });
     }
 
     /// <summary>

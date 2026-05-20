@@ -16,6 +16,8 @@ public class TutorialUI : MonoBehaviour
     private List<TutorialPage> _pages;
     private int _currentIndex = 0;
     private string _currentLevelName;
+    
+    private bool _isBattleStart = false; // 是否在战斗开始时显示教程
 
     private void Awake()
     {
@@ -39,7 +41,7 @@ public class TutorialUI : MonoBehaviour
     /// <summary>
     /// 显示教程（使用新的 TutorialData 类型）
     /// </summary>
-    public void Show(TutorialData data, string levelName)
+    public void Show(TutorialData data, string levelName, bool battleStart = false)
     {
         if (data == null || data.pages.Count == 0) return;
 
@@ -48,6 +50,7 @@ public class TutorialUI : MonoBehaviour
         _currentIndex = 0;
         gameObject.SetActive(true);
         UpdatePage();
+        _isBattleStart = battleStart;
     }
 
     private void UpdatePage()
@@ -86,6 +89,10 @@ public class TutorialUI : MonoBehaviour
         //PlayerPrefs.SetInt("TutorialSeen_" + _currentLevelName, 1);
         //PlayerPrefs.Save();
         GM.Ins.PLAYERPROFILE.seenTutorials.Add(_currentLevelName);
+        if (_isBattleStart)
+        {
+            BattleScene.Ins.BM.PlayerStart();
+        }
         gameObject.SetActive(false);
     }
 }

@@ -4,6 +4,7 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 
 public class PlayerController : SerializedMonoBehaviour
@@ -21,7 +22,7 @@ public class PlayerController : SerializedMonoBehaviour
     [ReadOnly] public PieceController burstTarget; // 当前聚能回合攻击的单一目标敌人
 
     [Header("UI")] 
-    public RectTransform burstChargeBarFill; // 聚能条填充部分
+    public Image burstChargeBarFill; // 聚能条填充部分
 
     private float originWidth = 1842.2f;
 
@@ -180,22 +181,14 @@ public class PlayerController : SerializedMonoBehaviour
     {
         if (burstChargeBarFill != null)
         {
-            float endWidth = originWidth * (burstCharge / maxBurstCharge);
+            float endWidth = (burstCharge / maxBurstCharge);
             if (instant)
             {
-                burstChargeBarFill.sizeDelta =
-                    new Vector2(endWidth, burstChargeBarFill.sizeDelta.y);
+                burstChargeBarFill.fillAmount = endWidth;
             }
             else
             {
-                DOVirtual.Float(burstChargeBarFill.sizeDelta.x, endWidth, 0.3f
-                    , (value) =>
-                    {
-                        burstChargeBarFill.sizeDelta =
-                            new Vector2(value, burstChargeBarFill.sizeDelta.y);
-                    }).SetDelay(0.3f);
-                /*burstChargeBarFill.sizeDelta = new Vector2(originWidth * (burstCharge / maxBurstCharge),
-                    burstChargeBarFill.sizeDelta.y);*/
+                burstChargeBarFill.DOFillAmount(endWidth, 0.3f).SetDelay(0.3f);
             }
         }
     }
