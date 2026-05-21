@@ -42,7 +42,37 @@ public class SkillManager : MonoBehaviour
         else if (skill.rangeType == RangeType.Fan)
         {
             // 扇形范围
-            // 进行扇形有限距离的穿透射线检测
+            // 1. 获取扇形参数
+            float halfAngle = _curSkillPack.rangeAgle / 2f;
+            float range = _curSkillPack.rangeValue;
+            Vector3 origin = caster.transform.position;
+            Vector3 forward = target.transform.position - caster.transform.position;
+
+            // 2. 获取范围内所有碰撞体
+            Collider[] colliders = Physics.OverlapSphere(origin, range);
+
+            //HashSet<PieceController> hitPieces = new HashSet<PieceController>();
+            foreach (var collider in colliders)
+            {
+                PieceController piece = collider.GetComponent<PieceController>();
+                if (piece == null) continue;
+
+                // 3. 判断是否在扇形角度范围内
+                Vector3 dir = (piece.transform.position - origin);
+                dir.y = 0; // 忽略y轴
+                if (dir.magnitude > range || dir.magnitude < 1f) continue; // 超出半径
+
+                float angle = Vector3.Angle(forward, dir);
+                if (angle <= halfAngle)
+                {
+                    if (piece != null && !newTargets.Contains(piece))
+                    {
+                        newTargets.Add(piece);
+                    }
+                }
+            }
+            Debug.Log($"扇形范围检测到 {newTargets.Count} 个目标");
+            /*// 进行扇形有限距离的穿透射线检测
             // 根据扇形角度，等间距的发射多根射线进行检测，结果需要去掉重复
             float halfAngle = _curSkillPack.rangeAgle / 2f;
             if(halfAngle <= 0f) halfAngle = 5f; // 最小5度
@@ -62,7 +92,7 @@ public class SkillManager : MonoBehaviour
                         newTargets.Add(piece);
                     }
                 }
-            }
+            }*/
         }
 
 
