@@ -8,7 +8,7 @@ public enum DamageType
     [LabelText("动能")]
     Melee = 1,// 近战
     [LabelText("热能")]Ranged = 2,// 远程
-    [LabelText("火能")]Electric = 3,// 电子
+    [LabelText("火种")]Electric = 3,// 电子
 }
 // 编写静态扩展类
 public static class EnumExtensions
@@ -19,7 +19,7 @@ public static class EnumExtensions
         {
             case DamageType.Melee: return "动能";
             case DamageType.Ranged:     return "热能";
-            case DamageType.Electric:      return "火能";
+            case DamageType.Electric:      return "火种";
             default:                  return type.ToString();
         }
     }

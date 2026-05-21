@@ -60,7 +60,7 @@ public class CharacterUIPage : MonoBehaviour
         {
             if (i >= armorRowList.Count) break;
             DetailAttributeRow row = armorRowList[i];
-            string attrName = ((DamageType)i+1).ToChinese() + "防御";
+            string attrName = ((DamageType)i+1).ToChinese() + "防护";
             int currentVal = piece._armorDic[(DamageType)i+1];
             row.UpdateInfo(attrName, currentVal, 100);
         }
