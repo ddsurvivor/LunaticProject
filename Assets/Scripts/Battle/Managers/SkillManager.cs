@@ -96,7 +96,7 @@ public class SkillManager : MonoBehaviour
                 piece.rangeUI?.ShowHighlight(true);
                 resultTargets.Add(piece);
             }
-            else if (_curSkillPack.target == SkillTarget.EnemyAll)
+            else if (_curSkillPack.target == SkillTarget.EnemyAll || _curSkillPack.target == SkillTarget.FarthestEnemy)
             {
                 if (piece.isPlayerPiece != casterPc.isPlayerPiece)
                 {

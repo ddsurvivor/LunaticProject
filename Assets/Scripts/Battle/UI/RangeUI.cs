@@ -36,7 +36,8 @@ public class RangeUI : MonoBehaviour
     private bool _isShowMoveIcon = false;
 
     private float circleRadius = 1f / 11f / 1.8f;
-    private float movelineLengthFactor = 3.6f;
+   [SerializeField] private float movelineLengthFactor = 3.8f;
+    [SerializeField]private float lineOffset = 0.5f;
     private float _curRange;
 
     private List<PieceController> _curTargets = new();
@@ -241,7 +242,7 @@ public class RangeUI : MonoBehaviour
         }
 
         // move line 缩放 width
-        float distance = dir.magnitude * movelineLengthFactor;
+        float distance = (dir.magnitude - lineOffset) * movelineLengthFactor;
         moveLine.size = new Vector2(distance, moveLine.size.y);
         // move line 缩放 width，长度根据 move start 和 move icon 之间的距离调整
     }
