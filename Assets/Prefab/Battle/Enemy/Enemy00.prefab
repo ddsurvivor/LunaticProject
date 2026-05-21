@@ -730,9 +730,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4545fa1e7904f3c82204a8e5cef576b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hitRateIcon: {fileID: 0}
   hitRateText: {fileID: 8266508294477102073}
-  damageText: {fileID: 5559154760832781130}
+  damageSlots: []
   critRateText: {fileID: 602297718968545101}
+  hpBarUI: {fileID: 0}
 --- !u!114 &4186531867778973609
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1052,6 +1054,7 @@ MonoBehaviour:
   ATK: 0
   CON: 0
   hpBarFill: {fileID: 0}
+  hpBarUI: {fileID: 0}
   OnDead:
     m_PersistentCalls:
       m_Calls: []
@@ -1122,8 +1125,6 @@ MonoBehaviour:
   hightlightEffect: {fileID: 3613445040506058447}
   _actionListPanel: {fileID: 0}
   pieceDisplay: {fileID: 5625326528305694457}
-  uiCanvas: {fileID: 0}
-  hitInfoPanel: {fileID: 7406761605229781594}
   _pieceData:
     pieceId: 0
     pieceName: 
@@ -1142,6 +1143,9 @@ MonoBehaviour:
       arcWeight: 0
       arcCenterDis: 0
       skillVFXType: 0
+      isBullet: 0
+      isRotate: 0
+      bulletVFXType: 0
       attackPacks: []
       atkTimes: 1
       buffPacks: []
@@ -1164,6 +1168,9 @@ MonoBehaviour:
       arcWeight: 0
       arcCenterDis: 0
       skillVFXType: 0
+      isBullet: 0
+      isRotate: 0
+      bulletVFXType: 0
       attackPacks: []
       atkTimes: 1
       buffPacks: []
@@ -1210,6 +1217,9 @@ MonoBehaviour:
     arcWeight: 0
     arcCenterDis: 0
     skillVFXType: 0
+    isBullet: 0
+    isRotate: 0
+    bulletVFXType: 0
     attackPacks: []
     atkTimes: 1
     buffPacks: []
@@ -1227,6 +1237,7 @@ MonoBehaviour:
   isIdle: 0
   cantControl: 0
   ableMove: 0
+  deadNotDelete: 1
   OnInit:
     m_PersistentCalls:
       m_Calls: []
@@ -1248,14 +1259,17 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  OnHurt:
+    m_PersistentCalls:
+      m_Calls: []
   OnDead:
     m_PersistentCalls:
       m_Calls: []
   outlineEffect: {fileID: 0}
   enemyAIType: 1
   isActived: 1
-  deadNotDelete: 1
   navigate: 0
+  enemyCanvas: {fileID: 0}
 --- !u!114 &5526592385598108375
 MonoBehaviour:
   m_ObjectHideFlags: 0

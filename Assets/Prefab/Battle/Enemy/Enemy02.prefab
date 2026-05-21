@@ -472,7 +472,6 @@ MonoBehaviour:
   hightlightEffect: {fileID: 4690703415738897855}
   _actionListPanel: {fileID: 0}
   pieceDisplay: {fileID: 3583487980011262596}
-  uiCanvas: {fileID: 0}
   _pieceData:
     pieceId: 0
     pieceName: 
@@ -491,6 +490,9 @@ MonoBehaviour:
       arcWeight: 0
       arcCenterDis: 0
       skillVFXType: 0
+      isBullet: 0
+      isRotate: 0
+      bulletVFXType: 0
       attackPacks: []
       atkTimes: 1
       buffPacks: []
@@ -513,6 +515,9 @@ MonoBehaviour:
       arcWeight: 0
       arcCenterDis: 0
       skillVFXType: 0
+      isBullet: 0
+      isRotate: 0
+      bulletVFXType: 0
       attackPacks: []
       atkTimes: 1
       buffPacks: []
@@ -559,6 +564,9 @@ MonoBehaviour:
     arcWeight: 0
     arcCenterDis: 0
     skillVFXType: 0
+    isBullet: 0
+    isRotate: 0
+    bulletVFXType: 0
     attackPacks: []
     atkTimes: 1
     buffPacks: []
@@ -576,6 +584,7 @@ MonoBehaviour:
   isIdle: 0
   cantControl: 0
   ableMove: 1
+  deadNotDelete: 0
   OnInit:
     m_PersistentCalls:
       m_Calls: []
@@ -585,13 +594,15 @@ MonoBehaviour:
   OnTurnEnd:
     m_PersistentCalls:
       m_Calls: []
+  OnHurt:
+    m_PersistentCalls:
+      m_Calls: []
   OnDead:
     m_PersistentCalls:
       m_Calls: []
   outlineEffect: {fileID: 0}
   enemyAIType: 2
   isActived: 1
-  deadNotDelete: 0
   navigate: 0
   enemyCanvas: {fileID: 7997717618187452530}
 --- !u!1 &1457925914143748292
@@ -1378,8 +1389,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4545fa1e7904f3c82204a8e5cef576b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hitRateIcon: {fileID: 0}
   hitRateText: {fileID: 6786359073531110352}
-  damageText: {fileID: 4680750643724991058}
+  damageSlots: []
   critRateText: {fileID: 6407001308465517568}
   hpBarUI: {fileID: 0}
 --- !u!114 &2947550080537662553

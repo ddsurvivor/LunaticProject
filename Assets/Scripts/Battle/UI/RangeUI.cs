@@ -36,7 +36,7 @@ public class RangeUI : MonoBehaviour
     private bool _isShowMoveIcon = false;
 
     private float circleRadius = 1f / 11f / 1.8f;
-    private float movelineLengthFactor = 3.8f;
+    private float movelineLengthFactor = 3.6f;
     private float _curRange;
 
     private List<PieceController> _curTargets = new();
