@@ -37,6 +37,7 @@ public class PlayerController : SerializedMonoBehaviour
         UpdateBurstBar(true);
         foreach (var piece in pieces)
         {
+            if(piece == null) continue;
             piece.Init(this, BattleScene.Ins.BM.pieceDataListSO.GetPieceData(piece.pieceID));
         }
 

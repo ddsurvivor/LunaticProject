@@ -15,7 +15,18 @@
         
         public PieceData GetPieceData(int pieceId)
         {
-            return pieceDataList.Find(pieceData => pieceData.pieceId == pieceId);
+            if (pieceDataList == null || pieceDataList.Count == 0)
+            {
+                throw new InvalidOperationException("Piece data list is empty or not initialized.");
+            }
+
+            var pieceData = pieceDataList.Find(pd => pd.pieceId == pieceId);
+            if (pieceData == null)
+            {
+                Debug.LogError($"No PieceData found with pieceId: {pieceId}");
+            }
+
+            return pieceData;
         }
     }
     
