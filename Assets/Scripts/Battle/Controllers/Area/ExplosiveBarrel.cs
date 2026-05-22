@@ -9,6 +9,7 @@ public class ExplosiveBarrel : MonoBehaviour
     [SerializeField] private float explosionRadius = 5f;   // 爆炸半径
 
     [SerializeField] private float offset = 1f;
+    [SerializeField] private float delayTime = 0.5f; // 爆炸延迟时间
     public SkillPack skillPack;
     //[SerializeField] private float maxDamage = 100f;      // 中心最大伤害
     [SerializeField] private LayerMask effectLayer;       // 建议设置层级，过滤掉不需要检测的物体
@@ -44,7 +45,7 @@ public class ExplosiveBarrel : MonoBehaviour
         if (_hasExploded) return;
         _hasExploded = true;
 
-        DOVirtual.DelayedCall(0.5f, Explode, false);
+        DOVirtual.DelayedCall(delayTime, Explode, false);
         //Explode();
     }
 
@@ -81,7 +82,7 @@ public class ExplosiveBarrel : MonoBehaviour
         
         // 6. 最后销毁桶本身（或者更换为残骸模型）
         //Destroy(gameObject);
-        gameObject.SetActive(false);
+        DOVirtual.DelayedCall(0.8f, () => gameObject.SetActive(false));
         Debug.Log($"{barrelName} 爆炸，影响了 {targetPieces.Count} 个目标");
     }
 

@@ -2830,10 +2830,11 @@ MonoBehaviour:
     - {fileID: 1672396652}
     - {fileID: 1398908980}
     - {fileID: 2118199718}
-    - {fileID: 2103887347}
     - {fileID: 770097597}
     - {fileID: 1436080271}
+    - {fileID: 381887413}
     - {fileID: 2054704229}
+    - {fileID: 449245633}
     - {fileID: 749376914}
     SerializedBytesString: 
     Prefab: {fileID: 0}
@@ -2853,7 +2854,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 12
-      Data: 3
+      Data: 2
     - Name: 
       Entry: 7
       Data: 
@@ -2866,7 +2867,7 @@ MonoBehaviour:
         mscorlib
     - Name: 
       Entry: 12
-      Data: 3
+      Data: 6
     - Name: 
       Entry: 10
       Data: 1
@@ -2877,36 +2878,14 @@ MonoBehaviour:
       Entry: 10
       Data: 3
     - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 
-    - Name: $k
       Entry: 10
       Data: 4
-    - Name: $v
-      Entry: 7
-      Data: 3|System.Collections.Generic.List`1[[EnemyController, Assembly-CSharp]],
-        mscorlib
-    - Name: 
-      Entry: 12
-      Data: 3
     - Name: 
       Entry: 10
       Data: 5
     - Name: 
       Entry: 10
       Data: 6
-    - Name: 
-      Entry: 6
-      Data: 
     - Name: 
       Entry: 13
       Data: 
@@ -2924,17 +2903,17 @@ MonoBehaviour:
       Data: 7
     - Name: $v
       Entry: 7
-      Data: 4|System.Collections.Generic.List`1[[EnemyController, Assembly-CSharp]],
+      Data: 3|System.Collections.Generic.List`1[[EnemyController, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
-      Entry: 6
-      Data: 
-    - Name: 
       Entry: 10
       Data: 8
+    - Name: 
+      Entry: 10
+      Data: 9
     - Name: 
       Entry: 13
       Data: 
@@ -5796,6 +5775,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 3583487980011262596, guid: 0ef34faed2f1d264cb6a26d602e67446, type: 3}
     - target: {fileID: 3819608013901936508, guid: 0ef34faed2f1d264cb6a26d602e67446, type: 3}
+      propertyPath: isActived
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3819608013901936508, guid: 0ef34faed2f1d264cb6a26d602e67446, type: 3}
       propertyPath: OnDead.m_PersistentCalls.m_Calls.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -5839,6 +5822,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 62b6dd8f429f41208074b8429bf15ff2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &381887413 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3819608013901936508, guid: 0ef34faed2f1d264cb6a26d602e67446, type: 3}
+  m_PrefabInstance: {fileID: 381887410}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b1e7d779d214926abba2429cfaba477, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &395035114
@@ -6903,6 +6897,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 3583487980011262596, guid: 0ef34faed2f1d264cb6a26d602e67446, type: 3}
     - target: {fileID: 3819608013901936508, guid: 0ef34faed2f1d264cb6a26d602e67446, type: 3}
+      propertyPath: isActived
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3819608013901936508, guid: 0ef34faed2f1d264cb6a26d602e67446, type: 3}
       propertyPath: OnDead.m_PersistentCalls.m_Calls.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -6946,6 +6944,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 62b6dd8f429f41208074b8429bf15ff2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &449245633 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3819608013901936508, guid: 0ef34faed2f1d264cb6a26d602e67446, type: 3}
+  m_PrefabInstance: {fileID: 449245630}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b1e7d779d214926abba2429cfaba477, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &453929462
