@@ -84,6 +84,15 @@ public class ShootFxEffect : SkillEffectBase
             fx.transform.rotation = Quaternion.identity;
         }
         
-        
+    }
+}
+
+public class SelfExplosionEffect : SkillEffectBase
+{
+    public void ApplyEffect(PieceController attacker)
+    {
+        // 对自身造成伤害
+        int selfDamage = 100; // 示例伤害值，可以根据需要调整
+        attacker.unitAttrCenter.TakeDamage(new AttackPack(selfDamage,DamageType.Ranged));
     }
 }

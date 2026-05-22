@@ -266,6 +266,9 @@ MonoBehaviour:
     arcWeight: 0
     arcCenterDis: 0
     skillVFXType: 16
+    isBullet: 0
+    isRotate: 0
+    bulletVFXType: 0
     attackPacks:
     - damage: 40
       damageType: 2
@@ -278,6 +281,7 @@ MonoBehaviour:
     animationIndex: 0
     isDelaySkill: 0
     layerSkill: 0
+    isRecognitionCheck: 0
   effectLayer:
     serializedVersion: 2
     m_Bits: 15415
@@ -450,7 +454,9 @@ MonoBehaviour:
   critRate: 0
   critDamageRate: 0
   ATK: 0
+  CON: 0
   hpBarFill: {fileID: 0}
+  hpBarUI: {fileID: 0}
   OnDead:
     m_PersistentCalls:
       m_Calls:
@@ -483,8 +489,6 @@ MonoBehaviour:
   hightlightEffect: {fileID: 360076303634718403}
   _actionListPanel: {fileID: 0}
   pieceDisplay: {fileID: 0}
-  uiCanvas: {fileID: 0}
-  hitInfoPanel: {fileID: 0}
   _pieceData:
     pieceId: 0
     pieceName: 
@@ -503,6 +507,9 @@ MonoBehaviour:
       arcWeight: 0
       arcCenterDis: 0
       skillVFXType: 0
+      isBullet: 0
+      isRotate: 0
+      bulletVFXType: 0
       attackPacks: []
       atkTimes: 1
       buffPacks: []
@@ -512,6 +519,7 @@ MonoBehaviour:
       animationIndex: 0
       isDelaySkill: 0
       layerSkill: 0
+      isRecognitionCheck: 0
     rangedAtk:
       skillName: 
       description: 
@@ -524,6 +532,9 @@ MonoBehaviour:
       arcWeight: 0
       arcCenterDis: 0
       skillVFXType: 0
+      isBullet: 0
+      isRotate: 0
+      bulletVFXType: 0
       attackPacks: []
       atkTimes: 1
       buffPacks: []
@@ -533,6 +544,7 @@ MonoBehaviour:
       animationIndex: 0
       isDelaySkill: 0
       layerSkill: 0
+      isRecognitionCheck: 0
     maxAmmoCount: 0
     evasionRate: 0
     critRate: 0
@@ -550,7 +562,6 @@ MonoBehaviour:
     spriteName: 
     normalSlots: 000000000000000000000000
     weaponSlots: 0000000000000000
-    componentInventory: 
   pieceID: 0
   player: {fileID: 0}
   isPlayerPiece: 0
@@ -570,6 +581,9 @@ MonoBehaviour:
     arcWeight: 0
     arcCenterDis: 0
     skillVFXType: 0
+    isBullet: 0
+    isRotate: 0
+    bulletVFXType: 0
     attackPacks: []
     atkTimes: 1
     buffPacks: []
@@ -579,6 +593,7 @@ MonoBehaviour:
     animationIndex: 0
     isDelaySkill: 0
     layerSkill: 0
+    isRecognitionCheck: 0
   interactAreas: []
   availableActions: 
   availableSkills: []
@@ -586,6 +601,7 @@ MonoBehaviour:
   isIdle: 0
   cantControl: 0
   ableMove: 1
+  deadNotDelete: 0
   OnInit:
     m_PersistentCalls:
       m_Calls: []
@@ -593,6 +609,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnTurnEnd:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHurt:
     m_PersistentCalls:
       m_Calls: []
   OnDead:
@@ -610,6 +629,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  outlineEffect: {fileID: 0}
 --- !u!1 &3628677100677552997
 GameObject:
   m_ObjectHideFlags: 0

@@ -102,7 +102,7 @@ public class EnemyController : PieceController
     public void CastAttackOnTarget(PieceController targetPc)
     {
         if (_curAttackPack == null || targetPc == null) return;
-        Debug.Log($"{this.name} 对 {targetPc.name} 施放攻击 {_curAttackPack.skillName}");
+        Debug.Log($"{this.name} 对 {targetPc.name} 施放攻击{_curAtkType} - {_curAttackPack.skillName}");
 
         // 根据范围获取所有棋子
         List<PieceController> targets = BattleScene.Ins.BM.skillManager

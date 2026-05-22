@@ -611,6 +611,9 @@ public class BattleManager : MonoBehaviour
                 case ShootFxEffect shootFxEffect:
                     shootFxEffect.ApplyEffect(caster, targetPos);
                     break;
+                case SelfExplosionEffect selfExplosionEffect:
+                    selfExplosionEffect.ApplyEffect(caster);
+                    break;
                 default:
                     break;
             }

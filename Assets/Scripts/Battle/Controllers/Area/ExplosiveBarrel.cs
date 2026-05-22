@@ -21,17 +21,20 @@ public class ExplosiveBarrel : MonoBehaviour
 
     private bool _hasExploded = false;
     public PieceController pieceController;
-    
+    public  bool needInit = true;
 
     public void Start()
     {
-        pieceController.Init(null, new PieceData()
+        if (needInit)
         {
-            pieceName = barrelName,
-            maxHealth = 2,
-        });
-        GetComponent<UnitAttrCenter>().Init();
-        highlightEffect.transform.localScale = explosionRadius*offset*Vector3.one;
+            pieceController.Init(null, new PieceData()
+            {
+                pieceName = barrelName,
+                maxHealth = 2,
+            });
+            GetComponent<UnitAttrCenter>().Init();
+            highlightEffect.transform.localScale = explosionRadius*offset*Vector3.one;
+        }
     }
     /// <summary>
     /// 对接你的生命值系统：当生命值归零时调用
