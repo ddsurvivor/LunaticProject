@@ -623,6 +623,36 @@ public class PieceController : MonoBehaviour
 
 
             PlayAudio(_skillPack);
+            
+            // 生成特效
+            //Transform atkPos = rangeUI.GetSkillTransform();
+            if (atkPos != null && _skillPack.skillVFXType != 0)
+            {
+                GameObject fx  = ObjectPool.Ins.GenerateObject(
+                    _skillPack.skillVFXType,
+                    atkPos.position + Vector3.up * 0.1f,
+                    atkPos.localRotation);
+                if (_skillPack.isRotate)
+                {
+                    // fx沿 z轴 旋转，方向为从transfrom指向atkPos
+                    Vector3 dir = (atkPos.position - transform.position).normalized;
+                    dir.y = 0;
+                    float angle = Mathf.Atan2(dir.z, dir.x) * Mathf.Rad2Deg;
+                    fx.transform.rotation = Quaternion.Euler(45,  -45, angle + 90f);
+                    Debug.Log($"生成技能特效{_skillPack.skillVFXType},{dir}旋转角度{angle}");
+                }
+
+            }
+            else if (_skillPack.skillVFXType != 0)
+            {
+                Vector3 pos = targets.Count > 0
+                    ? targets[0].transform.position
+                    : transform.position;
+                ObjectPool.Ins.GenerateObject(
+                    _skillPack.skillVFXType,
+                    pos + Vector3.up * 0.1f,
+                    Quaternion.identity);
+            }
         });
         sequence.AppendInterval(0.3f);
         sequence.AppendCallback(() =>
@@ -651,23 +681,7 @@ public class PieceController : MonoBehaviour
 
                 //Debug.Log("关闭显示范围");
                 rangeUI.CloseRange();
-                if (atkPos != null && _skillPack.skillVFXType != 0)
-                {
-                    ObjectPool.Ins.GenerateObject(
-                        _skillPack.skillVFXType,
-                        atkPos.position + Vector3.up * 3f,
-                        atkPos.localRotation);
-                }
-                else if (_skillPack.skillVFXType != 0)
-                {
-                    Vector3 pos = targets.Count > 0
-                        ? targets[0].transform.position
-                        : transform.position;
-                    ObjectPool.Ins.GenerateObject(
-                        _skillPack.skillVFXType,
-                        pos + Vector3.up * 3f,
-                        Quaternion.identity);
-                }
+                
             });
 
         // 技能聚能充能
@@ -701,7 +715,7 @@ public class PieceController : MonoBehaviour
         //if(!option) hitInfoPanel?.gameObject.SetActive(false);
     }
 
-    private void ShootBolt(Vector3 tagetPos, ItemType itemType)
+    protected void ShootBolt(Vector3 tagetPos, ItemType itemType)
     {
         if (itemType == ItemType.NONE)
         {
@@ -722,7 +736,7 @@ public class PieceController : MonoBehaviour
             // 让bolt的forward（z轴）指向目标点，然后旋转90度使x轴指向目标
             bolt.rotation = Quaternion.LookRotation(direction) * Quaternion.Euler(0, -90, 0);
         }
-        bolt.DOMove(targetPosFixed, 0.3f).SetEase(Ease.Linear)
+        bolt.DOMove(targetPosFixed, 2.3f).SetEase(Ease.Linear)
             .OnComplete(() => { ObjectPool.Ins.HideObject(bolt.gameObject); });
     }
 

@@ -55,6 +55,8 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         if (iconIndex < 按钮节点图片.Length)
         {
             icon.sprite = 按钮节点图片[iconIndex];
+            // 设置为原图尺寸
+            icon.SetNativeSize();
         }
     }
 
@@ -73,7 +75,12 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
     public void UpdateState()
     {
-        
+        if (iconIndex < 按钮节点图片.Length)
+        {
+            icon.sprite = 按钮节点图片[iconIndex];
+            // 设置为原图尺寸
+            icon.SetNativeSize();
+        }
         //GetComponentInChildren<Text>().text = gameObject.name.Replace("(Clone)","");
         
         if (前置任务要求.Length!=前置任务进度要求.Length)
