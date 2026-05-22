@@ -73,7 +73,7 @@ public class InventoryPanel : UIPanel
             }
         }
 
-        playerMoneyText.text = "货币: " + GM.Ins.PLAYERPROFILE.coins;
+        playerMoneyText.text =  GM.Ins.PLAYERPROFILE.coins.ToString();
     }
 
     public void AddOrIncreaseCount(List<ItemPack> list, ItemName name, int addNum, int cap)
