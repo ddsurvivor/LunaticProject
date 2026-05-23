@@ -2514,6 +2514,9 @@ MonoBehaviour:
     arcWeight: 0
     arcCenterDis: 0
     skillVFXType: 18
+    isBullet: 0
+    isRotate: 0
+    bulletVFXType: 0
     attackPacks:
     - damage: 90
       damageType: 2
@@ -2526,6 +2529,7 @@ MonoBehaviour:
     animationIndex: 0
     isDelaySkill: 1
     layerSkill: 0
+    isRecognitionCheck: 0
 --- !u!65 &334446702
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6628,6 +6632,8 @@ MonoBehaviour:
   - {fileID: 1598945330}
   - {fileID: 1580472316}
   highlightEffect: {fileID: 931639682}
+  evadeChance: 20
+  damageReduction: 20
 --- !u!65 &805328093
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -16508,6 +16514,8 @@ MonoBehaviour:
   buffManager: {fileID: 1713777230}
   skillManager: {fileID: 0}
   spriteManager: {fileID: 0}
+  diceCheckManager: {fileID: 0}
+  tutorialManager: {fileID: 0}
   pieceDataListSO: {fileID: 0}
   areaList: []
   finishDrop: {fileID: 0}
@@ -16540,6 +16548,7 @@ MonoBehaviour:
   BM: {fileID: 1713777224}
   UM: {fileID: 1713777228}
   CM: {fileID: 1713777226}
+  TM: {fileID: 0}
 --- !u!114 &1713777226
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16663,6 +16672,8 @@ MonoBehaviour:
   itemGetPanel: {fileID: 0}
   logPanel: {fileID: 0}
   battleFinishPanel: {fileID: 0}
+  checkDicePanel: {fileID: 0}
+  battleStartUIPanel: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17735,6 +17746,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   circle: {fileID: 960250037}
   moveIcon: {fileID: 1957564247}
+  moveStart: {fileID: 0}
+  moveLine: {fileID: 0}
   attackCircle: {fileID: 1511976315}
   attackIcon: {fileID: 635315704}
   skillIcon: {fileID: 0}
@@ -17746,11 +17759,14 @@ MonoBehaviour:
   fanCircle: {fileID: 0}
   fanLine1: {fileID: 0}
   fanLine2: {fileID: 0}
+  fanPos: {fileID: 0}
   arcRoot: {fileID: 0}
   arcOuter: {fileID: 0}
   arcInnerMask: {fileID: 0}
   arcLine1: {fileID: 0}
   arcLine2: {fileID: 0}
+  movelineLengthFactor: 3.8
+  lineOffset: 0.5
   isPlayerRange: 0
 --- !u!4 &1830372241
 Transform:
@@ -17805,6 +17821,8 @@ MonoBehaviour:
   - {fileID: 689035693}
   - {fileID: 422393545}
   highlightEffect: {fileID: 1733852695}
+  evadeChance: 20
+  damageReduction: 20
 --- !u!65 &1842989457
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -18079,22 +18097,7 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: itemPrefabDic
-      Entry: 7
-      Data: 2|System.Collections.Generic.Dictionary`2[[ItemType, Assembly-CSharp],[UnityEngine.GameObject,
-        UnityEngine.CoreModule]], mscorlib
-    - Name: comparer
-      Entry: 9
-      Data: 1
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
+  objectPoolSO: {fileID: 0}
 --- !u!1 &1893764190
 GameObject:
   m_ObjectHideFlags: 0
