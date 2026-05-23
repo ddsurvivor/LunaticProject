@@ -9,7 +9,7 @@ public class BattleFinishPanel : MonoBehaviour
     
     public GameObject continueButton;
     public GameObject retryButton;
-    public GameObject exitButton;
+    //public GameObject exitButton;
 
 
     public void ShowPanel(bool win, FinishDrop drop =null, int exp = 0)

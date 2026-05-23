@@ -36,8 +36,8 @@ public class RangeUI : MonoBehaviour
     private bool _isShowMoveIcon = false;
 
     private float circleRadius = 1f / 11f / 1.8f;
-   [SerializeField] private float movelineLengthFactor = 3.8f;
-    [SerializeField]private float lineOffset = 0.5f;
+    private float movelineLengthFactor = 4f;
+    private float lineOffset = 1.8f;
     private float _curRange;
 
     private List<PieceController> _curTargets = new();

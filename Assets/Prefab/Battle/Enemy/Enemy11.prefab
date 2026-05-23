@@ -596,7 +596,19 @@ MonoBehaviour:
       m_Calls: []
   OnDead:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1001156843357686723}
+        m_TargetAssemblyTypeName: ExplosiveBarrel, Assembly-CSharp
+        m_MethodName: OnDead
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   outlineEffect: {fileID: 0}
   enemyAIType: 4
   isActived: 1
@@ -651,7 +663,7 @@ MonoBehaviour:
     m_Bits: 15415
   highlightEffect: {fileID: 2264846183981322796}
   pieceController: {fileID: 3819608013901936508}
-  needInit: 1
+  needInit: 0
 --- !u!1 &1457925914143748292
 GameObject:
   m_ObjectHideFlags: 0

@@ -40,7 +40,7 @@ public class BattleManager : MonoBehaviour
         AIController.Init();
         ApplySetting(GM.Ins.battleSetting);
         _delaySkillPack = null;
-        StartBattle();
+        //StartBattle();
         //gray = Resources.Load<Material>("Materials/Gray");
         //grayEnemy = Resources.Load<Material>("Materials/GrayEnemy");
     }
@@ -54,12 +54,11 @@ public class BattleManager : MonoBehaviour
         //     BattleScene.Ins.UM.battleStartUIPanel.PlayBattleStartAnimation(2f);
         // });
         // sequence.AppendInterval(2.2f);
-        
+
         sequence.AppendCallback(() =>
         {
             if (tutorialManager.CheckAndShowTutorial())
             {
-                
             }
             else
             {
@@ -808,6 +807,12 @@ public class BattleManager : MonoBehaviour
         public Vector3 FinalPosition; // 最终可达到的位置
         public bool IsCollided; // 路径中是否发生了碰撞
         public List<PieceController> HitPieces = new List<PieceController>(); // 碰撞到的目标列表
+
+        public MoveResult(Vector3 finalPosition)
+        {
+            FinalPosition = finalPosition;
+            IsCollided = false;
+        }
     }
 
     /// <summary>
@@ -819,9 +824,9 @@ public class BattleManager : MonoBehaviour
     /// <param name="selfObj">调用者自身，用于排除碰撞</param>
     /// <returns>包含终点和碰撞信息的 MoveResult</returns>
     public MoveResult CalculateValidMovePos(Vector3 origin, Vector3 direction, float maxDistance
-        , GameObject selfObj)
+        , GameObject selfObj, bool ignorePieces = false)
     {
-        MoveResult result = new MoveResult();
+        MoveResult result = new MoveResult(origin);
         float step = 0.5f;
         Vector3 lastValidPos = origin;
 
@@ -839,7 +844,7 @@ public class BattleManager : MonoBehaviour
             {
                 // 判定是否撞到墙壁或非自身的棋子
                 bool isWall = wallHit.collider.CompareTag("Wall");
-                bool isPiece = wallHit.collider.CompareTag("Piece") &&
+                bool isPiece = !ignorePieces && wallHit.collider.CompareTag("Piece") &&
                                wallHit.collider.gameObject != selfObj;
 
                 if (isWall || isPiece)
@@ -867,7 +872,7 @@ public class BattleManager : MonoBehaviour
             {
                 if (groundHit.collider.CompareTag("Ground"))
                 {
-                    lastValidPos = groundHit.point;
+                    lastValidPos = new Vector3( groundHit.point.x, origin.y, groundHit.point.z);
                 }
                 else if (groundHit.collider.gameObject != selfObj)
                 {

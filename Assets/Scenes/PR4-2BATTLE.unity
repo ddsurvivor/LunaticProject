@@ -129,7 +129,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh115622
+  m_Name: pb_Mesh689226
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -5037,7 +5037,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1457925912296907158, guid: 8d6292dc2cae8284f9e33a81f978d97d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 19.29
+      value: 22.8
       objectReference: {fileID: 0}
     - target: {fileID: 1457925912296907158, guid: 8d6292dc2cae8284f9e33a81f978d97d, type: 3}
       propertyPath: m_LocalPosition.y
@@ -5045,7 +5045,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1457925912296907158, guid: 8d6292dc2cae8284f9e33a81f978d97d, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -21.03
+      value: -38.6
       objectReference: {fileID: 0}
     - target: {fileID: 1457925912296907158, guid: 8d6292dc2cae8284f9e33a81f978d97d, type: 3}
       propertyPath: m_LocalRotation.w
@@ -16104,6 +16104,7 @@ MonoBehaviour:
   skillManager: {fileID: 0}
   spriteManager: {fileID: 0}
   diceCheckManager: {fileID: 0}
+  tutorialManager: {fileID: 0}
   pieceDataListSO: {fileID: 0}
   areaList: []
   finishDrop: {fileID: 0}
@@ -16261,6 +16262,7 @@ MonoBehaviour:
   logPanel: {fileID: 0}
   battleFinishPanel: {fileID: 0}
   checkDicePanel: {fileID: 0}
+  battleStartUIPanel: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17698,6 +17700,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   circle: {fileID: 960250037}
   moveIcon: {fileID: 1957564247}
+  moveStart: {fileID: 0}
+  moveLine: {fileID: 0}
   attackCircle: {fileID: 1511976315}
   attackIcon: {fileID: 635315704}
   skillIcon: {fileID: 0}
@@ -18204,22 +18208,7 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: itemPrefabDic
-      Entry: 7
-      Data: 2|System.Collections.Generic.Dictionary`2[[ItemType, Assembly-CSharp],[UnityEngine.GameObject,
-        UnityEngine.CoreModule]], mscorlib
-    - Name: comparer
-      Entry: 9
-      Data: 1
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
+  objectPoolSO: {fileID: 0}
 --- !u!1001 &1885429083
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18747,7 +18736,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh115514
+  m_Name: pb_Mesh689118
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -19748,7 +19737,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh115916
+  m_Name: pb_Mesh689520
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2

@@ -39,6 +39,7 @@ using UnityEngine.SceneManagement;
             // 临时使用全新游戏存档
             PLAYERPROFILE = new PLAYERPROFILE();
             PLAYERPROFILE.新游戏初始化数值();
+            DebugBattleScene();
         }
 
         private void DebugBattleScene()
@@ -47,7 +48,7 @@ using UnityEngine.SceneManagement;
             // 如果当前场景名称包含battle，则调用战斗
             if (SceneManager.GetActiveScene().name.Contains("BATTLE"))
             {
-               BattleScene.Ins.BM.StartBattle();
+                DOVirtual.DelayedCall(0.5f, () => { BattleScene.Ins.BM.StartBattle(); });
             }
         }
 

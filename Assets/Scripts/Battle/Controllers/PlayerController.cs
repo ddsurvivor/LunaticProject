@@ -114,7 +114,7 @@ public class PlayerController : SerializedMonoBehaviour
     public void EnterBurstMode()
     {
         isBursting = true;
-        burstCharge = 0f;
+        
         UpdateBurstBar();
         totalDamage = 0;
         burstTarget = null;
