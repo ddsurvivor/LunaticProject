@@ -715,6 +715,13 @@ public class PieceController : MonoBehaviour
         //if(!option) hitInfoPanel?.gameObject.SetActive(false);
     }
 
+    [Button("测试发射火箭")]
+    public void TestShoot(Transform targetTransform)
+    {
+        Vector3 targetPos = targetTransform.position;
+        ShootBolt(targetPos, ItemType.ROCKET);
+    }
+    
     protected void ShootBolt(Vector3 tagetPos, ItemType itemType)
     {
         if (itemType == ItemType.NONE)
@@ -736,7 +743,7 @@ public class PieceController : MonoBehaviour
             // 让bolt的forward（z轴）指向目标点，然后旋转90度使x轴指向目标
             bolt.rotation = Quaternion.LookRotation(direction) * Quaternion.Euler(0, -90, 0);
         }
-        bolt.DOMove(targetPosFixed, 2.3f).SetEase(Ease.Linear)
+        bolt.DOMove(targetPosFixed, 0.5f).SetEase(Ease.Flash)
             .OnComplete(() => { ObjectPool.Ins.HideObject(bolt.gameObject); });
     }
 

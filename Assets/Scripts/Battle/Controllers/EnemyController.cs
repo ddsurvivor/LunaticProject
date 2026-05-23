@@ -87,10 +87,10 @@ public class EnemyController : PieceController
         // 播放技能动画
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Skill, false, 1f);
         PlayAudio(skill);
-        /*if (targets.Count > 0)
+        if (targets.Count > 0)
         {
             ShootBolt(targets[0].transform.position, skill.bulletVFXType);
-        }*/
+        }
         // 延迟0.3f
         DOVirtual.DelayedCall(0.3f, () =>
         {
