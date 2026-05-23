@@ -46,6 +46,12 @@ public class AttrModRow : MonoBehaviour {
         progressBar.transform.localScale = new Vector3((float)baseValue / maxValue, 1, 1);
         modBar.transform.localScale = new Vector3((float)(baseValue + pendingAdd) / maxValue, 1, 1);
     }
+
+    public void ShowBtn(bool option)
+    {
+        plusBtn.gameObject.SetActive(option);
+        //minusBtn.gameObject.SetActive(option);
+    }
     
     public void Commit() {
         baseValue += pendingAdd; // 将当前的加点正式合入基础值

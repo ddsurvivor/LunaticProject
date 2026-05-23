@@ -10,24 +10,24 @@ public enum AttrOp { Get=0, Add=1, Set=2,Sub=3 } // 定义操作：读取、累�
 /// </summary>
 public class Player
 {
-    [ShowInInspector][ReadOnly]private string name;
-    [ShowInInspector][ReadOnly]private int hp;
-    [ShowInInspector][ReadOnly]private int _hpmax;
-    [ShowInInspector][ReadOnly]private int staying;//耐力
-    [ShowInInspector][ReadOnly]private int stayingMax;//体力
-    [ShowInInspector][ReadOnly]private int yizhi;//意志
-    [ShowInInspector][ReadOnly]private int tactics;//作战
-    [ShowInInspector][ReadOnly]int Physique;//体能
-    [ShowInInspector][ReadOnly]private int Talk;//沟通
-    [ShowInInspector][ReadOnly]private int Recognition;//模式识别
+    [ShowInInspector]private string name;
+    [ShowInInspector]private int hp;
+    [ShowInInspector]private int _hpmax;
+    [ShowInInspector]private int staying;//耐力
+    [ShowInInspector]private int stayingMax;//体力
+    [ShowInInspector]private int yizhi;//意志
+    [ShowInInspector]private int tactics;//作战
+    [ShowInInspector]int Physique;//体能
+    [ShowInInspector]private int Talk;//沟通
+    [ShowInInspector]private int Recognition;//模式识别
 
     public int curHealth;// 当前血量
     public int curAmmo;// 当前弹药
     public int curMana;// 当前能量
     public string spriteName;
     
-    [ShowInInspector][ReadOnly]private int skillPoints; // 当前可用点数
-    [ShowInInspector][ReadOnly]private int level;
+    [ShowInInspector]private int skillPoints; // 当前可用点数
+    [ShowInInspector]private int level;
     
     // 存储 ID：3个普通槽位，2个武器槽位
     public int[] normalSlots = new int[3]; 

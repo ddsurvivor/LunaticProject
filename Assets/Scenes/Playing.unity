@@ -4953,7 +4953,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u4ED3\u5E93\u9875\u9762"
+  m_Text: "\u8BFB\u53D6\u5B58\u6863"
 --- !u!222 &537090720
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -13913,7 +13913,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1212825997}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1742346902}
+        m_TargetAssemblyTypeName: UIPanel, Assembly-CSharp
+        m_MethodName: ShowPanel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1212825997
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21064,6 +21076,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 6464183035913034552, guid: a67b4eb6cfa23c146a56801440dd9c3a, type: 3}
   m_PrefabInstance: {fileID: 1742346900}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1742346902 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6464183035913034555, guid: a67b4eb6cfa23c146a56801440dd9c3a, type: 3}
+  m_PrefabInstance: {fileID: 1742346900}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5623b0666b804f999ba9465774d07a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1746217306
 GameObject:
   m_ObjectHideFlags: 0
