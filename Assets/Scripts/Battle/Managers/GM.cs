@@ -46,7 +46,7 @@ using UnityEngine.SceneManagement;
         {
             // 仅供测试用
             // 如果当前场景名称包含battle，则调用战斗
-            if (SceneManager.GetActiveScene().name.Contains("BATTLE"))
+            if (SceneManager.GetActiveScene().name.Contains("BATTLE") || SceneManager.GetActiveScene().name.Contains("Boss"))
             {
                 DOVirtual.DelayedCall(0.5f, () => { BattleScene.Ins.BM.StartBattle(); });
             }
