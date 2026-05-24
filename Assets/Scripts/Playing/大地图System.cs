@@ -73,7 +73,10 @@ public class 大地图System : SerializedMonoBehaviour
 
         是可以点击地图事件 = false;
 
-        当前地图.transform.DOScale(Vector3.one * 点击后放大倍率, 点击后放大进行时间);
+        当前地图.transform.DOScale(Vector3.one * 点击后放大倍率, 点击后放大进行时间).OnComplete(() =>
+        {
+            当前地图.transform.localScale = Vector3.one;
+        });
         StartCoroutine(wait());
 
         IEnumerator wait()

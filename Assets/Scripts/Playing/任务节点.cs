@@ -51,6 +51,7 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     {
         smallPanelOriginalPos = smallPanel.transform.localPosition;
         smallPanel.SetActive(false);
+        detialInfoPanel.SetActive(false);
         buttonOriginalPos = button.transform.localPosition;
         if (iconIndex < 按钮节点图片.Length)
         {

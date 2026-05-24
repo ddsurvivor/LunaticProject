@@ -66,7 +66,7 @@ using UnityEngine.SceneManagement;
             this.endLog = endLog;
             this.battleSetting = setting;
             大地图System.instance.battleStartUIPanel.PlayBattleStartAnimation(1f);
-            DOVirtual.DelayedCall(1f, () =>
+            DOVirtual.DelayedCall(0.7f, () =>
             {
                 battleTransitionPanel.TransitionToBattle(battleScene);
             });

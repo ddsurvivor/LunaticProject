@@ -322,16 +322,18 @@ public class 剧本System : MonoBehaviour
         }
     }
 
+    private Tweener shakeTween;
     public void 执行震动(float strength = 20f, float duration = 0.5f, int vibrato = 10)
     {
+        shakeTween?.Kill();
         if (震动目标 == null)
         {
             Debug.LogError("震动目标未设置，请在Inspector中设置震动目标");
-            transform.DOShakePosition(duration, strength, vibrato);
+            shakeTween = transform.DOShakePosition(duration, strength, vibrato);
         }
         else
         {
-            震动目标.DOShakePosition(duration, strength, vibrato);
+            shakeTween = 震动目标.DOShakePosition(duration, strength, vibrato);
         }
     }
 
