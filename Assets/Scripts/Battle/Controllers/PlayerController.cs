@@ -10,19 +10,18 @@ using UnityEngine.UI;
 public class PlayerController : SerializedMonoBehaviour
 {
     public List<PieceController> pieces = new();
-    public List<PieceController> keyPieces = new();// 关键棋子，全部死亡后直接失败
+    public List<PieceController> keyPieces = new(); // 关键棋子，全部死亡后直接失败
     [ReadOnly] public bool isInTurn;
     [ReadOnly] public bool isBursting; // 是否处于聚能状态
 
     public float burstCharge = 0f; // 聚能值
-    [ReadOnly]  public float maxBurstCharge = 100f; // 最大聚能值
+    [ReadOnly] public float maxBurstCharge = 100f; // 最大聚能值
     public bool ableBurst => burstCharge >= maxBurstCharge && !isBursting; // 是否可以发动聚能
 
-    [ReadOnly]  public int totalDamage; // 对单一敌人造成的总伤害数值
+    [ReadOnly] public int totalDamage; // 对单一敌人造成的总伤害数值
     [ReadOnly] public PieceController burstTarget; // 当前聚能回合攻击的单一目标敌人
 
-    [Header("UI")] 
-    public Image burstChargeBarFill; // 聚能条填充部分
+    [Header("UI")] public Image burstChargeBarFill; // 聚能条填充部分
 
     private float originWidth = 1842.2f;
 
@@ -37,7 +36,7 @@ public class PlayerController : SerializedMonoBehaviour
         UpdateBurstBar(true);
         foreach (var piece in pieces)
         {
-            if(piece == null) continue;
+            if (piece == null) continue;
             piece.Init(this, BattleScene.Ins.BM.pieceDataListSO.GetPieceData(piece.pieceID));
         }
 
@@ -53,6 +52,7 @@ public class PlayerController : SerializedMonoBehaviour
         {
             piece.TurnStart();
         }
+
         // 相机锁定第一个棋子
         foreach (var piece in pieces)
         {
@@ -114,7 +114,7 @@ public class PlayerController : SerializedMonoBehaviour
     public void EnterBurstMode()
     {
         isBursting = true;
-        
+
         UpdateBurstBar();
         totalDamage = 0;
         burstTarget = null;
@@ -129,11 +129,10 @@ public class PlayerController : SerializedMonoBehaviour
         BattleScene.Ins.UM.burstBtnImage.gameObject.SetActive(true);
         BattleScene.Ins.UM.burstStart.color = new Color(1f, 1f, 1f, 1f);
         BattleScene.Ins.UM.burstStart.gameObject.SetActive(true);
-        BattleScene.Ins.UM.burstStart.DOFade(0f, 0.5f).SetDelay(0.6f).OnComplete(() => 
+        BattleScene.Ins.UM.burstStart.DOFade(0f, 0.5f).SetDelay(0.6f).OnComplete(() =>
             BattleScene.Ins.UM.burstStart.gameObject.SetActive(false));
         // 所有图片变色
         BattleScene.Ins.BM.ShowBurstGray(true);
-
     }
 
     /// <summary>
@@ -141,22 +140,26 @@ public class PlayerController : SerializedMonoBehaviour
     /// </summary>
     public void EndBurstMode()
     {
+        if (isBursting)
+        {
+            BattleScene.Ins.BM.ShowBurstGray(false);
+            BattleScene.Ins.UM.ShowBurstReady(false);
+            BattleScene.Ins.UM.burstBtnImage.gameObject.SetActive(false);
+            BattleScene.Ins.UM.burstEnd.color = new Color(1f, 1f, 1f, 1f);
+            BattleScene.Ins.UM.burstEnd.gameObject.SetActive(true);
+            BattleScene.Ins.UM.burstEnd.DOFade(0f, 0.5f)
+                .SetDelay(1f)
+                .OnComplete(() =>
+                    BattleScene.Ins.UM.burstEnd.gameObject.SetActive(false));
+            Debug.Log("聚能状态结束");
+        }
+
         isBursting = false;
         burstCharge = 0f;
         UpdateBurstBar();
         totalDamage = 0;
         burstTarget = null;
         //BattleScene.Ins.BM.camera.ActiveBurstMode(false);
-        BattleScene.Ins.BM.ShowBurstGray(false);
-        BattleScene.Ins.UM.ShowBurstReady(false);
-        BattleScene.Ins.UM.burstBtnImage.gameObject.SetActive(false);
-        BattleScene.Ins.UM.burstEnd.color = new Color(1f, 1f, 1f, 1f);
-        BattleScene.Ins.UM.burstEnd.gameObject.SetActive(true);
-        BattleScene.Ins.UM.burstEnd.DOFade(0f, 0.5f)
-            .SetDelay(1f)
-            .OnComplete(() => 
-                BattleScene.Ins.UM.burstEnd.gameObject.SetActive(false));
-        Debug.Log("聚能状态结束");
     }
 
 
@@ -169,7 +172,7 @@ public class PlayerController : SerializedMonoBehaviour
 
     public void OnClickBurst()
     {
-        if(!this.isInTurn) return;//只能在回合内发动聚能
+        if (!this.isInTurn) return; //只能在回合内发动聚能
         Debug.Log("发动聚能");
         //BattleScene.Ins.UM.ShowBurstReady(false);
         BattleScene.Ins.UM.burstButton.interactable = false;
@@ -222,7 +225,4 @@ public class PlayerController : SerializedMonoBehaviour
 
         return damage;
     }
-
-
-    
 }
