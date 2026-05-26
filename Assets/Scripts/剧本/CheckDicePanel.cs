@@ -6,6 +6,8 @@ using System.Collections.Generic;
 public class CheckDicePanel : MonoBehaviour
 {
     [Header("骰子六面图片")] public Sprite[] diceSprites; // 0-5分别代表1-6点
+    public RectTransform bgPanel;// 背景
+    private float w = 900f;
 
     //[Header("判定结果图片")]
     //public Sprite successSprite;
@@ -44,6 +46,7 @@ public class CheckDicePanel : MonoBehaviour
             diceImages[i].gameObject.SetActive(i < diceCount);
         }
 
+        bgPanel.sizeDelta = new Vector2(w*diceCount, bgPanel.sizeDelta.y);// 修改尺寸
         //blur.SetActive(true);
         // 播放音效
         if (rollSound != null)
