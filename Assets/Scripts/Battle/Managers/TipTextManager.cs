@@ -11,7 +11,7 @@ public class TipTextManager : MonoBehaviour
     /// <summary>
     /// 提示文本的预设文案数据结构
     /// </summary>
-    [System.Serializable]
+    //[System.Serializable]
     public class TipPresetData
     {
         [Tooltip("能量不足时的提示文本")]
@@ -29,7 +29,10 @@ public class TipTextManager : MonoBehaviour
         public string noValidTarget = "无有效目标";
         
         [Tooltip("道具不足时的格式化提示文本，{0} 会被替换为道具名称")]
-        public string itemInsufficientFormat = "{0}不足"; 
+        public string itemInsufficientFormat = "{0}不足";
+        
+        // 添加buff，n层
+        public string buffAddedFormat = "+{0}{1}";
     }
 
     [Header("文本内容配置")]
@@ -50,6 +53,7 @@ public class TipTextManager : MonoBehaviour
     private void Awake()
     {
         _mainCamera = Camera.main;
+        presetData = new TipPresetData();
     }
 
     /// <summary>
@@ -171,6 +175,12 @@ public class TipTextManager : MonoBehaviour
     public void ShowItemInsufficient(Transform target, string itemName)
     {
         SpawnTipAtTarget(target, string.Format(presetData.itemInsufficientFormat, itemName));
+    }
+    
+    public void ShowBuffAdded(Transform target, string buffName, int stackCount)
+    {
+        string stackText = stackCount > 1 ? $"{stackCount}" : "";
+        SpawnTipAtTarget(target, string.Format(presetData.buffAddedFormat, stackText, buffName));
     }
 
     #endregion

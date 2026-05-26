@@ -8,7 +8,7 @@ public class TipText : MonoBehaviour
     [Header("动画参数配置")]
     [SerializeField] private float moveDistance = 60f;     
     [SerializeField] private float duration = 1.2f;        
-    [SerializeField] private Ease moveEase = Ease.OutCubic; 
+    private Ease moveEase = Ease.OutQuad; 
 
     [SerializeField]
     private Text _text;
@@ -42,8 +42,8 @@ public class TipText : MonoBehaviour
 
         // 4. 并行播放：位移 + 淡出
         _tipSequence.Join(transform.DOLocalMoveY(transform.localPosition.y + moveDistance, duration).SetEase(moveEase));
-        _tipSequence.Join(_text.DOFade(0f, duration));
-
+        //_tipSequence.Join(_text.DOFade(0f, duration));
+        _tipSequence.Insert(duration/2f, _text.DOFade(0f, duration/2f));
         // 5. 动画完成后【自动关闭自身】以供对象池回收
         _tipSequence.OnComplete(() =>
         {

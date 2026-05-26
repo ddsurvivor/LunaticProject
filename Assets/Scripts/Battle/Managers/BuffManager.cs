@@ -18,6 +18,8 @@
                 unit.buffStates.Add(new BuffState(buff, stack));
                 ApplyBuff(buff, unit, true);
             }
+            
+            BattleScene.Ins.BM.tipTextManager.ShowBuffAdded(unit.transform, buff.ToChinese(), stack);
         }
 
         // 移除buff

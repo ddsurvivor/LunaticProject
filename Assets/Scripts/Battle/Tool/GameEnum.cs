@@ -37,6 +37,23 @@ public static class EnumExtensions
             default: return target.ToString();
         }
     }
+    // buff类型转换
+    public static string ToChinese(this BuffType type)
+    {
+        switch (type)
+        {
+            case BuffType.Charge: return "充能";
+            case BuffType.AutoHeal: return "自动治疗";
+            case BuffType.Shield: return "防护";
+            case BuffType.Conceal: return "隐蔽";
+            case BuffType.Disrupt: return "干扰";
+            case BuffType.Overload: return "过载";
+            case BuffType.Bind: return "束缚";
+            case BuffType.Burn: return "燃烧";
+            case BuffType.Frail: return "脆弱";
+            default: return type.ToString();
+        }
+    }
 }
 
 /// <summary>

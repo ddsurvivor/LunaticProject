@@ -225,6 +225,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 skillButtons[j].onClick.AddListener(() => {
                     gameObject.SetActive(false);
                     pc.StartSkillAttack(pc.availableSkills[capturedIndex]);
+                    BattleScene.Ins.UM.skillTooltipUI.HideTooltip();
                 });
                 
                 HoverScale hoverScale = skillButtons[j].GetComponent<HoverScale>();
