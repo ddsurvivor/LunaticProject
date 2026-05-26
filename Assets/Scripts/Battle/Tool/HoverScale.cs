@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
+using UnityEngine.Events;
 
 /// <summary>
 /// 挂载在Button上，实现鼠标悬停时放大，移出时恢复。
@@ -27,7 +28,9 @@ public class HoverScale : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     private Color originalColor;
     public Color hoverColor = Color.black;
-
+    
+    public UnityEvent onHoverEnter; // 鼠标进入时的额外事件
+    public UnityEvent onHoverExit; // 鼠标离开时的额外事件
     void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
@@ -96,6 +99,7 @@ public class HoverScale : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     public void OnPointerEnter(PointerEventData eventData)
     {
         SetHoverState(true);
+        onHoverEnter?.Invoke(); // 触发额外事件
     }
 
     // IPointerExitHandler
@@ -103,6 +107,7 @@ public class HoverScale : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     {
         // 注意：即使 OnPointerExit 被触发，我们也会设置状态，但仍由 Update 进行双重保障
         SetHoverState(false);
+        onHoverExit?.Invoke(); // 触发额外事件
     }
 
     /// <summary>

@@ -543,6 +543,7 @@ public class PieceController : MonoBehaviour
         Debug.Log("重新装填弹药");
         unitAttrCenter.FullAmmo();
         PlayAudio(ActionType.重新装填);
+        BattleScene.Ins.BM.tipTextManager.ShowReloadAmmo(this.transform);
     }
 
     public void StartSkillAttack(SkillPack skillPack)

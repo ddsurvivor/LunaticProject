@@ -17,6 +17,7 @@ public class BattleManager : MonoBehaviour
     public SpriteManager spriteManager;
     public DiceCheckManager diceCheckManager;
     public TutorialManager tutorialManager;
+    public TipTextManager tipTextManager;
 
     public PieceDataListSO pieceDataListSO;
 

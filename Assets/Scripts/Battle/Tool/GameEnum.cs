@@ -23,6 +23,20 @@ public static class EnumExtensions
             default:                  return type.ToString();
         }
     }
+    // 辅助方法：将枚举转换为更易读的中文（可根据你的项目实际枚举修改）
+    public static string ToChinese(this SkillTarget target)
+    {
+        switch (target)
+        {
+            case SkillTarget.Self: return "自身";
+            case SkillTarget.Enemy: return "敌方";
+            case SkillTarget.Ally: return "友方";
+            case SkillTarget.All: return "所有";
+            case SkillTarget.Area: return "区域";
+            case SkillTarget.EnemyAll: return "敌方全体";
+            default: return target.ToString();
+        }
+    }
 }
 
 /// <summary>
@@ -140,6 +154,7 @@ public enum SkillTarget
     All = 6,// 全体单位
     FarthestEnemy = 7,// 最远敌人
 }
+
 
 public enum RangeType
 {

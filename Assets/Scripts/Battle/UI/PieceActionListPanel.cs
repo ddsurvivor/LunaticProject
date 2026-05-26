@@ -220,11 +220,23 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 int capturedIndex = j; // 捕获当前索引
                 skillButtons[j].gameObject.SetActive(true);
                 skillButtons[j].enabled = pc.SkillAvailable(pc.availableSkills[capturedIndex]);
-                skillButtons[j].GetComponentInChildren<Text>().text = pc.availableSkills[j].skillName;
+                skillButtons[j].GetComponentInChildren<Text>().text = pc.availableSkills[capturedIndex].skillName;
                 skillButtons[j].onClick.RemoveAllListeners();
                 skillButtons[j].onClick.AddListener(() => {
                     gameObject.SetActive(false);
                     pc.StartSkillAttack(pc.availableSkills[capturedIndex]);
+                });
+                
+                HoverScale hoverScale = skillButtons[j].GetComponent<HoverScale>();
+                hoverScale.onHoverEnter.RemoveAllListeners();
+                hoverScale.onHoverExit.RemoveAllListeners();
+                hoverScale.onHoverEnter.AddListener(() =>
+                {
+                    BattleScene.Ins.UM.skillTooltipUI.ShowTooltip(pc.availableSkills[capturedIndex]);
+                });
+                hoverScale.onHoverExit.AddListener(() =>
+                {
+                    BattleScene.Ins.UM.skillTooltipUI.HideTooltip();
                 });
             }
         }

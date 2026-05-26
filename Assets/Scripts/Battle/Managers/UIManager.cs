@@ -34,6 +34,7 @@ public class UIManager : SerializedMonoBehaviour
     public BattleStartUIPanel battleStartUIPanel;
     public Image burstStart;
     public Image burstEnd;
+    public SkillTooltipUI skillTooltipUI;
     
     public Dictionary<KeyCode, GameObject> keyPanelDic = new();
     
