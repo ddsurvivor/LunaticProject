@@ -98,14 +98,14 @@ public class EasyButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
         {
             transform.DOScale(btnScale, 0.2f).SetEase(Ease.InOutElastic).OnComplete(()=>
             {
-                OnBtnClick.Invoke();
-                OnBtnUp.Invoke();
+                OnBtnClick?.Invoke();
+                OnBtnUp?.Invoke();
             });
         }
         else
         {
-            OnBtnClick.Invoke();
-            OnBtnUp.Invoke();
+            OnBtnClick?.Invoke();
+            OnBtnUp?.Invoke();
         }
     }
 

@@ -101,7 +101,7 @@ public class PLAYERPROFILE
         player[1].SkillPoints = 5;
         player[2].SkillPoints = 5;*/
 
-
+        componentInventory.AddRange(new List<int>(){5,13});
         // 道具
         itemPacks.Clear();
         itemPacks.Add(new ItemPack(ItemName.能量包, 6));

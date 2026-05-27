@@ -22,6 +22,7 @@ public class ItemData
     public string techName; // 技术名称
     public string itemDescription;
     public Sprite itemIcon;
+    public ItemTag itemTag; // 道具标签
     public EquipType equipType; // 道具类别
     public UseType useType; // 使用类别
     public int price; // 价格

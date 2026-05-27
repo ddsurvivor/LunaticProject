@@ -2,6 +2,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
+/// <summary>
+/// 插件道具格子
+/// </summary>
 public class UIItemSlot : MonoBehaviour, IPointerClickHandler
 {
     public Image iconImage;
