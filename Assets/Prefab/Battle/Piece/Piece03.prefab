@@ -501,8 +501,6 @@ MonoBehaviour:
   hightlightEffect: {fileID: 0}
   _actionListPanel: {fileID: 1933915504802351383}
   pieceDisplay: {fileID: 9066005200974287038}
-  uiCanvas: {fileID: 0}
-  hitInfoPanel: {fileID: 0}
   _pieceData:
     pieceId: 0
     pieceName: 
@@ -521,6 +519,9 @@ MonoBehaviour:
       arcWeight: 0
       arcCenterDis: 0
       skillVFXType: 0
+      isBullet: 0
+      isRotate: 0
+      bulletVFXType: 0
       attackPacks: []
       atkTimes: 1
       buffPacks: []
@@ -530,6 +531,7 @@ MonoBehaviour:
       animationIndex: 0
       isDelaySkill: 0
       layerSkill: 0
+      isRecognitionCheck: 0
     rangedAtk:
       skillName: 
       description: 
@@ -542,6 +544,9 @@ MonoBehaviour:
       arcWeight: 0
       arcCenterDis: 0
       skillVFXType: 0
+      isBullet: 0
+      isRotate: 0
+      bulletVFXType: 0
       attackPacks: []
       atkTimes: 1
       buffPacks: []
@@ -551,6 +556,7 @@ MonoBehaviour:
       animationIndex: 0
       isDelaySkill: 0
       layerSkill: 0
+      isRecognitionCheck: 0
     maxAmmoCount: 0
     evasionRate: 0
     critRate: 0
@@ -587,6 +593,9 @@ MonoBehaviour:
     arcWeight: 0
     arcCenterDis: 0
     skillVFXType: 0
+    isBullet: 0
+    isRotate: 0
+    bulletVFXType: 0
     attackPacks: []
     atkTimes: 1
     buffPacks: []
@@ -596,6 +605,7 @@ MonoBehaviour:
     animationIndex: 0
     isDelaySkill: 0
     layerSkill: 0
+    isRecognitionCheck: 0
   interactAreas: []
   availableActions: 
   availableSkills: []
@@ -603,6 +613,7 @@ MonoBehaviour:
   isIdle: 0
   cantControl: 0
   ableMove: 1
+  deadNotDelete: 0
   OnInit:
     m_PersistentCalls:
       m_Calls: []
@@ -610,6 +621,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnTurnEnd:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHurt:
     m_PersistentCalls:
       m_Calls: []
   OnDead:
@@ -852,7 +866,9 @@ MonoBehaviour:
   critRate: 0
   critDamageRate: 0
   ATK: 0
+  CON: 0
   hpBarFill: {fileID: 0}
+  hpBarUI: {fileID: 0}
   OnDead:
     m_PersistentCalls:
       m_Calls: []
@@ -942,7 +958,8 @@ MonoBehaviour:
       Entry: 8
       Data: 
   pieceSpriteRenderer: {fileID: 8316052725672642768}
-  idleSprite: {fileID: 21300000, guid: 6542ca542a8b5c247a76112de6b7c134, type: 3}
+  idleSprite:
+  - {fileID: 21300000, guid: 6542ca542a8b5c247a76112de6b7c134, type: 3}
   moveSprite: {fileID: 21300000, guid: 3e03b3afe2c033645910796e3175597d, type: 3}
   meleeSprites:
   - {fileID: 21300000, guid: 988d251a3b79a1440a02de7e1a9319c4, type: 3}

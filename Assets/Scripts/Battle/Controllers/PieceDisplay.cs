@@ -17,7 +17,7 @@ public class PieceDisplay : SerializedMonoBehaviour
     // 棋子图片控制脚本，有一个SpriteRenderer用于显示棋子图片
     public SpriteRenderer pieceSpriteRenderer;
     // 有一系列按照规定命名的Sprite资源用于显示不同的棋子图片，分别为idel、move、attack、shoot
-    public Sprite idleSprite;
+    public List<Sprite> idleSprite;
     public Sprite moveSprite;
     
     public List<Sprite> meleeSprites;
@@ -55,7 +55,7 @@ public class PieceDisplay : SerializedMonoBehaviour
         switch (state)
         {
             case PieceDisplayState.Idle:
-                pieceSpriteRenderer.sprite = back ? idleBackSprite : idleSprite;
+                StartCoroutine(PlaySpriteAnimation(idleSprite, frameDuration,true));
                 break;
             case PieceDisplayState.Move:
                 pieceSpriteRenderer.sprite = back ? moveBackSprite : moveSprite;
@@ -92,7 +92,9 @@ public class PieceDisplay : SerializedMonoBehaviour
     private IEnumerator RevertToIdleAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-        pieceSpriteRenderer.sprite = idleSprite;
+        //pieceSpriteRenderer.sprite = idleSprite;
+        // 进入idle动画状态
+        StartCoroutine(PlaySpriteAnimation(idleSprite, frameDuration,true));
         finishAction?.Invoke();
     }
     
@@ -114,6 +116,43 @@ public class PieceDisplay : SerializedMonoBehaviour
             pieceSpriteRenderer.sprite = sprite;
             yield return new WaitForSeconds(frameDuration);
         }
+        finishAction?.Invoke();
+    }
+    private IEnumerator PlaySpriteAnimation(List<Sprite> sprites, float frameDuration, bool loop = false)
+    {
+        // 1. 防御性检查：没图片直接闪人，安全第一
+        if (sprites == null || sprites.Count == 0)
+        {
+            finishAction?.Invoke();
+            yield break;
+        }
+
+        int currentFrame = 0;
+
+        while (true)
+        {
+            // 2. 渲染当前帧
+            pieceSpriteRenderer.sprite = sprites[currentFrame];
+            yield return new WaitForSeconds(frameDuration);
+
+            // 3. 准备切到下一帧
+            currentFrame++;
+
+            // 4. 当一轮动画播放完毕时的核心逻辑判定
+            if (currentFrame >= sprites.Count)
+            {
+                if (loop)
+                {
+                    currentFrame = 0; // 如果是循环，索引归零，继续跑 while
+                }
+                else
+                {
+                    break; // 如果不循环，直接跳出整个 while
+                }
+            }
+        }
+
+        // 5. 只有跳出了 while 循环（即 loop = false 且播完）才会走到这里
         finishAction?.Invoke();
     }
     
