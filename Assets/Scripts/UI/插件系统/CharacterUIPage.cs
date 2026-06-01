@@ -12,6 +12,7 @@ public class CharacterUIPage : MonoBehaviour
     public Text nameText;
     public Text skillPointNumText;
     public Image avatarImage;
+    public Image weaponImage;
     public UIDetailPanel detailPanel;
     public GameObject applyBtn;
     public GameObject resetBtn;
@@ -28,15 +29,22 @@ public class CharacterUIPage : MonoBehaviour
     [SerializeField]
     private List<AttrModRow> rowList = new ();
     [SerializeField]
+    public List<DetailAttributeRow> battleRowList  = new ();
     public List<DetailAttributeRow> armorRowList  = new ();
+    
+    public List<SkillGroup> passiveSkillGroupList = new List<SkillGroup>();
+    public List<SkillGroup> activeSkillGroupList = new List<SkillGroup>();
+
+
     //public SkillPointPanel skillPointPanel;
     private int tempPoints;
-    
+    private PieceData pieceData;
     
     public void ShowPanel(Player player, int unitID)
     {
         this.player = player;
         this.unitID = unitID;
+        pieceData = GM.Ins.DM.pieceDataListSO.GetPieceData(unitID);
         RefreshUI();
         gameObject.SetActive(true);
         detailPanel.gameObject.SetActive(false);
@@ -52,7 +60,6 @@ public class CharacterUIPage : MonoBehaviour
             row.Setup(attrName, currentVal, 200);
         }*/
 
-        PieceData piece = GM.Ins.DM.pieceDataListSO.GetPieceData(unitID);
         // for (int i = 0; i < 3; i++)
         // {
         //     if (i >= rowList.Count) break;
@@ -66,16 +73,49 @@ public class CharacterUIPage : MonoBehaviour
             if (i >= armorRowList.Count) break;
             DetailAttributeRow row = armorRowList[i];
             string attrName = ((DamageType)i+1).ToChinese() + "防护";
-            int currentVal = piece._armorDic[(DamageType)i+1];
+            int currentVal = pieceData._armorDic[(DamageType)i+1];
             row.UpdateInfo(attrName, currentVal, 100);
         }
         skillPointNumText.text = player.SkillPoints.ToString();
+
+
+        foreach (var group in passiveSkillGroupList)
+        {
+            group.gameObject.SetActive(false);
+        }
+        for (var index = 0; index < pieceData.passiveSkillPacks.Count; index++)
+        {
+            var skillPack = pieceData.passiveSkillPacks[index];
+            if (passiveSkillGroupList.Count > index)
+            {
+                passiveSkillGroupList[index].gameObject.SetActive(true);
+                passiveSkillGroupList[index].skillTitle.text = skillPack.skillName;
+                passiveSkillGroupList[index].skillDesc.text = skillPack.description;
+            }
+        }
+
+        foreach (var group in activeSkillGroupList)
+        {
+            group.gameObject.SetActive(false);
+        }
+
+        for (var index = 0; index < pieceData.skillPacks.Count; index++)
+        {
+            var VARIABLE = pieceData.skillPacks[index];
+            if (activeSkillGroupList.Count > index)
+            {
+                activeSkillGroupList[index].gameObject.SetActive(true);
+                activeSkillGroupList[index].skillTitle.text = VARIABLE.skillName;
+                activeSkillGroupList[index].skillDesc.text = VARIABLE.GetSkillDesc();
+            }
+        }
     }
 
     
     public void RefreshUI() {
         
         avatarImage.sprite  = Resources.Load<Sprite>("CG/" + player.spriteName);
+        weaponImage.sprite = pieceData.weaponIcon;
         nameText.text = player.NAME;
         
         // 1. 刷新普通装备槽
@@ -98,6 +138,17 @@ public class CharacterUIPage : MonoBehaviour
         }
         
         tempPoints = player.SkillPoints;
+        
+        // 刷新属性面板
+        
+        // 0生命，1能量，2攻击，3暴击，4对抗
+        battleRowList[0].UpdateInfo("生命", pieceData.maxHealth, 100);
+        battleRowList[1].UpdateInfo("能量", pieceData.maxMana, 100);
+        //ATK += 
+        //CON += (int)(playerData.AccessAttribute(4, AttrOp.Get) * 0.5f);
+        battleRowList[2].UpdateInfo("攻击", (int)(player.AccessAttribute(1, AttrOp.Get) * 0.5f), 100);
+        battleRowList[3].UpdateInfo("暴击", pieceData.critRate+(player.AccessAttribute(3, AttrOp.Get) + player.AccessAttribute(4, AttrOp.Get) ) * 2, 100);
+        battleRowList[4].UpdateInfo("对抗", (int)(player.AccessAttribute(4, AttrOp.Get) * 0.5f), 100);
     }
     
     void InitPanel()
@@ -192,4 +243,12 @@ public class CharacterUIPage : MonoBehaviour
         skillPointNumText.text = tempPoints.ToString();
         //InitPanel();
     }
+}
+
+[System.Serializable]
+public class SkillGroup
+{
+    public GameObject gameObject;
+    public Text skillTitle;
+    public Text skillDesc;
 }

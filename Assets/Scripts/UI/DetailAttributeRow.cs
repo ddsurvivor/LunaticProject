@@ -5,6 +5,8 @@ public class DetailAttributeRow : MonoBehaviour {
     public Text attrNameText;
     public Text attrValueText; // 显示格式如 "85 / 100"
     public Image progressBar; // 进度条组件
+
+    public Image icon;//属性图标
     
     /// <summary>
     /// 更新属性行显示

@@ -38,6 +38,71 @@ public class SkillPack
     public List<SkillEffectBase> additionalEffects = new(); // 额外效果列表
 }
 
+public static class SkillPackExtension
+{
+    public static string GetSkillDesc(this SkillPack skill)
+    {
+
+        // 2. 拼接技能详细信息（消耗、范围、描述等）
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+        sb.AppendLine($"能量消耗: {skill.mpCost}");
+        sb.AppendLine($"作用目标: {(skill.target.ToChinese())}");
+        sb.Append($"作用范围: {skill.rangeValue}");
+
+        // 根据技能范围类型，动态追加特有属性
+        if (skill.rangeType == RangeType.Fan)
+        {
+            sb.Append($" (角度: {skill.rangeAgle}°)");
+        }
+        else if (skill.rangeType == RangeType.Grenade)
+        {
+            sb.Append($" (爆炸半径: {skill.explodeRadius})");
+        }
+
+        sb.AppendLine(); // 换行
+
+        //sb.AppendLine("---------------------------");
+        sb.AppendLine($"技能描述: {skill.description}");
+
+        // 3. 新增：在描述末尾动态追加技能伤害信息
+        if (skill.attackPacks != null && skill.attackPacks.Count > 0)
+        {
+            //sb.AppendLine(); // 与描述隔开一行
+            //sb.AppendLine("【技能伤害】");
+
+            // 如果只有一段伤害，直接整行输出
+            if (skill.attackPacks.Count == 1)
+            {
+                AttackPack atk = skill.attackPacks[0];
+                string critLabel = atk.isCritical ? " (必定暴击)" : "";
+                sb.AppendLine(
+                    $"造成 <b>{atk.damage}</b> 点 {(atk.damageType.ToChinese())}伤害{critLabel}");
+            }
+            // 如果有多段伤害（比如复合属性或连击），循环输出每段细节
+            else
+            {
+                for (int i = 0; i < skill.attackPacks.Count; i++)
+                {
+                    AttackPack atk = skill.attackPacks[i];
+                    string critLabel = atk.isCritical ? " (必定暴击)" : "";
+                    sb.AppendLine(
+                        $"  • 第 {i + 1} 段: <b>{atk.damage}</b> 点 {(atk.damageType.ToChinese())}伤害{critLabel}");
+                }
+            }
+
+            // 如果攻击次数大于 1，可以额外提示总连击数
+            if (skill.atkTimes > 1)
+            {
+                sb.AppendLine($"总计攻击次数: {skill.atkTimes} 次");
+            }
+        }
+
+        // 3. 赋值给详细信息 Text
+        return sb.ToString();
+    }
+
+}
 
 /// <summary>
 /// 技能特殊效果基类，所有技能特殊效果都继承自这个类

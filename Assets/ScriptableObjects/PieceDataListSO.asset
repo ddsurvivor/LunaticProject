@@ -23,8 +23,10 @@ MonoBehaviour:
     - {fileID: 8300000, guid: da1e1f92e0249c84a8bc718972816227, type: 3}
     - {fileID: 8300000, guid: ffbb0148c707b7644bd0af9e9caa1027, type: 3}
     - {fileID: 8300000, guid: 46d60202ad5c25a4ba8bc85b93eec117, type: 3}
+    - {fileID: 21300000, guid: 14fd65569447fb544911d040686eb5e8, type: 3}
     - {fileID: 8300000, guid: f2d0d07c7f82b4646bc799dfb3e198d1, type: 3}
     - {fileID: 8300000, guid: a631fd39cd3f52a4585a2ad4b0f2452c, type: 3}
+    - {fileID: 21300000, guid: c2d5f7f10f77d234fbddc66c302a1324, type: 3}
     - {fileID: 8300000, guid: 17754d4fdb03d0545a69df7cf089e479, type: 3}
     - {fileID: 8300000, guid: 62464e1563603e8428333cb837bdcf42, type: 3}
     - {fileID: 8300000, guid: 8ddb242502d8097458321d8735aaca21, type: 3}
@@ -775,12 +777,40 @@ MonoBehaviour:
     - Name: attrDic
       Entry: 6
       Data: 
+    - Name: passiveSkillPacks
+      Entry: 7
+      Data: 32|System.Collections.Generic.List`1[[PassiveSkillPack, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 33|PassiveSkillPack, Assembly-CSharp
+    - Name: skillName
+      Entry: 1
+      Data: "\u653B\u575A\u624B"
+    - Name: description
+      Entry: 1
+      Data: "\u5BF9\u654C\u4EBA\u9020\u6210\u8FD1\u8DDD\u79BB\u4F24\u5BB3"
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: weaponIcon
+      Entry: 10
+      Data: 7
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: 32|PieceData, Assembly-CSharp
+      Data: 34|PieceData, Assembly-CSharp
     - Name: pieceId
       Entry: 3
       Data: 101
@@ -798,7 +828,7 @@ MonoBehaviour:
       Data: 20
     - Name: meleeAtk
       Entry: 7
-      Data: 33|SkillPack, Assembly-CSharp
+      Data: 35|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
       Data: 
@@ -843,14 +873,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 34|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 36|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 35|AttackPack, Assembly-CSharp
+      Data: 37|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 27
@@ -874,13 +904,13 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 36|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 38|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 37|BuffPack, Assembly-CSharp
+      Data: 39|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 105
@@ -904,7 +934,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 38|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 40|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -917,10 +947,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 7
+      Data: 8
     - Name: consumeItems
       Entry: 7
-      Data: 39|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 41|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -944,14 +974,14 @@ MonoBehaviour:
       Data: false
     - Name: additionalEffects
       Entry: 7
-      Data: 40|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
+      Data: 42|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 41|HitBackEffect, Assembly-CSharp
+      Data: 43|HitBackEffect, Assembly-CSharp
     - Name: dis
       Entry: 4
       Data: 5
@@ -972,7 +1002,7 @@ MonoBehaviour:
       Data: 
     - Name: rangedAtk
       Entry: 7
-      Data: 42|SkillPack, Assembly-CSharp
+      Data: 44|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
       Data: 
@@ -1017,14 +1047,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 43|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 45|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 44|AttackPack, Assembly-CSharp
+      Data: 46|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 18
@@ -1048,13 +1078,13 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 45|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 47|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 46|BuffPack, Assembly-CSharp
+      Data: 48|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 104
@@ -1078,7 +1108,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 47|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 49|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -1094,7 +1124,7 @@ MonoBehaviour:
       Data: 1
     - Name: consumeItems
       Entry: 7
-      Data: 48|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 50|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -1118,7 +1148,7 @@ MonoBehaviour:
       Data: false
     - Name: additionalEffects
       Entry: 7
-      Data: 49|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
+      Data: 51|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -1146,11 +1176,11 @@ MonoBehaviour:
       Data: 180
     - Name: actionSounds
       Entry: 7
-      Data: 50|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
+      Data: 52|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
         UnityEngine.AudioModule]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 51|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
+      Data: 53|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -1244,13 +1274,13 @@ MonoBehaviour:
       Data: 
     - Name: skillPacks
       Entry: 7
-      Data: 52|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]], mscorlib
+      Data: 54|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 53|SkillPack, Assembly-CSharp
+      Data: 55|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
       Data: "\u9AD8\u9891\u9707\u8361"
@@ -1295,14 +1325,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 54|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 56|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 55|AttackPack, Assembly-CSharp
+      Data: 57|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 40
@@ -1326,13 +1356,13 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 56|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 58|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 57|BuffPack, Assembly-CSharp
+      Data: 59|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 105
@@ -1356,7 +1386,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 58|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 60|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -1372,7 +1402,7 @@ MonoBehaviour:
       Data: 0
     - Name: consumeItems
       Entry: 7
-      Data: 59|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 61|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -1396,14 +1426,14 @@ MonoBehaviour:
       Data: false
     - Name: additionalEffects
       Entry: 7
-      Data: 60|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
+      Data: 62|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 61|HitBackEffect, Assembly-CSharp
+      Data: 63|HitBackEffect, Assembly-CSharp
     - Name: dis
       Entry: 4
       Data: 7
@@ -1424,7 +1454,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 62|SkillPack, Assembly-CSharp
+      Data: 64|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
       Data: "\u5B9A\u5411\u80FD\u8F70\u51FB"
@@ -1469,14 +1499,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 63|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 65|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 64|AttackPack, Assembly-CSharp
+      Data: 66|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 25
@@ -1500,13 +1530,13 @@ MonoBehaviour:
       Data: 1
     - Name: buffPacks
       Entry: 7
-      Data: 65|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 67|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 66|BuffPack, Assembly-CSharp
+      Data: 68|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 104
@@ -1530,7 +1560,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 67|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 69|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -1543,10 +1573,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 8
+      Data: 9
     - Name: consumeItems
       Entry: 7
-      Data: 68|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 70|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -1570,7 +1600,7 @@ MonoBehaviour:
       Data: false
     - Name: additionalEffects
       Entry: 7
-      Data: 69|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
+      Data: 71|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -1592,11 +1622,11 @@ MonoBehaviour:
       Data: 
     - Name: _armorDic
       Entry: 7
-      Data: 70|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
+      Data: 72|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 71|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
+      Data: 73|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -1666,7 +1696,7 @@ MonoBehaviour:
       Data: 12
     - Name: dropItemList
       Entry: 7
-      Data: 72|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 74|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -1682,12 +1712,28 @@ MonoBehaviour:
     - Name: attrDic
       Entry: 6
       Data: 
+    - Name: passiveSkillPacks
+      Entry: 7
+      Data: 75|System.Collections.Generic.List`1[[PassiveSkillPack, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: weaponIcon
+      Entry: 10
+      Data: 10
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: 73|PieceData, Assembly-CSharp
+      Data: 76|PieceData, Assembly-CSharp
     - Name: pieceId
       Entry: 3
       Data: 2
@@ -1705,7 +1751,7 @@ MonoBehaviour:
       Data: 25
     - Name: meleeAtk
       Entry: 7
-      Data: 74|SkillPack, Assembly-CSharp
+      Data: 77|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -1750,14 +1796,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 75|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 78|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 76|AttackPack, Assembly-CSharp
+      Data: 79|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 17
@@ -1781,7 +1827,7 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 77|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 80|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -1793,7 +1839,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 78|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 81|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -1809,7 +1855,7 @@ MonoBehaviour:
       Data: 
     - Name: consumeItems
       Entry: 7
-      Data: 79|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 82|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -1839,7 +1885,7 @@ MonoBehaviour:
       Data: 
     - Name: rangedAtk
       Entry: 7
-      Data: 80|SkillPack, Assembly-CSharp
+      Data: 83|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -1884,14 +1930,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 81|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 84|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 82|AttackPack, Assembly-CSharp
+      Data: 85|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 17
@@ -1915,7 +1961,7 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 83|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 86|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -1927,7 +1973,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 84|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 87|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -1943,7 +1989,7 @@ MonoBehaviour:
       Data: 
     - Name: consumeItems
       Entry: 7
-      Data: 85|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 88|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -1985,11 +2031,11 @@ MonoBehaviour:
       Data: 180
     - Name: actionSounds
       Entry: 7
-      Data: 86|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
+      Data: 89|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
         UnityEngine.AudioModule]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 87|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
+      Data: 90|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -2011,7 +2057,7 @@ MonoBehaviour:
       Data: 3
     - Name: $v
       Entry: 10
-      Data: 9
+      Data: 11
     - Name: 
       Entry: 8
       Data: 
@@ -2023,7 +2069,7 @@ MonoBehaviour:
       Data: 1
     - Name: $v
       Entry: 10
-      Data: 10
+      Data: 12
     - Name: 
       Entry: 8
       Data: 
@@ -2047,7 +2093,7 @@ MonoBehaviour:
       Data: 4
     - Name: $v
       Entry: 10
-      Data: 11
+      Data: 13
     - Name: 
       Entry: 8
       Data: 
@@ -2083,13 +2129,13 @@ MonoBehaviour:
       Data: 
     - Name: skillPacks
       Entry: 7
-      Data: 88|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]], mscorlib
+      Data: 91|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 89|SkillPack, Assembly-CSharp
+      Data: 92|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
       Data: "\u5149\u77DB"
@@ -2134,14 +2180,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 90|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 93|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 91|AttackPack, Assembly-CSharp
+      Data: 94|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 10
@@ -2156,7 +2202,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 92|AttackPack, Assembly-CSharp
+      Data: 95|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 15
@@ -2180,13 +2226,13 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 93|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 96|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 3
     - Name: 
       Entry: 7
-      Data: 94|BuffPack, Assembly-CSharp
+      Data: 97|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 101
@@ -2204,7 +2250,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 95|BuffPack, Assembly-CSharp
+      Data: 98|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 102
@@ -2222,7 +2268,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 96|BuffPack, Assembly-CSharp
+      Data: 99|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 1
@@ -2246,7 +2292,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 97|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 100|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -2259,10 +2305,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 12
+      Data: 14
     - Name: consumeItems
       Entry: 7
-      Data: 98|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 101|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -2286,14 +2332,14 @@ MonoBehaviour:
       Data: true
     - Name: additionalEffects
       Entry: 7
-      Data: 99|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
+      Data: 102|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 100|HitBackEffect, Assembly-CSharp
+      Data: 103|HitBackEffect, Assembly-CSharp
     - Name: dis
       Entry: 4
       Data: 5
@@ -2320,11 +2366,11 @@ MonoBehaviour:
       Data: 
     - Name: _armorDic
       Entry: 7
-      Data: 101|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
+      Data: 104|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 102|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
+      Data: 105|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -2385,11 +2431,11 @@ MonoBehaviour:
       Data: 2
     - Name: _elementAddDamage
       Entry: 7
-      Data: 103|System.Collections.Generic.Dictionary`2[[PieceElementType, Assembly-CSharp],[System.Int32,
+      Data: 106|System.Collections.Generic.Dictionary`2[[PieceElementType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 104|System.Collections.Generic.EnumEqualityComparer`1[[PieceElementType,
+      Data: 107|System.Collections.Generic.EnumEqualityComparer`1[[PieceElementType,
         Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
@@ -2429,7 +2475,7 @@ MonoBehaviour:
       Data: 5
     - Name: dropItemList
       Entry: 7
-      Data: 105|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 108|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -2445,12 +2491,28 @@ MonoBehaviour:
     - Name: attrDic
       Entry: 6
       Data: 
+    - Name: passiveSkillPacks
+      Entry: 7
+      Data: 109|System.Collections.Generic.List`1[[PassiveSkillPack, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: weaponIcon
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: 106|PieceData, Assembly-CSharp
+      Data: 110|PieceData, Assembly-CSharp
     - Name: pieceId
       Entry: 3
       Data: 102
@@ -2468,7 +2530,7 @@ MonoBehaviour:
       Data: 25
     - Name: meleeAtk
       Entry: 7
-      Data: 107|SkillPack, Assembly-CSharp
+      Data: 111|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -2513,14 +2575,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 108|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 112|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 109|AttackPack, Assembly-CSharp
+      Data: 113|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 30
@@ -2544,7 +2606,7 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 110|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 114|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -2556,7 +2618,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 111|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 115|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -2572,7 +2634,7 @@ MonoBehaviour:
       Data: 
     - Name: consumeItems
       Entry: 7
-      Data: 112|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 116|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -2602,7 +2664,7 @@ MonoBehaviour:
       Data: 
     - Name: rangedAtk
       Entry: 7
-      Data: 113|SkillPack, Assembly-CSharp
+      Data: 117|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -2647,14 +2709,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 114|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 118|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 115|AttackPack, Assembly-CSharp
+      Data: 119|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 30
@@ -2678,7 +2740,7 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 116|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 120|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -2690,7 +2752,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 117|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 121|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -2706,7 +2768,7 @@ MonoBehaviour:
       Data: 
     - Name: consumeItems
       Entry: 7
-      Data: 118|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 122|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -2748,11 +2810,11 @@ MonoBehaviour:
       Data: 180
     - Name: actionSounds
       Entry: 7
-      Data: 119|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
+      Data: 123|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
         UnityEngine.AudioModule]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 120|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
+      Data: 124|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -2774,7 +2836,7 @@ MonoBehaviour:
       Data: 3
     - Name: $v
       Entry: 10
-      Data: 9
+      Data: 11
     - Name: 
       Entry: 8
       Data: 
@@ -2786,7 +2848,7 @@ MonoBehaviour:
       Data: 1
     - Name: $v
       Entry: 10
-      Data: 10
+      Data: 12
     - Name: 
       Entry: 8
       Data: 
@@ -2810,7 +2872,7 @@ MonoBehaviour:
       Data: 4
     - Name: $v
       Entry: 10
-      Data: 11
+      Data: 13
     - Name: 
       Entry: 8
       Data: 
@@ -2846,14 +2908,14 @@ MonoBehaviour:
       Data: 
     - Name: skillPacks
       Entry: 7
-      Data: 121|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
+      Data: 125|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 122|SkillPack, Assembly-CSharp
+      Data: 126|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
       Data: "\u5149\u77DB\u6A2A\u65A9"
@@ -2898,14 +2960,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 123|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 127|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 124|AttackPack, Assembly-CSharp
+      Data: 128|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 5
@@ -2920,7 +2982,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 125|AttackPack, Assembly-CSharp
+      Data: 129|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 30
@@ -2944,13 +3006,13 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 126|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 130|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 3
     - Name: 
       Entry: 7
-      Data: 127|BuffPack, Assembly-CSharp
+      Data: 131|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 101
@@ -2968,7 +3030,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 128|BuffPack, Assembly-CSharp
+      Data: 132|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 102
@@ -2986,7 +3048,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 129|BuffPack, Assembly-CSharp
+      Data: 133|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 1
@@ -3010,7 +3072,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 130|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 134|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -3023,10 +3085,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 12
+      Data: 14
     - Name: consumeItems
       Entry: 7
-      Data: 131|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 135|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -3050,14 +3112,14 @@ MonoBehaviour:
       Data: false
     - Name: additionalEffects
       Entry: 7
-      Data: 132|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
+      Data: 136|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 133|HitBackEffect, Assembly-CSharp
+      Data: 137|HitBackEffect, Assembly-CSharp
     - Name: dis
       Entry: 4
       Data: 6
@@ -3078,7 +3140,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 134|SkillPack, Assembly-CSharp
+      Data: 138|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
       Data: "\u76EE\u51FB\u4E4B\u672F"
@@ -3123,14 +3185,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 135|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 139|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 136|AttackPack, Assembly-CSharp
+      Data: 140|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 35
@@ -3154,13 +3216,13 @@ MonoBehaviour:
       Data: 1
     - Name: buffPacks
       Entry: 7
-      Data: 137|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 141|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 3
     - Name: 
       Entry: 7
-      Data: 138|BuffPack, Assembly-CSharp
+      Data: 142|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 101
@@ -3178,7 +3240,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 139|BuffPack, Assembly-CSharp
+      Data: 143|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 102
@@ -3196,7 +3258,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 140|BuffPack, Assembly-CSharp
+      Data: 144|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 103
@@ -3220,7 +3282,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 141|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 145|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -3233,10 +3295,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 12
+      Data: 14
     - Name: consumeItems
       Entry: 7
-      Data: 142|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 146|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -3260,7 +3322,7 @@ MonoBehaviour:
       Data: true
     - Name: additionalEffects
       Entry: 7
-      Data: 143|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
+      Data: 147|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -3282,11 +3344,11 @@ MonoBehaviour:
       Data: 
     - Name: _armorDic
       Entry: 7
-      Data: 144|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
+      Data: 148|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 145|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
+      Data: 149|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -3347,11 +3409,11 @@ MonoBehaviour:
       Data: 2
     - Name: _elementAddDamage
       Entry: 7
-      Data: 146|System.Collections.Generic.Dictionary`2[[PieceElementType, Assembly-CSharp],[System.Int32,
+      Data: 150|System.Collections.Generic.Dictionary`2[[PieceElementType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 147|System.Collections.Generic.EnumEqualityComparer`1[[PieceElementType,
+      Data: 151|System.Collections.Generic.EnumEqualityComparer`1[[PieceElementType,
         Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
@@ -3391,7 +3453,7 @@ MonoBehaviour:
       Data: 12
     - Name: dropItemList
       Entry: 7
-      Data: 148|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 152|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -3407,12 +3469,28 @@ MonoBehaviour:
     - Name: attrDic
       Entry: 6
       Data: 
+    - Name: passiveSkillPacks
+      Entry: 7
+      Data: 153|System.Collections.Generic.List`1[[PassiveSkillPack, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: weaponIcon
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: 149|PieceData, Assembly-CSharp
+      Data: 154|PieceData, Assembly-CSharp
     - Name: pieceId
       Entry: 3
       Data: 3
@@ -3430,7 +3508,7 @@ MonoBehaviour:
       Data: 25
     - Name: meleeAtk
       Entry: 7
-      Data: 150|SkillPack, Assembly-CSharp
+      Data: 155|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -3475,14 +3553,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 151|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 156|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 152|AttackPack, Assembly-CSharp
+      Data: 157|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 12
@@ -3506,7 +3584,7 @@ MonoBehaviour:
       Data: 1
     - Name: buffPacks
       Entry: 7
-      Data: 153|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 158|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -3518,7 +3596,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 154|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 159|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -3534,7 +3612,7 @@ MonoBehaviour:
       Data: 0
     - Name: consumeItems
       Entry: 7
-      Data: 155|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 160|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -3564,7 +3642,7 @@ MonoBehaviour:
       Data: 
     - Name: rangedAtk
       Entry: 7
-      Data: 156|SkillPack, Assembly-CSharp
+      Data: 161|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -3609,14 +3687,14 @@ MonoBehaviour:
       Data: 41
     - Name: attackPacks
       Entry: 7
-      Data: 157|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 162|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 158|AttackPack, Assembly-CSharp
+      Data: 163|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 13
@@ -3640,7 +3718,7 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 159|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 164|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -3652,7 +3730,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 160|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 165|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -3668,7 +3746,7 @@ MonoBehaviour:
       Data: 
     - Name: consumeItems
       Entry: 7
-      Data: 161|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 166|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -3710,11 +3788,11 @@ MonoBehaviour:
       Data: 180
     - Name: actionSounds
       Entry: 7
-      Data: 162|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
+      Data: 167|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
         UnityEngine.AudioModule]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 163|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
+      Data: 168|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -3736,7 +3814,7 @@ MonoBehaviour:
       Data: 3
     - Name: $v
       Entry: 10
-      Data: 13
+      Data: 15
     - Name: 
       Entry: 8
       Data: 
@@ -3808,14 +3886,14 @@ MonoBehaviour:
       Data: 
     - Name: skillPacks
       Entry: 7
-      Data: 164|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
+      Data: 169|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 165|SkillPack, Assembly-CSharp
+      Data: 170|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
       Data: "\u6CBB\u7597\u5F39"
@@ -3860,7 +3938,7 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 166|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 171|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -3876,13 +3954,13 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 167|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 172|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 168|BuffPack, Assembly-CSharp
+      Data: 173|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 2
@@ -3906,7 +3984,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 169|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 174|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -3922,16 +4000,16 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 14
+      Data: 16
     - Name: consumeItems
       Entry: 7
-      Data: 170|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 175|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 171|ItemPack, Assembly-CSharp
+      Data: 176|ItemPack, Assembly-CSharp
     - Name: itemName
       Entry: 3
       Data: 4
@@ -3967,7 +4045,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 172|SkillPack, Assembly-CSharp
+      Data: 177|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
       Data: "\u7B49\u79BB\u5B50\u69B4\u5F39"
@@ -4012,14 +4090,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 173|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 178|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 174|AttackPack, Assembly-CSharp
+      Data: 179|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 21
@@ -4043,13 +4121,13 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 175|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 180|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 176|BuffPack, Assembly-CSharp
+      Data: 181|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 104
@@ -4067,7 +4145,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 177|BuffPack, Assembly-CSharp
+      Data: 182|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 0
@@ -4091,7 +4169,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 178|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 183|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -4104,10 +4182,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 15
+      Data: 17
     - Name: consumeItems
       Entry: 7
-      Data: 179|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 184|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -4143,11 +4221,11 @@ MonoBehaviour:
       Data: 
     - Name: _armorDic
       Entry: 7
-      Data: 180|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
+      Data: 185|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 181|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
+      Data: 186|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -4217,7 +4295,7 @@ MonoBehaviour:
       Data: 5
     - Name: dropItemList
       Entry: 7
-      Data: 182|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 187|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -4233,12 +4311,28 @@ MonoBehaviour:
     - Name: attrDic
       Entry: 6
       Data: 
+    - Name: passiveSkillPacks
+      Entry: 7
+      Data: 188|System.Collections.Generic.List`1[[PassiveSkillPack, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: weaponIcon
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: 183|PieceData, Assembly-CSharp
+      Data: 189|PieceData, Assembly-CSharp
     - Name: pieceId
       Entry: 3
       Data: 103
@@ -4256,7 +4350,7 @@ MonoBehaviour:
       Data: 25
     - Name: meleeAtk
       Entry: 7
-      Data: 184|SkillPack, Assembly-CSharp
+      Data: 190|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -4301,14 +4395,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 185|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 191|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 186|AttackPack, Assembly-CSharp
+      Data: 192|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 20
@@ -4332,7 +4426,7 @@ MonoBehaviour:
       Data: 1
     - Name: buffPacks
       Entry: 7
-      Data: 187|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 193|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -4344,7 +4438,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 188|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 194|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -4357,10 +4451,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 7
+      Data: 8
     - Name: consumeItems
       Entry: 7
-      Data: 189|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 195|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -4390,7 +4484,7 @@ MonoBehaviour:
       Data: 
     - Name: rangedAtk
       Entry: 7
-      Data: 190|SkillPack, Assembly-CSharp
+      Data: 196|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -4435,14 +4529,14 @@ MonoBehaviour:
       Data: 41
     - Name: attackPacks
       Entry: 7
-      Data: 191|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 197|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 192|AttackPack, Assembly-CSharp
+      Data: 198|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 20
@@ -4466,7 +4560,7 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 193|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 199|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -4478,7 +4572,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 194|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 200|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -4491,10 +4585,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 16
+      Data: 18
     - Name: consumeItems
       Entry: 7
-      Data: 195|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 201|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -4536,11 +4630,11 @@ MonoBehaviour:
       Data: 180
     - Name: actionSounds
       Entry: 7
-      Data: 196|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
+      Data: 202|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
         UnityEngine.AudioModule]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 197|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
+      Data: 203|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -4562,7 +4656,7 @@ MonoBehaviour:
       Data: 3
     - Name: $v
       Entry: 10
-      Data: 13
+      Data: 15
     - Name: 
       Entry: 8
       Data: 
@@ -4634,14 +4728,14 @@ MonoBehaviour:
       Data: 
     - Name: skillPacks
       Entry: 7
-      Data: 198|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
+      Data: 204|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 3
     - Name: 
       Entry: 7
-      Data: 199|SkillPack, Assembly-CSharp
+      Data: 205|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
       Data: "\u4FEE\u590D\u5F39"
@@ -4686,7 +4780,7 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 200|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 206|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -4702,13 +4796,13 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 201|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 207|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 202|BuffPack, Assembly-CSharp
+      Data: 208|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 2
@@ -4732,7 +4826,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 203|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 209|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -4748,16 +4842,16 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 14
+      Data: 16
     - Name: consumeItems
       Entry: 7
-      Data: 204|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 210|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 205|ItemPack, Assembly-CSharp
+      Data: 211|ItemPack, Assembly-CSharp
     - Name: itemName
       Entry: 3
       Data: 4
@@ -4793,7 +4887,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 206|SkillPack, Assembly-CSharp
+      Data: 212|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
       Data: "\u5236\u5BFC\u7206\u88C2\u5F39"
@@ -4838,14 +4932,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 207|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 213|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 208|AttackPack, Assembly-CSharp
+      Data: 214|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 12
@@ -4860,7 +4954,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 209|AttackPack, Assembly-CSharp
+      Data: 215|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 28
@@ -4884,13 +4978,13 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 210|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 216|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 211|BuffPack, Assembly-CSharp
+      Data: 217|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 105
@@ -4908,7 +5002,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 212|BuffPack, Assembly-CSharp
+      Data: 218|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 0
@@ -4932,7 +5026,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 213|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 219|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -4945,10 +5039,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 15
+      Data: 17
     - Name: consumeItems
       Entry: 7
-      Data: 214|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 220|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -4978,7 +5072,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 215|SkillPack, Assembly-CSharp
+      Data: 221|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
       Data: "\u589E\u5E45\u7070\u96FE"
@@ -5023,7 +5117,7 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 216|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 222|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -5039,13 +5133,13 @@ MonoBehaviour:
       Data: 1
     - Name: buffPacks
       Entry: 7
-      Data: 217|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 223|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 218|BuffPack, Assembly-CSharp
+      Data: 224|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 3
@@ -5063,7 +5157,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 219|BuffPack, Assembly-CSharp
+      Data: 225|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 1
@@ -5087,7 +5181,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 220|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 226|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -5100,10 +5194,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 17
+      Data: 19
     - Name: consumeItems
       Entry: 7
-      Data: 221|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 227|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -5127,7 +5221,7 @@ MonoBehaviour:
       Data: false
     - Name: additionalEffects
       Entry: 7
-      Data: 222|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
+      Data: 228|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -5149,11 +5243,11 @@ MonoBehaviour:
       Data: 
     - Name: _armorDic
       Entry: 7
-      Data: 223|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
+      Data: 229|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 224|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
+      Data: 230|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -5223,7 +5317,7 @@ MonoBehaviour:
       Data: 12
     - Name: dropItemList
       Entry: 7
-      Data: 225|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 231|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -5239,12 +5333,28 @@ MonoBehaviour:
     - Name: attrDic
       Entry: 6
       Data: 
+    - Name: passiveSkillPacks
+      Entry: 7
+      Data: 232|System.Collections.Generic.List`1[[PassiveSkillPack, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: weaponIcon
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: 226|PieceData, Assembly-CSharp
+      Data: 233|PieceData, Assembly-CSharp
     - Name: pieceId
       Entry: 3
       Data: 1001
@@ -5262,7 +5372,7 @@ MonoBehaviour:
       Data: 20
     - Name: meleeAtk
       Entry: 7
-      Data: 227|SkillPack, Assembly-CSharp
+      Data: 234|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -5307,7 +5417,7 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 228|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 235|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -5323,7 +5433,7 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 229|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 236|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -5335,7 +5445,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 230|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 237|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -5351,7 +5461,7 @@ MonoBehaviour:
       Data: 
     - Name: consumeItems
       Entry: 7
-      Data: 231|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 238|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -5381,7 +5491,7 @@ MonoBehaviour:
       Data: 
     - Name: rangedAtk
       Entry: 7
-      Data: 232|SkillPack, Assembly-CSharp
+      Data: 239|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
       Data: "\u8BA2\u4E66\u673A"
@@ -5426,14 +5536,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 233|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 240|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 234|AttackPack, Assembly-CSharp
+      Data: 241|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 10
@@ -5448,7 +5558,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 235|AttackPack, Assembly-CSharp
+      Data: 242|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 15
@@ -5472,13 +5582,13 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 236|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 243|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 237|BuffPack, Assembly-CSharp
+      Data: 244|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 103
@@ -5502,7 +5612,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 238|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 245|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -5518,7 +5628,7 @@ MonoBehaviour:
       Data: 
     - Name: consumeItems
       Entry: 7
-      Data: 239|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 246|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -5560,11 +5670,11 @@ MonoBehaviour:
       Data: 180
     - Name: actionSounds
       Entry: 7
-      Data: 240|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
+      Data: 247|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
         UnityEngine.AudioModule]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 241|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
+      Data: 248|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -5586,7 +5696,7 @@ MonoBehaviour:
       Data: 2
     - Name: $v
       Entry: 10
-      Data: 7
+      Data: 8
     - Name: 
       Entry: 8
       Data: 
@@ -5598,7 +5708,7 @@ MonoBehaviour:
       Data: 3
     - Name: $v
       Entry: 10
-      Data: 18
+      Data: 20
     - Name: 
       Entry: 8
       Data: 
@@ -5610,7 +5720,7 @@ MonoBehaviour:
       Data: 
     - Name: skillPacks
       Entry: 7
-      Data: 242|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
+      Data: 249|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -5623,11 +5733,11 @@ MonoBehaviour:
       Data: 
     - Name: _armorDic
       Entry: 7
-      Data: 243|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
+      Data: 250|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 244|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
+      Data: 251|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -5697,13 +5807,13 @@ MonoBehaviour:
       Data: 0
     - Name: dropItemList
       Entry: 7
-      Data: 245|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 252|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 246|ItemPack, Assembly-CSharp
+      Data: 253|ItemPack, Assembly-CSharp
     - Name: itemName
       Entry: 3
       Data: 3
@@ -5724,11 +5834,11 @@ MonoBehaviour:
       Data: 100
     - Name: attrDic
       Entry: 7
-      Data: 247|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
+      Data: 254|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 248|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
+      Data: 255|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
         Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
@@ -5760,12 +5870,18 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: passiveSkillPacks
+      Entry: 6
+      Data: 
+    - Name: weaponIcon
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: 249|PieceData, Assembly-CSharp
+      Data: 256|PieceData, Assembly-CSharp
     - Name: pieceId
       Entry: 3
       Data: 1002
@@ -5783,7 +5899,7 @@ MonoBehaviour:
       Data: 25
     - Name: meleeAtk
       Entry: 7
-      Data: 250|SkillPack, Assembly-CSharp
+      Data: 257|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -5828,7 +5944,7 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 251|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 258|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -5844,7 +5960,7 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 252|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 259|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -5856,7 +5972,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 253|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 260|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -5872,7 +5988,7 @@ MonoBehaviour:
       Data: 
     - Name: consumeItems
       Entry: 7
-      Data: 254|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 261|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -5902,7 +6018,7 @@ MonoBehaviour:
       Data: 
     - Name: rangedAtk
       Entry: 7
-      Data: 255|SkillPack, Assembly-CSharp
+      Data: 262|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -5947,14 +6063,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 256|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 263|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 257|AttackPack, Assembly-CSharp
+      Data: 264|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 12
@@ -5978,7 +6094,7 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 258|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 265|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -5990,7 +6106,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 259|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 266|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -6003,10 +6119,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 18
+      Data: 20
     - Name: consumeItems
       Entry: 7
-      Data: 260|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 267|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -6048,11 +6164,11 @@ MonoBehaviour:
       Data: 180
     - Name: actionSounds
       Entry: 7
-      Data: 261|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
+      Data: 268|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
         UnityEngine.AudioModule]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 262|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
+      Data: 269|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -6074,7 +6190,7 @@ MonoBehaviour:
       Data: 2
     - Name: $v
       Entry: 10
-      Data: 7
+      Data: 8
     - Name: 
       Entry: 8
       Data: 
@@ -6086,7 +6202,7 @@ MonoBehaviour:
       Data: 3
     - Name: $v
       Entry: 10
-      Data: 18
+      Data: 20
     - Name: 
       Entry: 8
       Data: 
@@ -6098,7 +6214,7 @@ MonoBehaviour:
       Data: 
     - Name: skillPacks
       Entry: 7
-      Data: 263|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
+      Data: 270|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -6111,11 +6227,11 @@ MonoBehaviour:
       Data: 
     - Name: _armorDic
       Entry: 7
-      Data: 264|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
+      Data: 271|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 265|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
+      Data: 272|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -6185,13 +6301,13 @@ MonoBehaviour:
       Data: 0
     - Name: dropItemList
       Entry: 7
-      Data: 266|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 273|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 267|ItemPack, Assembly-CSharp
+      Data: 274|ItemPack, Assembly-CSharp
     - Name: itemName
       Entry: 3
       Data: 3
@@ -6212,11 +6328,11 @@ MonoBehaviour:
       Data: 10
     - Name: attrDic
       Entry: 7
-      Data: 268|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
+      Data: 275|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 269|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
+      Data: 276|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
         Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
@@ -6248,12 +6364,18 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: passiveSkillPacks
+      Entry: 6
+      Data: 
+    - Name: weaponIcon
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: 270|PieceData, Assembly-CSharp
+      Data: 277|PieceData, Assembly-CSharp
     - Name: pieceId
       Entry: 3
       Data: 1003
@@ -6271,7 +6393,7 @@ MonoBehaviour:
       Data: 25
     - Name: meleeAtk
       Entry: 7
-      Data: 271|SkillPack, Assembly-CSharp
+      Data: 278|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -6316,166 +6438,17 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 272|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 279|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
-    - Name: 
-      Entry: 7
-      Data: 273|AttackPack, Assembly-CSharp
-    - Name: damage
-      Entry: 3
-      Data: 23
-    - Name: damageType
-      Entry: 3
-      Data: 1
-    - Name: isCritical
-      Entry: 5
-      Data: false
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: atkTimes
-      Entry: 3
-      Data: 1
-    - Name: buffPacks
-      Entry: 7
-      Data: 274|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: skillEffects
-      Entry: 7
-      Data: 275|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
-        mscorlib
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: skillSound
-      Entry: 10
-      Data: 19
-    - Name: consumeItems
-      Entry: 7
-      Data: 276|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: animationIndex
-      Entry: 3
-      Data: 0
-    - Name: isDelaySkill
-      Entry: 5
-      Data: false
-    - Name: layerSkill
-      Entry: 5
-      Data: false
-    - Name: isRecognitionCheck
-      Entry: 5
-      Data: false
-    - Name: additionalEffects
-      Entry: 6
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: rangedAtk
-      Entry: 7
-      Data: 277|SkillPack, Assembly-CSharp
-    - Name: skillName
-      Entry: 6
-      Data: 
-    - Name: description
-      Entry: 6
-      Data: 
-    - Name: mpCost
-      Entry: 3
-      Data: 0
-    - Name: target
-      Entry: 3
-      Data: 1
-    - Name: rangeType
-      Entry: 3
-      Data: 2
-    - Name: rangeValue
-      Entry: 4
-      Data: 10
-    - Name: rangeAgle
-      Entry: 4
-      Data: 30
-    - Name: explodeRadius
-      Entry: 4
-      Data: 0
-    - Name: arcWeight
-      Entry: 4
-      Data: 0
-    - Name: arcCenterDis
-      Entry: 4
-      Data: 0
-    - Name: skillVFXType
-      Entry: 3
-      Data: 0
-    - Name: isBullet
-      Entry: 5
-      Data: false
-    - Name: isRotate
-      Entry: 5
-      Data: false
-    - Name: bulletVFXType
-      Entry: 3
-      Data: 0
-    - Name: attackPacks
-      Entry: 7
-      Data: 278|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
-        mscorlib
-    - Name: 
-      Entry: 12
-      Data: 2
-    - Name: 
-      Entry: 7
-      Data: 279|AttackPack, Assembly-CSharp
-    - Name: damage
-      Entry: 3
-      Data: 17
-    - Name: damageType
-      Entry: 3
-      Data: 2
-    - Name: isCritical
-      Entry: 5
-      Data: false
-    - Name: 
-      Entry: 8
-      Data: 
     - Name: 
       Entry: 7
       Data: 280|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
-      Data: 5
+      Data: 23
     - Name: damageType
       Entry: 3
       Data: 1
@@ -6521,10 +6494,159 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 20
+      Data: 21
     - Name: consumeItems
       Entry: 7
       Data: 283|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: animationIndex
+      Entry: 3
+      Data: 0
+    - Name: isDelaySkill
+      Entry: 5
+      Data: false
+    - Name: layerSkill
+      Entry: 5
+      Data: false
+    - Name: isRecognitionCheck
+      Entry: 5
+      Data: false
+    - Name: additionalEffects
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: rangedAtk
+      Entry: 7
+      Data: 284|SkillPack, Assembly-CSharp
+    - Name: skillName
+      Entry: 6
+      Data: 
+    - Name: description
+      Entry: 6
+      Data: 
+    - Name: mpCost
+      Entry: 3
+      Data: 0
+    - Name: target
+      Entry: 3
+      Data: 1
+    - Name: rangeType
+      Entry: 3
+      Data: 2
+    - Name: rangeValue
+      Entry: 4
+      Data: 10
+    - Name: rangeAgle
+      Entry: 4
+      Data: 30
+    - Name: explodeRadius
+      Entry: 4
+      Data: 0
+    - Name: arcWeight
+      Entry: 4
+      Data: 0
+    - Name: arcCenterDis
+      Entry: 4
+      Data: 0
+    - Name: skillVFXType
+      Entry: 3
+      Data: 0
+    - Name: isBullet
+      Entry: 5
+      Data: false
+    - Name: isRotate
+      Entry: 5
+      Data: false
+    - Name: bulletVFXType
+      Entry: 3
+      Data: 0
+    - Name: attackPacks
+      Entry: 7
+      Data: 285|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 2
+    - Name: 
+      Entry: 7
+      Data: 286|AttackPack, Assembly-CSharp
+    - Name: damage
+      Entry: 3
+      Data: 17
+    - Name: damageType
+      Entry: 3
+      Data: 2
+    - Name: isCritical
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 287|AttackPack, Assembly-CSharp
+    - Name: damage
+      Entry: 3
+      Data: 5
+    - Name: damageType
+      Entry: 3
+      Data: 1
+    - Name: isCritical
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: atkTimes
+      Entry: 3
+      Data: 1
+    - Name: buffPacks
+      Entry: 7
+      Data: 288|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: skillEffects
+      Entry: 7
+      Data: 289|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: skillSound
+      Entry: 10
+      Data: 22
+    - Name: consumeItems
+      Entry: 7
+      Data: 290|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -6566,11 +6688,11 @@ MonoBehaviour:
       Data: 180
     - Name: actionSounds
       Entry: 7
-      Data: 284|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
+      Data: 291|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
         UnityEngine.AudioModule]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 285|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
+      Data: 292|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -6592,7 +6714,7 @@ MonoBehaviour:
       Data: 2
     - Name: $v
       Entry: 10
-      Data: 7
+      Data: 8
     - Name: 
       Entry: 8
       Data: 
@@ -6604,7 +6726,7 @@ MonoBehaviour:
       Data: 3
     - Name: $v
       Entry: 10
-      Data: 18
+      Data: 20
     - Name: 
       Entry: 8
       Data: 
@@ -6616,14 +6738,14 @@ MonoBehaviour:
       Data: 
     - Name: skillPacks
       Entry: 7
-      Data: 286|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
+      Data: 293|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 287|SkillPack, Assembly-CSharp
+      Data: 294|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
       Data: "\u7834\u7247\u69B4\u5F39"
@@ -6668,14 +6790,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 288|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 295|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 289|AttackPack, Assembly-CSharp
+      Data: 296|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 10
@@ -6690,7 +6812,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 290|AttackPack, Assembly-CSharp
+      Data: 297|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 5
@@ -6714,13 +6836,13 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 291|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 298|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 292|BuffPack, Assembly-CSharp
+      Data: 299|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 105
@@ -6744,7 +6866,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 293|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 300|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -6757,10 +6879,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 15
+      Data: 17
     - Name: consumeItems
       Entry: 7
-      Data: 294|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 301|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -6790,7 +6912,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 295|SkillPack, Assembly-CSharp
+      Data: 302|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
       Data: "\u71C3\u70E7\u69B4\u5F39"
@@ -6835,14 +6957,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 296|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 303|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 297|AttackPack, Assembly-CSharp
+      Data: 304|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 10
@@ -6866,13 +6988,13 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 298|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 305|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 299|BuffPack, Assembly-CSharp
+      Data: 306|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 104
@@ -6896,7 +7018,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 300|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 307|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -6909,10 +7031,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 15
+      Data: 17
     - Name: consumeItems
       Entry: 7
-      Data: 301|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 308|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -6948,11 +7070,11 @@ MonoBehaviour:
       Data: 
     - Name: _armorDic
       Entry: 7
-      Data: 302|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
+      Data: 309|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 303|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
+      Data: 310|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -7022,13 +7144,13 @@ MonoBehaviour:
       Data: 0
     - Name: dropItemList
       Entry: 7
-      Data: 304|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 311|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 305|ItemPack, Assembly-CSharp
+      Data: 312|ItemPack, Assembly-CSharp
     - Name: itemName
       Entry: 3
       Data: 3
@@ -7040,7 +7162,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 306|ItemPack, Assembly-CSharp
+      Data: 313|ItemPack, Assembly-CSharp
     - Name: itemName
       Entry: 3
       Data: 4
@@ -7061,11 +7183,11 @@ MonoBehaviour:
       Data: 100
     - Name: attrDic
       Entry: 7
-      Data: 307|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
+      Data: 314|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 308|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
+      Data: 315|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
         Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
@@ -7097,12 +7219,18 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: passiveSkillPacks
+      Entry: 6
+      Data: 
+    - Name: weaponIcon
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: 309|PieceData, Assembly-CSharp
+      Data: 316|PieceData, Assembly-CSharp
     - Name: pieceId
       Entry: 3
       Data: 1004
@@ -7120,7 +7248,7 @@ MonoBehaviour:
       Data: 15
     - Name: meleeAtk
       Entry: 7
-      Data: 310|SkillPack, Assembly-CSharp
+      Data: 317|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -7165,14 +7293,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 311|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 318|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 312|AttackPack, Assembly-CSharp
+      Data: 319|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 15
@@ -7196,7 +7324,7 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 313|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 320|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -7208,7 +7336,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 314|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 321|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -7221,10 +7349,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 21
+      Data: 23
     - Name: consumeItems
       Entry: 7
-      Data: 315|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 322|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -7254,7 +7382,7 @@ MonoBehaviour:
       Data: 
     - Name: rangedAtk
       Entry: 7
-      Data: 316|SkillPack, Assembly-CSharp
+      Data: 323|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -7299,14 +7427,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 317|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 324|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 318|AttackPack, Assembly-CSharp
+      Data: 325|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 15
@@ -7330,13 +7458,13 @@ MonoBehaviour:
       Data: 1
     - Name: buffPacks
       Entry: 7
-      Data: 319|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 326|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 320|BuffPack, Assembly-CSharp
+      Data: 327|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 102
@@ -7360,7 +7488,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 321|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 328|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -7373,10 +7501,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 18
+      Data: 20
     - Name: consumeItems
       Entry: 7
-      Data: 322|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 329|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -7418,11 +7546,11 @@ MonoBehaviour:
       Data: 180
     - Name: actionSounds
       Entry: 7
-      Data: 323|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
+      Data: 330|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
         UnityEngine.AudioModule]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 324|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
+      Data: 331|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -7444,7 +7572,7 @@ MonoBehaviour:
       Data: 2
     - Name: $v
       Entry: 10
-      Data: 7
+      Data: 8
     - Name: 
       Entry: 8
       Data: 
@@ -7456,7 +7584,7 @@ MonoBehaviour:
       Data: 3
     - Name: $v
       Entry: 10
-      Data: 18
+      Data: 20
     - Name: 
       Entry: 8
       Data: 
@@ -7468,7 +7596,7 @@ MonoBehaviour:
       Data: 1
     - Name: $v
       Entry: 10
-      Data: 22
+      Data: 24
     - Name: 
       Entry: 8
       Data: 
@@ -7480,7 +7608,7 @@ MonoBehaviour:
       Data: 
     - Name: skillPacks
       Entry: 7
-      Data: 325|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
+      Data: 332|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -7493,11 +7621,11 @@ MonoBehaviour:
       Data: 
     - Name: _armorDic
       Entry: 7
-      Data: 326|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
+      Data: 333|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 327|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
+      Data: 334|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -7567,13 +7695,13 @@ MonoBehaviour:
       Data: 0
     - Name: dropItemList
       Entry: 7
-      Data: 328|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 335|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 329|ItemPack, Assembly-CSharp
+      Data: 336|ItemPack, Assembly-CSharp
     - Name: itemName
       Entry: 3
       Data: 3
@@ -7585,7 +7713,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 330|ItemPack, Assembly-CSharp
+      Data: 337|ItemPack, Assembly-CSharp
     - Name: itemName
       Entry: 3
       Data: 4
@@ -7606,11 +7734,11 @@ MonoBehaviour:
       Data: 15
     - Name: attrDic
       Entry: 7
-      Data: 331|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
+      Data: 338|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 332|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
+      Data: 339|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
         Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
@@ -7642,12 +7770,18 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: passiveSkillPacks
+      Entry: 6
+      Data: 
+    - Name: weaponIcon
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: 333|PieceData, Assembly-CSharp
+      Data: 340|PieceData, Assembly-CSharp
     - Name: pieceId
       Entry: 3
       Data: 1005
@@ -7665,7 +7799,7 @@ MonoBehaviour:
       Data: 30
     - Name: meleeAtk
       Entry: 7
-      Data: 334|SkillPack, Assembly-CSharp
+      Data: 341|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -7710,14 +7844,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 335|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 342|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 336|AttackPack, Assembly-CSharp
+      Data: 343|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 25
@@ -7741,13 +7875,13 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 337|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 344|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 338|BuffPack, Assembly-CSharp
+      Data: 345|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 105
@@ -7771,7 +7905,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 339|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 346|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -7787,7 +7921,7 @@ MonoBehaviour:
       Data: 3
     - Name: consumeItems
       Entry: 7
-      Data: 340|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 347|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -7817,7 +7951,7 @@ MonoBehaviour:
       Data: 
     - Name: rangedAtk
       Entry: 7
-      Data: 341|SkillPack, Assembly-CSharp
+      Data: 348|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -7862,14 +7996,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 342|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 349|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 343|AttackPack, Assembly-CSharp
+      Data: 350|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 10
@@ -7893,7 +8027,7 @@ MonoBehaviour:
       Data: 3
     - Name: buffPacks
       Entry: 7
-      Data: 344|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 351|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -7905,7 +8039,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 345|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 352|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -7918,10 +8052,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 23
+      Data: 25
     - Name: consumeItems
       Entry: 7
-      Data: 346|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 353|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -7963,11 +8097,11 @@ MonoBehaviour:
       Data: 180
     - Name: actionSounds
       Entry: 7
-      Data: 347|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
+      Data: 354|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
         UnityEngine.AudioModule]], mscorlib
     - Name: comparer
       Entry: 9
-      Data: 324
+      Data: 331
     - Name: 
       Entry: 12
       Data: 2
@@ -7991,7 +8125,7 @@ MonoBehaviour:
       Data: 3
     - Name: $v
       Entry: 10
-      Data: 23
+      Data: 25
     - Name: 
       Entry: 8
       Data: 
@@ -8003,14 +8137,14 @@ MonoBehaviour:
       Data: 
     - Name: skillPacks
       Entry: 7
-      Data: 348|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
+      Data: 355|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 349|SkillPack, Assembly-CSharp
+      Data: 356|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -8055,14 +8189,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 350|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 357|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 351|AttackPack, Assembly-CSharp
+      Data: 358|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 35
@@ -8086,13 +8220,13 @@ MonoBehaviour:
       Data: 1
     - Name: buffPacks
       Entry: 7
-      Data: 352|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 359|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 353|BuffPack, Assembly-CSharp
+      Data: 360|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 101
@@ -8116,7 +8250,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 354|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 361|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -8132,10 +8266,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 24
+      Data: 26
     - Name: consumeItems
       Entry: 7
-      Data: 355|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 362|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -8171,11 +8305,11 @@ MonoBehaviour:
       Data: 
     - Name: _armorDic
       Entry: 7
-      Data: 356|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
+      Data: 363|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 357|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
+      Data: 364|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -8245,7 +8379,7 @@ MonoBehaviour:
       Data: 0
     - Name: dropItemList
       Entry: 7
-      Data: 358|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 365|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -8260,11 +8394,11 @@ MonoBehaviour:
       Data: 0
     - Name: attrDic
       Entry: 7
-      Data: 359|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
+      Data: 366|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 360|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
+      Data: 367|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
         Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
@@ -8296,12 +8430,18 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: passiveSkillPacks
+      Entry: 6
+      Data: 
+    - Name: weaponIcon
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: 361|PieceData, Assembly-CSharp
+      Data: 368|PieceData, Assembly-CSharp
     - Name: pieceId
       Entry: 3
       Data: 1006
@@ -8319,7 +8459,7 @@ MonoBehaviour:
       Data: 24
     - Name: meleeAtk
       Entry: 7
-      Data: 362|SkillPack, Assembly-CSharp
+      Data: 369|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -8364,14 +8504,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 363|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 370|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 364|AttackPack, Assembly-CSharp
+      Data: 371|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 10
@@ -8395,162 +8535,10 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 365|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 372|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: skillEffects
-      Entry: 7
-      Data: 366|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
-        mscorlib
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: skillSound
-      Entry: 10
-      Data: 21
-    - Name: consumeItems
-      Entry: 7
-      Data: 367|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: animationIndex
-      Entry: 3
-      Data: 0
-    - Name: isDelaySkill
-      Entry: 5
-      Data: false
-    - Name: layerSkill
-      Entry: 5
-      Data: false
-    - Name: isRecognitionCheck
-      Entry: 5
-      Data: false
-    - Name: additionalEffects
-      Entry: 6
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: rangedAtk
-      Entry: 7
-      Data: 368|SkillPack, Assembly-CSharp
-    - Name: skillName
-      Entry: 6
-      Data: 
-    - Name: description
-      Entry: 6
-      Data: 
-    - Name: mpCost
-      Entry: 3
-      Data: 0
-    - Name: target
-      Entry: 3
-      Data: 1
-    - Name: rangeType
-      Entry: 3
-      Data: 1
-    - Name: rangeValue
-      Entry: 4
-      Data: 15
-    - Name: rangeAgle
-      Entry: 4
-      Data: 0
-    - Name: explodeRadius
-      Entry: 4
-      Data: 0
-    - Name: arcWeight
-      Entry: 4
-      Data: 0
-    - Name: arcCenterDis
-      Entry: 4
-      Data: 0
-    - Name: skillVFXType
-      Entry: 3
-      Data: 0
-    - Name: isBullet
-      Entry: 5
-      Data: false
-    - Name: isRotate
-      Entry: 5
-      Data: false
-    - Name: bulletVFXType
-      Entry: 3
-      Data: 0
-    - Name: attackPacks
-      Entry: 7
-      Data: 369|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
-        mscorlib
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 7
-      Data: 370|AttackPack, Assembly-CSharp
-    - Name: damage
-      Entry: 3
-      Data: 15
-    - Name: damageType
-      Entry: 3
-      Data: 2
-    - Name: isCritical
-      Entry: 5
-      Data: false
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: atkTimes
-      Entry: 3
-      Data: 1
-    - Name: buffPacks
-      Entry: 7
-      Data: 371|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 7
-      Data: 372|BuffPack, Assembly-CSharp
-    - Name: buffType
-      Entry: 3
-      Data: 102
-    - Name: stacks
-      Entry: 3
-      Data: 1
-    - Name: rate
-      Entry: 3
-      Data: 30
-    - Name: target
-      Entry: 3
-      Data: 1
-    - Name: 
-      Entry: 8
-      Data: 
     - Name: 
       Entry: 13
       Data: 
@@ -8572,7 +8560,7 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 18
+      Data: 23
     - Name: consumeItems
       Entry: 7
       Data: 374|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
@@ -8603,6 +8591,158 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: rangedAtk
+      Entry: 7
+      Data: 375|SkillPack, Assembly-CSharp
+    - Name: skillName
+      Entry: 6
+      Data: 
+    - Name: description
+      Entry: 6
+      Data: 
+    - Name: mpCost
+      Entry: 3
+      Data: 0
+    - Name: target
+      Entry: 3
+      Data: 1
+    - Name: rangeType
+      Entry: 3
+      Data: 1
+    - Name: rangeValue
+      Entry: 4
+      Data: 15
+    - Name: rangeAgle
+      Entry: 4
+      Data: 0
+    - Name: explodeRadius
+      Entry: 4
+      Data: 0
+    - Name: arcWeight
+      Entry: 4
+      Data: 0
+    - Name: arcCenterDis
+      Entry: 4
+      Data: 0
+    - Name: skillVFXType
+      Entry: 3
+      Data: 0
+    - Name: isBullet
+      Entry: 5
+      Data: false
+    - Name: isRotate
+      Entry: 5
+      Data: false
+    - Name: bulletVFXType
+      Entry: 3
+      Data: 0
+    - Name: attackPacks
+      Entry: 7
+      Data: 376|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 377|AttackPack, Assembly-CSharp
+    - Name: damage
+      Entry: 3
+      Data: 15
+    - Name: damageType
+      Entry: 3
+      Data: 2
+    - Name: isCritical
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: atkTimes
+      Entry: 3
+      Data: 1
+    - Name: buffPacks
+      Entry: 7
+      Data: 378|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 379|BuffPack, Assembly-CSharp
+    - Name: buffType
+      Entry: 3
+      Data: 102
+    - Name: stacks
+      Entry: 3
+      Data: 1
+    - Name: rate
+      Entry: 3
+      Data: 30
+    - Name: target
+      Entry: 3
+      Data: 1
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: skillEffects
+      Entry: 7
+      Data: 380|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: skillSound
+      Entry: 10
+      Data: 20
+    - Name: consumeItems
+      Entry: 7
+      Data: 381|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: animationIndex
+      Entry: 3
+      Data: 0
+    - Name: isDelaySkill
+      Entry: 5
+      Data: false
+    - Name: layerSkill
+      Entry: 5
+      Data: false
+    - Name: isRecognitionCheck
+      Entry: 5
+      Data: false
+    - Name: additionalEffects
+      Entry: 6
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: maxAmmoCount
       Entry: 3
       Data: 3
@@ -8617,11 +8757,11 @@ MonoBehaviour:
       Data: 180
     - Name: actionSounds
       Entry: 7
-      Data: 375|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
+      Data: 382|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
         UnityEngine.AudioModule]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 376|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
+      Data: 383|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -8643,7 +8783,7 @@ MonoBehaviour:
       Data: 1
     - Name: $v
       Entry: 10
-      Data: 25
+      Data: 27
     - Name: 
       Entry: 8
       Data: 
@@ -8655,7 +8795,7 @@ MonoBehaviour:
       Data: 
     - Name: skillPacks
       Entry: 7
-      Data: 377|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
+      Data: 384|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -8668,11 +8808,11 @@ MonoBehaviour:
       Data: 
     - Name: _armorDic
       Entry: 7
-      Data: 378|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
+      Data: 385|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 379|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
+      Data: 386|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -8742,13 +8882,13 @@ MonoBehaviour:
       Data: 0
     - Name: dropItemList
       Entry: 7
-      Data: 380|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 387|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 381|ItemPack, Assembly-CSharp
+      Data: 388|ItemPack, Assembly-CSharp
     - Name: itemName
       Entry: 3
       Data: 3
@@ -8769,11 +8909,11 @@ MonoBehaviour:
       Data: 0
     - Name: attrDic
       Entry: 7
-      Data: 382|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
+      Data: 389|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 383|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
+      Data: 390|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
         Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
@@ -8805,12 +8945,18 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: passiveSkillPacks
+      Entry: 6
+      Data: 
+    - Name: weaponIcon
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: 384|PieceData, Assembly-CSharp
+      Data: 391|PieceData, Assembly-CSharp
     - Name: pieceId
       Entry: 3
       Data: 1007
@@ -8828,7 +8974,7 @@ MonoBehaviour:
       Data: 15
     - Name: meleeAtk
       Entry: 7
-      Data: 385|SkillPack, Assembly-CSharp
+      Data: 392|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -8873,14 +9019,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 386|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 393|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 387|AttackPack, Assembly-CSharp
+      Data: 394|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 10
@@ -8904,7 +9050,7 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 388|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 395|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -8916,7 +9062,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 389|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 396|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -8929,10 +9075,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 7
+      Data: 8
     - Name: consumeItems
       Entry: 7
-      Data: 390|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 397|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -8962,7 +9108,7 @@ MonoBehaviour:
       Data: 
     - Name: rangedAtk
       Entry: 7
-      Data: 391|SkillPack, Assembly-CSharp
+      Data: 398|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -9007,14 +9153,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 392|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 399|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 393|AttackPack, Assembly-CSharp
+      Data: 400|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 15
@@ -9038,13 +9184,13 @@ MonoBehaviour:
       Data: 2
     - Name: buffPacks
       Entry: 7
-      Data: 394|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 401|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 395|BuffPack, Assembly-CSharp
+      Data: 402|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 102
@@ -9068,7 +9214,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 396|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 403|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -9081,10 +9227,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 26
+      Data: 28
     - Name: consumeItems
       Entry: 7
-      Data: 397|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 404|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -9126,11 +9272,11 @@ MonoBehaviour:
       Data: 180
     - Name: actionSounds
       Entry: 7
-      Data: 398|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
+      Data: 405|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
         UnityEngine.AudioModule]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 399|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
+      Data: 406|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -9152,7 +9298,7 @@ MonoBehaviour:
       Data: 2
     - Name: $v
       Entry: 10
-      Data: 7
+      Data: 8
     - Name: 
       Entry: 8
       Data: 
@@ -9164,7 +9310,7 @@ MonoBehaviour:
       Data: 3
     - Name: $v
       Entry: 10
-      Data: 26
+      Data: 28
     - Name: 
       Entry: 8
       Data: 
@@ -9176,7 +9322,7 @@ MonoBehaviour:
       Data: 1
     - Name: $v
       Entry: 10
-      Data: 10
+      Data: 12
     - Name: 
       Entry: 8
       Data: 
@@ -9188,7 +9334,7 @@ MonoBehaviour:
       Data: 
     - Name: skillPacks
       Entry: 7
-      Data: 400|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
+      Data: 407|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -9201,11 +9347,11 @@ MonoBehaviour:
       Data: 
     - Name: _armorDic
       Entry: 7
-      Data: 401|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
+      Data: 408|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 402|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
+      Data: 409|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -9275,13 +9421,13 @@ MonoBehaviour:
       Data: 0
     - Name: dropItemList
       Entry: 7
-      Data: 403|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 410|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 404|ItemPack, Assembly-CSharp
+      Data: 411|ItemPack, Assembly-CSharp
     - Name: itemName
       Entry: 3
       Data: 3
@@ -9302,11 +9448,11 @@ MonoBehaviour:
       Data: 20
     - Name: attrDic
       Entry: 7
-      Data: 405|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
+      Data: 412|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 406|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
+      Data: 413|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
         Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
@@ -9338,12 +9484,18 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: passiveSkillPacks
+      Entry: 6
+      Data: 
+    - Name: weaponIcon
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: 407|PieceData, Assembly-CSharp
+      Data: 414|PieceData, Assembly-CSharp
     - Name: pieceId
       Entry: 3
       Data: 1008
@@ -9361,7 +9513,7 @@ MonoBehaviour:
       Data: 15
     - Name: meleeAtk
       Entry: 7
-      Data: 408|SkillPack, Assembly-CSharp
+      Data: 415|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -9406,14 +9558,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 409|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 416|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 410|AttackPack, Assembly-CSharp
+      Data: 417|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 9
@@ -9428,7 +9580,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 411|AttackPack, Assembly-CSharp
+      Data: 418|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 6
@@ -9452,13 +9604,13 @@ MonoBehaviour:
       Data: 3
     - Name: buffPacks
       Entry: 7
-      Data: 412|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 419|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 413|BuffPack, Assembly-CSharp
+      Data: 420|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 101
@@ -9482,7 +9634,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 414|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 421|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -9495,10 +9647,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 9
+      Data: 11
     - Name: consumeItems
       Entry: 7
-      Data: 415|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 422|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -9528,7 +9680,7 @@ MonoBehaviour:
       Data: 
     - Name: rangedAtk
       Entry: 7
-      Data: 416|SkillPack, Assembly-CSharp
+      Data: 423|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -9573,14 +9725,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 417|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 424|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 418|AttackPack, Assembly-CSharp
+      Data: 425|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 15
@@ -9604,13 +9756,13 @@ MonoBehaviour:
       Data: 1
     - Name: buffPacks
       Entry: 7
-      Data: 419|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 426|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 420|BuffPack, Assembly-CSharp
+      Data: 427|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 102
@@ -9634,7 +9786,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 421|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 428|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -9647,10 +9799,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 26
+      Data: 28
     - Name: consumeItems
       Entry: 7
-      Data: 422|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 429|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -9692,11 +9844,11 @@ MonoBehaviour:
       Data: 180
     - Name: actionSounds
       Entry: 7
-      Data: 423|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
+      Data: 430|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
         UnityEngine.AudioModule]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 424|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
+      Data: 431|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -9718,7 +9870,7 @@ MonoBehaviour:
       Data: 2
     - Name: $v
       Entry: 10
-      Data: 9
+      Data: 11
     - Name: 
       Entry: 8
       Data: 
@@ -9730,7 +9882,7 @@ MonoBehaviour:
       Data: 3
     - Name: $v
       Entry: 10
-      Data: 26
+      Data: 28
     - Name: 
       Entry: 8
       Data: 
@@ -9742,7 +9894,7 @@ MonoBehaviour:
       Data: 
     - Name: skillPacks
       Entry: 7
-      Data: 425|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
+      Data: 432|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -9755,11 +9907,11 @@ MonoBehaviour:
       Data: 
     - Name: _armorDic
       Entry: 7
-      Data: 426|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
+      Data: 433|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 427|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
+      Data: 434|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -9829,13 +9981,13 @@ MonoBehaviour:
       Data: 0
     - Name: dropItemList
       Entry: 7
-      Data: 428|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 435|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 429|ItemPack, Assembly-CSharp
+      Data: 436|ItemPack, Assembly-CSharp
     - Name: itemName
       Entry: 3
       Data: 5
@@ -9856,11 +10008,11 @@ MonoBehaviour:
       Data: 35
     - Name: attrDic
       Entry: 7
-      Data: 430|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
+      Data: 437|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 431|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
+      Data: 438|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
         Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
@@ -9892,12 +10044,18 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: passiveSkillPacks
+      Entry: 6
+      Data: 
+    - Name: weaponIcon
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: 432|PieceData, Assembly-CSharp
+      Data: 439|PieceData, Assembly-CSharp
     - Name: pieceId
       Entry: 3
       Data: 1009
@@ -9915,7 +10073,7 @@ MonoBehaviour:
       Data: 15
     - Name: meleeAtk
       Entry: 7
-      Data: 433|SkillPack, Assembly-CSharp
+      Data: 440|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -9960,14 +10118,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 434|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 441|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 435|AttackPack, Assembly-CSharp
+      Data: 442|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 10
@@ -9982,7 +10140,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 436|AttackPack, Assembly-CSharp
+      Data: 443|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 20
@@ -10006,13 +10164,13 @@ MonoBehaviour:
       Data: 3
     - Name: buffPacks
       Entry: 7
-      Data: 437|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 444|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 438|BuffPack, Assembly-CSharp
+      Data: 445|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 101
@@ -10036,7 +10194,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 439|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 446|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -10049,10 +10207,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 9
+      Data: 11
     - Name: consumeItems
       Entry: 7
-      Data: 440|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 447|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -10082,7 +10240,7 @@ MonoBehaviour:
       Data: 
     - Name: rangedAtk
       Entry: 7
-      Data: 441|SkillPack, Assembly-CSharp
+      Data: 448|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -10127,14 +10285,14 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 442|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 449|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 443|AttackPack, Assembly-CSharp
+      Data: 450|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 15
@@ -10149,7 +10307,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 444|AttackPack, Assembly-CSharp
+      Data: 451|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 20
@@ -10173,13 +10331,13 @@ MonoBehaviour:
       Data: 1
     - Name: buffPacks
       Entry: 7
-      Data: 445|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 452|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 446|BuffPack, Assembly-CSharp
+      Data: 453|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 102
@@ -10203,7 +10361,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 447|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 454|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -10216,10 +10374,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 26
+      Data: 28
     - Name: consumeItems
       Entry: 7
-      Data: 448|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 455|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -10261,11 +10419,11 @@ MonoBehaviour:
       Data: 180
     - Name: actionSounds
       Entry: 7
-      Data: 449|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
+      Data: 456|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
         UnityEngine.AudioModule]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 450|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
+      Data: 457|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -10287,7 +10445,7 @@ MonoBehaviour:
       Data: 2
     - Name: $v
       Entry: 10
-      Data: 9
+      Data: 11
     - Name: 
       Entry: 8
       Data: 
@@ -10299,7 +10457,7 @@ MonoBehaviour:
       Data: 3
     - Name: $v
       Entry: 10
-      Data: 16
+      Data: 18
     - Name: 
       Entry: 8
       Data: 
@@ -10311,7 +10469,7 @@ MonoBehaviour:
       Data: 1
     - Name: $v
       Entry: 10
-      Data: 27
+      Data: 29
     - Name: 
       Entry: 8
       Data: 
@@ -10323,14 +10481,14 @@ MonoBehaviour:
       Data: 
     - Name: skillPacks
       Entry: 7
-      Data: 451|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
+      Data: 458|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 452|SkillPack, Assembly-CSharp
+      Data: 459|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
       Data: "\u706B\u7BAD\u5DE2"
@@ -10375,14 +10533,14 @@ MonoBehaviour:
       Data: 45
     - Name: attackPacks
       Entry: 7
-      Data: 453|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 460|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 2
     - Name: 
       Entry: 7
-      Data: 454|AttackPack, Assembly-CSharp
+      Data: 461|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 10
@@ -10397,7 +10555,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 455|AttackPack, Assembly-CSharp
+      Data: 462|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
       Data: 20
@@ -10421,13 +10579,13 @@ MonoBehaviour:
       Data: 3
     - Name: buffPacks
       Entry: 7
-      Data: 456|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 463|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 457|BuffPack, Assembly-CSharp
+      Data: 464|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 104
@@ -10451,7 +10609,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 458|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 465|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -10464,10 +10622,10 @@ MonoBehaviour:
       Data: 
     - Name: skillSound
       Entry: 10
-      Data: 28
+      Data: 30
     - Name: consumeItems
       Entry: 7
-      Data: 459|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 466|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -10491,7 +10649,7 @@ MonoBehaviour:
       Data: false
     - Name: additionalEffects
       Entry: 7
-      Data: 460|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
+      Data: 467|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -10513,11 +10671,11 @@ MonoBehaviour:
       Data: 
     - Name: _armorDic
       Entry: 7
-      Data: 461|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
+      Data: 468|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 462|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
+      Data: 469|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -10587,13 +10745,13 @@ MonoBehaviour:
       Data: 0
     - Name: dropItemList
       Entry: 7
-      Data: 463|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 470|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 464|ItemPack, Assembly-CSharp
+      Data: 471|ItemPack, Assembly-CSharp
     - Name: itemName
       Entry: 3
       Data: 5
@@ -10614,11 +10772,11 @@ MonoBehaviour:
       Data: 35
     - Name: attrDic
       Entry: 7
-      Data: 465|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
+      Data: 472|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 466|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
+      Data: 473|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
         Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
@@ -10650,12 +10808,18 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+    - Name: passiveSkillPacks
+      Entry: 6
+      Data: 
+    - Name: weaponIcon
+      Entry: 6
+      Data: 
     - Name: 
       Entry: 8
       Data: 
     - Name: 
       Entry: 7
-      Data: 467|PieceData, Assembly-CSharp
+      Data: 474|PieceData, Assembly-CSharp
     - Name: pieceId
       Entry: 3
       Data: 1011
@@ -10673,7 +10837,7 @@ MonoBehaviour:
       Data: 20
     - Name: meleeAtk
       Entry: 7
-      Data: 468|SkillPack, Assembly-CSharp
+      Data: 475|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 6
       Data: 
@@ -10718,141 +10882,6 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 469|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
-        mscorlib
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: atkTimes
-      Entry: 3
-      Data: 0
-    - Name: buffPacks
-      Entry: 7
-      Data: 470|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: skillEffects
-      Entry: 7
-      Data: 471|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
-        mscorlib
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: skillSound
-      Entry: 6
-      Data: 
-    - Name: consumeItems
-      Entry: 7
-      Data: 472|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: animationIndex
-      Entry: 3
-      Data: 0
-    - Name: isDelaySkill
-      Entry: 5
-      Data: false
-    - Name: layerSkill
-      Entry: 5
-      Data: false
-    - Name: isRecognitionCheck
-      Entry: 5
-      Data: false
-    - Name: additionalEffects
-      Entry: 7
-      Data: 473|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
-        mscorlib
-    - Name: 
-      Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 7
-      Data: 474|SelfExplosionEffect, Assembly-CSharp
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: rangedAtk
-      Entry: 7
-      Data: 475|SkillPack, Assembly-CSharp
-    - Name: skillName
-      Entry: 6
-      Data: 
-    - Name: description
-      Entry: 6
-      Data: 
-    - Name: mpCost
-      Entry: 3
-      Data: 0
-    - Name: target
-      Entry: 3
-      Data: 0
-    - Name: rangeType
-      Entry: 3
-      Data: 0
-    - Name: rangeValue
-      Entry: 4
-      Data: 0
-    - Name: rangeAgle
-      Entry: 4
-      Data: 0
-    - Name: explodeRadius
-      Entry: 4
-      Data: 0
-    - Name: arcWeight
-      Entry: 4
-      Data: 0
-    - Name: arcCenterDis
-      Entry: 4
-      Data: 0
-    - Name: skillVFXType
-      Entry: 3
-      Data: 0
-    - Name: isBullet
-      Entry: 5
-      Data: false
-    - Name: isRotate
-      Entry: 5
-      Data: false
-    - Name: bulletVFXType
-      Entry: 3
-      Data: 0
-    - Name: attackPacks
-      Entry: 7
       Data: 476|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
@@ -10866,7 +10895,7 @@ MonoBehaviour:
       Data: 
     - Name: atkTimes
       Entry: 3
-      Data: 1
+      Data: 0
     - Name: buffPacks
       Entry: 7
       Data: 477|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
@@ -10925,6 +10954,141 @@ MonoBehaviour:
         mscorlib
     - Name: 
       Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 481|SelfExplosionEffect, Assembly-CSharp
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: rangedAtk
+      Entry: 7
+      Data: 482|SkillPack, Assembly-CSharp
+    - Name: skillName
+      Entry: 6
+      Data: 
+    - Name: description
+      Entry: 6
+      Data: 
+    - Name: mpCost
+      Entry: 3
+      Data: 0
+    - Name: target
+      Entry: 3
+      Data: 0
+    - Name: rangeType
+      Entry: 3
+      Data: 0
+    - Name: rangeValue
+      Entry: 4
+      Data: 0
+    - Name: rangeAgle
+      Entry: 4
+      Data: 0
+    - Name: explodeRadius
+      Entry: 4
+      Data: 0
+    - Name: arcWeight
+      Entry: 4
+      Data: 0
+    - Name: arcCenterDis
+      Entry: 4
+      Data: 0
+    - Name: skillVFXType
+      Entry: 3
+      Data: 0
+    - Name: isBullet
+      Entry: 5
+      Data: false
+    - Name: isRotate
+      Entry: 5
+      Data: false
+    - Name: bulletVFXType
+      Entry: 3
+      Data: 0
+    - Name: attackPacks
+      Entry: 7
+      Data: 483|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: atkTimes
+      Entry: 3
+      Data: 1
+    - Name: buffPacks
+      Entry: 7
+      Data: 484|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: skillEffects
+      Entry: 7
+      Data: 485|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: skillSound
+      Entry: 6
+      Data: 
+    - Name: consumeItems
+      Entry: 7
+      Data: 486|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: animationIndex
+      Entry: 3
+      Data: 0
+    - Name: isDelaySkill
+      Entry: 5
+      Data: false
+    - Name: layerSkill
+      Entry: 5
+      Data: false
+    - Name: isRecognitionCheck
+      Entry: 5
+      Data: false
+    - Name: additionalEffects
+      Entry: 7
+      Data: 487|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
       Data: 0
     - Name: 
       Entry: 13
@@ -10949,11 +11113,11 @@ MonoBehaviour:
       Data: 180
     - Name: actionSounds
       Entry: 7
-      Data: 481|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
+      Data: 488|System.Collections.Generic.Dictionary`2[[ActionType, Assembly-CSharp],[UnityEngine.AudioClip,
         UnityEngine.AudioModule]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 482|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
+      Data: 489|System.Collections.Generic.EnumEqualityComparer`1[[ActionType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -10975,7 +11139,7 @@ MonoBehaviour:
       Data: 2
     - Name: $v
       Entry: 10
-      Data: 15
+      Data: 17
     - Name: 
       Entry: 8
       Data: 
@@ -10987,7 +11151,7 @@ MonoBehaviour:
       Data: 3
     - Name: $v
       Entry: 10
-      Data: 18
+      Data: 20
     - Name: 
       Entry: 8
       Data: 
@@ -10999,7 +11163,7 @@ MonoBehaviour:
       Data: 
     - Name: skillPacks
       Entry: 7
-      Data: 483|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
+      Data: 490|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -11012,11 +11176,11 @@ MonoBehaviour:
       Data: 
     - Name: _armorDic
       Entry: 7
-      Data: 484|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
+      Data: 491|System.Collections.Generic.Dictionary`2[[DamageType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 485|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
+      Data: 492|System.Collections.Generic.EnumEqualityComparer`1[[DamageType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -11086,13 +11250,13 @@ MonoBehaviour:
       Data: 0
     - Name: dropItemList
       Entry: 7
-      Data: 486|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 493|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 487|ItemPack, Assembly-CSharp
+      Data: 494|ItemPack, Assembly-CSharp
     - Name: itemName
       Entry: 3
       Data: 3
@@ -11113,11 +11277,11 @@ MonoBehaviour:
       Data: 10
     - Name: attrDic
       Entry: 7
-      Data: 488|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
+      Data: 495|System.Collections.Generic.Dictionary`2[[UnitAttrType, Assembly-CSharp],[System.Int32,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 489|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
+      Data: 496|System.Collections.Generic.EnumEqualityComparer`1[[UnitAttrType,
         Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
@@ -11148,6 +11312,12 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 8
+      Data: 
+    - Name: passiveSkillPacks
+      Entry: 6
+      Data: 
+    - Name: weaponIcon
+      Entry: 6
       Data: 
     - Name: 
       Entry: 8
@@ -11269,6 +11439,7 @@ MonoBehaviour:
     maxMana: 6
     dropItemList: []
     dropRate: 0
+    weaponIcon: {fileID: 21300000, guid: 14fd65569447fb544911d040686eb5e8, type: 3}
   - pieceId: 101
     pieceName: "\u90B1\u609F"
     maxHealth: 110
@@ -11410,6 +11581,7 @@ MonoBehaviour:
     maxMana: 12
     dropItemList: []
     dropRate: 0
+    weaponIcon: {fileID: 21300000, guid: c2d5f7f10f77d234fbddc66c302a1324, type: 3}
   - pieceId: 2
     pieceName: "\u7EFF"
     maxHealth: 50
@@ -11523,6 +11695,7 @@ MonoBehaviour:
     maxMana: 5
     dropItemList: []
     dropRate: 0
+    weaponIcon: {fileID: 0}
   - pieceId: 102
     pieceName: "\u7EFF"
     maxHealth: 95
@@ -11675,6 +11848,7 @@ MonoBehaviour:
     maxMana: 12
     dropItemList: []
     dropRate: 0
+    weaponIcon: {fileID: 0}
   - pieceId: 3
     pieceName: "\u9A6C\u8D5B"
     maxHealth: 55
@@ -11811,6 +11985,7 @@ MonoBehaviour:
     maxMana: 5
     dropItemList: []
     dropRate: 0
+    weaponIcon: {fileID: 0}
   - pieceId: 103
     pieceName: "\u9A6C\u8D5B"
     maxHealth: 60
@@ -11982,6 +12157,7 @@ MonoBehaviour:
     maxMana: 12
     dropItemList: []
     dropRate: 0
+    weaponIcon: {fileID: 0}
   - pieceId: 1001
     pieceName: "\u6253\u5370\u673A"
     maxHealth: 275
@@ -12059,6 +12235,7 @@ MonoBehaviour:
     - itemName: 3
       itemNum: 2
     dropRate: 100
+    weaponIcon: {fileID: 0}
   - pieceId: 1002
     pieceName: "\u8BAD\u7EC3\u65E0\u4EBA\u673A"
     maxHealth: 28
@@ -12129,6 +12306,7 @@ MonoBehaviour:
     - itemName: 3
       itemNum: 1
     dropRate: 10
+    weaponIcon: {fileID: 0}
   - pieceId: 1003
     pieceName: "\u675C\u4F2F\u5B89"
     maxHealth: 305
@@ -12272,6 +12450,7 @@ MonoBehaviour:
     - itemName: 4
       itemNum: 2
     dropRate: 100
+    weaponIcon: {fileID: 0}
   - pieceId: 1004
     pieceName: "\u519B\u68B0\u65E0\u4EBA\u673A"
     maxHealth: 30
@@ -12351,6 +12530,7 @@ MonoBehaviour:
     - itemName: 4
       itemNum: 1
     dropRate: 15
+    weaponIcon: {fileID: 0}
   - pieceId: 1005
     pieceName: "\u9ED1\u8863\u4EBA"
     maxHealth: 270
@@ -12457,6 +12637,7 @@ MonoBehaviour:
     maxMana: 0
     dropItemList: []
     dropRate: 0
+    weaponIcon: {fileID: 0}
   - pieceId: 1006
     pieceName: "\u5730\u6548\u8F66"
     maxHealth: 230
@@ -12534,6 +12715,7 @@ MonoBehaviour:
     - itemName: 3
       itemNum: 1
     dropRate: 0
+    weaponIcon: {fileID: 0}
   - pieceId: 1007
     pieceName: "\u6A21\u56E0\u4E2D\u6BD2\u80051"
     maxHealth: 170
@@ -12611,6 +12793,7 @@ MonoBehaviour:
     - itemName: 3
       itemNum: 1
     dropRate: 20
+    weaponIcon: {fileID: 0}
   - pieceId: 1008
     pieceName: "\u6A21\u56E0\u4E2D\u6BD2\u80052"
     maxHealth: 140
@@ -12695,6 +12878,7 @@ MonoBehaviour:
     - itemName: 5
       itemNum: 1
     dropRate: 35
+    weaponIcon: {fileID: 0}
   - pieceId: 1009
     pieceName: "\u4EF2\u88C1\u8005"
     maxHealth: 450
@@ -12816,6 +13000,7 @@ MonoBehaviour:
     - itemName: 5
       itemNum: 1
     dropRate: 35
+    weaponIcon: {fileID: 0}
   - pieceId: 1011
     pieceName: "\u81EA\u7206\u65E0\u4EBA\u673A"
     maxHealth: 30
@@ -12883,3 +13068,4 @@ MonoBehaviour:
     - itemName: 3
       itemNum: 1
     dropRate: 10
+    weaponIcon: {fileID: 0}

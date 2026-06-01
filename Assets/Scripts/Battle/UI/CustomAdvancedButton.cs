@@ -25,7 +25,7 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     [SerializeField] private float scaleSpeed = 12f;
 
     [Header("Interaction Events")]
-    [SerializeField] private UnityEvent onClickEvent;   // 鼠标抬起时触发的自定义事件
+    [SerializeField] public UnityEvent onClickEvent;   // 鼠标抬起时触发的自定义事件
 
     private bool isHovered = false;
     private bool isPressed = false;      // 记录鼠标是否按下

@@ -34,4 +34,13 @@ public class PieceData
     [LabelText("掉落道具")] public List<ItemPack> dropItemList = new();
     [LabelText("掉落概率")]  public int dropRate;
     [LabelText("扩展属性")] public Dictionary<UnitAttrType, int> attrDic = new Dictionary<UnitAttrType, int>();// 其他属性
+    [LabelText("专长技能")] public List<PassiveSkillPack> passiveSkillPacks = new List<PassiveSkillPack>();
+    [LabelText("武器icon")] public Sprite weaponIcon;
+}
+
+[SerializeField]
+public class PassiveSkillPack
+{
+    public string skillName;
+    public string description;
 }

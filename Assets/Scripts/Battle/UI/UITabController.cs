@@ -9,7 +9,7 @@ public class UITabController : MonoBehaviour
     [System.Serializable]
     public struct TabItem
     {
-        public Button tabButton;       // 选项卡按钮
+        public GameObject tabButton;       // 选项卡按钮
         public Image tabBgImage;       // 选项卡自身的底图
         public GameObject subPage;     // 该选项卡绑定的子页面 (可为空)
     }
@@ -48,7 +48,7 @@ public class UITabController : MonoBehaviour
             int index = i; // 解决闭包陷阱
             if (tabs[i].tabButton != null)
             {
-                tabs[i].tabButton.onClick.AddListener(() => SwitchTab(index, false));
+                tabs[i].tabButton.GetComponent<CustomAdvancedButton>()?.onClickEvent.AddListener(() => SwitchTab(index, false));
             }
         }
     }

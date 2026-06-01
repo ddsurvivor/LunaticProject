@@ -9,6 +9,7 @@ public class AttrModRow : MonoBehaviour {
     public Image modBar;
     public Button plusBtn;
     public Button minusBtn;
+    public GameObject modeBtnRoot;
 
     private int baseValue;
     private int pendingAdd = 0;
@@ -49,7 +50,8 @@ public class AttrModRow : MonoBehaviour {
 
     public void ShowBtn(bool option)
     {
-        plusBtn.gameObject.SetActive(option);
+        modeBtnRoot.SetActive(option);
+        //plusBtn.gameObject.SetActive(option);
         //minusBtn.gameObject.SetActive(option);
     }
     
