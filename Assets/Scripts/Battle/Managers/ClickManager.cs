@@ -259,6 +259,9 @@ public class ClickManager : MonoBehaviour
         _selectedPiece.CheckFace(_selectedPiece.transform.position - _dragStartPos);
     }
 
+    /// <summary>
+    /// 实时更新移动范围
+    /// </summary>
     public void DragMoveIcon()
     {
         if (_selectedPiece == null)
@@ -288,6 +291,9 @@ public class ClickManager : MonoBehaviour
             point = _dragStartPos + offset;
         }
         _rangeUI.UpdateMove(point);
+        
+        // move manager同步更新路径
+        BattleScene.Ins.BM.moveManager.PreviewMove(_selectedPiece.gameObject, point, _dragRange);
     }
 
     private void StopDrag()
@@ -318,12 +324,14 @@ public class ClickManager : MonoBehaviour
             _selectedPiece.CheckFace(targetPos - _dragStartPos);
             _selectedPiece.StartMove();
             var piece = _selectedPiece;
-            piece.transform.DOMove(targetPos, 1.0f).OnComplete(() =>
-            {
-                piece.StopMove();
-            });
+            // piece.transform.DOMove(targetPos, 1.0f).OnComplete(() =>
+            // {
+            //     piece.StopMove();
+            // });
             _rangeUI.CloseRange();
             //_selectedPiece = null;
+            // 确定开始移动
+            BattleScene.Ins.BM.moveManager.ExecuteMove(_selectedPiece.gameObject);
         }
     }
 }

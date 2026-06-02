@@ -243,7 +243,7 @@ public class RangeUI : MonoBehaviour
 
         // move line 缩放 width
         float distance = (dir.magnitude - lineOffset) * movelineLengthFactor;
-        moveLine.size = new Vector2(distance, moveLine.size.y);
+        //moveLine.size = new Vector2(distance, moveLine.size.y);
         // move line 缩放 width，长度根据 move start 和 move icon 之间的距离调整
     }
 
