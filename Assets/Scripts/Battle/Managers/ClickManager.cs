@@ -94,6 +94,7 @@ public class ClickManager : MonoBehaviour
                 _selectedPiece = null;
                 _isDragging = false;
                 _rangeUI.CloseRange();
+                BattleScene.Ins.BM.moveManager.ClearPathLine();
             }
             BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
             BattleScene.Ins.UM.pieceInfoPanel.StopMpIconsBlink();
@@ -331,7 +332,7 @@ public class ClickManager : MonoBehaviour
             _rangeUI.CloseRange();
             //_selectedPiece = null;
             // 确定开始移动
-            BattleScene.Ins.BM.moveManager.ExecuteMove(_selectedPiece.gameObject);
+            BattleScene.Ins.BM.moveManager.ExecuteMove(_selectedPiece.gameObject, piece.StopMove);
         }
     }
 }

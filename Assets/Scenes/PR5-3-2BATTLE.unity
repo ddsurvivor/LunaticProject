@@ -122,7 +122,7 @@ NavMeshSettings:
     preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
-  m_NavMeshData: {fileID: 0}
+  m_NavMeshData: {fileID: 23800000, guid: 34fc9de3bf8146e47861443f046bb46d, type: 2}
 --- !u!1 &12595235
 GameObject:
   m_ObjectHideFlags: 0
@@ -10041,7 +10041,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh60584
+  m_Name: pb_Mesh337662
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -10316,7 +10316,7 @@ GameObject:
   m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 8
   m_IsActive: 1
 --- !u!64 &826854625
 MeshCollider:
@@ -18822,6 +18822,8 @@ MonoBehaviour:
   spriteManager: {fileID: 0}
   diceCheckManager: {fileID: 0}
   tutorialManager: {fileID: 0}
+  tipTextManager: {fileID: 0}
+  moveManager: {fileID: 0}
   pieceDataListSO: {fileID: 0}
   areaList: []
   finishDrop: {fileID: 0}
@@ -18980,6 +18982,9 @@ MonoBehaviour:
   battleFinishPanel: {fileID: 0}
   checkDicePanel: {fileID: 0}
   battleStartUIPanel: {fileID: 0}
+  burstStart: {fileID: 0}
+  burstEnd: {fileID: 0}
+  skillTooltipUI: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20839,8 +20844,6 @@ MonoBehaviour:
   arcInnerMask: {fileID: 0}
   arcLine1: {fileID: 0}
   arcLine2: {fileID: 0}
-  movelineLengthFactor: 3.8
-  lineOffset: 0.5
   isPlayerRange: 0
 --- !u!4 &1830372241
 Transform:
@@ -24400,6 +24403,7 @@ MonoBehaviour:
     maxMana: 0
     dropItemList: []
     dropRate: 0
+    weaponIcon: {fileID: 0}
   playerData:
     curHealth: 0
     curAmmo: 0
@@ -24810,7 +24814,10 @@ MonoBehaviour:
       Entry: 8
       Data: 
   pieceSpriteRenderer: {fileID: 1425235767}
-  idleSprite: {fileID: 21300000, guid: cc2a65f3882e95d4baeb347ad830c6dc, type: 3}
+  idleSprite:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   moveSprite: {fileID: 21300000, guid: 0949c6f7be186d34d90bb6cc470498f8, type: 3}
   meleeSprites: []
   rangeSprites: []

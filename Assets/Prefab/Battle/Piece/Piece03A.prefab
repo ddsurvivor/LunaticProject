@@ -340,6 +340,7 @@ GameObject:
   - component: {fileID: 8316052724586748498}
   - component: {fileID: 8316052724586748499}
   - component: {fileID: 9066005200974287038}
+  - component: {fileID: 8213716073640434541}
   m_Layer: 13
   m_Name: Piece03A
   m_TagString: Piece
@@ -893,6 +894,28 @@ MonoBehaviour:
   hitBackSprite: {fileID: 0}
   path: "Assets/A\u7F8E\u672F/BattleSprites/\u9A6C\u8D5B\u6210\u5E74\u52A8\u4F5C"
   pieceName: PC03A
+--- !u!195 &8213716073640434541
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8316052724586748503}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 20
+  m_Acceleration: 999
+  avoidancePriority: 50
+  m_AngularSpeed: 0
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &8316052725672642774
 GameObject:
   m_ObjectHideFlags: 0

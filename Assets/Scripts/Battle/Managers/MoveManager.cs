@@ -1,5 +1,7 @@
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Events;
 
 public class MoveManager : MonoBehaviour
 {
@@ -11,11 +13,43 @@ public class MoveManager : MonoBehaviour
 
     private NavMeshPath tempPath;
     private Vector3 lastValidPreviewPosition; // 记录上一次成功渲染的有效目标点
+    
+    private NavMeshAgent agent;
+    private UnityAction onReachDestination; // 存储外部传进来的回调函数
+    private bool isTracking = false;
 
     private void Awake()
     {
         tempPath = new NavMeshPath();
     }
+    private void Update()
+    {
+        if (!isTracking || agent == null) return;
+
+        // 核心到达判定条件：
+        // 1. !agent.pathPending : 路径已经计算完毕
+        // 2. remainingDistance <= stoppingDistance : 剩余距离小于等于停止距离
+        // 3. (!agent.hasPath || agent.velocity.sqrMagnitude == 0f) : 没有路径了或者速度已经降为 0
+        if (!agent.pathPending)
+        {
+            if (agent.remainingDistance <= agent.stoppingDestinationDistance()) 
+            {
+                // 双重保障：确保棋子真的停下来了
+                if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)
+                {
+                    isTracking = false;
+
+                    // 执行外部传入的回调函数（如果存在的话）
+                    if (onReachDestination != null)
+                    {
+                        onReachDestination.Invoke();
+                        pathRenderer.gameObject.SetActive(false); // 隐藏路径渲染器
+                    }
+                }
+            }
+        }
+    }
+    
 
     /// <summary>
     /// 【新增公共接口】实时预览移动路径（带防抖与性能优化）
@@ -26,6 +60,7 @@ public class MoveManager : MonoBehaviour
     public void PreviewMove(GameObject pawnObject, Vector3 hoverPosition, float maxDistance)
     {
         if (pawnObject == null || pathRenderer == null) return;
+        pathRenderer.gameObject.SetActive(true);
 
         // 性能优化点 1：如果鼠标移动距离非常微小，直接拦截，不进行任何寻路计算
         if (Vector3.Distance(hoverPosition, lastValidPreviewPosition) < mouseMoveThreshold)
@@ -56,13 +91,15 @@ public class MoveManager : MonoBehaviour
     /// <summary>
     /// 【公共接口】正式请求移动（此处的计算直接使用最后确认的有效路径，防止漂移）
     /// </summary>
-    public float ExecuteMove(GameObject pawnObject)
+    public float ExecuteMove(GameObject pawnObject, UnityAction onMoveComplete = null)
     {
         if (pawnObject == null) return 0f;
 
         NavMeshAgent agent = pawnObject.GetComponent<NavMeshAgent>();
         if (agent == null) return 0f;
-
+        this.agent = agent;
+        this.onReachDestination = onMoveComplete;
+        isTracking = true;
         // 直接走向最后一次预览成功的有效位置
         if (NavMesh.CalculatePath(agent.transform.position, lastValidPreviewPosition, NavMesh.AllAreas, tempPath))
         {
@@ -111,6 +148,14 @@ public class MoveManager : MonoBehaviour
             pathRenderer.SetPosition(i, path.corners[i] + Vector3.up * 0.05f);
         }
     }
-
+    
     #endregion
+}
+public static class NavMeshAgentExtensions
+{
+    public static float stoppingDestinationDistance(this NavMeshAgent agent)
+    {
+        // 健壮性处理：如果停止距离设置得太小，强制给一个极小的物理容错范围
+        return agent.stoppingDistance == 0 ? 0.1f : agent.stoppingDistance;
+    }
 }

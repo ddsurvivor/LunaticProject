@@ -122,7 +122,7 @@ NavMeshSettings:
     preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
-  m_NavMeshData: {fileID: 0}
+  m_NavMeshData: {fileID: 23800000, guid: 6ce8bdc91da35ab439318e533e0efb02, type: 2}
 --- !u!43 &5611673
 Mesh:
   m_ObjectHideFlags: 0
@@ -5056,7 +5056,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh419478
+  m_Name: pb_Mesh335424
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -8244,7 +8244,7 @@ GameObject:
   m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 8
   m_IsActive: 1
 --- !u!64 &826854625
 MeshCollider:
@@ -16949,6 +16949,9 @@ MonoBehaviour:
   skillManager: {fileID: 0}
   spriteManager: {fileID: 0}
   diceCheckManager: {fileID: 0}
+  tutorialManager: {fileID: 0}
+  tipTextManager: {fileID: 0}
+  moveManager: {fileID: 0}
   pieceDataListSO: {fileID: 0}
   areaList: []
   finishDrop: {fileID: 0}
@@ -16981,6 +16984,7 @@ MonoBehaviour:
   BM: {fileID: 1713777224}
   UM: {fileID: 1713777228}
   CM: {fileID: 1713777226}
+  TM: {fileID: 0}
 --- !u!114 &1713777226
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17105,6 +17109,10 @@ MonoBehaviour:
   logPanel: {fileID: 0}
   battleFinishPanel: {fileID: 0}
   checkDicePanel: {fileID: 0}
+  battleStartUIPanel: {fileID: 0}
+  burstStart: {fileID: 0}
+  burstEnd: {fileID: 0}
+  skillTooltipUI: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18316,6 +18324,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   circle: {fileID: 960250037}
   moveIcon: {fileID: 1957564247}
+  moveStart: {fileID: 0}
+  moveLine: {fileID: 0}
   attackCircle: {fileID: 1511976315}
   attackIcon: {fileID: 635315704}
   skillIcon: {fileID: 0}
@@ -18579,22 +18589,7 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: itemPrefabDic
-      Entry: 7
-      Data: 2|System.Collections.Generic.Dictionary`2[[ItemType, Assembly-CSharp],[UnityEngine.GameObject,
-        UnityEngine.CoreModule]], mscorlib
-    - Name: comparer
-      Entry: 9
-      Data: 1
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
+  objectPoolSO: {fileID: 0}
 --- !u!1001 &1885429083
 PrefabInstance:
   m_ObjectHideFlags: 0

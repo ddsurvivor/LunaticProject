@@ -181,6 +181,7 @@ GameObject:
   - component: {fileID: 3435330606817873377}
   - component: {fileID: 190077875118252175}
   - component: {fileID: 439568009330001271}
+  - component: {fileID: -2688693991500060377}
   m_Layer: 11
   m_Name: Enemy01
   m_TagString: Piece
@@ -672,6 +673,28 @@ MonoBehaviour:
   isActived: 0
   navigate: 0
   enemyCanvas: {fileID: 1724962933129911064}
+--- !u!195 &-2688693991500060377
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2820315917553685404}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 25
+  m_Acceleration: 999
+  avoidancePriority: 50
+  m_AngularSpeed: 0
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &5877048452073769702
 GameObject:
   m_ObjectHideFlags: 0

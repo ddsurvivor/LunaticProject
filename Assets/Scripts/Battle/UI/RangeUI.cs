@@ -210,7 +210,7 @@ public class RangeUI : MonoBehaviour
         _isShowMoveIcon = option;
         moveIcon.SetActive(option);
         moveStart.SetActive(option);
-        moveLine.gameObject.SetActive(option);
+        //moveLine.gameObject.SetActive(option);
     }
 
     public void UpdateMove(Vector3 pos)
@@ -237,7 +237,7 @@ public class RangeUI : MonoBehaviour
             // 备用显式 Euler 解法：如果用 transform.right 发现图片翻转了，
             // 可以解开下方注释，假设图片原本绕 X 轴旋转了 90 度躺在地上，则直接控制它的本地 Z 轴：
             moveStart.transform.localRotation = Quaternion.Euler(0, 0, -angle);
-            moveLine.transform.localRotation = Quaternion.Euler(0, 0, -angle);
+            //moveLine.transform.localRotation = Quaternion.Euler(0, 0, -angle);
             
         }
 

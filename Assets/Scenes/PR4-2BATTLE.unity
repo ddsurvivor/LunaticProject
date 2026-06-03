@@ -122,7 +122,7 @@ NavMeshSettings:
     preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
-  m_NavMeshData: {fileID: 0}
+  m_NavMeshData: {fileID: 23800000, guid: 255080b9d73ed9b4bb03c8d4286abde8, type: 2}
 --- !u!43 &5611673
 Mesh:
   m_ObjectHideFlags: 0
@@ -6703,7 +6703,7 @@ GameObject:
   m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 8
   m_IsActive: 1
 --- !u!64 &826854625
 MeshCollider:
@@ -16105,6 +16105,8 @@ MonoBehaviour:
   spriteManager: {fileID: 0}
   diceCheckManager: {fileID: 0}
   tutorialManager: {fileID: 0}
+  tipTextManager: {fileID: 0}
+  moveManager: {fileID: 0}
   pieceDataListSO: {fileID: 0}
   areaList: []
   finishDrop: {fileID: 0}
@@ -16263,6 +16265,9 @@ MonoBehaviour:
   battleFinishPanel: {fileID: 0}
   checkDicePanel: {fileID: 0}
   battleStartUIPanel: {fileID: 0}
+  burstStart: {fileID: 0}
+  burstEnd: {fileID: 0}
+  skillTooltipUI: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18736,7 +18741,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh689118
+  m_Name: pb_Mesh331986
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -20768,7 +20773,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 922511613884213275, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_RootOrder
-      value: 14
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 938954361116868618, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y
@@ -21288,7 +21293,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5894177824596357264, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_RootOrder
-      value: 18
+      value: 19
       objectReference: {fileID: 0}
     - target: {fileID: 5951524225831787956, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y
@@ -21608,7 +21613,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7716796170780293752, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_RootOrder
-      value: 15
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 7793809528629350751, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y
@@ -21690,6 +21695,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8419255297466138792, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_RootOrder
+      value: 21
+      objectReference: {fileID: 0}
     - target: {fileID: 8455713939983682778, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -21706,6 +21715,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8481942755368138472, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_RootOrder
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 8650936795375690168, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -21721,6 +21734,10 @@ PrefabInstance:
     - target: {fileID: 8650936795375690168, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8659182203610381001, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_RootOrder
+      value: 14
       objectReference: {fileID: 0}
     - target: {fileID: 8902595909463613481, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y
