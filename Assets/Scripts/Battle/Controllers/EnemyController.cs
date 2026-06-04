@@ -19,6 +19,9 @@ public class EnemyController : PieceController
 
     public Dictionary<PieceController, int> damageDic = new(); // 记录各个单位造成的伤害
 
+    public LineRenderer tagetLine;// 目标指示线
+    private PieceController _curTargetPc; // 当前攻击目标
+
 
     public override void TurnStart()
     {
@@ -193,6 +196,11 @@ public class EnemyController : PieceController
             enemyCanvas.hpBarUI.UpdateHpBar(hpPercent);
             enemyCanvas.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
         }
-        
+    }
+
+    public override void ShowOutline(bool option)
+    {
+        base.ShowOutline(option);
+        // 显示攻击目标指示线
     }
 }

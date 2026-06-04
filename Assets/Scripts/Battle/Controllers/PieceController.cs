@@ -915,7 +915,7 @@ public class PieceController : MonoBehaviour
     {
         if (outlineEffect != null) outlineEffect.SetActive(false);
     }*/
-    public void ShowOutline(bool option)
+    public virtual void ShowOutline(bool option)
     {
         if (outlineEffect != null) outlineEffect.SetActive(option);
         //ShowHighlight(option);

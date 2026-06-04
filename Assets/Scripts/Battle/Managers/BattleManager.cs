@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using BattleDialogue;
 using DG.Tweening;
 using JetBrains.Annotations;
 using Sirenix.OdinInspector;
@@ -19,6 +21,7 @@ public class BattleManager : MonoBehaviour
     public TutorialManager tutorialManager;
     public TipTextManager tipTextManager;
     public MoveManager moveManager;
+    public BattleDialogueManager battleDialogueManager;
 
     public PieceDataListSO pieceDataListSO;
 
@@ -33,6 +36,9 @@ public class BattleManager : MonoBehaviour
     private int _turnNumber = 0;
 
     private bool inBattle = false; // 是否在战斗中，防止重复初始化
+    
+    [SerializeField][LabelText("镜头移动等待时间")] float moveWaitTime = 1.0f; // 
+    [SerializeField][LabelText("镜头注视时间")]float gazeWaitTime = 0.5f; // 
 
     public void Init()
     {
@@ -55,8 +61,9 @@ public class BattleManager : MonoBehaviour
         // {
         //     BattleScene.Ins.UM.battleStartUIPanel.PlayBattleStartAnimation(2f);
         // });
-        // sequence.AppendInterval(2.2f);
-
+        
+        sequence.AppendCallback(SweepActiveEnemies);
+        sequence.AppendInterval(CalculateTotalTime());
         sequence.AppendCallback(() =>
         {
             if (tutorialManager.CheckAndShowTutorial())
@@ -118,7 +125,7 @@ public class BattleManager : MonoBehaviour
         //BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家回合");
         _turnNumber++;
         BattleScene.Ins.UM.turnNumberText.text = TunrNumber.ToString();
-
+        battleDialogueManager.TriggerBattleStart();
         // 胜利条件：坚持回合数
         if (TunrNumber >= winTurnCondition)
         {
@@ -901,6 +908,73 @@ public class BattleManager : MonoBehaviour
         return result;
     }
 
+    
+    /// <summary>
+    /// 扩展方法：在战斗开始时扫视所有已经激活的敌人（参数内嵌版）
+    /// </summary>
+    /// <param name="battleManager">BattleManager 实例</param>
+    /// <param name="gameCamera">镜头控制组件</param>
+    public void SweepActiveEnemies()
+    {
+        // 鲁棒性检查
+        if (camera == null)
+        {
+            Debug.LogError("[BattleExtension] 扫视初始化失败：BattleManager 或 Camera 为空。");
+            return;
+        }
+
+        // ================= 核心修改：直接在函数内定义时间变量 =================
+        
+        // ====================================================================
+
+        // 启动协程并把变量传递进去
+        StartCoroutine(SweepRoutine(moveWaitTime, gazeWaitTime));
+    }
+
+    private float CalculateTotalTime()
+    {
+        float totalTime = 0f;
+        foreach (EnemyController enemy in AIController.pieces)
+        {
+            if (enemy != null && enemy.isActived)
+            {
+                totalTime += moveWaitTime + gazeWaitTime;
+            }
+        }
+
+        return totalTime;
+    }
+
+    private IEnumerator SweepRoutine(float moveWaitTime, float gazeWaitTime)
+    {
+        if (AIController.pieces == null || AIController.pieces.Count == 0)
+        {
+            Debug.LogWarning("[BattleExtension] AIController.pieces 为空，跳过扫视。");
+            yield break;
+        }
+
+        Debug.Log("【战前扫视】开始...");
+
+        foreach (EnemyController enemy in AIController.pieces)
+        {
+            if (enemy != null && enemy.isActived)
+            {
+                // 1. 镜头追踪当前敌人
+                camera.SetFollow(enemy.transform);
+
+                // 2. 等待镜头移动到位
+                yield return new WaitForSeconds(moveWaitTime);
+
+                // 3. 镜头注视停留
+                yield return new WaitForSeconds(gazeWaitTime);
+            }
+        }
+
+        Debug.Log("【战前扫视】结束。");
+
+        // 回调主管理器的开战函数
+    }
+    
     // ===== 掩体判定 ========== //
     /// <summary>
     /// 判定掩体是否在攻击射线上生效
@@ -934,6 +1008,8 @@ public class BattleManager : MonoBehaviour
 
         return null;
     }
+    
+    
 
     // ===== Test ======//
     public void OnClickQuitBattle()
