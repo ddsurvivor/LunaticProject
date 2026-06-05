@@ -1,3 +1,4 @@
+using System;
 using DG.Tweening;
 using UnityEngine;
 
@@ -8,6 +9,11 @@ public class SidePanel : MonoBehaviour
 
     public float slidePosX = 500f;
     public float slideDuration = 0.3f;
+
+    public void Update()
+    {
+        
+    }
 
     public void ShowPanel()
     {
