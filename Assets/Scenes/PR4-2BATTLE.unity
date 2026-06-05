@@ -2619,7 +2619,7 @@ MonoBehaviour:
   m_Follow: {fileID: 320141619}
   m_Lens:
     FieldOfView: 60
-    OrthographicSize: 12
+    OrthographicSize: 24
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
@@ -16107,12 +16107,15 @@ MonoBehaviour:
   tutorialManager: {fileID: 0}
   tipTextManager: {fileID: 0}
   moveManager: {fileID: 0}
+  battleDialogueManager: {fileID: 0}
   pieceDataListSO: {fileID: 0}
   areaList: []
   finishDrop: {fileID: 0}
   finishExp: 100
   winTurnCondition: 999
   battleSetController: {fileID: 0}
+  moveWaitTime: 1
+  gazeWaitTime: 0.5
   gray: {fileID: 0}
   grayEnemy: {fileID: 0}
 --- !u!114 &1713777225
@@ -16830,7 +16833,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 12
+  orthographic size: 24
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -20140,7 +20143,7 @@ MonoBehaviour:
   m_Follow: {fileID: 0}
   m_Lens:
     FieldOfView: 60
-    OrthographicSize: 12
+    OrthographicSize: 24
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
@@ -20934,6 +20937,18 @@ PrefabInstance:
     - target: {fileID: 2696257026913239330, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2937903447923388798, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -13.140747
+      objectReference: {fileID: 0}
+    - target: {fileID: 2937903447923388798, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 37.560608
+      objectReference: {fileID: 0}
+    - target: {fileID: 2937903448832898021, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_RootOrder
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 2974498756062244303, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y
@@ -22125,7 +22140,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7676897098428941033, guid: 4a6b20516db39744093211e7b6b4a617, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -28.1
+      value: -20.11
       objectReference: {fileID: 0}
     - target: {fileID: 7676897098428941033, guid: 4a6b20516db39744093211e7b6b4a617, type: 3}
       propertyPath: m_LocalPosition.y
