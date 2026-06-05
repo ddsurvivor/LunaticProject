@@ -40,6 +40,7 @@ public class DataManager : SerializedMonoBehaviour
         {
             InitSettings();
         }
+        ApplySettings(settingsData);// 加载后立即应用设置
     }
 
     public PLAYERPROFILE LoadData(int index)
@@ -65,8 +66,11 @@ public class DataManager : SerializedMonoBehaviour
     //     string path = savePath + $"PlayerProfiles_{index}.json";
     //     ES3.Save("PlayerProfile", GM.Ins.PLAYERPROFILE, path);
     // }
-    
-    
+
+
+
+    #region 游戏设置存储
+
     /// <summary>
     /// 初始化设置
     /// </summary>
@@ -104,7 +108,9 @@ public class DataManager : SerializedMonoBehaviour
         new Vector2Int(1600, 900),
         new Vector2Int(1920, 1080),
         new Vector2Int(2560, 1440),
-        new Vector2Int(3840, 2160)
+        new Vector2Int(3840, 2160),
+        new Vector2Int(1920,1200),
+        new Vector2Int(1440,1024),
     };
 
     // === 核心事件广播机制 ===
@@ -134,6 +140,7 @@ public class DataManager : SerializedMonoBehaviour
         // ==========================================
         // 2. 画面设置实装 (底层物理切换)
         // ==========================================
+        Screen.fullScreen = settingsData.isFullScreen;
         // A. 分辨率与全屏判定
         int resIndex = Mathf.Clamp(settingsData.resolutionIndex, 0, resolutionPresets.Count - 1);
         Vector2Int targetRes = resolutionPresets[resIndex];
@@ -191,4 +198,6 @@ public class DataManager : SerializedMonoBehaviour
         float dB = sliderValue > 0.0001f ? Mathf.Log10(sliderValue) * 20f : -80f;
         mainMixer.SetFloat(exposedParam, dB);
     }
+    
+    #endregion
 }
