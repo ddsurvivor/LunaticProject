@@ -440,12 +440,19 @@ MonoBehaviour:
   pieceSpriteRenderer: {fileID: 1142199792870587360}
   idleSprite:
   - {fileID: 21300000, guid: 0dbbcbcf39981d64582837c7d0848397, type: 3}
+  - {fileID: 21300000, guid: 0246c54a6862df44896cb2eac916ddd0, type: 3}
+  - {fileID: 21300000, guid: ee031bd52fe83ba47a6873bee5cc89a9, type: 3}
+  - {fileID: 21300000, guid: 01a1e12ea7836e043b20bf1fd9f8609e, type: 3}
+  - {fileID: 21300000, guid: b0de65cd6aa6d6e419e3967784cd620f, type: 3}
   moveSprite: {fileID: 21300000, guid: 1ee46b8ffe9877444bee2e685f6f1de2, type: 3}
   meleeSprites: []
   rangeSprites: []
   dodgeSprite: {fileID: 21300000, guid: d5e1bdba57dbe8548a8fcfac8cb62840, type: 3}
   hitSprite: {fileID: 21300000, guid: c1a9ebddd18e3b745a1927614b1e0100, type: 3}
-  deathSprites: []
+  deathSprites:
+  - {fileID: 21300000, guid: 57cb3517bbac17545a58df0a9f7d2809, type: 3}
+  - {fileID: 21300000, guid: 0f8e921b5495813419817c12486d68c3, type: 3}
+  - {fileID: 21300000, guid: 979beaaf76b18f343becc4177d09f155, type: 3}
   idleBackSprite: {fileID: 0}
   moveBackSprite: {fileID: 0}
   attackBackSprite: {fileID: 0}
@@ -617,6 +624,7 @@ MonoBehaviour:
   isActived: 1
   navigate: 0
   enemyCanvas: {fileID: 7997717618187452530}
+  tagetLine: {fileID: 0}
 --- !u!114 &1001156843357686723
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1338,7 +1346,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 25, y: 25}
+  m_Size: {x: 20.48, y: 20.48}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
