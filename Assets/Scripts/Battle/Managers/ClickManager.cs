@@ -189,6 +189,7 @@ public class ClickManager : MonoBehaviour
             BattleScene.Ins.UM.ShowPieceState(piece);
             BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(piece);
             BattleScene.Ins.BM.camera.SetFollow(piece.transform);
+            GM.Ins.AM.PlayAudio(AudioCueType.Select);
             /*_selectedPiece.StartDrag();
             
             // 显示移动范围

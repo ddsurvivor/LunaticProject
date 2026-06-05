@@ -19,7 +19,8 @@ public class AudioManager : SerializedMonoBehaviour
     private Dictionary<string, GameObject> 循环音效字典 = new Dictionary<string, GameObject>();
     [OdinSerialize]
     private Dictionary<string, List<GameObject>> 所有音效字典 = new Dictionary<string, List<GameObject>>();
-    
+
+    public AudioConfig audioConfig;
 
     public void 初始化()
     {
@@ -67,6 +68,13 @@ public class AudioManager : SerializedMonoBehaviour
             StartCoroutine(加载并播放SE(audioName));
         }
     }
+    
+    public void PlayAudio(AudioCueType audioCueType, int loop = -1)
+    {
+        string audioName = audioConfig.GetAudioPath(audioCueType);
+        播放音效(audioName, loop);
+    }
+    
     private void 停止循环让其播放完(string audioName)
     {
         if (循环音效字典.ContainsKey(audioName))

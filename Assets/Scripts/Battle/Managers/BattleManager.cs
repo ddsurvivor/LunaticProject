@@ -71,6 +71,7 @@ public class BattleManager : MonoBehaviour
             }
             else
             {
+                battleDialogueManager.TriggerBattleStart();
                 PlayerStart();
             }
         });
@@ -125,7 +126,6 @@ public class BattleManager : MonoBehaviour
         //BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家回合");
         _turnNumber++;
         BattleScene.Ins.UM.turnNumberText.text = TunrNumber.ToString();
-        battleDialogueManager.TriggerBattleStart();
         // 胜利条件：坚持回合数
         if (TunrNumber >= winTurnCondition)
         {

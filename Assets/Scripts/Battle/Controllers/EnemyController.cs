@@ -26,7 +26,7 @@ public class EnemyController : PieceController
     public override void TurnStart()
     {
         base.TurnStart();
-        enemyCanvas.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
+        if(enemyCanvas!=null) enemyCanvas.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
     }
 
     // 添加伤害记录

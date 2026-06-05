@@ -91,6 +91,7 @@ public class TutorialUI : MonoBehaviour
         GM.Ins.PLAYERPROFILE.seenTutorials.Add(_currentLevelName);
         if (_isBattleStart)
         {
+            BattleScene.Ins.BM.battleDialogueManager.TriggerBattleStart();
             BattleScene.Ins.BM.PlayerStart();
         }
         gameObject.SetActive(false);

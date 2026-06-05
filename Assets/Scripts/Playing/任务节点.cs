@@ -146,6 +146,7 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             button.SetActive(true);
         });
         infoSequence.Append(button.transform.DOLocalMoveY(100, 0.3f).SetEase(Ease.OutBack).From());
+        GM.Ins.AM.PlayAudio(AudioCueType.Expand);
     }
     public void CloseDetialInfo()
     {
@@ -162,6 +163,7 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         smallPanel.SetActive(true);
         icon.transform.localScale = Vector3.one * 1.2f;
         currentTween = smallPanel.transform.DOLocalMoveX(-100, 0.2f).SetEase(Ease.OutBack).From();
+        GM.Ins.AM.PlayAudio(AudioCueType.Expand);
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -171,5 +173,6 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         smallPanel.SetActive(false);
         icon.transform.localScale = Vector3.one;
         smallPanel.transform.localPosition = smallPanelOriginalPos;
+        GM.Ins.AM.PlayAudio(AudioCueType.Collapse);
     }
 }

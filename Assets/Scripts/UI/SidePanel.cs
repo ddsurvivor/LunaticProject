@@ -20,6 +20,7 @@ public class SidePanel : MonoBehaviour
         // 激活侧栏，并移动到指定点
         panel.gameObject.SetActive(true);
         panel.DOMoveX(0, slideDuration).From(-slidePosX).SetEase(Ease.OutCubic);
+        GM.Ins.AM.PlayAudio(AudioCueType.Expand);
     }
 
     public void ClosePanel()
@@ -30,5 +31,6 @@ public class SidePanel : MonoBehaviour
         {
             panel.gameObject.SetActive(false);
         });
+        GM.Ins.AM.PlayAudio(AudioCueType.Collapse);
     }
 }

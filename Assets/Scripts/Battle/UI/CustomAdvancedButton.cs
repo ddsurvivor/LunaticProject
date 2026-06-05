@@ -31,6 +31,9 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     private bool isPressed = false;      // 记录鼠标是否按下
     private Vector3 originalScale;       // 记录物体的初始尺寸
 
+    public AudioCueType clickSound;
+    public AudioCueType mouseOnSound;
+
     private void Start()
     {
         // 记录最初的缩放比例（适配可能已经被美术调整过的初始大小）
@@ -95,6 +98,7 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     public void OnPointerEnter(PointerEventData eventData)
     {
         isHovered = true;
+        GM.Ins.AM.PlayAudio(mouseOnSound);
     }
 
     // 鼠标移出
@@ -113,6 +117,7 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
         {
             pressedImage.gameObject.SetActive(true);
         }
+        
     }
 
     // 鼠标抬起
@@ -125,6 +130,7 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
             pressedImage.gameObject.SetActive(false);
         }
 
+        GM.Ins.AM.PlayAudio(clickSound);
         // 只有在按钮内部抬起时，才算作一次成功的点击，触发事件
         if (isHovered && onClickEvent != null)
         {
