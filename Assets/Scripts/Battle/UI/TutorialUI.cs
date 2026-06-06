@@ -72,6 +72,7 @@ public class TutorialUI : MonoBehaviour
         {
             _currentIndex++;
             UpdatePage();
+            GM.Ins.AM.PlayAudio(AudioCueType.Click);
         }
     }
 
@@ -81,6 +82,7 @@ public class TutorialUI : MonoBehaviour
         {
             _currentIndex--;
             UpdatePage();
+            GM.Ins.AM.PlayAudio(AudioCueType.Click);
         }
     }
 
@@ -95,5 +97,6 @@ public class TutorialUI : MonoBehaviour
             BattleScene.Ins.BM.PlayerStart();
         }
         gameObject.SetActive(false);
+        GM.Ins.AM.PlayAudio(AudioCueType.Close);
     }
 }

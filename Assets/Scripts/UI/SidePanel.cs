@@ -9,10 +9,22 @@ public class SidePanel : MonoBehaviour
 
     public float slidePosX = 500f;
     public float slideDuration = 0.3f;
+    public KeyCode toggleKey = KeyCode.Tab;
 
     public void Update()
     {
-        
+        if (Input.GetKeyUp(toggleKey))
+        {
+            // 如果侧栏当前不可见，则显示；如果可见，则关闭
+            if (!panel.gameObject.activeSelf)
+            {
+                ShowPanel();
+            }
+            else
+            {
+                ClosePanel();
+            }
+        }
     }
 
     public void ShowPanel()

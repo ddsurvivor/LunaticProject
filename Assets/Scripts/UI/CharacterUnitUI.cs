@@ -73,6 +73,7 @@ public class CharacterUnitUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     {
         RefreshDetailPanel();
         detailPanel.SetActive(true);
+        GM.Ins.AM.PlayAudio(AudioCueType.Hover);
     }
 
     // 鼠标移出
@@ -86,5 +87,6 @@ public class CharacterUnitUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         // 打开技能面板
         //skillPointPanel.ShowPanel(unitID);
         characterUIPage.ShowPanel(playerData, unitID+1);
+        GM.Ins.AM.PlayAudio(AudioCueType.Click);
     }
 }
