@@ -31,11 +31,11 @@ public class UIManager : SerializedMonoBehaviour
     public PlayerLogPanel logPanel;
     public BattleFinishPanel battleFinishPanel;
     public CheckDicePanel checkDicePanel;
-    public BattleStartUIPanel battleStartUIPanel;
+    public BattleStartUIPanel battleStartUIPanel;// 复用为战斗胜利提示
     public Image burstStart;
     public Image burstEnd;
     public SkillTooltipUI skillTooltipUI;
-    
+
     public Dictionary<KeyCode, GameObject> keyPanelDic = new();
     
 

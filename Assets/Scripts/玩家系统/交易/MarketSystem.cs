@@ -23,7 +23,7 @@ public class MarketSystem : MonoBehaviour
     public void OpenMarketPanel(int shopId, int discountPercent = 100)
     {
         ShopData shopData = shopListSO.GetShopData(shopId);
-        if(shopData == null)
+        if(shopData.itemPacks == null)
         {
             Debug.LogError("商店数据不存在，商店ID：" + shopId);
             return;

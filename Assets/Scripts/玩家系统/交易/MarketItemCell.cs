@@ -25,6 +25,7 @@
             nameText.text = "";
             numText.text = "";
             selectNumText.text = "";
+            itemPack = null;
         }
         
         public void SetItem(ItemPack itemPack, bool market = false)
@@ -35,6 +36,7 @@
 
         public void UpdateDisplay()
         {
+            if(itemPack == null)return;
             ItemData itemData = GM.Ins.marketSystem.marketItemListSO.GetData(itemPack.itemName);
             if (itemData.itemIcon != null)
             {
@@ -48,21 +50,7 @@
             selectNumText.text = selectedCount.ToString();
         }
 
-
-        public void OnClick()
-        {
-            if (!isMarketItem)
-            {
-                // 卖 → 加到 sellingList
-                inventoryPanel.AddOrIncreaseCount(inventoryPanel.sellingList, itemPack.itemName, 1, itemPack.itemNum);
-            }
-            else
-            {
-                // 买 → 加到 buyingList
-                inventoryPanel.AddOrIncreaseCount(inventoryPanel.buyingList, itemPack.itemName, 1, itemPack.itemNum);
-            }
-            UpdateDisplay();
-        }
+        
         
         public int GetCurrentSelectedCount()
         {

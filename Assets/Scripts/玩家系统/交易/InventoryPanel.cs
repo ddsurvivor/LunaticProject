@@ -17,12 +17,13 @@ public class InventoryPanel : UIPanel
 
     private ShopData currentShopData;
     
+    
     // 打折
     public int discountPercent = 100; // 默认不打折
 
     public void ShowShop(ShopData shopData, int discountPercent = 100)
     {
-        currentShopData = shopData;
+        currentShopData = shopData.Clone();;
         gameObject.SetActive(true);
         this.discountPercent = discountPercent;
         //UpdateDisplay();
@@ -126,11 +127,13 @@ public class InventoryPanel : UIPanel
         foreach (var pack in buyingList)
         {
             GM.Ins.PLAYERPROFILE.AddItem(pack.itemName, pack.itemNum);
+            ModifyItem(currentShopData.itemPacks, pack.itemName, -pack.itemNum);
         }
 
         foreach (var pack in sellingList)
         {
             GM.Ins.PLAYERPROFILE.CostItem(pack.itemName, pack.itemNum);
+            ModifyItem(currentShopData.itemPacks, pack.itemName, pack.itemNum);
         }
 
         // 4. 扣钱
@@ -170,5 +173,39 @@ public class InventoryPanel : UIPanel
         // 从市场数据获取物品价格并应用折扣
         int basePrice = GetItemPrice(itemName);
         return Mathf.RoundToInt(basePrice * discountPercent / 100f);
+    }
+    
+    public void ModifyItem(List<ItemPack> targetPack, ItemName itemName, int num)
+    {
+        if (targetPack == null) return;
+
+        var item = targetPack.Find(t => t.itemName == itemName);
+
+        if (num > 0)
+        {
+            if (item != null)
+            {
+                item.itemNum += num;
+            }
+            else
+            {
+                targetPack.Add(new ItemPack(itemName, num));
+            }
+            Debug.Log($"添加道具: {itemName} 数量: {num}");
+        }
+        else if (num < 0)
+        {
+            if (item != null)
+            {
+                item.itemNum += num; // num为负数
+                if (item.itemNum <= 0)
+                {
+                    item.itemNum = 0;
+                    targetPack.Remove(item);
+                }
+                Debug.Log($"消耗道具: {itemName} 数量: {-num}");
+            }
+        }
+        // num == 0 不做操作
     }
 }
