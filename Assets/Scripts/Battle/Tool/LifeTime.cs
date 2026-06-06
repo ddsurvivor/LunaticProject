@@ -13,6 +13,7 @@ public class LifeTime : MonoBehaviour
     // Start is called before the first frame update
     void OnEnable()
     {
+        if(lifeTime <= 0) return;
         DOVirtual.DelayedCall(lifeTime, () =>
         {
             gameObject.SetActive(false);

@@ -254,6 +254,7 @@ MonoBehaviour:
   barrelName: "\u7206\u70B8\u6876"
   explosionRadius: 12
   offset: 0.23
+  delayTime: 0.5
   skillPack:
     skillName: "\u7206\u70B8"
     description: 
@@ -265,8 +266,7 @@ MonoBehaviour:
     explodeRadius: 0
     arcWeight: 0
     arcCenterDis: 0
-    skillVFXType: 16
-    isBullet: 0
+    skillVFXType: 10
     isRotate: 0
     bulletVFXType: 0
     attackPacks:
@@ -287,6 +287,7 @@ MonoBehaviour:
     m_Bits: 15415
   highlightEffect: {fileID: 4526656481513676065}
   pieceController: {fileID: 3628677100636854144}
+  needInit: 1
 --- !u!65 &3628677100636854150
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -507,7 +508,6 @@ MonoBehaviour:
       arcWeight: 0
       arcCenterDis: 0
       skillVFXType: 0
-      isBullet: 0
       isRotate: 0
       bulletVFXType: 0
       attackPacks: []
@@ -532,7 +532,6 @@ MonoBehaviour:
       arcWeight: 0
       arcCenterDis: 0
       skillVFXType: 0
-      isBullet: 0
       isRotate: 0
       bulletVFXType: 0
       attackPacks: []
@@ -555,6 +554,7 @@ MonoBehaviour:
     maxMana: 0
     dropItemList: []
     dropRate: 0
+    weaponIcon: {fileID: 0}
   playerData:
     curHealth: 0
     curAmmo: 0
@@ -581,7 +581,6 @@ MonoBehaviour:
     arcWeight: 0
     arcCenterDis: 0
     skillVFXType: 0
-    isBullet: 0
     isRotate: 0
     bulletVFXType: 0
     attackPacks: []

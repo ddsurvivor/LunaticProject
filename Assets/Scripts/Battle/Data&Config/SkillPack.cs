@@ -20,8 +20,8 @@ public class SkillPack
     [ShowIf("@this.rangeType == RangeType.Arc")] public float arcCenterDis;// 弧线中心距离（仅弧线范围有效）
     
     public ItemType skillVFXType;// 技能特效类型
-    [ShowIf("@this.skillVFXType != ItemType.NONE")]  
-    public bool isBullet = false; // 是否为子弹技能
+    //[ShowIf("@this.skillVFXType != ItemType.NONE")]  
+    //public bool isBullet = false; // 是否为子弹技能
     [ShowIf("@this.skillVFXType != ItemType.NONE")] 
     public bool isRotate = false; // 是否旋转子弹特效
     public ItemType bulletVFXType;// 子弹特效类型

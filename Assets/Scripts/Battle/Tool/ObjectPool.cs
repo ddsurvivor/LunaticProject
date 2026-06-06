@@ -5,49 +5,92 @@ using UnityEngine;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
 
+// 文件: Assets/Scripts/Battle/Tool/ObjectPool.cs
+using Sirenix.OdinInspector;
+
 public enum ItemType
 {
-    NONE=0,
-    /*EMO_HAPPY=1,
-    EMO_NORMAL=2,
-    EMO_SAD=3,*/
-    SHIELD=9,// 盾牌特效
+    [LabelText("无")]
+    NONE = 0,
 
-    // 爆炸特效
-    EXPLOSION=10,
-    // 伤害跳字
-    DAMAGE_TEXT=11,
-    // 能量攻击特效
-    ENERGY_ATTACK=12,
-    // 动能攻击特效
-    KINETIC_ATTACK=13,
-    HEAL_SKILL=14,
-    // 等离子爆炸
-    PLASMA_EXPLOSION=15,
-    // 燃烧特效
-    FLAME_EFFECT=16,
-    // 技能攻击区域标记
-    SKILL_AREA=17,
-    // 轨道轰炸特效
-    ORBITAL_STRIKE=18,
-    GEL_BOMB=19,// 粘性炸弹特效
+    /*[LabelText("表情-高兴")]
+    EMO_HAPPY = 1,
+    [LabelText("表情-普通")]
+    EMO_NORMAL = 2,
+    [LabelText("表情-悲伤")]
+    EMO_SAD = 3,*/
 
-    // 治疗区域
-    HEAL_AREA=20,
-    
-    // 物品拾取
-    PICKABLE_ITEM=30,
-    
-    // 电击弹道
-    ELECTRIC_BOLT=40,
-    // 火焰弹道
-    FLAME_BOLT=41,
-    // 扇形爆炸弹道
-    FAN_EXPLOSION=42,
+    [LabelText("盾牌特效")]
+    SHIELD = 9, // 盾牌特效
+
+    [LabelText("爆炸特效")]
+    EXPLOSION = 10, // 爆炸特效
+
+    [LabelText("伤害跳字")]
+    DAMAGE_TEXT = 11, // 伤害跳字
+
+    [LabelText("能量攻击特效")]
+    ENERGY_ATTACK = 12, // 能量攻击特效
+
+    [LabelText("动能攻击特效")]
+    KINETIC_ATTACK = 13, // 动能攻击特效
+
+    [LabelText("治疗技能")]
+    HEAL_SKILL = 14,
+
+    [LabelText("等离子爆炸")]
+    PLASMA_EXPLOSION = 15, // 等离子爆炸
+
+    [LabelText("燃烧特效")]
+    FLAME_EFFECT = 16, // 燃烧特效
+
+    [LabelText("技能攻击区域标记")]
+    SKILL_AREA = 17, // 技能攻击区域标记
+
+    [LabelText("轨道轰炸特效")]
+    ORBITAL_STRIKE = 18, // 轨道轰炸特效
+
+    [LabelText("粘性炸弹特效")]
+    GEL_BOMB = 19, // 粘性炸弹特效
+
+    [LabelText("治疗区域")]
+    HEAL_AREA = 20, // 治疗区域
+
+    [LabelText("物品拾取")]
+    PICKABLE_ITEM = 30, // 物品拾取
+
+    [LabelText("电击弹道")]
+    ELECTRIC_BOLT = 40, // 电击弹道
+
+    [LabelText("火焰弹道")]
+    FLAME_BOLT = 41, // 火焰弹道
+
+    [LabelText("扇形爆炸弹道")]
+    FAN_EXPLOSION = 42, // 扇形爆炸弹道
+
+    [LabelText("暗能量")]
     DENERGY = 43,
-    EYESTRIKE=44,
-    ROCKET=45,
+
+    [LabelText("目击之术")]
+    EYESTRIKE = 44,
+
+    [LabelText("火箭")]
+    ROCKET = 45,
+
+    [LabelText("高频")]
+    HightFrequency = 46,
+
+    [LabelText("光矛")]
+    LightSpear = 47,
+
+    [LabelText("光扫")]
+    LightSweap = 48,
+
+    [LabelText("通用子弹")]
+    BulletFx = 49, // 通用子弹
     
+    [LabelText("爆炸桶爆炸")]
+    EXPLOSIVE_BARREL = 50, // 爆炸桶爆炸
 }
 /// <summary>
 /// 对象池
