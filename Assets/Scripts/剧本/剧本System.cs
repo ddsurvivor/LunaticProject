@@ -328,7 +328,7 @@ public class 剧本System : MonoBehaviour
         shakeTween?.Kill();
         if (震动目标 == null)
         {
-            Debug.LogError("震动目标未设置，请在Inspector中设置震动目标");
+            Debug.LogWarning("震动目标未设置，请在Inspector中设置震动目标");
             shakeTween = transform.DOShakePosition(duration, strength, vibrato);
         }
         else

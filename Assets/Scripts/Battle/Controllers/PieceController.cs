@@ -716,7 +716,7 @@ public class PieceController : MonoBehaviour
         //if(!option) hitInfoPanel?.gameObject.SetActive(false);
     }
 
-    [Button("测试发射火箭")]
+    //[Button("测试发射火箭")]
     public void TestShoot(Transform targetTransform)
     {
         Vector3 targetPos = targetTransform.position;

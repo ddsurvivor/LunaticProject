@@ -209,7 +209,7 @@ public class RangeUI : MonoBehaviour
     {
         _isShowMoveIcon = option;
         moveIcon.SetActive(option);
-        moveStart.SetActive(option);
+        //moveStart.SetActive(option);
         //moveLine.gameObject.SetActive(option);
     }
 

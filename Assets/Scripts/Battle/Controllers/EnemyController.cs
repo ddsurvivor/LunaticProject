@@ -201,6 +201,46 @@ public class EnemyController : PieceController
     public override void ShowOutline(bool option)
     {
         base.ShowOutline(option);
+        Debug.Log($"ShowOutline {option} - {_curTargetPc?.name}");
+        if (!option)
+        {
+            tagetLine.enabled = false;
+            return;
+        }
         // 显示攻击目标指示线
+        if (player is AIController aiController)
+        {
+            _curTargetPc = aiController.CheckEnemyTarget(this);
+        }
+        UpdateTargetLine();
+    }
+    // 在 EnemyController.cs 中添加
+    private void UpdateTargetLine()
+    {
+        if (_curTargetPc != null && tagetLine != null)
+        {
+            Vector3 start = transform.position + Vector3.up * 1.5f; // 本棋子顶部
+            Vector3 end = _curTargetPc.transform.position + Vector3.up * 1.5f; // 目标棋子顶部
+            Vector3 control = (start + end) / 2 + Vector3.up * 2.5f; // 控制点：中点上移
+
+            int segmentCount = 20;
+            Vector3[] positions = new Vector3[segmentCount + 1];
+            for (int i = 0; i <= segmentCount; i++)
+            {
+                float t = i / (float)segmentCount;
+                // 二次贝塞尔曲线公式
+                positions[i] = Mathf.Pow(1 - t, 2) * start +
+                               2 * (1 - t) * t * control +
+                               Mathf.Pow(t, 2) * end;
+            }
+            tagetLine.positionCount = positions.Length;
+            tagetLine.SetPositions(positions);
+            tagetLine.enabled = true;
+        }
+        else if (tagetLine != null)
+        {
+            tagetLine.positionCount = 0;
+            tagetLine.enabled = false;
+        }
     }
 }
