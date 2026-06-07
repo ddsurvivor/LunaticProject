@@ -734,4 +734,57 @@ public class AIController : PlayerController
             => l.Value > r.Value ? l : r).Key;
         EnemyAttack(aiPiece, target);
     }
+
+    public PieceController CheckEnemyTarget(EnemyController aiPiece)
+    {
+        // 计算所有目标棋子的威胁值
+        Dictionary<PieceController, int> threatValues = new();
+
+        PieceController nearTarget = null; // 距离最近的棋子
+        // 伤害最高的棋子
+        PieceController highDamageTarget = null;
+        float minDistance = float.MaxValue;
+        int maxDamage = -1;
+
+        foreach (var playerPiece in BattleScene.Ins.BM.PlayerController.pieces)
+        {
+            if (playerPiece.isDead) continue;
+            threatValues.Add(playerPiece, 0);
+
+            // 获取最近的玩家棋子
+            float distance =
+                Vector3.Distance(playerPiece.transform.position, aiPiece.transform.position);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                nearTarget = playerPiece;
+            }
+
+            // 伤害最高的玩家棋子
+            if (aiPiece.damageDic.ContainsKey(playerPiece))
+            {
+                int damage = aiPiece.damageDic[playerPiece];
+                if (damage > maxDamage)
+                {
+                    maxDamage = damage;
+                    highDamageTarget = playerPiece;
+                }
+            }
+
+            // 计算嘲讽值
+            threatValues[playerPiece] += playerPiece.unitAttrCenter.TauntValue;
+        }
+
+        if (nearTarget != null) threatValues[nearTarget] += 1; // 距离最近的地方棋子威胁值+1
+        if (highDamageTarget != null)
+        {
+            threatValues[highDamageTarget] += 2; // 伤害最高的玩家棋子威胁值+2
+        }
+
+        if (threatValues.Count == 0) return null;
+        // 选择威胁值最高的目标进行攻击
+        PieceController target = threatValues.Aggregate((l, r)
+            => l.Value > r.Value ? l : r).Key;
+        return target;
+    }
 }
