@@ -168,6 +168,16 @@ public class PieceDisplay : SerializedMonoBehaviour
         scale.x = Mathf.Abs(scale.x) * (faceRight ? 1 : -1);
         pieceSpriteRenderer.transform.localScale = scale;
     }
+    
+    /// <summary>
+    /// 停止当前播放的序列帧动画，图片保持在当前帧不动
+    /// </summary>
+    public void StopAnimation()
+    {
+        StopAllCoroutines();
+        // 如果需要，这里也可以选择性地触发 finishAction?.Invoke(); 
+        // 视你的底层逻辑（比如是否有连招、动作锁）而定
+    }
 
     #region 加载图片
 

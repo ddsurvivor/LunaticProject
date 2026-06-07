@@ -15,6 +15,10 @@ public enum AudioCueType
     [LabelText("确认")] Confirm = 60,
     [LabelText("取消")] Cancel = 70,
     [LabelText("选中")] Select = 80,
+    // 聚能充满、启动、退出
+    [LabelText("聚能充满")] ChargeFull = 90,
+    [LabelText("聚能启动")] ChargeStart = 100,
+    [LabelText("聚能退出")] ChargeExit = 110,
 }
 
 [CreateAssetMenu(fileName = "AudioConfig", menuName = "Config/Audio Config")]

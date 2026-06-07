@@ -97,6 +97,7 @@ public class PlayerController : SerializedMonoBehaviour
             burstCharge = maxBurstCharge;
             Debug.Log("聚能已满，可以发动聚能！");
             BattleScene.Ins.UM.ShowBurstReady(true);
+            GM.Ins.AM.PlayAudio(AudioCueType.ChargeFull);
         }
 
         UpdateBurstBar();
@@ -123,6 +124,11 @@ public class PlayerController : SerializedMonoBehaviour
         {
             piece.TurnStart();
         }
+        // 所有敌人棋子暂定
+        foreach (var aiPiece in BattleScene.Ins.BM.AIController.pieces)
+        {
+            aiPiece.pieceDisplay.StopAnimation();
+        }
 
         // 用相机滤镜模式
         //BattleScene.Ins.BM.camera.ActiveBurstMode(true);
@@ -133,6 +139,7 @@ public class PlayerController : SerializedMonoBehaviour
             BattleScene.Ins.UM.burstStart.gameObject.SetActive(false));
         // 所有图片变色
         BattleScene.Ins.BM.ShowBurstGray(true);
+        GM.Ins.AM.PlayAudio(AudioCueType.ChargeStart);
     }
 
     /// <summary>
@@ -151,6 +158,7 @@ public class PlayerController : SerializedMonoBehaviour
                 .SetDelay(1f)
                 .OnComplete(() =>
                     BattleScene.Ins.UM.burstEnd.gameObject.SetActive(false));
+            GM.Ins.AM.PlayAudio(AudioCueType.ChargeExit);
             Debug.Log("聚能状态结束");
         }
 
