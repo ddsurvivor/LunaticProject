@@ -134,6 +134,10 @@ public class EnemyController : PieceController
             // 消耗弹药
             unitAttrCenter.CostAmmo();
             PlayAudio(_curAttackPack);
+            if (targets.Count > 0)
+            {
+                ShootBolt(targets[0].transform.position, _curAttackPack.bulletVFXType);
+            }
         }
 
         // 延迟0.3f

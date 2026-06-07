@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 /// <summary>
 /// 梯子交互行为
@@ -25,6 +26,9 @@ public class LadderArea : InteractArea
         // pieces.Add(piece);
         
         // 直接攀爬
+        // 暂时关闭nav mesh agent
+        piece.GetComponent<NavMeshAgent>().enabled = false;
+            //piece.unitAttrCenter.CostMP(piece.unitAttrCenter.CurMovePoint);
 
         // 如果这个棋子的y坐标与uppos之差小于1，则移动到downpos，否则移动到uppos
         if (Mathf.Abs(piece.transform.position.y - upPos.position.y) < 1f)
@@ -54,6 +58,7 @@ public class LadderArea : InteractArea
             }
         }
         BattleScene.Ins.BM.camera.SetFollow(piece.transform);
+        piece.GetComponent<NavMeshAgent>().enabled = true;
     }
 
     public Vector3 GetNearPos(Vector3 pos)
