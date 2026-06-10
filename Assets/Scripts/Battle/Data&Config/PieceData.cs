@@ -3,6 +3,7 @@ using Sirenix.Serialization;
 using UnityEngine;
 using System;
 using Sirenix.OdinInspector;
+using SkillSystem;
 
 [Serializable]
 /// <summary>
@@ -34,7 +35,8 @@ public class PieceData
     [LabelText("掉落道具")] public List<ItemPack> dropItemList = new();
     [LabelText("掉落概率")]  public int dropRate;
     [LabelText("扩展属性")] public Dictionary<UnitAttrType, int> attrDic = new Dictionary<UnitAttrType, int>();// 其他属性
-    [LabelText("专长技能")] public List<PassiveSkillPack> passiveSkillPacks = new List<PassiveSkillPack>();
+    //[LabelText("专长技能")] public List<PassiveSkillPack> passiveSkillPacks = new List<PassiveSkillPack>();
+    [LabelText("专长类型")] public List<PassiveSkillType> passiveSkillTypes = new List<PassiveSkillType>();
     [LabelText("武器icon")] public Sprite weaponIcon;
 }
 

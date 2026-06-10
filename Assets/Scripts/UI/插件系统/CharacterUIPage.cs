@@ -86,14 +86,16 @@ public class CharacterUIPage : MonoBehaviour
             group.gameObject.SetActive(false);
         }
 
-        for (var index = 0; index < pieceData.passiveSkillPacks.Count; index++)
+        for (var index = 0; index < pieceData.passiveSkillTypes.Count; index++)
         {
-            var skillPack = pieceData.passiveSkillPacks[index];
+            //var skillPack = pieceData.passiveSkillPacks[index];
+            var skillData =
+                GM.Ins.DM.passiveSkillConfigSO.GetSkillData(pieceData.passiveSkillTypes[index]);
             if (passiveSkillGroupList.Count > index)
             {
                 passiveSkillGroupList[index].gameObject.SetActive(true);
-                passiveSkillGroupList[index].skillTitle.text = skillPack.skillName;
-                passiveSkillGroupList[index].skillDesc.text = skillPack.description;
+                passiveSkillGroupList[index].skillTitle.text = skillData.skillName;
+                passiveSkillGroupList[index].skillDesc.text = skillData.description;
             }
         }
 

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
+using SkillSystem;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -18,6 +19,7 @@ public class DataManager : SerializedMonoBehaviour
     public LevelUpConfig levelUpConfig;
     public ComponentConfig componentConfig;
     public PieceDataListSO pieceDataListSO;
+    public PassiveSkillConfigSO passiveSkillConfigSO;
     public void Init()
     {
         // 测试加载
