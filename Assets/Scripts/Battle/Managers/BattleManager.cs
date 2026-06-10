@@ -869,6 +869,7 @@ public class BattleManager : MonoBehaviour
                             result.HitPieces.Add(pc);
                         }
                     }
+                    Debug.Log($"检测到碰撞: {wallHit.collider.name} at {wallHit.point}");
 
                     // 记录碰撞并计算最终停留点（向后微调 0.2f 避免模型穿插）
                     //result.FinalPosition = wallHit.point - direction * 0.2f;
@@ -880,7 +881,7 @@ public class BattleManager : MonoBehaviour
 
             // 2. 地面检测 (垂直向下检测路径是否合法)
             Ray groundRay = new Ray(nextStepPos + Vector3.up * 10f, Vector3.down);
-            if (Physics.Raycast(groundRay, out RaycastHit groundHit, 30f))
+            if (Physics.Raycast(groundRay, out RaycastHit groundHit, 30f,LayerMask.GetMask("Ground","Wall")))//
             {
                 if (groundHit.collider.CompareTag("Ground"))
                 {

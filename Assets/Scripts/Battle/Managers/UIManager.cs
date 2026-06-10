@@ -10,7 +10,7 @@ public class UIManager : SerializedMonoBehaviour
 {
     public TurnPanel turnPanel;
     public List<GameObject> turnImage;
-    public Button endTurnButton;
+    public CustomAdvancedButton endTurnButton;
     public InfoBox infoBox;
     public Button burstButton;
     public Image burstBtnImage;
