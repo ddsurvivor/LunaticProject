@@ -11,7 +11,8 @@ namespace BattleDialogue
         BattleStart,     // 战斗开始
         BattleEnd,       // 战斗结束
         CharacterDeath,  // 关键角色死亡
-        Custom           // 自定义/额外扩展调用
+        TurnNumStart,      // 第N回合开始
+        Custom,           // 自定义/额外扩展调用
     }
 
     /// <summary>
@@ -23,6 +24,8 @@ namespace BattleDialogue
         [SerializeField] private ETriggerType triggerType;
         [SerializeField] private string characterId; // 仅在角色死亡时使用
         [SerializeField] private string logName;     // 对应的对话剧本名称
+        
+        public int turnNum; // 仅在回合开始时使用，表示第N回合
 
         public ETriggerType TriggerType => triggerType;
         public string CharacterId => characterId;

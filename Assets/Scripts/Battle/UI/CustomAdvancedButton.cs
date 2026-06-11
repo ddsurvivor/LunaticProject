@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -136,6 +137,18 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
         {
             onClickEvent.Invoke();
         }
+    }
+
+    private void OnDisable()
+    {
+        fillImage.fillAmount = 0f;
+        isHovered = false;
+    }
+
+    private void OnEnable()
+    {
+        fillImage.fillAmount = 0f;
+        isHovered = false;
     }
 
     #endregion

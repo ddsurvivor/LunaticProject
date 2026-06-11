@@ -71,6 +71,13 @@ namespace BattleDialogue
             string logName = GetLogName(ETriggerType.CharacterDeath, characterId);
             StartLog(logName, onComplete);
         }
+        
+        public void TriggerTurnNumStart(int turnNum, Action onComplete = null)
+        {
+            // 目前示例中未实现基于回合数的触发逻辑，但接口预留了turnNum参数以供未来扩展
+            string logName = GetLogName(ETriggerType.TurnNumStart, turnNum);
+            StartLog(logName, onComplete);
+        }
 
         #endregion
 
@@ -82,6 +89,16 @@ namespace BattleDialogue
             var target = triggerList.Find(data => 
                 data.TriggerType == type && 
                 (type != ETriggerType.CharacterDeath || data.CharacterId == characterId)
+            );
+
+            return target != null ? target.LogName : string.Empty;
+        }
+        private string GetLogName(ETriggerType type, int turnNum)
+        {
+            // 直接在本本地列表 (triggerList) 中进行快捷搜寻
+            var target = triggerList.Find(data => 
+                data.TriggerType == type && 
+                (type != ETriggerType.TurnNumStart || data.turnNum == turnNum)
             );
 
             return target != null ? target.LogName : string.Empty;

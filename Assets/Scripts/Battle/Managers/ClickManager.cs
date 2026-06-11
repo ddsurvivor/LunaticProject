@@ -130,22 +130,23 @@ public class ClickManager : MonoBehaviour
             if (piece != null)
             {
                 currentHoveredPiece = piece;
-                break; // 只取第一个被射线穿透命中的棋子
+                if (lastHoveredPiece != currentHoveredPiece)
+                {
+                    if (lastHoveredPiece != null)
+                    {
+                        lastHoveredPiece.ShowOutline(false);
+                    }
+                    if (currentHoveredPiece != null)
+                    {
+                        currentHoveredPiece.ShowOutline(true);
+                    }
+                    lastHoveredPiece = currentHoveredPiece;
+                }
+                //break; // 只取第一个被射线穿透命中的棋子
             }
         }
 
-        if (lastHoveredPiece != currentHoveredPiece)
-        {
-            if (lastHoveredPiece != null)
-            {
-                lastHoveredPiece.ShowOutline(false);
-            }
-            if (currentHoveredPiece != null)
-            {
-                currentHoveredPiece.ShowOutline(true);
-            }
-            lastHoveredPiece = currentHoveredPiece;
-        }
+        
     }
 
     private void ClickPieceByIndex(int index)
@@ -182,9 +183,9 @@ public class ClickManager : MonoBehaviour
                 {
                     enemy.ShowTargetLine();
                 }
-                return;
+                continue;
             }
-            if (piece.cantControl)return;
+            if (piece.cantControl)continue;
             if(piece.isDead) continue;
             //if(piece.unitAttrCenter.CurMovePoint<=0) continue;
             _selectedPiece?.CancelSelect();

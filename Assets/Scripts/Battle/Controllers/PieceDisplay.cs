@@ -16,73 +16,70 @@ public class PieceDisplay : SerializedMonoBehaviour
     
     // 棋子图片控制脚本，有一个SpriteRenderer用于显示棋子图片
     public SpriteRenderer pieceSpriteRenderer;
-    // 有一系列按照规定命名的Sprite资源用于显示不同的棋子图片，分别为idel、move、attack、shoot
+    // 所有美术资源现已全部统一为 List<Sprite> 序列帧
     public List<Sprite> idleSprite;
-    public Sprite moveSprite;
-    
+    public List<Sprite> moveSprite;
     public List<Sprite> meleeSprites;
-    
     public List<Sprite> rangeSprites;
-    // 闪避
-    public Sprite dodgeSprite;
-    public Sprite hitSprite;
+    public List<Sprite> dodgeSprite;
+    public List<Sprite> hitSprite;
     public List<Sprite> deathSprites;
     [OdinSerialize]
     public List<List<Sprite>> skillSpriteList = new();
-    
-
-    // 每种图片还有背面图
-    public Sprite idleBackSprite;
-    public Sprite moveBackSprite;
-    public Sprite attackBackSprite;
-    public Sprite shootBackSprite;
-    public Sprite dodgeBackSprite;
-    public Sprite hitBackSprite;
 
     private UnityAction finishAction;
     
     
     private float frameDuration = 0.2f; // 每帧持续时间，默认为0.2秒
-    // 更改显示状态脚本，传入一个状态，和一个持续时间，如果是-1则表示永久更改，否则持续时间结束后恢复到idle状态
-    // 如果传入back则显示背面图片
-    public void ChangeDisplayState(PieceDisplayState state, bool back = false, float duration = -1f,
-        UnityAction finish = null, int index=0)
+    /// <summary>
+    /// 更改显示状态脚本，传入一个状态和一个持续时间。
+    /// 如果是-1则表示永久更改（或等待动画播放完毕），否则持续时间结束后恢复到idle状态。
+    /// </summary>
+    public void ChangeDisplayState(PieceDisplayState state, bool back = false, float duration = -1f, UnityAction finish = null, int index = 0)
     {
-        //Debug.Log($"ChangeDisplayState: {state}, back: {back}, duration: {duration}");
-        if(pieceSpriteRenderer== null) return;
+        if (pieceSpriteRenderer == null) return;
         finishAction = finish;
         StopAllCoroutines();
+
         switch (state)
         {
             case PieceDisplayState.Idle:
-                StartCoroutine(PlaySpriteAnimation(idleSprite, frameDuration,true));
+                StartCoroutine(PlaySpriteAnimation(idleSprite, frameDuration, true));
                 break;
             case PieceDisplayState.Move:
-                pieceSpriteRenderer.sprite = back ? moveBackSprite : moveSprite;
+                // 移动通常也是循环播放
+                StartCoroutine(PlaySpriteAnimation(moveSprite, frameDuration, true));
                 break;
             case PieceDisplayState.Attack:
                 StartCoroutine(PlaySpriteAnimation(meleeSprites, frameDuration));
                 break;
             case PieceDisplayState.Shoot:
                 StartCoroutine(PlaySpriteAnimation(rangeSprites, frameDuration));
-                //pieceSpriteRenderer.sprite = back ? shootBackSprite : shootSprite;
                 break;
             case PieceDisplayState.Dodge:
-                pieceSpriteRenderer.sprite = back ? dodgeBackSprite : dodgeSprite;
-                break;
-            case PieceDisplayState.Death:
-                // 按顺序按固定时间间隔播放死亡动画
-                StartCoroutine(PlaySpriteAnimation(deathSprites, frameDuration));
+                StartCoroutine(PlaySpriteAnimation(dodgeSprite, frameDuration));
                 break;
             case PieceDisplayState.Hit:
-                pieceSpriteRenderer.sprite = back ? hitBackSprite : hitSprite;
+                StartCoroutine(PlaySpriteAnimation(hitSprite, frameDuration));
+                break;
+            case PieceDisplayState.Death:
+                StartCoroutine(PlaySpriteAnimation(deathSprites, frameDuration));
                 break;
             case PieceDisplayState.Skill:
-                StartCoroutine(PlaySpriteAnimation(skillSpriteList[index], frameDuration));
+                if (index >= 0 && index < skillSpriteList.Count)
+                {
+                    StartCoroutine(PlaySpriteAnimation(skillSpriteList[index], frameDuration));
+                }
+                else
+                {
+                    Debug.LogWarning($"[PieceDisplay] 技能索引 {index} 超出范围。");
+                    finishAction?.Invoke();
+                }
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(state), state, null);
         }
+
         if (duration > 0)
         {
             StartCoroutine(RevertToIdleAfterDelay(duration));

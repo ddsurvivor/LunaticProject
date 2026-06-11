@@ -585,22 +585,19 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 956e723f630708e499c3a7df4cadb790, type: 3}
   - {fileID: 21300000, guid: 9965c9fc1bfd3674f9d99b9989aba96a, type: 3}
   - {fileID: 21300000, guid: 95c431f859efef44995bb045577a8691, type: 3}
-  moveSprite: {fileID: 21300000, guid: fa9514318b275ac468c2f60e614ff754, type: 3}
+  moveSprite:
+  - {fileID: 21300000, guid: fa9514318b275ac468c2f60e614ff754, type: 3}
   meleeSprites:
   - {fileID: 21300000, guid: 3a3cc4a0abd10db48b1a863d252f7b2e, type: 3}
   - {fileID: 21300000, guid: fc9ce17668329464da0863d348932967, type: 3}
   rangeSprites: []
-  dodgeSprite: {fileID: 0}
-  hitSprite: {fileID: 21300000, guid: bfdee733c7c1471419b22f1b8682d918, type: 3}
+  dodgeSprite:
+  - {fileID: 21300000, guid: 956e723f630708e499c3a7df4cadb790, type: 3}
+  hitSprite:
+  - {fileID: 21300000, guid: bfdee733c7c1471419b22f1b8682d918, type: 3}
   deathSprites:
   - {fileID: 21300000, guid: fe67ec1c6ff41144d993f9c4e3367ab1, type: 3}
   - {fileID: 21300000, guid: 7f7ac34c2d685924e91076b8551ebfb4, type: 3}
-  idleBackSprite: {fileID: 0}
-  moveBackSprite: {fileID: 0}
-  attackBackSprite: {fileID: 0}
-  shootBackSprite: {fileID: 0}
-  dodgeBackSprite: {fileID: 0}
-  hitBackSprite: {fileID: 0}
   path: "Assets/A\u7F8E\u672F/BattleSprites/E08(\u6A21\u56E0\u4E2D\u6BD2\u80052\uFF09"
   pieceName: E08
 --- !u!114 &3819608013901936508
@@ -684,6 +681,7 @@ MonoBehaviour:
     maxMana: 0
     dropItemList: []
     dropRate: 0
+    passiveSkillTypes: 
     weaponIcon: {fileID: 0}
   playerData:
     curHealth: 0

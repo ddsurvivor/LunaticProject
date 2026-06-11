@@ -50,7 +50,7 @@ public class PlayerController : SerializedMonoBehaviour
         // 所有棋子重置状态
         foreach (var piece in pieces)
         {
-            piece.TurnStart();
+            if(piece.gameObject.activeInHierarchy) piece.TurnStart();
         }
 
         // 相机锁定第一个棋子
