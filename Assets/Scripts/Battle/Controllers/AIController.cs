@@ -583,58 +583,60 @@ public class AIController : PlayerController
         float testDistance = Mathf.Min(distanceToIdeal, moveRange);
 
         // 3. 第一次尝试移动
-        var moveResult =
-            BattleScene.Ins.BM.CalculateValidMovePos(currentPos, mainDir, testDistance
-                , aiPiece.gameObject, true);
-        float originalDist = Vector3.Distance(currentPos, moveResult.FinalPosition);
-
+        // var moveResult =
+        //     BattleScene.Ins.BM.CalculateValidMovePos(currentPos, mainDir, testDistance
+        //         , aiPiece.gameObject, true);
+        // float originalDist = Vector3.Distance(currentPos, moveResult.FinalPosition);
+        BattleScene.Ins.BM.moveManager.PreviewMove(aiPiece.gameObject, idealAttackPos, moveRange);
+        
         // 4. 判定是否“撞墙死顶”：发生了碰撞 且 行进路程不足 30%
-        if (moveResult.IsCollided && originalDist < (moveRange * 0.3f))
-        {
-            Debug.Log($"{aiPiece.name} 遇到障碍物阻挡，尝试左右侧滑绕开...");
-
-            // 计算正负 90 度的方向
-            Vector3 leftDir = Quaternion.Euler(0, -90, 0) * mainDir;
-            Vector3 rightDir = Quaternion.Euler(0, 90, 0) * mainDir;
-
-            // 执行左右两次判定（探测完整的移动范围）
-            var leftResult = BattleScene.Ins.BM.CalculateValidMovePos(currentPos, leftDir, moveRange
-                , aiPiece.gameObject, true);
-            var rightResult = BattleScene.Ins.BM.CalculateValidMovePos(currentPos, rightDir
-                , moveRange, aiPiece.gameObject, true);
-
-            float leftDist = Vector3.Distance(currentPos, leftResult.FinalPosition);
-            float rightDist = Vector3.Distance(currentPos, rightResult.FinalPosition);
-
-            // 对比哪条路径更长
-
-            // 选择最长的那条路径更新 moveResult
-            if (leftDist >= rightDist)
-            {
-                moveResult = leftResult;
-                Debug.Log($"{aiPiece.name} 选择左侧绕行，距离：{leftDist},结果{leftResult.FinalPosition}");
-            }
-            else
-            {
-                moveResult = rightResult;
-                Debug.Log($"{aiPiece.name} 选择右侧绕行，距离：{rightDist},结果{rightResult.FinalPosition}");
-            }
-        }
+        // if (moveResult.IsCollided && originalDist < (moveRange * 0.3f))
+        // {
+        //     Debug.Log($"{aiPiece.name} 遇到障碍物阻挡，尝试左右侧滑绕开...");
+        //
+        //     // 计算正负 90 度的方向
+        //     Vector3 leftDir = Quaternion.Euler(0, -90, 0) * mainDir;
+        //     Vector3 rightDir = Quaternion.Euler(0, 90, 0) * mainDir;
+        //
+        //     // 执行左右两次判定（探测完整的移动范围）
+        //     var leftResult = BattleScene.Ins.BM.CalculateValidMovePos(currentPos, leftDir, moveRange
+        //         , aiPiece.gameObject, true);
+        //     var rightResult = BattleScene.Ins.BM.CalculateValidMovePos(currentPos, rightDir
+        //         , moveRange, aiPiece.gameObject, true);
+        //
+        //     float leftDist = Vector3.Distance(currentPos, leftResult.FinalPosition);
+        //     float rightDist = Vector3.Distance(currentPos, rightResult.FinalPosition);
+        //
+        //     // 对比哪条路径更长
+        //
+        //     // 选择最长的那条路径更新 moveResult
+        //     if (leftDist >= rightDist)
+        //     {
+        //         moveResult = leftResult;
+        //         Debug.Log($"{aiPiece.name} 选择左侧绕行，距离：{leftDist},结果{leftResult.FinalPosition}");
+        //     }
+        //     else
+        //     {
+        //         moveResult = rightResult;
+        //         Debug.Log($"{aiPiece.name} 选择右侧绕行，距离：{rightDist},结果{rightResult.FinalPosition}");
+        //     }
+        // }
 
         // 5. 最终执行位移
-        Vector3 moveTargetPos = moveResult.FinalPosition;
+        BattleScene.Ins.BM.moveManager.ExecuteMove(aiPiece.gameObject);
+        aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
+        aiPiece.CheckFace(targetPos - currentPos);
+        //Vector3 moveTargetPos = moveResult.FinalPosition;
 
         // 强制锁定 Y 轴（根据你的需求，也可以不锁，让 CalculateValidMovePos 决定）
         // moveTargetPos.y = currentPos.y; 
 
-        Debug.Log($"{aiPiece.enemyAIType} AI {aiPiece.name} 最终移动到：{moveTargetPos}");
-
-        aiPiece.transform.DOMove(moveTargetPos, 1.0f).SetEase(Ease.InOutQuad).OnComplete(() =>
-        {
-            Debug.Log($"{aiPiece.name} 移动完成，当前坐标：{aiPiece.transform.position}");
-        });
-        aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
-        aiPiece.CheckFace(moveTargetPos - currentPos);
+        // Debug.Log($"{aiPiece.enemyAIType} AI {aiPiece.name} 最终移动到：{moveTargetPos}");
+        //
+        // aiPiece.transform.DOMove(moveTargetPos, 1.0f).SetEase(Ease.InOutQuad).OnComplete(() =>
+        // {
+        //     Debug.Log($"{aiPiece.name} 移动完成，当前坐标：{aiPiece.transform.position}");
+        // });
     }
 
     /// <summary>

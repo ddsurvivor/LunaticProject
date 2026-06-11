@@ -175,7 +175,15 @@ public class ClickManager : MonoBehaviour
         foreach (var hit in hits)
         {
             PieceController piece = hit.collider.GetComponent<PieceController>();
-            if (piece == null || !piece.isPlayerPiece) continue;
+            if (piece == null) continue;
+            if (!piece.isPlayerPiece)
+            {
+                if (piece is EnemyController enemy)
+                {
+                    enemy.ShowTargetLine();
+                }
+                return;
+            }
             if (piece.cantControl)return;
             if(piece.isDead) continue;
             //if(piece.unitAttrCenter.CurMovePoint<=0) continue;
@@ -334,6 +342,7 @@ public class ClickManager : MonoBehaviour
             //_selectedPiece = null;
             // 确定开始移动
             BattleScene.Ins.BM.moveManager.ExecuteMove(_selectedPiece.gameObject, piece.StopMove);
+            
         }
     }
 }

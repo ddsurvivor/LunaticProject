@@ -211,6 +211,16 @@ public class EnemyController : PieceController
             tagetLine.enabled = false;
             return;
         }
+        /*// 显示攻击目标指示线
+        if (player is AIController aiController)
+        {
+            _curTargetPc = aiController.CheckEnemyTarget(this);
+        }
+        UpdateTargetLine();*/
+    }
+
+    public void ShowTargetLine()
+    {
         // 显示攻击目标指示线
         if (player is AIController aiController)
         {
