@@ -623,8 +623,11 @@ public class AIController : PlayerController
         // }
 
         // 5. 最终执行位移
-        BattleScene.Ins.BM.moveManager.ExecuteMove(aiPiece.gameObject);
-        aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move, false, 1.0f);
+        aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
+        BattleScene.Ins.BM.moveManager.ExecuteMove(aiPiece.gameObject, () =>
+        {
+            aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
+        });
         aiPiece.CheckFace(targetPos - currentPos);
         //Vector3 moveTargetPos = moveResult.FinalPosition;
 

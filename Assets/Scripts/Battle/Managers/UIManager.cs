@@ -35,6 +35,7 @@ public class UIManager : SerializedMonoBehaviour
     public Image burstStart;
     public Image burstEnd;
     public SkillTooltipUI skillTooltipUI;
+    public CustomAdvancedButton skipButton;
 
     public Dictionary<KeyCode, GameObject> keyPanelDic = new();
     

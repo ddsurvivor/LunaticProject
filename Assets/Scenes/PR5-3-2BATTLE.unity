@@ -18824,12 +18824,15 @@ MonoBehaviour:
   tutorialManager: {fileID: 0}
   tipTextManager: {fileID: 0}
   moveManager: {fileID: 0}
+  battleDialogueManager: {fileID: 0}
   pieceDataListSO: {fileID: 0}
   areaList: []
   finishDrop: {fileID: 0}
   finishExp: 100
   winTurnCondition: 999
   battleSetController: {fileID: 0}
+  moveWaitTime: 1
+  gazeWaitTime: 0.5
   gray: {fileID: 0}
   grayEnemy: {fileID: 0}
 --- !u!114 &1713777225
@@ -18963,7 +18966,7 @@ MonoBehaviour:
       Data: 
   turnPanel: {fileID: 1081070822}
   turnImage: []
-  endTurnButton: {fileID: 1052199133}
+  endTurnButton: {fileID: 0}
   infoBox: {fileID: 797644601}
   burstButton: {fileID: 588414090}
   burstBtnImage: {fileID: 0}
@@ -18985,6 +18988,7 @@ MonoBehaviour:
   burstStart: {fileID: 0}
   burstEnd: {fileID: 0}
   skillTooltipUI: {fileID: 0}
+  skipButton: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23754,7 +23758,7 @@ PrefabInstance:
     - target: {fileID: 6793405397572969132, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: serializationData.Prefab
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 6793405397572969132, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
     - target: {fileID: 6793405397572969134, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: serializationData.Prefab
       value: 
@@ -23803,6 +23807,22 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7230884532560567416, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: triggerList.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7230884532560567416, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: triggerList.Array.data[0].logName
+      value: BT2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7230884532560567416, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: triggerList.Array.data[0].turnNum
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7230884532560567416, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: triggerList.Array.data[0].triggerType
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 7446548641573111303, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -23834,6 +23854,10 @@ PrefabInstance:
     - target: {fileID: 7452146618565594202, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7510330769408413007, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7571949465241409533, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y
@@ -24355,7 +24379,6 @@ MonoBehaviour:
       arcWeight: 0
       arcCenterDis: 0
       skillVFXType: 0
-      isBullet: 0
       isRotate: 0
       bulletVFXType: 0
       attackPacks: []
@@ -24380,7 +24403,6 @@ MonoBehaviour:
       arcWeight: 0
       arcCenterDis: 0
       skillVFXType: 0
-      isBullet: 0
       isRotate: 0
       bulletVFXType: 0
       attackPacks: []
@@ -24403,6 +24425,7 @@ MonoBehaviour:
     maxMana: 0
     dropItemList: []
     dropRate: 0
+    passiveSkillTypes: 
     weaponIcon: {fileID: 0}
   playerData:
     curHealth: 0
@@ -24430,7 +24453,6 @@ MonoBehaviour:
     arcWeight: 0
     arcCenterDis: 0
     skillVFXType: 0
-    isBullet: 0
     isRotate: 0
     bulletVFXType: 0
     attackPacks: []
@@ -24818,18 +24840,21 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  moveSprite: {fileID: 21300000, guid: 0949c6f7be186d34d90bb6cc470498f8, type: 3}
+  moveSprite:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   meleeSprites: []
   rangeSprites: []
-  dodgeSprite: {fileID: 21300000, guid: 7cfb03be92d4fc34bb3a0df156e1a452, type: 3}
-  hitSprite: {fileID: 21300000, guid: 179f2f585d6961a4293cf9cac27c5aef, type: 3}
+  dodgeSprite:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  hitSprite:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   deathSprites: []
-  idleBackSprite: {fileID: 21300000, guid: f6bb2e8848df5eb49bdac2b9c058a2d2, type: 3}
-  moveBackSprite: {fileID: 21300000, guid: 458ec508e2f7b1e44afa8e57cee86688, type: 3}
-  attackBackSprite: {fileID: 21300000, guid: c167a3747a7218143a8959c80ca019dc, type: 3}
-  shootBackSprite: {fileID: 21300000, guid: ed7112cc94273ca4b8c337ac6026af69, type: 3}
-  dodgeBackSprite: {fileID: 21300000, guid: 4b1ad39275526ca4a9860a00c93d562a, type: 3}
-  hitBackSprite: {fileID: 21300000, guid: 2c22d3205b8baa349a5a1d46d3a387ea, type: 3}
   path: "Assets/A\u7F8E\u672F/BattleSprites/\u9A6C\u8D5B\u6210\u5E74\u52A8\u4F5C"
   pieceName: PC03A
 --- !u!4 &5062046175921335849

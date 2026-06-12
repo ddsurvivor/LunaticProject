@@ -404,7 +404,6 @@ MonoBehaviour:
       arcWeight: 0
       arcCenterDis: 0
       skillVFXType: 0
-      isBullet: 0
       isRotate: 0
       bulletVFXType: 0
       attackPacks: []
@@ -429,7 +428,6 @@ MonoBehaviour:
       arcWeight: 0
       arcCenterDis: 0
       skillVFXType: 0
-      isBullet: 0
       isRotate: 0
       bulletVFXType: 0
       attackPacks: []
@@ -452,6 +450,7 @@ MonoBehaviour:
     maxMana: 0
     dropItemList: []
     dropRate: 0
+    passiveSkillTypes: 
     weaponIcon: {fileID: 0}
   playerData:
     curHealth: 0
@@ -479,7 +478,6 @@ MonoBehaviour:
     arcWeight: 0
     arcCenterDis: 0
     skillVFXType: 0
-    isBullet: 0
     isRotate: 0
     bulletVFXType: 0
     attackPacks: []
@@ -879,14 +877,17 @@ MonoBehaviour:
   - {fileID: 21300000, guid: a880178acd6dda746b846bc5fad6a88d, type: 3}
   - {fileID: 21300000, guid: ba43926800b911648ad45cabe1f97e12, type: 3}
   - {fileID: 21300000, guid: 79b9e0e4c47f54f488b9fccc821e3c90, type: 3}
-  moveSprite: {fileID: 21300000, guid: ec8c3e3f7ff27eb49b2414ab04869fda, type: 3}
+  moveSprite:
+  - {fileID: 21300000, guid: ec8c3e3f7ff27eb49b2414ab04869fda, type: 3}
   meleeSprites:
   - {fileID: 21300000, guid: 80d99fe6a957636458acbbb7a8da447e, type: 3}
   rangeSprites:
   - {fileID: 21300000, guid: 470bd3952acb58d4f937bcb3580777a7, type: 3}
   - {fileID: 21300000, guid: d0faa948799323f4595d6edcb33aa85b, type: 3}
-  dodgeSprite: {fileID: 21300000, guid: a87425c357a2c40429490aa36461ee57, type: 3}
-  hitSprite: {fileID: 21300000, guid: 261b0ad25d8ebd04c8973dea913f665f, type: 3}
+  dodgeSprite:
+  - {fileID: 21300000, guid: a87425c357a2c40429490aa36461ee57, type: 3}
+  hitSprite:
+  - {fileID: 21300000, guid: 261b0ad25d8ebd04c8973dea913f665f, type: 3}
   deathSprites:
   - {fileID: 21300000, guid: 2921eebcf9df5e649ba22fdd2c3cbd81, type: 3}
   - {fileID: 21300000, guid: ba4ace080e400a540bbfe931fddfeecc, type: 3}

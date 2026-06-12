@@ -948,20 +948,17 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 258adcf6636426a4fac309abfe22fa2c, type: 3}
   - {fileID: 21300000, guid: f8ed319e933cfaa46adb61ae1fc1ded7, type: 3}
   - {fileID: 21300000, guid: 8c80d7fb335c3064ab635278b008e44f, type: 3}
-  moveSprite: {fileID: 21300000, guid: f9f8a0fbb4cc53c479361a1cee70812c, type: 3}
+  moveSprite:
+  - {fileID: 21300000, guid: f9f8a0fbb4cc53c479361a1cee70812c, type: 3}
   meleeSprites: []
   rangeSprites: []
-  dodgeSprite: {fileID: 0}
-  hitSprite: {fileID: 21300000, guid: dbe9939e679a08041ac4b0e28b150253, type: 3}
+  dodgeSprite:
+  - {fileID: 0}
+  hitSprite:
+  - {fileID: 21300000, guid: dbe9939e679a08041ac4b0e28b150253, type: 3}
   deathSprites:
   - {fileID: 21300000, guid: 596f6031073c3924ca357bd5e77f4168, type: 3}
   - {fileID: 21300000, guid: 240424eedea8adc40ad7d51e923ccaa6, type: 3}
-  idleBackSprite: {fileID: 0}
-  moveBackSprite: {fileID: 0}
-  attackBackSprite: {fileID: 0}
-  shootBackSprite: {fileID: 0}
-  dodgeBackSprite: {fileID: 0}
-  hitBackSprite: {fileID: 0}
   path: "Assets/A\u7F8E\u672F/BattleSprites/E06(\u5730\u6548\u8F66\uFF09"
   pieceName: E06
 --- !u!114 &439568009330001271
@@ -1045,6 +1042,7 @@ MonoBehaviour:
     maxMana: 0
     dropItemList: []
     dropRate: 0
+    passiveSkillTypes: 
     weaponIcon: {fileID: 0}
   playerData:
     curHealth: 0

@@ -39,7 +39,10 @@ public class BattleManager : MonoBehaviour
     
     [SerializeField][LabelText("镜头移动等待时间")] float moveWaitTime = 1.0f; // 
     [SerializeField][LabelText("镜头注视时间")]float gazeWaitTime = 0.5f; // 
-
+    
+    private Sequence startSequence; // 战斗开始时的镜头动画序列
+    private Coroutine sweepCoroutine;
+    
     public void Init()
     {
         inBattle = true;
@@ -55,24 +58,18 @@ public class BattleManager : MonoBehaviour
 
     public void StartBattle()
     {
-        Sequence sequence = DOTween.Sequence();
-        sequence.AppendInterval(0.5f);
-        // sequence.AppendCallback(() =>
-        // {
-        //     BattleScene.Ins.UM.battleStartUIPanel.PlayBattleStartAnimation(2f);
-        // });
+        startSequence = DOTween.Sequence();
+        startSequence.AppendInterval(0.5f);
         
-        sequence.AppendCallback(SweepActiveEnemies);
-        sequence.AppendInterval(CalculateTotalTime());
-        sequence.AppendCallback(() =>
+        // 触发扫视
+        startSequence.AppendCallback(SweepActiveEnemies);
+        
+        startSequence.AppendInterval(CalculateTotalTime());
+        startSequence.AppendCallback(() =>
         {
-            if (tutorialManager.CheckAndShowTutorial())
+            if (sweepCoroutine != null)
             {
-            }
-            else
-            {
-                battleDialogueManager.TriggerBattleStart();
-                PlayerStart();
+                EnterBattleSequence();
             }
         });
     }
@@ -125,6 +122,7 @@ public class BattleManager : MonoBehaviour
         BattleScene.Ins.UM.ShowTurnChange(true);
         //BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家回合");
         _turnNumber++;
+        battleDialogueManager.TriggerTurnNumStart(_turnNumber);
         BattleScene.Ins.UM.turnNumberText.text = TunrNumber.ToString();
         // 胜利条件：坚持回合数
         if (TunrNumber >= winTurnCondition)
@@ -920,19 +918,19 @@ public class BattleManager : MonoBehaviour
     /// <param name="gameCamera">镜头控制组件</param>
     public void SweepActiveEnemies()
     {
-        // 鲁棒性检查
         if (camera == null)
         {
             Debug.LogError("[BattleExtension] 扫视初始化失败：BattleManager 或 Camera 为空。");
             return;
         }
 
-        // ================= 核心修改：直接在函数内定义时间变量 =================
+        // ====== 新增：开始扫视时激活跳过按钮 ======
         
-        // ====================================================================
+        BattleScene.Ins.UM.skipButton?.gameObject.SetActive(true);
+        
+        // =========================================
 
-        // 启动协程并把变量传递进去
-        StartCoroutine(SweepRoutine(moveWaitTime, gazeWaitTime));
+        sweepCoroutine = StartCoroutine(SweepRoutine(moveWaitTime, gazeWaitTime));
     }
 
     private float CalculateTotalTime()
@@ -979,6 +977,55 @@ public class BattleManager : MonoBehaviour
         // 回调主管理器的开战函数
     }
     
+    /// <summary>
+    /// 提取出的后续核心战斗步骤
+    /// </summary>
+    private void EnterBattleSequence()
+    {
+        // ====== 新增：进入战斗阶段时，关闭跳过按钮 ======
+        BattleScene.Ins.UM.skipButton?.gameObject.SetActive(false);
+        // =============================================
+
+        if (sweepCoroutine != null)
+        {
+            StopCoroutine(sweepCoroutine);
+            sweepCoroutine = null;
+        }
+        startSequence?.Kill(); 
+
+        if (tutorialManager.CheckAndShowTutorial())
+        {
+        }
+        else
+        {
+            battleDialogueManager.TriggerBattleStart();
+            PlayerStart();
+        }
+    }
+    /// <summary>
+    /// 跳过战前扫视，直接进入战斗
+    /// </summary>
+    public void OnClickSkip()
+    {
+        if (sweepCoroutine != null)
+        {
+            Debug.Log("【战前扫视】玩家选择跳过。");
+            
+            // 强行把相机拉回玩家棋子
+            if (PlayerController.pieces != null && PlayerController.pieces.Count > 0)
+            {
+                var firstPlayer = PlayerController.pieces.FirstOrDefault(p => p != null && !p.isDead);
+                if (firstPlayer != null)
+                {
+                    camera.SetFollow(firstPlayer.transform);
+                }
+            }
+
+            // 直接执行后续（内部会自动关闭按钮）
+            EnterBattleSequence();
+        }
+    }
+    
     // ===== 掩体判定 ========== //
     /// <summary>
     /// 判定掩体是否在攻击射线上生效
@@ -1012,7 +1059,7 @@ public class BattleManager : MonoBehaviour
 
         return null;
     }
-    
+
     
 
     // ===== Test ======//

@@ -102,7 +102,7 @@ public class PieceController : MonoBehaviour
         }
 
         //Debug.Log(_pieceDisplay.name);
-        pieceDisplay?.ChangeDisplayState(PieceDisplayState.Idle);
+        if(gameObject.activeInHierarchy) pieceDisplay?.ChangeDisplayState(PieceDisplayState.Idle);
         if (pieceData != null)
         {
             _pieceData = pieceData;
@@ -128,6 +128,11 @@ public class PieceController : MonoBehaviour
         //if (_actionListPanel != null) _actionListPanel.Init(this);
         isIdle = true;
         OnInit?.Invoke();
+    }
+
+    private void OnEnable()
+    {
+        pieceDisplay?.ChangeDisplayState(PieceDisplayState.Idle);
     }
 
     private void Update()
