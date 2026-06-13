@@ -341,6 +341,7 @@ public class ClickManager : MonoBehaviour
             // });
             _rangeUI.CloseRange();
             //_selectedPiece = null;
+            
             // 确定开始移动
             BattleScene.Ins.BM.moveManager.ExecuteMove(_selectedPiece.gameObject, piece.StopMove);
             

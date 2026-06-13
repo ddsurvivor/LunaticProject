@@ -209,7 +209,7 @@ public class PieceController : MonoBehaviour
         if (!isPlayerPiece) return;
         //_actionListPanel.gameObject.SetActive(false);
         BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
-        pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
+        //pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
         if (_curCaverSlot != null)
         {
             _curCaverSlot.LeaveSlot(transform);
@@ -239,6 +239,7 @@ public class PieceController : MonoBehaviour
     public void StartMove()
     {
         if (!isPlayerPiece) return;
+        pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
         PlayAudio(ActionType.移动);
         //pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
     }
@@ -609,6 +610,7 @@ public class PieceController : MonoBehaviour
         }
 
         Vector3 atkPosValue = atkPos != null ? atkPos.position : Vector3.zero;
+        sequence.SetUpdate(UpdateType.Normal, false);
         sequence.AppendCallback(() =>
         {
             if (atkPos != null)
