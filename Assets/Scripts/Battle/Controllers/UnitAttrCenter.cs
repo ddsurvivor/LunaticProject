@@ -381,6 +381,13 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         _ammoCount = _maxAmmoCount;// 弹药数量直接设置为满
     }
     
+    public void SetHurtState()
+    {
+        // 生命值和能量都设置为30%
+        _curHealth = Mathf.RoundToInt(_maxHealth * 0.3f);
+        _manaPoint = Mathf.RoundToInt(_maxManaPoint * 0.3f);
+    }
+    
     /// <summary>
     /// 通过枚举统一修改属性数值
     /// </summary>

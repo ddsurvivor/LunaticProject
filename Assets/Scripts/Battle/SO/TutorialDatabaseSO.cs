@@ -7,7 +7,7 @@ public class TutorialDatabaseSO : ScriptableObject
 {
     
 
-    [Header("所有教程配置（只需在这里添加/修改）")]
+    [Header("所有教程配置")]
     public List<TutorialData> allTutorials = new List<TutorialData>();
 
     // 内部缓存，查找超快
@@ -47,7 +47,7 @@ public class TutorialDatabaseSO : ScriptableObject
 [System.Serializable]
 public class TutorialData
 {
-    [Header("触发关卡名称（必须和Scene.name完全一致）")]
+    [Header("触发关卡名称")]
     public string triggerLevelName;
 
     [Header("教程页面列表")]

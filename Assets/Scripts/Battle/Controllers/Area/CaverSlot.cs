@@ -1,6 +1,7 @@
 
     using System;
     using System.Collections.Generic;
+    using Sirenix.OdinInspector;
     using UnityEngine;
 
     /// <summary>
@@ -12,8 +13,8 @@
         private Dictionary<Transform, Transform> piecesDic = new();
         public GameObject highlightEffect;
         
-        public int evadeChance = 20; // 闪避率
-        public int damageReduction = 20; // 减伤率
+        [LabelText("闪避率%")]public int evadeChance = 20; // 闪避率
+        [LabelText("减伤百分比%")]public int damageReduction = 20; // 减伤率
         
         public bool isFull => piecesDic.Values.Count >= slotTransforms.Length;
 

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine.UI;
 
 /// <summary>
@@ -7,10 +8,10 @@ using UnityEngine.UI;
 /// </summary>
 public enum ItemTag
 {
-    All,        // 全部
-    Consumables,// 消耗品
-    Plugins,    // 插件
-    Materials   // 材料（示例扩展）
+    [LabelText("全部")]All,        // 全部
+    [LabelText("消耗品")]Consumables,// 消耗品
+    [LabelText("插件")]Plugins,    // 插件
+    [LabelText("材料")]Materials   // 材料（示例扩展）
 }
 public class BackpackPanel : MonoBehaviour
 {

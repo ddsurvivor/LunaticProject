@@ -25,6 +25,8 @@ public class ItemData
     public ItemTag itemTag; // 道具标签
     public EquipType equipType; // 道具类别
     public UseType useType; // 使用类别
+    [LabelText("技能名称")][ShowIf("@this.useType == UseType.ActiveInBattle")] 
+    public string skillPack; // 关联技能包ID，0表示无关联
     public int price; // 价格
 }
 
@@ -37,6 +39,7 @@ public enum ItemName
     医疗单元I型=4,
     专速达=5,
     礼盒=6,
+    便携手榴弹 = 201,
 }
 
 // 装备类别
@@ -58,4 +61,6 @@ public enum UseType
     ,[LabelText("生命不满时")]WhenHpNotFull =4
     // 耐力不满时
     ,[LabelText("耐力不满时")]WhenStaminaNotFull =5
+    // 在战斗中主动使用
+    ,[LabelText("主动使用")]ActiveInBattle =6
 }

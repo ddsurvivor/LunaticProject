@@ -24,6 +24,7 @@ public class Player
     public int curHealth;// 当前血量
     public int curAmmo;// 当前弹药
     public int curMana;// 当前能量
+    public int deadCount;// 死亡次数
     public string spriteName;
     
     [ShowInInspector]private int skillPoints; // 当前可用点数

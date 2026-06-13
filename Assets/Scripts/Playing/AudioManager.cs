@@ -261,6 +261,15 @@ public class AudioManager : SerializedMonoBehaviour
 
     private IEnumerator 加载音频文件(string audioName, System.Action<AudioClip> callback)
     {
+        // ====== 添加的空字符串判定 ======
+        if (string.IsNullOrWhiteSpace(audioName))
+        {
+            Debug.LogWarning("加载音频失败：传入的音频名称为空或仅包含空格。");
+            callback?.Invoke(null); // 触发回调，返回空，避免外部无限等待
+            yield break;            // 结束协程
+        }
+        // ================================
+        
         string soundFolder = Path.Combine(Application.streamingAssetsPath, "SOUND");
         string[] extensions = { ".wav", ".mp3", ".ogg" };
         

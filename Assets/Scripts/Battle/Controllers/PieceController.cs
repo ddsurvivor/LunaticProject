@@ -117,6 +117,12 @@ public class PieceController : MonoBehaviour
                     unitAttrCenter.SetValues(playerData.curHealth, playerData.curMana
                         , playerData.curAmmo);
                 }
+                else
+                {
+                    playerData.deadCount++;
+                    // 触发角色死亡惩罚初始化：上一场战斗中死亡，这一场战斗中变成负伤状态
+                    unitAttrCenter.SetHurtState();
+                }
             }
         }
         else
