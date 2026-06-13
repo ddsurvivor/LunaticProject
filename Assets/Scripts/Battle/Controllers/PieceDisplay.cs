@@ -48,7 +48,7 @@ public class PieceDisplay : SerializedMonoBehaviour
                 break;
             case PieceDisplayState.Move:
                 // 移动通常也是循环播放
-                StartCoroutine(PlaySpriteAnimation(moveSprite, frameDuration, true));
+                StartCoroutine(PlaySpriteAnimation(moveSprite, frameDuration/2f, true));
                 break;
             case PieceDisplayState.Attack:
                 StartCoroutine(PlaySpriteAnimation(meleeSprites, frameDuration));

@@ -112,6 +112,7 @@ public class CameraController : MonoBehaviour
         //virtualCamera.m_Lens.OrthographicSize = minZoom;
         float currentSize = followVCam.m_Lens.OrthographicSize;
         shakeTweener?.Kill();
+        shakeTweener.SetUpdate(UpdateType.Normal, false);
         float zoom = minZoom + (maxZoom - minZoom) * 0.2f;
         shakeTweener = DOTween.To(
             () => followVCam.m_Lens.OrthographicSize,
