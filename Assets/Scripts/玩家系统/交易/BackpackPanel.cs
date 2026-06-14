@@ -13,7 +13,7 @@ public enum ItemTag
     [LabelText("插件")]Plugins,    // 插件
     [LabelText("材料")]Materials   // 材料（示例扩展）
 }
-public class BackpackPanel : MonoBehaviour
+public class BackpackPanel : UIPanel
 {
     [Header("背包滚动面板")]
     [SerializeField] private ScrollRect backpackScrollRect;

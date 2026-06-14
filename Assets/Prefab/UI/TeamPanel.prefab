@@ -162,6 +162,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1577688166}
   - component: {fileID: 1577688168}
+  - component: {fileID: 4796168868100900759}
   - component: {fileID: 5449072221519609751}
   m_Layer: 5
   m_Name: "\u4ED3\u5E93"
@@ -209,6 +210,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1577688165}
   m_CullTransparentMesh: 1
+--- !u!225 &4796168868100900759
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1577688165}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!114 &5449072221519609751
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -221,6 +234,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f9a8354b6af43478c42a6f01f5c0e1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hasInited: 0
+  canvasGroup: {fileID: 4796168868100900759}
+  timeScale: 1
+  popScaleFactor: 0.72
+  popOffsetY: 18
   backpackScrollRect: {fileID: 588370084316360040}
   itemSlots:
   - {fileID: 7920797516819586832}
@@ -1256,6 +1274,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 689439259424465313}
+  - component: {fileID: 559245280892433911}
   - component: {fileID: 2717050935841168463}
   m_Layer: 5
   m_Name: "\u63D2\u4EF6\u9875\u9762"
@@ -1313,6 +1332,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &559245280892433911
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 758698745634643221}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!114 &2717050935841168463
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1325,10 +1356,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f34b82983d6d4e95b6669346d989b7c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hasInited: 0
+  canvasGroup: {fileID: 559245280892433911}
+  timeScale: 1
+  popScaleFactor: 0.72
+  popOffsetY: 18
   player:
     curHealth: 0
     curAmmo: 0
     curMana: 0
+    deadCount: 0
     spriteName: 
     normalSlots: 000000000000000000000000
     weaponSlots: 0000000000000000
@@ -3754,6 +3791,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6336123070601364789}
+  - component: {fileID: 1492667836163730256}
   - component: {fileID: 6909161257445265188}
   m_Layer: 5
   m_Name: Skill
@@ -3793,6 +3831,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &1492667836163730256
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1965942125402130374}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!114 &6909161257445265188
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3809,6 +3859,7 @@ MonoBehaviour:
     curHealth: 0
     curAmmo: 0
     curMana: 0
+    deadCount: 0
     spriteName: 
     normalSlots: 000000000000000000000000
     weaponSlots: 0000000000000000
@@ -3886,6 +3937,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8452439992370049714}
+  - component: {fileID: 6733184941959606131}
+  - component: {fileID: 3527582748401623988}
   m_Layer: 5
   m_Name: "\u5C0F\u961F"
   m_TagString: Untagged
@@ -3916,6 +3969,35 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &6733184941959606131
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1986392864027084170}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &3527582748401623988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1986392864027084170}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f1e59dfa689cd14b821c5211d21b34d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hasInited: 0
+  canvasGroup: {fileID: 6733184941959606131}
+  timeScale: 1
+  popScaleFactor: 0.72
+  popOffsetY: 18
 --- !u!1 &2031842059318830537
 GameObject:
   m_ObjectHideFlags: 0

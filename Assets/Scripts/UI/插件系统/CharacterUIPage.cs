@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// 棋子综合显示面板
 /// </summary>
-public class CharacterUIPage : MonoBehaviour
+public class CharacterUIPage : UIPanel
 {
     public Player player;
     private int unitID;
@@ -47,7 +47,8 @@ public class CharacterUIPage : MonoBehaviour
         this.unitID = unitID;
         pieceData = GM.Ins.DM.pieceDataListSO.GetPieceData(unitID);
         RefreshUI();
-        gameObject.SetActive(true);
+        Open();
+        //gameObject.SetActive(true);
         detailPanel.gameObject.SetActive(false);
         InitPanel();
         /*for (int i = 0; i < 10; i++)
