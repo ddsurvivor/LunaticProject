@@ -107,6 +107,8 @@ public class PLAYERPROFILE
         itemPacks.Add(new ItemPack(ItemName.能量包, 6));
         itemPacks.Add(new ItemPack(ItemName.医疗单元I型, 3));
         itemPacks.Add(new ItemPack(ItemName.专速达, 3));
+        itemPacks.Add(new ItemPack(ItemName.自动无人机, 3));
+        itemPacks.Add(new ItemPack(ItemName.便携手榴弹, 2));
         //初始化
         isNewGame = true;
 

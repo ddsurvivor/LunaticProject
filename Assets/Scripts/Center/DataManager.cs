@@ -20,6 +20,8 @@ public class DataManager : SerializedMonoBehaviour
     public ComponentConfig componentConfig;
     public PieceDataListSO pieceDataListSO;
     public PassiveSkillConfigSO passiveSkillConfigSO;
+    public SkillPackListSO skillPackListSO;
+    
     public void Init()
     {
         // 测试加载

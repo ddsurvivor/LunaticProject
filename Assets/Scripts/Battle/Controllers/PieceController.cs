@@ -796,7 +796,15 @@ public class PieceController : MonoBehaviour
     {
         var items = new List<ItemPack>() { new ItemPack(itemData.itemName, 1) };
         if (!unitAttrCenter.HasItem(items)) return;
-        if (!unitAttrCenter.CostMP()) return;
+        if (!unitAttrCenter.HasMP()) return;
+        unitAttrCenter.CostItem(items);
+        if (itemData.useType == UseType.ActiveInBattle)
+        {
+            // 主动释放技能直接进入技能释放流程
+            SkillPack skillPack = GM.Ins.DM.skillPackListSO.GetSkillPack(itemData.skillPack);
+            StartItemAttack(skillPack);
+            return;
+        }
         switch (itemData.itemName)
         {
             case ItemName.通用作战平台_CW179:
@@ -819,8 +827,21 @@ public class PieceController : MonoBehaviour
             default:
                 throw new ArgumentOutOfRangeException();
         }
+        
+        if (!unitAttrCenter.CostMP()) return;
+    }
+    
+    /// <summary>
+    /// 开始使用道具进行攻击
+    /// </summary>
+    /// <param name="skillPack"></param>
+    private void StartItemAttack(SkillPack skillPack)
+    {
+        _isAttacking = true;
+        _curAttackPack = skillPack;
+        rangeUI?.ShowSkillRange(_curAttackPack);
+        _curAtkType = ActionType.远程攻击;
 
-        unitAttrCenter.CostItem(items);
     }
 
     // ======= 插件 ====== //

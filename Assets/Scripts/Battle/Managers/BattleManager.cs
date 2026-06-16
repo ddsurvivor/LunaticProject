@@ -629,7 +629,13 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-
+    /// <summary>
+    /// 击退效果
+    /// </summary>
+    /// <param name="hitBackEffect"></param>
+    /// <param name="caster"></param>
+    /// <param name="target"></param>
+    /// <param name="targetPos"></param>
     private void HitBackEffect(HitBackEffect hitBackEffect, PieceController caster = null,
         PieceController target = null, Vector3 targetPos = default)
     {
