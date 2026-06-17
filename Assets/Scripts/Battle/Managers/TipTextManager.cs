@@ -33,6 +33,8 @@ public class TipTextManager : MonoBehaviour
         
         // 添加buff，n层
         public string buffAddedFormat = "+{0}{1}";
+        
+        public string missText = "未命中";
     }
 
     [Header("文本内容配置")]
@@ -181,6 +183,11 @@ public class TipTextManager : MonoBehaviour
     {
         string stackText = stackCount > 1 ? $"{stackCount}" : "";
         SpawnTipAtTarget(target, string.Format(presetData.buffAddedFormat, stackText, buffName));
+    }
+    
+    public void ShowMiss(Transform target)
+    {
+        SpawnTipAtTarget(target, presetData.missText);
     }
 
     #endregion

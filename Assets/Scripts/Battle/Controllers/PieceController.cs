@@ -117,6 +117,10 @@ public class PieceController : MonoBehaviour
                     unitAttrCenter.SetValues(playerData.curHealth, playerData.curMana
                         , playerData.curAmmo);
                 }
+                else if (playerData.curHealth == 0)
+                {
+                    // 默认初始化
+                }
                 else
                 {
                     playerData.deadCount++;

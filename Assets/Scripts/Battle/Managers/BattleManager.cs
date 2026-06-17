@@ -260,6 +260,7 @@ public class BattleManager : MonoBehaviour
             {
                 // 未命中
                 target.pieceDisplay.ChangeDisplayState(PieceDisplayState.Dodge, false, 0.5f);
+                BattleScene.Ins.BM.tipTextManager.ShowMiss(target.transform);
                 //BattleScene.Ins.BM.camera.FocusShake(defender.transform);
                 Debug.Log("Skill Attack: Missed");
                 return;
@@ -305,7 +306,11 @@ public class BattleManager : MonoBehaviour
             foreach (var attackPack in skillPack.attackPacks)
             {
                 Debug.Log($"依次计算伤害");
-                int realDamage = attackPack.damage;
+                
+                /*
+                 // 旧伤害函数：伤害 = 基础伤害 - 护甲
+                 int realDamage = attackPack.damage;
+                
                 if (coverDamageReduction > 0)
                     realDamage = (int)(realDamage * (100 - coverDamageReduction) / 100f); // 掩体伤害减免
                 if (isCrit)
@@ -320,7 +325,20 @@ public class BattleManager : MonoBehaviour
                                                BuffAttrType.MeleeArmorPercent] / 100f));
                 }
 
-                realDamage -= armor;
+                realDamage -= armor;*/
+                int realDamage = attackPack.damage;
+                if (coverDamageReduction > 0)
+                    realDamage = (int)(realDamage * (100 - coverDamageReduction) / 100f); // 掩体伤害减免
+                int armor = target.unitAttrCenter.attr.GetArmor(attackPack.damageType);
+                if (attackPack.damageType == DamageType.Melee)
+                {
+                    armor = (int)(armor * (1f -
+                                           target.unitAttrCenter.buffAttrDic[
+                                               BuffAttrType.MeleeArmorPercent] / 100f));
+                }
+
+                realDamage = DamageCalculator.CalculateActualDamage(realDamage, armor
+                    ,isCrit, attacker.unitAttrCenter.critDamageRate);
                 // 减伤
                 realDamage = (int)(realDamage
                                    * (100 + attacker.unitAttrCenter.buffAttrDic[
@@ -1080,7 +1098,7 @@ public class BattleManager : MonoBehaviour
                 if (playerPiece != null)
                 {
                     GM.Ins.PLAYERPROFILE.SetPlayer(i,
-                        playerPiece.unitAttrCenter.CurHealth,
+                        playerPiece.unitAttrCenter.CurHealth > 0 ? playerPiece.unitAttrCenter.CurHealth : -1,
                         playerPiece.unitAttrCenter.AmmoCount,
                         playerPiece.unitAttrCenter.ManaPoint);
                 }

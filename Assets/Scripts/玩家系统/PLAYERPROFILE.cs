@@ -94,7 +94,7 @@ public class PLAYERPROFILE
         player[2].STAYINGMAX = 20;
         player[2].spriteName = "PC03C1";
         player[2].Level = 1;
-        
+
 
         // 技能点测试
         /*player[0].SkillPoints = 5;

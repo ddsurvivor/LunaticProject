@@ -330,7 +330,8 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 pc.PlayAudio(actionType);
                 break;
             case ActionType.指令:
-                
+                OpenCommandPanel();
+                break;
             default:
                 Debug.LogWarning($"{actionType} 未实现");
                 break;
@@ -393,6 +394,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             skillButton.gameObject.SetActive(false);
             skillButton.onClick.RemoveAllListeners();
         }
+        List<Transform> targetsToAnimate = new List<Transform>();
         for (int j = 0; j < GM.Ins.PLAYERPROFILE.itemPacks.Count; j++)
         {
             // 更新所有技能按钮
@@ -405,6 +407,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 int capturedIndex = j; // 捕获当前索引
                 int num = GM.Ins.PLAYERPROFILE.itemPacks[j].itemNum;
                 skillButtons[j].gameObject.SetActive(true);
+                targetsToAnimate.Add(skillButtons[j].transform); // 只塞入需要表现的组件
                 skillButtons[j].enabled = pc.ItemAvailable(itemData);
                 skillButtons[j].GetComponentInChildren<Text>().text =
                     itemData.itemName.ToString() + $" x{num}";
@@ -415,6 +418,8 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 });
             }
         }
+        
+        PlayShowAnimation(targetsToAnimate);
     }
 
     private void OpenCommandPanel()

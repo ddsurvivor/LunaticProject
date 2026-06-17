@@ -15,12 +15,19 @@ public static class DamageCalculator
     /// </summary>
     /// <param name="atk">攻击力</param>
     /// <param name="def">对应的防御属性值（动能/热能/火种）</param>
+    /// <param name="critMultiplierPct">暴击倍率（单位为%，例如150表示150%）</param>
     /// <returns>最终造成的实际伤害（向下取整）</returns>
-    public static int CalculateActualDamage(int atk, int def)
+    public static int CalculateActualDamage(int atk, int def,bool isCrit, int critMultiplierPct)
     {
+        if (isCrit)
+        {
+            //暴击/大成功：无视防御力的暴击伤害 = 攻击力 * (暴击倍率 / 100f)
+            float finalCritDamage = atk * (critMultiplierPct / 100f);
+            return (int)Math.Floor(finalCritDamage); 
+        }
         // 1. 暗骰 4D6 判定
         int diceResult = Roll4D6();
-        
+    
         // 2. 计算检定结果：攻击力 + 4D6 - 防御力
         int checkResult = atk + diceResult - def;
 
@@ -37,9 +44,9 @@ public static class DamageCalculator
         }
         else
         {
-            // 暴击/大成功：无视防御力的暴击伤害
-            // 注：根据常规理解，无视防御即造成100%全额攻击力伤害，此处可根据实际策划需求调整倍率
-            return atk; 
+            // 暴击/大成功：无视防御力的暴击伤害 = 攻击力 * (暴击倍率 / 100f)
+            float finalCritDamage = atk * (critMultiplierPct / 100f);
+            return (int)Math.Floor(finalCritDamage); 
         }
     }
 

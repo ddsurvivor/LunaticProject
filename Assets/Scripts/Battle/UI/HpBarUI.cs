@@ -10,7 +10,8 @@ public class HpBarUI : MonoBehaviour
 {
     public Image hpBarFill; // 血条填充部分的 Transform
     public Image shadowFill; // 拖影血条
-    public Image preDamageFill; // 伤害显示血条
+    public Image preDamageFill; // 伤害显示血条(红色)
+    public Image preDamageFillYellow; // 预伤害黄色血条
     public Image hpBarRenderer; // 血条的 Image 组件，用于调整透明度
     public List<GameObject> mpIcons;
 
@@ -66,6 +67,11 @@ public class HpBarUI : MonoBehaviour
             .DOFade(0.5f, 1f)
             .SetLoops(-1, LoopType.Yoyo)
             .SetEase(Ease.InOutSine);;
+    }
+
+    public void ShowPreDamage(DamagePreviewResult damagePreviewResult)
+    {
+        
     }
     
     public void ClosePreDamage()

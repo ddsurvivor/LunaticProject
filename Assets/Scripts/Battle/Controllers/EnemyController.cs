@@ -97,6 +97,7 @@ public class EnemyController : PieceController
         // 延迟0.3f
         DOVirtual.DelayedCall(0.3f, () =>
         {
+            if(targets ==null || targets.Count == 0) return;
             Debug.Log($"技能命中数量{targets.Count}");
             BattleScene.Ins.BM.PieceSkill(this, targets, skill, targets[0].transform.position);
             enemyCanvas.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
