@@ -111,14 +111,10 @@ public class PieceActionListPanel : SerializedMonoBehaviour
     /// </summary>
     public void ShowPanel(PieceController pc)
     {
-        // 1. 基础行动力检查
-        if (pc.unitAttrCenter.CurMovePoint < 1)
-        {
-            return;
-        }
+        if (pc.unitAttrCenter.CurMovePoint < 1) return;
         this.pc = pc;
 
-        // 2. 状态更新：装填动作逻辑
+        // 1. 状态更新：装填动作逻辑
         if (pc.unitAttrCenter.AmmoCount < pc.unitAttrCenter.MaxAmmoCount)
         {
             if (!pc.availableActions.Contains(ActionType.重新装填))
@@ -129,89 +125,54 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             pc.availableActions.Remove(ActionType.重新装填);
         }
 
-        // 3. 收集当前真正需要显示的按钮和它们对应的交互数据
-        // 使用一个字典或列表来记录本次需要展示的 Action
-        List<ActionType> activeActions = new List<ActionType>();
+        // 2. 收集本次需要显示的“目标 Transform 列表”
+        List<Transform> targetsToAnimate = new List<Transform>();
+        HashSet<ActionType> visibleActions = new HashSet<ActionType>();
 
-        // 检查基础可用动作
+        // 筛选基础动作
         foreach (var pair in actionButtonDic)
         {
             if (pc.availableActions.Contains(pair.Key))
             {
-                activeActions.Add(pair.Key);
+                visibleActions.Add(pair.Key);
             }
         }
 
-        // 检查环境/区域交互动作，并动态绑定最新的触发事件
+        // 筛选并重新绑定环境交互动作
         foreach (var interactArea in pc.interactAreas)
         {
             if (actionButtonDic.ContainsKey(interactArea.actionType))
             {
-                // 如果不能触发，从显示列表移除
                 if (!interactArea.ableToTrigger)
                 {
-                    activeActions.Remove(interactArea.actionType);
+                    visibleActions.Remove(interactArea.actionType);
                     continue;
                 }
 
-                if (!activeActions.Contains(interactArea.actionType))
-                {
-                    activeActions.Add(interactArea.actionType);
-                }
+                visibleActions.Add(interactArea.actionType);
 
-                // 重新绑定事件（针对特定区域交互）
+                // 动态绑定事件
                 Button btn = actionButtonDic[interactArea.actionType];
                 btn.onClick.RemoveAllListeners();
                 
-                // 这里的闭包捕获了当前的 interactArea 和 pc
                 InteractArea currentArea = interactArea; 
                 btn.onClick.AddListener(() =>
                 {
                     if (!pc.unitAttrCenter.CostMP()) return;
                     currentArea.TriggerAction(pc);
-                    // 动作触发后，通常需要关闭面板或刷新面板
                     HidePanel(); 
                 });
             }
         }
 
-        // 4. 彻底解耦：开始执行“灵动”的入场动画
-        skillListPanel.SetActive(false);
-        gameObject.SetActive(true); // 激活面板自身
-
-        PlayShowAnimation(activeActions);
-    }
-
-    /// <summary>
-    /// 播放按钮依次显示的精美动画
-    /// </summary>
-    private void PlayShowAnimation(List<ActionType> activeActions)
-    {
-        // 如果上一次的动画还在播放，先杀掉
-        if (showSequence != null && showSequence.IsPlaying())
-        {
-            showSequence.Kill(true);
-        }
-
-        showSequence = DOTween.Sequence();
-
-        // 收集所有需要播放动画的按钮组件
-        List<CanvasGroup> btnsToAnimate = new List<CanvasGroup>();
-
+        // 3. 根据筛选结果，控制物体的显隐，并填充动画队列
         foreach (var pair in actionButtonDic)
         {
             Button btn = pair.Value;
-            CanvasGroup cg = btn.GetComponent<CanvasGroup>();
-            if (cg == null) cg = btn.gameObject.AddComponent<CanvasGroup>();
-
-            if (activeActions.Contains(pair.Key))
+            if (visibleActions.Contains(pair.Key))
             {
                 btn.gameObject.SetActive(true);
-                // 动画前置状态：透明度为0，稍微缩小，或者往下偏移一点
-                cg.alpha = 0;
-                btn.transform.localScale = Vector3.one * 0.7f; 
-                
-                btnsToAnimate.Add(cg);
+                targetsToAnimate.Add(btn.transform); // 只塞入需要表现的组件
             }
             else
             {
@@ -219,25 +180,51 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             }
         }
 
-        // 计算动画节奏
-        int count = btnsToAnimate.Count;
+        // 4. 打开面板并播放纯粹的动画
+        skillListPanel.SetActive(false);
+        gameObject.SetActive(true);
+
+        PlayShowAnimation(targetsToAnimate);
+    }
+
+    /// <summary>
+    /// 纯粹的表现层动画：依次展现传入的 Transform 列表
+    /// </summary>
+    /// <param name="targets">需要播放动画的物体列表</param>
+    private void PlayShowAnimation(List<Transform> targets)
+    {
+        if (showSequence != null && showSequence.IsPlaying())
+        {
+            showSequence.Kill(true);
+        }
+
+        int count = targets.Count;
         if (count == 0) return;
 
-        // 总时间 0.5秒，平分给每个按钮的间隔时间和自身动画时间
+        showSequence = DOTween.Sequence();
+
+        // 基础时间配置
         float totalDuration = 0.5f;
-        float perBtnDuration = 0.25f; // 每个按钮自身淡入动画的时间
-        // 计算错开的时间间隔 (Stagger)
+        float perBtnDuration = 0.25f; 
         float interval = count > 1 ? (totalDuration - perBtnDuration) / (count - 1) : 0f;
 
         for (int i = 0; i < count; i++)
         {
-            CanvasGroup cg = btnsToAnimate[i];
-            Transform trans = cg.transform;
+            Transform t = targets[i];
+            
+            // 获取或添加 CanvasGroup 用于控制透明度
+            CanvasGroup cg = t.GetComponent<CanvasGroup>();
+            if (cg == null) cg = t.gameObject.AddComponent<CanvasGroup>();
+
+            // 动画前置状态初始化
+            cg.alpha = 0f;
+            t.localScale = Vector3.one * 0.7f;
+
             float delayTime = i * interval;
 
-            // 无论是透明度还是缩放，都加入到 Sequence 中，并通过 SetDelay 实现扇形展开效果
+            // 纯粹基于 Transform 和 CanvasGroup 的动画组织
             showSequence.Insert(delayTime, cg.DOFade(1f, perBtnDuration).SetEase(Ease.OutCubic));
-            showSequence.Insert(delayTime, trans.DOScale(1f, perBtnDuration).SetEase(Ease.OutBack)); // OutBack 带有一点点回弹，更灵动
+            showSequence.Insert(delayTime, t.DOScale(1f, perBtnDuration).SetEase(Ease.OutBack));
         }
     }
 
@@ -359,6 +346,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             skillButton.gameObject.SetActive(false);
             skillButton.onClick.RemoveAllListeners();
         }
+        List<Transform> targetsToAnimate = new List<Transform>();
         for (int j = 0; j < pc.availableSkills.Count; j++)
         {
             // 更新所有技能按钮
@@ -366,6 +354,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             {
                 int capturedIndex = j; // 捕获当前索引
                 skillButtons[j].gameObject.SetActive(true);
+                targetsToAnimate.Add(skillButtons[j].transform); // 只塞入需要表现的组件
                 skillButtons[j].enabled = pc.SkillAvailable(pc.availableSkills[capturedIndex]);
                 skillButtons[j].GetComponentInChildren<Text>().text = pc.availableSkills[capturedIndex].skillName;
                 skillButtons[j].onClick.RemoveAllListeners();
@@ -388,6 +377,8 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 });
             }
         }
+        
+        PlayShowAnimation(targetsToAnimate);
     }
 
     /// <summary>

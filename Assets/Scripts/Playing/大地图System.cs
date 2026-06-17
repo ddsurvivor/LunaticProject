@@ -44,6 +44,8 @@ public class 大地图System : SerializedMonoBehaviour
     public ItemGetPanel itemGetPanel;
     public MessagePanel messagePanel;
     public BattleStartUIPanel battleStartUIPanel;
+
+    public GameObject blackFront;//黑幕
     public void 失败()
     {
         失败Obj.SetActive(true);
@@ -59,8 +61,12 @@ public class 大地图System : SerializedMonoBehaviour
         if (GM.Ins.PLAYERPROFILE.isNewGame)
         {
             Debug.Log("检测到新游戏,开始第一章剧情");
-            大地图System.instance.开始剧情("PR1");
+            大地图System.instance.开始剧情("PR0");
             GM.Ins.PLAYERPROFILE.isNewGame = false;
+            blackFront.SetActive(true);
+            DOVirtual.DelayedCall(2.2f,()=>{
+                blackFront.SetActive(false);
+            });
         }
     }
 
