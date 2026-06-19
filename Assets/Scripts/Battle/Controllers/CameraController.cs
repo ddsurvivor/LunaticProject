@@ -35,8 +35,19 @@ public class CameraController : MonoBehaviour
         followVCam.m_Lens.OrthographicSize = initialZoom;
     }
 
-    void Update()
+    
+
+
+    void LateUpdate()
     {
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if (scroll != 0f)
+        {
+            float newSize = virtualCamera.m_Lens.OrthographicSize - scroll * zoomSpeed;
+            virtualCamera.m_Lens.OrthographicSize = Mathf.Clamp(newSize, minZoom, maxZoom);
+            // 同时设置跟随相机的缩放
+            followVCam.m_Lens.OrthographicSize = virtualCamera.m_Lens.OrthographicSize;
+        }
         if (!BattleScene.Ins.BM.PlayerController.isInTurn) return;
         if (Input.GetMouseButtonDown(2))
         {
@@ -53,19 +64,6 @@ public class CameraController : MonoBehaviour
             move = virtualCamera.transform.right * move.x + virtualCamera.transform.up * move.y;
             virtualCamera.transform.position += move;
             _lastMousePosition = Input.mousePosition;
-        }
-    }
-
-
-    void LateUpdate()
-    {
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (scroll != 0f)
-        {
-            float newSize = virtualCamera.m_Lens.OrthographicSize - scroll * zoomSpeed;
-            virtualCamera.m_Lens.OrthographicSize = Mathf.Clamp(newSize, minZoom, maxZoom);
-            // 同时设置跟随相机的缩放
-            followVCam.m_Lens.OrthographicSize = virtualCamera.m_Lens.OrthographicSize;
         }
     }
 
