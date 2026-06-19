@@ -1,78 +1,97 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Sirenix.OdinInspector; // 完美适配你的 Odin 插件
 
+[DefaultExecutionOrder(2000)] // 确保在 Cinemachine 计算完边界和抖动后执行
 public class ParallaxManager3D : MonoBehaviour
 {
     [System.Serializable]
     public struct ParallaxItem
     {
-        [Header("视差物体/组")]
+        [LabelText("视差物体/组")] 
         public Transform target;
 
-        [Header("视差系数 (0=完全不跟随, 0.5=慢速, 1=完全跟随相对相机静止)")]
-        [Range(0f, 1f)]
+        [LabelText("视差系数 (0=不跟随, 1=完全相对相机静止)")] 
+        [Range(0f, 1f)] 
         public float parallaxFactor;
 
-        // 内部记录的初始世界坐标
-        [HideInInspector] 
-        public Vector3 startPosition;
+        [LabelText("开启缩放补偿")] 
+        [Tooltip("开启后，远景在相机滚轮缩放或 DOTween 震动缩放时，会在屏幕上保持固定大小，不会跟着放大缩小。")]
+        public bool compensateZoom;
+
+        // 内部记录的初始状态
+        [HideInInspector] public Vector3 startPosition;
+        [HideInInspector] public Vector3 startScale;
     }
 
-    [Header("相机引用（留空自动获取主相机）")]
-    public Transform cameraTransform;
+    [LabelText("主相机引用（留空自动获取）")] 
+    public Camera mainCamera;
 
-    [Header("需要在视差列表中管理的物体")]
+    [LabelText("视差层级列表")] 
     public List<ParallaxItem> parallaxItems = new List<ParallaxItem>();
 
-    private Vector3 startCameraPosition;
+    private Vector3 _startCameraPosition;
+    private float _startOrthoSize;
+    private bool _isInitialized = false;
 
     void Start()
     {
-        if (cameraTransform == null && Camera.main != null)
-        {
-            cameraTransform = Camera.main.transform;
-        }
+        if (mainCamera == null) mainCamera = Camera.main;
+    }
 
-        if (cameraTransform == null)
-        {
-            Debug.LogError("ParallaxManager3D: 未找到主相机，请手动拖拽引用！");
-            return;
-        }
+    // 使用延迟初始化，防止游戏刚启动时 Cinemachine 还没来得及同步Lens尺寸
+    void Initialize()
+    {
+        if (mainCamera == null) return;
 
-        // 记录相机的初始 3D 位置
-        startCameraPosition = cameraTransform.position;
+        _startCameraPosition = mainCamera.transform.position;
+        _startOrthoSize = mainCamera.orthographicSize;
 
-        // 记录所有物体的初始 3D 位置
         for (int i = 0; i < parallaxItems.Count; i++)
         {
             ParallaxItem item = parallaxItems[i];
             if (item.target != null)
             {
                 item.startPosition = item.target.position;
-                parallaxItems[i] = item;
+                item.startScale = item.target.localScale;
+                parallaxItems[i] = item; // 结构体值类型写回
             }
         }
+        _isInitialized = true;
     }
 
     void LateUpdate()
     {
-        if (cameraTransform == null) return;
+        if (mainCamera == null) return;
+        
+        // 第一帧动态初始化
+        if (!_isInitialized) Initialize();
 
-        // 核心改动：计算相机在 3D 空间中的【总位移向量】（包含 X, Y, Z）
-        Vector3 cameraDelta = cameraTransform.position - startCameraPosition;
+        // 1. 计算相机的 3D 位移差（完美应对你 45° 角的 transform.up/right 移动）
+        Vector3 cameraDelta = mainCamera.transform.position - _startCameraPosition;
+        
+        // 2. 计算相机的缩放比例（应对你的滚轮缩放与 DOTween FocusShake）
+        float currentOrthoSize = mainCamera.orthographicSize;
+        float zoomRatio = currentOrthoSize / _startOrthoSize;
 
-        // 遍历并更新列表中所有物体的 3D 坐标
+        // 3. 遍历更新所有视差物体
         for (int i = 0; i < parallaxItems.Count; i++)
         {
             ParallaxItem item = parallaxItems[i];
             if (item.target == null) continue;
 
-            // 核心改动：直接用 3D 向量乘以视差系数
-            // 当系数为 1 时，targetPosition 的增量与相机完全一致，实现完美的相对静止
+            // --- 位置视差 ---
             Vector3 targetPosition = item.startPosition + (cameraDelta * item.parallaxFactor);
-
-            // 应用新的 3D 位置
             item.target.position = targetPosition;
+
+            // --- 缩放补偿 ---
+            if (item.compensateZoom)
+            {
+                // 当 factor 为 1 时，缩放比例完全随相机 1:1 抵消，在屏幕上看起来大小绝对固定
+                // 当 factor 为 0 时，保持原始大小，随相机正常放大缩小
+                float scaleMultiplier = 1f + (zoomRatio - 1f) * item.parallaxFactor;
+                item.target.localScale = item.startScale * scaleMultiplier;
+            }
         }
     }
 }
