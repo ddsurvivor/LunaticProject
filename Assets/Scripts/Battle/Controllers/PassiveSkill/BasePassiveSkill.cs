@@ -2,10 +2,12 @@ using UnityEngine;
 
 namespace SkillSystem
 {
+    [System.Serializable]
     public abstract class BasePassiveSkill
     {
         protected PassiveSkillData data;
-        protected GameObject owner;
+        [SerializeField]
+        protected GameObject owner; // 技能的宿主（谁拥有这个技能）
         protected CharacterSkillManager manager;
 
         public virtual void Initialize(PassiveSkillData data, GameObject owner)
@@ -16,22 +18,31 @@ namespace SkillSystem
             OnSkillEquipped();
         }
 
-        // --- 全量事件钩子 ---
+        // --- 加上 instigator 后的全量钩子 ---
         public virtual void OnSkillEquipped() { }
         public virtual void OnSkillUnequipped() { }
-        public virtual void OnHpChanged(float currentHp, float maxHp) { }
-        public virtual void OnKillEnemy(GameObject victim) { }
         
-        // 检定钩子：传入检定类型，通过 ref 修改额外机会和修正值
-        public virtual void OnCheckInitiated(string checkType, ref int extraAttempts, ref int valueModifier) { }
-        public virtual void OnTakeDamage(GameObject attacker) { }
+        // instigator: 谁的血量变了
+        public virtual void OnHpChanged(GameObject instigator, float currentHp, float maxHp) { }
         
-        // 攻击前置钩子：通过 ref 动态修改最终伤害倍率
-        public virtual void OnBeforeAttack(GameObject target, ref float damageMultiplier) { }
+        // instigator: 谁完成了击杀
+        public virtual void OnKillEnemy(GameObject instigator, GameObject victim) { }
         
-        // 特定机制钩子：当模式识别检定通过时触发
-        public virtual void OnPatternRecognitionPassed() { }
-        public virtual void OnCastActiveSkill() { }
-        public virtual void OnTurnEnd() { } // 用于处理回合倒计时
+        // instigator: 谁发起了检定
+        public virtual void OnCheckInitiated(GameObject instigator, string checkType, ref int extraAttempts, ref int valueModifier) { }
+        
+        // instigator: 谁受到了伤害
+        public virtual void OnTakeDamage(GameObject instigator, GameObject attacker) { }
+        
+        // instigator: 谁在发起攻击
+        public virtual void OnBeforeAttack(GameObject instigator, GameObject target, ref float damageMultiplier) { }
+        
+        // instigator: 谁通过了模式识别
+        public virtual void OnPatternRecognitionPassed(GameObject instigator) { }
+        
+        // instigator: 谁释放了主动技能
+        public virtual void OnCastActiveSkill(GameObject instigator) { }
+        
+        public virtual void OnTurnEnd() { } 
     }
 }

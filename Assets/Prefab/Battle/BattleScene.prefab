@@ -12052,6 +12052,7 @@ GameObject:
   - component: {fileID: 2098703952157809477}
   - component: {fileID: 7230884532560567416}
   - component: {fileID: 6173436885347656615}
+  - component: {fileID: 6891228850527105862}
   m_Layer: 0
   m_Name: BattleScene
   m_TagString: Untagged
@@ -12125,6 +12126,7 @@ MonoBehaviour:
   tipTextManager: {fileID: 6700525078670225954}
   moveManager: {fileID: 2098703952157809477}
   battleDialogueManager: {fileID: 7230884532560567416}
+  characterSkillManager: {fileID: 6891228850527105862}
   pieceDataListSO: {fileID: 11400000, guid: df52c853d61d0014ea7cb63307708d78, type: 2}
   areaList: []
   finishDrop: {fileID: 0}
@@ -12689,8 +12691,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 362b9892810e47a39f79f1f6b80bff6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraTransform: {fileID: 0}
+  mainCamera: {fileID: 0}
   parallaxItems: []
+--- !u!114 &6891228850527105862
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6793405397572969121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e2dfbfae9a74b34a396482b6b2653ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  skillConfigSO: {fileID: 11400000, guid: 2f6b39c31911af84394228670327cc01, type: 2}
+  equippedSkills: 
 --- !u!1 &6915368942728177865
 GameObject:
   m_ObjectHideFlags: 0

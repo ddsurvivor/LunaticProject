@@ -7,22 +7,27 @@ namespace SkillSystem
     // ==========================================
     public class SkillSuccessor : BasePassiveSkill
     {
+        // 逻辑变量本地化定义
+        private const float HP_THRESHOLD = 0.3f;       // 触发血线 30%
+        private const float ATTRIBUTE_BONUS = 0.2f;    // 属性提升 20%
+        
         private bool _isTriggered = false;
 
-        public override void OnHpChanged(float currentHp, float maxHp)
+        public override void OnHpChanged(GameObject instigator, float currentHp, float maxHp)
         {
-            float threshold = data.floatParams.Length > 0 ? data.floatParams[0] : 0.3f; // 默认 30%
+            if (instigator != owner) return;
+
             float hpRatio = currentHp / maxHp;
 
-            if (hpRatio < threshold && !_isTriggered)
+            if (hpRatio < HP_THRESHOLD && !_isTriggered)
             {
                 _isTriggered = true;
-                Debug.Log($"[被动触发] {owner.name} 触发【继承者】：HP低于{threshold:P0}，防御力、攻击力和行动范围提升20%！");
+                Debug.Log($"[被动触发] {owner.name} 触发【继承者】：自身HP低于 {HP_THRESHOLD:P0}，防御力、攻击力和行动范围提升 {ATTRIBUTE_BONUS:P0}！");
             }
-            else if (hpRatio >= threshold && _isTriggered)
+            else if (hpRatio >= HP_THRESHOLD && _isTriggered)
             {
                 _isTriggered = false;
-                Debug.Log($"[被动失效] {owner.name} 的【继承者】效果因血线回升而解除。");
+                Debug.Log($"[状态解除] {owner.name} 的【继承者】效果因自身血线回升而解除。");
             }
         }
     }
@@ -32,13 +37,16 @@ namespace SkillSystem
     // ==========================================
     public class SkillInspiration : BasePassiveSkill
     {
-        public override void OnKillEnemy(GameObject victim)
+        private const float TRIGGER_CHANCE = 0.25f;    // 触发概率 25%
+        private const int CHARGE_LAYERS = 3;           // 充能层数 3层
+
+        public override void OnKillEnemy(GameObject instigator, GameObject victim)
         {
-            float chance = data.floatParams.Length > 0 ? data.floatParams[0] : 0.25f; // 默认 25%
-            if (Random.value <= chance)
+            if (instigator != owner) return;
+
+            if (Random.value <= TRIGGER_CHANCE)
             {
-                int layers = data.intParams.Length > 0 ? data.intParams[0] : 3; // 默认 3 层
-                Debug.Log($"[被动触发] {owner.name} 击杀了 {victim.name}，成功触发【鼓舞】：全队施加 {layers} 层 [充能]！");
+                Debug.Log($"[被动触发] {owner.name} 击杀了 {victim.name}，成功触发【鼓舞】：为全队施加 {CHARGE_LAYERS} 层 [充能]！");
             }
         }
     }
@@ -48,13 +56,18 @@ namespace SkillSystem
     // ==========================================
     public class SkillSurvivalWisdom : BasePassiveSkill
     {
-        public override void OnCheckInitiated(string checkType, ref int extraAttempts, ref int valueModifier)
+        private const int EXTRA_ATTEMPTS = 1;          // 额外检定机会 +1
+        private const int VALUE_MODIFIER = -2;         // 检定数值减免 -2
+
+        public override void OnCheckInitiated(GameObject instigator, string checkType, ref int extraAttempts, ref int valueModifier)
         {
+            if (instigator != owner) return;
+
             if (checkType == "Communication" || checkType == "Combat")
             {
-                extraAttempts += 1;
-                valueModifier -= 2;
-                Debug.Log($"[被动生效] {owner.name} 的【生存智慧】在 [{checkType}] 检定中生效：获得1次额外机会，减免2点检定值。");
+                extraAttempts += EXTRA_ATTEMPTS;
+                valueModifier += VALUE_MODIFIER; // -2点
+                Debug.Log($"[被动生效] {owner.name} 的【生存智慧】在自身的 [{checkType}] 检定中生效：获得 {EXTRA_ATTEMPTS} 次额外机会，减免 {-VALUE_MODIFIER} 点检定值。");
             }
         }
     }
@@ -64,56 +77,63 @@ namespace SkillSystem
     // ==========================================
     public class SkillReflectiveECM : BasePassiveSkill
     {
-        public override void OnTakeDamage(GameObject attacker)
+        private const float TRIGGER_CHANCE = 0.20f;    // 触发概率 20%
+        private const int OVERLOAD_LAYERS = 2;         // 过载层数 2层
+
+        public override void OnTakeDamage(GameObject instigator, GameObject attacker)
         {
+            if (instigator != owner) return;
             if (attacker == null) return;
             
-            float chance = data.floatParams.Length > 0 ? data.floatParams[0] : 0.20f; // 默认 20%
-            if (Random.value <= chance)
+            if (Random.value <= TRIGGER_CHANCE)
             {
-                int layers = data.intParams.Length > 0 ? data.intParams[0] : 2; // 默认 2 层
-                Debug.Log($"[被动触发] {owner.name} 遭受 {attacker.name} 攻击，触发【反射性电子对抗】：向对方施加 {layers} 层 [过载]！");
+                Debug.Log($"[被动触发] {owner.name} 遭受 {attacker.name} 攻击，触发【反射性电子对抗】：反向对攻击者施加 {OVERLOAD_LAYERS} 层 [过载]！");
+            }
+            else
+            {
+                Debug.Log($"[被动未触发] 【反射性电子对抗】{owner.name}");  
             }
         }
     }
 
     // ==========================================
-    // 5. 进攻分析 (核心联动技能)
+    // 5. 进攻分析
     // ==========================================
     public class SkillOffensiveAnalysis : BasePassiveSkill
     {
+        private const float CHECK_CHANCE = 0.20f;       // 攻击时触发模式识别的概率 20%
+        private const float DAMAGE_MULTIPLIER = 2.5f;   // 强化伤害倍率 250%
+        
         private bool _nextAttackEmpowered = false;
 
-        public override void OnBeforeAttack(GameObject target, ref float damageMultiplier)
+        public override void OnBeforeAttack(GameObject instigator, GameObject target, ref float damageMultiplier)
         {
-            // 1. 如果上次成功锁定了强化，则在此次攻击应用伤害加成
+            if (instigator != owner) return;
+
+            // 1. 应用已被强化的击打
             if (_nextAttackEmpowered)
             {
-                float dmgBonus = data.floatParams.Length > 0 ? data.floatParams[0] : 2.5f; // 默认 250% 伤害
-                damageMultiplier *= dmgBonus;
-                _nextAttackEmpowered = false; // 消耗掉该次加成
-                Debug.Log($"[被动生效] {owner.name} 消耗【进攻分析】加成，本次攻击造成 {dmgBonus:P0} 伤害！");
+                damageMultiplier *= DAMAGE_MULTIPLIER;
+                _nextAttackEmpowered = false; 
+                Debug.Log($"[被动生效] {owner.name} 消耗【进攻分析】加成，本次攻击造成 {DAMAGE_MULTIPLIER:P0} 伤害！");
                 return;
             }
 
-            // 2. 常规攻击时，概率触发模式识别检定
-            float triggerChance = data.floatParams.Length > 1 ? data.floatParams[1] : 0.20f; // 默认 20%
-            if (Random.value <= triggerChance)
+            // 2. 概率进行模式识别检定
+            if (Random.value <= CHECK_CHANCE)
             {
-                Debug.Log($"[被动判定] {owner.name} 攻击时触发【进攻分析】，正在进行 [模式识别检定]...");
+                Debug.Log($"[被动判定] {owner.name} 攻击时触发【进攻分析】，正在进行自身的 [模式识别检定]...");
                 
-                // 模拟检定通过 (这里假设总是通过，或者您可以在此加入骰子逻辑)
-                bool isCheckPassed = true; 
+                bool isCheckPassed = true; // 模拟检定成功
                 
                 if (isCheckPassed)
                 {
                     Debug.Log($"[被动检定成功] {owner.name} 通过了模式识别检定！下一次攻击将被强化。");
                     _nextAttackEmpowered = true;
 
-                    // 【核心联动】：通知技能管理器，该角色成功通过了模式识别，以此触发技能 6
                     if (manager != null)
                     {
-                        manager.NotifyPatternRecognitionPassed();
+                        manager.NotifyPatternRecognitionPassed(owner);
                     }
                 }
             }
@@ -121,17 +141,20 @@ namespace SkillSystem
     }
 
     // ==========================================
-    // 6. 转账拦截 (与技能 5 产生联动)
+    // 6. 转账拦截
     // ==========================================
     public class SkillTransferInterception : BasePassiveSkill
     {
-        public override void OnPatternRecognitionPassed()
+        private const float TRIGGER_CHANCE = 0.25f;    // 触发概率 25%
+        private const int REWARD_CURRENCY = 100;       // 奖励货币 100
+
+        public override void OnPatternRecognitionPassed(GameObject instigator)
         {
-            float chance = data.floatParams.Length > 0 ? data.floatParams[0] : 0.25f; // 默认 25%
-            if (Random.value <= chance)
+            if (instigator != owner) return;
+
+            if (Random.value <= TRIGGER_CHANCE)
             {
-                int currencyAmount = data.intParams.Length > 0 ? data.intParams[0] : 100; // 默认 100
-                Debug.Log($"[被动触发] 检测到模式识别通过！{owner.name} 触发【转账拦截】：成功拦截并获得 {currencyAmount} 标准货币！");
+                Debug.Log($"[被动触发] 侦测到宿主 {owner.name} 自身通过了模式识别！【转账拦截】触发：成功拦截并获得 {REWARD_CURRENCY} 标准货币！");
             }
         }
     }
@@ -141,25 +164,29 @@ namespace SkillSystem
     // ==========================================
     public class SkillEdgeSurvival : BasePassiveSkill
     {
+        private const int REQUIRED_HIT_COUNT = 6;      // 需要挨打次数 6次
+        private const int BUFF_DURATION_TURNS = 2;     // 持续回合数 2回合
+        private const int ATTRIBUTE_BONUS = 3;         // 属性提升点数 3点
+
         private int _hitCounter = 0;
         private int _remainingTurns = 0;
         private bool _isBuffActive = false;
 
-        public override void OnTakeDamage(GameObject attacker)
+        public override void OnTakeDamage(GameObject instigator, GameObject attacker)
         {
-            if (_isBuffActive) return; // 不可叠加
+            if (instigator != owner) return;
+            if (_isBuffActive) return; 
 
             _hitCounter++;
-            Debug.Log($"[被动计数] {owner.name} 的【边缘求生】计数器: {_hitCounter}/6");
+            Debug.Log($"[被动计数] {owner.name} 受到攻击，【边缘求生】自身计数器: {_hitCounter}/{REQUIRED_HIT_COUNT}");
 
-            if (_hitCounter >= 6)
+            if (_hitCounter >= REQUIRED_HIT_COUNT)
             {
                 _hitCounter = 0;
                 _isBuffActive = true;
-                _remainingTurns = data.intParams.Length > 0 ? data.intParams[0] : 2; // 默认 2 回合
+                _remainingTurns = BUFF_DURATION_TURNS;
                 
-                int attrBonus = data.intParams.Length > 1 ? data.intParams[1] : 3; // 默认 3 点
-                Debug.Log($"[被动触发] {owner.name} 累积遭受6次攻击，触发【边缘求生】：体力、意志和作战属性提升 {attrBonus} 点，持续 {_remainingTurns} 回合！");
+                Debug.Log($"[被动触发] {owner.name} 自身累积遭受 {REQUIRED_HIT_COUNT} 次攻击，触发【边缘求生】：自身体力、意志和作战属性提升 {ATTRIBUTE_BONUS} 点，持续 {BUFF_DURATION_TURNS} 回合！");
             }
         }
 
@@ -171,7 +198,7 @@ namespace SkillSystem
                 if (_remainingTurns <= 0)
                 {
                     _isBuffActive = false;
-                    Debug.Log($"[被动失效] {owner.name} 的【边缘求生】持续回合结束，属性恢复正常。");
+                    Debug.Log($"[状态解除] {owner.name} 的【边缘求生】持续回合结束，自身属性恢复正常。");
                 }
             }
         }
@@ -182,13 +209,16 @@ namespace SkillSystem
     // ==========================================
     public class SkillMicromechanicalDamageControl : BasePassiveSkill
     {
-        public override void OnTakeDamage(GameObject attacker)
+        private const float TRIGGER_CHANCE = 0.20f;    // 触发概率 20%
+        private const int HEAL_LAYERS = 3;             // 自动治疗层数 3层
+
+        public override void OnTakeDamage(GameObject instigator, GameObject attacker)
         {
-            float chance = data.floatParams.Length > 0 ? data.floatParams[0] : 0.20f; // 默认 20%
-            if (Random.value <= chance)
+            if (instigator != owner) return;
+
+            if (Random.value <= TRIGGER_CHANCE)
             {
-                int layers = data.intParams.Length > 0 ? data.intParams[0] : 3; // 默认 3 层
-                Debug.Log($"[被动触发] {owner.name} 遭受攻击，触发【微机械损害管制】：为自身施加 {layers} 层 [自动治疗]！");
+                Debug.Log($"[被动触发] {owner.name} 遭受攻击，触发【微机械损害管制】：为自身施加 {HEAL_LAYERS} 层 [自动治疗]！");
             }
         }
     }
@@ -198,13 +228,16 @@ namespace SkillSystem
     // ==========================================
     public class SkillMaintenanceSupport : BasePassiveSkill
     {
-        public override void OnCastActiveSkill()
+        private const float TRIGGER_CHANCE = 0.20f;    // 触发概率 20%
+        private const int PROTECT_LAYERS = 3;          // 防护层数 3层
+
+        public override void OnCastActiveSkill(GameObject instigator)
         {
-            float chance = data.floatParams.Length > 0 ? data.floatParams[0] : 0.20f; // 默认 20%
-            if (Random.value <= chance)
+            if (instigator != owner) return;
+
+            if (Random.value <= TRIGGER_CHANCE)
             {
-                int layers = data.intParams.Length > 0 ? data.intParams[0] : 3; // 默认 3 层
-                Debug.Log($"[被动触发] {owner.name} 释放了技能，触发【维护保障】：为全队施加 {layers} 层 [防护]！");
+                Debug.Log($"[被动触发] {owner.name} 释放了主动技能，触发【维护保障】：成功为全队施加 {PROTECT_LAYERS} 层 [防护]！");
             }
         }
     }

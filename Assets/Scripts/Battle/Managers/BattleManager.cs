@@ -6,6 +6,7 @@ using BattleDialogue;
 using DG.Tweening;
 using JetBrains.Annotations;
 using Sirenix.OdinInspector;
+using SkillSystem;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -22,6 +23,7 @@ public class BattleManager : MonoBehaviour
     public TipTextManager tipTextManager;
     public MoveManager moveManager;
     public BattleDialogueManager battleDialogueManager;
+    public CharacterSkillManager characterSkillManager;
 
     public PieceDataListSO pieceDataListSO;
 
@@ -58,6 +60,9 @@ public class BattleManager : MonoBehaviour
 
     public void StartBattle()
     {
+        // 初始化角色技能系统
+        characterSkillManager.Init(PlayerController.pieces);
+        
         startSequence = DOTween.Sequence();
         startSequence.AppendInterval(0.5f);
         
@@ -359,7 +364,14 @@ public class BattleManager : MonoBehaviour
                 // TODO: 临时护盾功能
                 target.unitAttrCenter.TakeDamage(new AttackPack(realDamage, attackPack.damageType
                     , isCrit));
+                BattleScene.Ins.BM.characterSkillManager.NotifyTakeDamage(target.gameObject
+                    , attacker.gameObject);
 
+                if (target.unitAttrCenter.CurHealth <= 0)
+                {
+                    // 触发击杀
+                    BattleScene.Ins.BM.characterSkillManager.NotifyKillEnemy(attacker.gameObject,target.gameObject);
+                }
                 if (target is EnemyController enemy)
                 {
                     enemy.AddDamageRecord(attacker, realDamage);

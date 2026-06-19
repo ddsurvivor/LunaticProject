@@ -211,8 +211,10 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         else
         {
             if (pc == null) return;
-
+            
             pc.Hurt();
+            
+            BattleScene.Ins.BM.characterSkillManager.NotifyHpChanged(pc.gameObject,_curHealth, _maxHealth);
             ObjectPool.Ins.GenerateObject(
                 attackPack.damageType == DamageType.Melee
                     ? ItemType.KINETIC_ATTACK
