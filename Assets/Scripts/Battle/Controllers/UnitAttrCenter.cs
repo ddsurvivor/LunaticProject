@@ -407,6 +407,9 @@ public class UnitAttrCenter : SerializedMonoBehaviour
                 break;
             case UnitAttrType.MaxHealth:
                 _maxHealth += intValue;
+                _curHealth = _maxHealth;
+                UpdateHpBar();
+                BattleScene.Ins.UM.OnPieceStateChance(pc);
                 //UpdateHealthUI(); // 最大生命变化通常也需要刷新血条比例
                 break;
             case UnitAttrType.CurMana:

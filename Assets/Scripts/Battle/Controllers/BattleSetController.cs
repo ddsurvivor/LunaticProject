@@ -9,8 +9,14 @@ using UnityEngine;
 public class BattleSetController : MonoBehaviour
 {
     public List<PresetData> presetDatas = new();
+    
     public void ApplyAllPreset(int presetID)
     {
+        if (pr0Settings)
+        {
+            Pr0Settings();
+            return;
+        }
         List<PieceController> targetList = new();
         foreach (var presetData in presetDatas)
         {
@@ -58,6 +64,19 @@ public class BattleSetController : MonoBehaviour
             
             Debug.Log($"应用预设{presetID}，目标数量{targetList.Count}");
         }
+    }
+
+    public bool pr0Settings = false;
+
+
+    /// <summary>
+    /// 特殊的临时预设设置，PR0专用
+    /// </summary>
+    private void Pr0Settings()
+    {
+        // 等级设为15级
+        // 属性点数按照预设分配
+        // 
     }
 }
 

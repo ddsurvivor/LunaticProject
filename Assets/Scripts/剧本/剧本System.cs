@@ -284,7 +284,7 @@ public class 剧本System : MonoBehaviour
 
         if (texture == null)
         {
-            Debug.LogError("无法加载图片: " + imageName);
+            Debug.LogWarning("无法加载图片: " + imageName);
             return;
         }
 

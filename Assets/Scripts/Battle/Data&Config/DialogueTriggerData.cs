@@ -13,6 +13,7 @@ namespace BattleDialogue
         CharacterDeath,  // 关键角色死亡
         TurnNumStart,      // 第N回合开始
         Custom,           // 自定义/额外扩展调用
+        BustReady,       // 聚能完成
     }
 
     /// <summary>

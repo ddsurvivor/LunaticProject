@@ -98,6 +98,7 @@ public class PlayerController : SerializedMonoBehaviour
             Debug.Log("聚能已满，可以发动聚能！");
             BattleScene.Ins.UM.ShowBurstReady(true);
             GM.Ins.AM.PlayAudio(AudioCueType.ChargeFull);
+            BattleScene.Ins.BM.battleDialogueManager.TriggerBurstReady();
         }
 
         UpdateBurstBar();

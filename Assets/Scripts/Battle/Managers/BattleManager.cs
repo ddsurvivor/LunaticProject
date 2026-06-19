@@ -49,7 +49,7 @@ public class BattleManager : MonoBehaviour
         _turnNumber = 0;
         PlayerController.Init();
         AIController.Init();
-        ApplySetting(GM.Ins.battleSetting);
+        ApplySetting(GM.Ins.battleSetting);// 在完成所有棋子初始化以后，更新预设
         _delaySkillPack = null;
         //StartBattle();
         //gray = Resources.Load<Material>("Materials/Gray");

@@ -79,6 +79,21 @@ namespace BattleDialogue
             StartLog(logName, onComplete);
         }
 
+        private bool hasBursted = false; // 示例中简单使用一个布尔值来模拟聚能状态，实际项目中可能需要更复杂的状态管理
+        public void TriggerBurstReady(Action onComplete = null)
+        {
+            if (hasBursted)
+            {
+                return;
+            }
+            else
+            {
+                hasBursted = true;
+            }
+            string logName = GetLogName(ETriggerType.BustReady);
+            StartLog(logName, onComplete);
+        }
+
         #endregion
 
         #region 内部数据检索
