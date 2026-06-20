@@ -77,7 +77,7 @@ namespace SkillSystem
     // ==========================================
     public class SkillReflectiveECM : BasePassiveSkill
     {
-        private const float TRIGGER_CHANCE = 0.20f;    // 触发概率 20%
+        private const float TRIGGER_CHANCE = 0.90f;    // 触发概率 20%
         private const int OVERLOAD_LAYERS = 2;         // 过载层数 2层
 
         public override void OnTakeDamage(GameObject instigator, GameObject attacker)
@@ -85,9 +85,14 @@ namespace SkillSystem
             if (instigator != owner) return;
             if (attacker == null) return;
             
+            UnitAttrCenter targetUnitAttrCenter = attacker.GetComponent<UnitAttrCenter>();
             if (Random.value <= TRIGGER_CHANCE)
             {
+                BattleScene.Ins.BM.tipTextManager.ShowTip(instigator.transform
+                    , $"{data.skillName}");
                 Debug.Log($"[被动触发] {owner.name} 遭受 {attacker.name} 攻击，触发【反射性电子对抗】：反向对攻击者施加 {OVERLOAD_LAYERS} 层 [过载]！");
+                BattleScene.Ins.BM.buffManager.AddBuff(targetUnitAttrCenter, BuffType.Overload
+                    , OVERLOAD_LAYERS);
             }
             else
             {

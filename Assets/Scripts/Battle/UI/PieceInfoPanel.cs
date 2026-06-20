@@ -13,15 +13,19 @@ using UnityEngine.UI;
 
     public Image head;
     public Text pieceName;
-    public Transform hpBar;
+    public Image hpBar;
     //public List<GameObject> hpIcons;
     public Text hpNumText;
-    public List<GameObject> mpIcons;
+    public Text hpMaxText;
+    //public List<GameObject> mpIcons;
     public Text mpNumText;
-    public Transform manaBar;
+    public Text mpMaxText;
+    public Image manaBar;
     //public List<GameObject> manaIcons;
     public Text manaNumText;
-    public List<GameObject> ammoIcons;
+    public Text manaMaxText;
+    //public List<GameObject> ammoIcons;
+    public Image ammoBar;
     public Text ammoNumText;
     
     //public Sprite[] headSprites;
@@ -55,12 +59,14 @@ using UnityEngine.UI;
         pieceName.text = playerData.NAME;
         // 更新血量
         float hpPercent = (float)piece.unitAttrCenter.CurHealth / piece.unitAttrCenter.MaxHealth;
-        hpBar.localScale = new Vector3(hpPercent, 1, 1);
+        hpBar.fillAmount = hpPercent;
         hpNumText.text = piece.unitAttrCenter.CurHealth.ToString();
+        hpMaxText.text = "/" + piece.unitAttrCenter.MaxHealth.ToString();
         // 更新魔法值图标
         int curMP = piece.unitAttrCenter.CurMovePoint;
         mpNumText.text = curMP.ToString();
-        for (int i = 0; i < mpIcons.Count; i++)
+        mpMaxText.text = "/" + piece.unitAttrCenter.MaxMovePoint.ToString();
+        /*for (int i = 0; i < mpIcons.Count; i++)
         {
             if (i < curMP)
             {
@@ -70,16 +76,18 @@ using UnityEngine.UI;
             {
                 mpIcons[i].SetActive(false);
             }
-        }
+        }*/
         int curMana = piece.unitAttrCenter.ManaPoint;
         manaNumText.text = curMana.ToString();
+        manaMaxText.text = "/" + piece.unitAttrCenter.MaxManaPoint.ToString();
         float manaPercent = (float)curMana / piece.unitAttrCenter.MaxManaPoint;
-        manaBar.localScale = new Vector3(manaPercent, 1, 1);
+        manaBar.fillAmount = manaPercent;
         
         int ammo = piece.unitAttrCenter.AmmoCount;
         ammoNumText.text = ammo.ToString();
+        ammoBar.fillAmount = (float)ammo / piece.unitAttrCenter.MaxAmmoCount;
         //Debug.Log("Ammo: " + ammo);
-        for (int i = 0; i < ammoIcons.Count; i++)
+        /*for (int i = 0; i < ammoIcons.Count; i++)
         {
             if (i < ammo)
             {
@@ -89,7 +97,7 @@ using UnityEngine.UI;
             {
                 ammoIcons[i].SetActive(false);
             }
-        }
+        }*/
 
         // 更新buff
         foreach (var buffCell in buffCells)
@@ -116,7 +124,7 @@ using UnityEngine.UI;
     {
         StopMpIconsBlink();
         List<GameObject> activeIcons = new();
-        activeIcons.AddRange(mpIcons.FindAll(icon => icon.activeInHierarchy));
+        //activeIcons.AddRange(mpIcons.FindAll(icon => icon.activeInHierarchy));
         int total = activeIcons.Count;
         for (int i = total - count; i < total; i++)
         {
@@ -138,12 +146,12 @@ using UnityEngine.UI;
         mpIconBlinkCoroutines.Clear();
 
         // 恢复所有 mpIcons 的正常显示
-        foreach (var icon in mpIcons)
+        /*foreach (var icon in mpIcons)
         {
             var img = icon.GetComponent<Image>();
             if (img != null)
                 img.color = Color.white;
-        }
+        }*/
     }
 
     // 闪烁协程

@@ -189,6 +189,11 @@ public class TipTextManager : MonoBehaviour
     {
         SpawnTipAtTarget(target, presetData.missText);
     }
+    
+    public void ShowTip(Transform target, string content)
+    {
+        SpawnTipAtTarget(target, content);
+    }
 
     #endregion
 }
