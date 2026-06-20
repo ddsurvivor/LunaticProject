@@ -9,6 +9,10 @@
         public void AddBuff(UnitAttrCenter unit, BuffType buff, int stack=1)
         {
             var existingBuff = unit.buffStates.Find(b => b.buffType == buff);
+            if (stack == -1)
+            {
+                // 处理永续buff
+            }
             if (existingBuff != null)
             {
                 existingBuff.stacks += stack;// 相同buff叠加层数

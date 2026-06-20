@@ -10,6 +10,7 @@ namespace SkillSystem
         // 逻辑变量本地化定义
         private const float HP_THRESHOLD = 0.3f;       // 触发血线 30%
         private const float ATTRIBUTE_BONUS = 0.2f;    // 属性提升 20%
+        private const float MOVE_RANGE_ADD = 10f;
         
         private bool _isTriggered = false;
 
@@ -21,13 +22,21 @@ namespace SkillSystem
 
             if (hpRatio < HP_THRESHOLD && !_isTriggered)
             {
+                BattleScene.Ins.BM.tipTextManager.ShowTip(instigator.transform
+                    , $"{data.skillName}");
                 _isTriggered = true;
                 Debug.Log($"[被动触发] {owner.name} 触发【继承者】：自身HP低于 {HP_THRESHOLD:P0}，防御力、攻击力和行动范围提升 {ATTRIBUTE_BONUS:P0}！");
+                UnitAttrCenter unitAttrCenter = instigator.GetComponent<UnitAttrCenter>();
+                unitAttrCenter.ModifyAttribute(UnitAttrType.MoveRange, MOVE_RANGE_ADD);
+                unitAttrCenter.ModifyAttribute(UnitAttrType.ATK, unitAttrCenter.ATK*ATTRIBUTE_BONUS);
+                // 防御力提升，利用减伤buff实现
+                
             }
             else if (hpRatio >= HP_THRESHOLD && _isTriggered)
             {
                 _isTriggered = false;
                 Debug.Log($"[状态解除] {owner.name} 的【继承者】效果因自身血线回升而解除。");
+                // 重置属性值，清除buff
             }
         }
     }
@@ -46,6 +55,14 @@ namespace SkillSystem
 
             if (Random.value <= TRIGGER_CHANCE)
             {
+                BattleScene.Ins.BM.tipTextManager.ShowTip(instigator.transform
+                    , $"{data.skillName}");
+                PlayerController player = instigator.GetComponent<PieceController>().player;
+
+                foreach (var piece in player.pieces)
+                {           
+                    BattleScene.Ins.BM.buffManager.AddBuff(piece.unitAttrCenter, BuffType.Charge, CHARGE_LAYERS);
+                }
                 Debug.Log($"[被动触发] {owner.name} 击杀了 {victim.name}，成功触发【鼓舞】：为全队施加 {CHARGE_LAYERS} 层 [充能]！");
             }
         }
@@ -190,6 +207,9 @@ namespace SkillSystem
                 _hitCounter = 0;
                 _isBuffActive = true;
                 _remainingTurns = BUFF_DURATION_TURNS;
+                BattleScene.Ins.BM.tipTextManager.ShowTip(instigator.transform
+                    , $"{data.skillName}");
+                // 添加持续3回合的buff
                 
                 Debug.Log($"[被动触发] {owner.name} 自身累积遭受 {REQUIRED_HIT_COUNT} 次攻击，触发【边缘求生】：自身体力、意志和作战属性提升 {ATTRIBUTE_BONUS} 点，持续 {BUFF_DURATION_TURNS} 回合！");
             }
@@ -223,6 +243,11 @@ namespace SkillSystem
 
             if (Random.value <= TRIGGER_CHANCE)
             {
+                BattleScene.Ins.BM.tipTextManager.ShowTip(instigator.transform
+                    , $"{data.skillName}");
+                UnitAttrCenter targetUnitAttrCenter = attacker.GetComponent<UnitAttrCenter>();
+                BattleScene.Ins.BM.buffManager.AddBuff(targetUnitAttrCenter, BuffType.AutoHeal
+                    , HEAL_LAYERS);
                 Debug.Log($"[被动触发] {owner.name} 遭受攻击，触发【微机械损害管制】：为自身施加 {HEAL_LAYERS} 层 [自动治疗]！");
             }
         }
