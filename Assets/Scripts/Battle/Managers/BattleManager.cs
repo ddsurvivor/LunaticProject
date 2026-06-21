@@ -1045,6 +1045,7 @@ public class BattleManager : MonoBehaviour
     {
         if (sweepCoroutine != null)
         {
+            StopCoroutine(sweepCoroutine);
             Debug.Log("【战前扫视】玩家选择跳过。");
             
             // 强行把相机拉回玩家棋子

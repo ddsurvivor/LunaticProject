@@ -101,6 +101,10 @@ using UnityEngine.SceneManagement;
         }
         public  void BattleEnd()
         {
+            /*DOVirtual.DelayedCall(0.7f, () =>
+            {
+                battleTransitionPanel.TransitionEndBattle("Playing", endLog);
+            });*/
             StartCoroutine(LoadSceneCoroutine());
         }
 
@@ -127,10 +131,14 @@ using UnityEngine.SceneManagement;
             }
         
             // 场景加载完成后执行
+            // 执行黑屏加载动画
+            大地图System.instance.BlackSceneChapter(endLog);
             大地图System.instance.打开地图(PLAYERPROFILE.currentMap);
-            if (endLog != "")
-            {
-                大地图System.instance.开始剧情(endLog);
-            }
+        }
+        public void BackToMainMapFinish()
+        {
+            //大地图System.instance.blackFront.SetActive(true);
+            大地图System.instance.BlackSceneChapter(endLog);
+            大地图System.instance.打开地图(PLAYERPROFILE.currentMap);
         }
     }
