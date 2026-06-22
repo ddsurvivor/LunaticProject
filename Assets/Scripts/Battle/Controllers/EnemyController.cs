@@ -9,24 +9,26 @@ public class EnemyController : PieceController
 {
     public EnemyAIType enemyAIType;
     public bool isActived = false; // 是否被激活
-    
-    public bool navigate;/// 是否正在导航中
+
+    public bool navigate;
+
+    /// 是否正在导航中
     //public bool ableFakeDeath = false; // 是否具有假死能力
     //private bool isFakeDead = false; // 是否处于假死状态
     //public bool FakeDead => isFakeDead;
-    
     public EnemyCanvas enemyCanvas; // 敌人专用UI画布，包含血条、buff等显示组件
 
     public Dictionary<PieceController, int> damageDic = new(); // 记录各个单位造成的伤害
 
-    public LineRenderer tagetLine;// 目标指示线
+    public LineRenderer tagetLine; // 目标指示线
     private PieceController _curTargetPc; // 当前攻击目标
 
 
     public override void TurnStart()
     {
+        if (!isActived) return;
         base.TurnStart();
-        if(enemyCanvas!=null) enemyCanvas.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
+        if (enemyCanvas != null) enemyCanvas.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
     }
 
     // 添加伤害记录
@@ -94,10 +96,11 @@ public class EnemyController : PieceController
         {
             ShootBolt(targets[0].transform.position, skill.bulletVFXType);
         }
+
         // 延迟0.3f
         DOVirtual.DelayedCall(0.3f, () =>
         {
-            if(targets ==null || targets.Count == 0) return;
+            if (targets == null || targets.Count == 0) return;
             Debug.Log($"技能命中数量{targets.Count}");
             BattleScene.Ins.BM.PieceSkill(this, targets, skill, targets[0].transform.position);
             enemyCanvas.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
@@ -144,9 +147,10 @@ public class EnemyController : PieceController
         // 延迟0.3f
         DOVirtual.DelayedCall(0.3f, () =>
         {
-            if(targets.Count == 0) return;
+            if (targets.Count == 0) return;
             Debug.Log($"攻击命中数量{targets.Count}");
-            BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack, targets[0].transform.position, _curAtkType);
+            BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack
+                , targets[0].transform.position, _curAtkType);
             enemyCanvas.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
             rangeUI?.CloseRange();
         }, false);
@@ -157,7 +161,7 @@ public class EnemyController : PieceController
 
     private void CheckDrop()
     {
-        if (pieceData.dropItemList!=null && pieceData.dropItemList.Count > 0)
+        if (pieceData.dropItemList != null && pieceData.dropItemList.Count > 0)
         {
             // 按照概率随机
             if (GameConst.CheckRate(pieceData.dropRate))
@@ -227,8 +231,10 @@ public class EnemyController : PieceController
         {
             _curTargetPc = aiController.CheckEnemyTarget(this);
         }
+
         UpdateTargetLine();
     }
+
     // 在 EnemyController.cs 中添加
     private void UpdateTargetLine()
     {
@@ -248,6 +254,7 @@ public class EnemyController : PieceController
                                2 * (1 - t) * t * control +
                                Mathf.Pow(t, 2) * end;
             }
+
             tagetLine.positionCount = positions.Length;
             tagetLine.SetPositions(positions);
             tagetLine.enabled = true;

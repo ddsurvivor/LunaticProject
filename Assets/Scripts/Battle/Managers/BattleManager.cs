@@ -398,9 +398,27 @@ public class BattleManager : MonoBehaviour
                             , buffPack.stacks);
                     }
                 }
+                else if (buffPack.target == SkillTarget.All)
+                {
+                    if (GameConst.CheckRate(buffPack.rate))
+                    {
+                        buffManager.AddBuff(target.unitAttrCenter, buffPack.buffType
+                            , buffPack.stacks);
+                    }
+                }
                 else if (buffPack.target == SkillTarget.EnemyAll ||
                          buffPack.target == SkillTarget.Enemy)
                 {
+                    if(target.isPlayerPiece) continue; // 友军不受敌方buff影响
+                    if (GameConst.CheckRate(buffPack.rate))
+                    {
+                        buffManager.AddBuff(target.unitAttrCenter, buffPack.buffType
+                            , buffPack.stacks);
+                    }
+                }
+                else if (buffPack.target == SkillTarget.Ally)
+                {
+                    if(!target.isPlayerPiece) continue; // 敌军不受友方buff影响
                     if (GameConst.CheckRate(buffPack.rate))
                     {
                         buffManager.AddBuff(target.unitAttrCenter, buffPack.buffType

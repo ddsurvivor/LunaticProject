@@ -50,7 +50,11 @@ public class PlayerController : SerializedMonoBehaviour
         // 所有棋子重置状态
         foreach (var piece in pieces)
         {
-            if(piece.gameObject.activeInHierarchy) piece.TurnStart();
+            if (piece.gameObject.activeInHierarchy && !piece.isDead)
+            {
+                piece.TurnStart();
+                BattleScene.Ins.BM.buffManager.ProcessBuffs(piece.unitAttrCenter);
+            }
         }
 
         // 相机锁定第一个棋子
@@ -74,7 +78,6 @@ public class PlayerController : SerializedMonoBehaviour
         foreach (var piece in pieces)
         {
             piece.TurnEnd();
-            BattleScene.Ins.BM.buffManager.ProcessBuffs(piece.unitAttrCenter);
         }
 
         if (isBursting)

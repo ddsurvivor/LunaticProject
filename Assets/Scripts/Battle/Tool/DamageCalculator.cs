@@ -19,6 +19,7 @@ public static class DamageCalculator
     /// <returns>最终造成的实际伤害（向下取整）</returns>
     public static int CalculateActualDamage(int atk, int def,bool isCrit, int critMultiplierPct)
     {
+        if(critMultiplierPct == 0)critMultiplierPct = 100; // 默认1倍
         if (isCrit)
         {
             //暴击/大成功：无视防御力的暴击伤害 = 攻击力 * (暴击倍率 / 100f)

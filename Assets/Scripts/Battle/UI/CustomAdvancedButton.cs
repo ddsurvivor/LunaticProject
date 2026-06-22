@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.Events;
 
 /// <summary>
-/// 自定义高级交互按钮（支持动态缩放扩展）
+/// 自定义高级交互按钮（支持动态缩放扩展与键盘长按蓄力触发）
 /// </summary>
 public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
 {
@@ -14,10 +14,10 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     [SerializeField] private Image pressedImage;      // 鼠标点住时显现的图片
 
     [Header("Animation Settings")]
-    [Tooltip("填充和减少填充的速度")]
+    [Tooltip("填充和减少填充的速度（鼠标悬停或松开按键回退时生效）")]
     [SerializeField] private float fillSpeed = 8f;    
 
-    [Header("Scale Settings (New)")]
+    [Header("Scale Settings")]
     [Tooltip("是否开启按住放大效果")]
     [SerializeField] private bool enableScaleEffect = true; 
     [Tooltip("按住时的放大倍数（1.05 表示放大 5%）")]
@@ -25,12 +25,25 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     [Tooltip("缩放动画的变化速度")]
     [SerializeField] private float scaleSpeed = 12f;
 
+    [Header("Keyboard Binding Settings (New)")]
+    [Tooltip("是否开启键盘按键映射触发")]
+    [SerializeField] private bool enableKeyBinding = true;
+    [Tooltip("绑定的触发键盘按键")]
+    [SerializeField] private KeyCode activationKey = KeyCode.E;
+    [Tooltip("需要长按充满的时间（秒）")]
+    [SerializeField] private float keyHoldDuration = 1.0f;
+
     [Header("Interaction Events")]
-    [SerializeField] public UnityEvent onClickEvent;   // 鼠标抬起时触发的自定义事件
+    [SerializeField] public UnityEvent onClickEvent;   // 核心触发自定义事件
 
     private bool isHovered = false;
-    private bool isPressed = false;      // 记录鼠标是否按下
-    private Vector3 originalScale;       // 记录物体的初始尺寸
+    private bool isPressed = false;       // 记录鼠标是否按下
+    private Vector3 originalScale;        // 记录物体的初始尺寸
+
+    // 键盘长按状态私有变量
+    private bool isKeyHolding = false;
+    private float currentKeyHoldTime = 0f;
+    private bool keyTriggered = false;    // 防止单次长按满后重复触发
 
     public AudioCueType clickSound;
     public AudioCueType mouseOnSound;
@@ -45,7 +58,8 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
 
     private void Update()
     {
-        HandleFillAnimation();
+        HandleKeyboardInput(); // 优先处理键盘输入逻辑
+        HandleFillAnimation();  // 处理填充动画
         HandleScaleAnimation(); // 处理缩放动画
     }
 
@@ -57,14 +71,55 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
         if (fillImage != null)
         {
             fillImage.fillAmount = 0f;
-            //fillImage.type = Image.Type.Filled;
-            //fillImage.fillMethod = Image.FillMethod.Horizontal;
-            //fillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
         }
 
         if (pressedImage != null)
         {
             pressedImage.gameObject.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// 处理键盘长按的核心状态机
+    /// </summary>
+    private void HandleKeyboardInput()
+    {
+        if (!enableKeyBinding) return;
+
+        // 当玩家按住绑定按键时
+        if (Input.GetKey(activationKey))
+        {
+            if (!keyTriggered)
+            {
+                isKeyHolding = true;
+                currentKeyHoldTime += Time.deltaTime;
+
+                // 表现层：按住时让高亮/按下贴图显现
+                if (pressedImage != null) pressedImage.gameObject.SetActive(true);
+
+                // 蓄力时间全满，触发点击
+                if (currentKeyHoldTime >= keyHoldDuration)
+                {
+                    TriggerButtonClick();
+                    keyTriggered = true; // 标记本轮已触发，不再重复触发
+                }
+            }
+        }
+        else
+        {
+            // 玩家松开按键，重置键盘蓄力相关的状态
+            if (isKeyHolding || keyTriggered)
+            {
+                isKeyHolding = false;
+                currentKeyHoldTime = 0f;
+                keyTriggered = false;
+
+                // 如果此时鼠标没有点着，就关闭按下贴图
+                if (!isPressed && pressedImage != null) 
+                {
+                    pressedImage.gameObject.SetActive(false);
+                }
+            }
         }
     }
 
@@ -75,8 +130,17 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     {
         if (fillImage == null) return;
 
-        float targetFill = isHovered ? 1f : 0f;
-        fillImage.fillAmount = Mathf.MoveTowards(fillImage.fillAmount, targetFill, fillSpeed * Time.deltaTime);
+        // 如果开启了键盘绑定且玩家正在长按蓄力，填充进度由长按时间百分比绝对控制
+        if (enableKeyBinding && isKeyHolding)
+        {
+            fillImage.fillAmount = Mathf.Clamp01(currentKeyHoldTime / keyHoldDuration);
+        }
+        else
+        {
+            // 否则维持原有的鼠标悬停填充逻辑（松开键盘后，进度条会通过 MoveTowards 丝滑地退回 0）
+            float targetFill = isHovered ? 1f : 0f;
+            fillImage.fillAmount = Mathf.MoveTowards(fillImage.fillAmount, targetFill, fillSpeed * Time.deltaTime);
+        }
     }
 
     /// <summary>
@@ -86,11 +150,24 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     {
         if (!enableScaleEffect) return;
 
-        // 目标缩放逻辑：只有当鼠标在按钮内(isHovered)且处于按下状态(isPressed)时，才应用放大尺寸；否则恢复原尺寸
-        Vector3 targetScale = (isHovered && isPressed) ? originalScale * pressedScale : originalScale;
+        // 目标缩放逻辑：鼠标处于悬停且按下状态，或者键盘正在长按蓄力时，均应用放大尺寸
+        bool shouldScale = (isHovered && isPressed) || (enableKeyBinding && isKeyHolding);
+        Vector3 targetScale = shouldScale ? originalScale * pressedScale : originalScale;
 
         // 使用 Vector3.MoveTowards 实现平滑的线性缩放过渡
         transform.localScale = Vector3.MoveTowards(transform.localScale, targetScale, scaleSpeed * Time.deltaTime);
+    }
+
+    /// <summary>
+    /// 触发核心点击事件（由鼠标抬起或键盘长按蓄力满时调用）
+    /// </summary>
+    private void TriggerButtonClick()
+    {
+        GM.Ins.AM.PlayAudio(clickSound);
+        if (onClickEvent != null)
+        {
+            onClickEvent.Invoke();
+        }
     }
 
     #region UGUI Event System Interfaces
@@ -106,7 +183,6 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     public void OnPointerExit(PointerEventData eventData)
     {
         isHovered = false;
-        // 注意：如果按住鼠标并拖出按钮范围，按钮应该安全地恢复原大小
     }
 
     // 鼠标按下
@@ -118,7 +194,6 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
         {
             pressedImage.gameObject.SetActive(true);
         }
-        
     }
 
     // 鼠标抬起
@@ -126,29 +201,40 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     {
         isPressed = false;
 
-        if (pressedImage != null)
+        // 如果此时键盘也没有在长按，才关闭按下贴图
+        if (!isKeyHolding && pressedImage != null)
         {
             pressedImage.gameObject.SetActive(false);
         }
 
-        GM.Ins.AM.PlayAudio(clickSound);
-        // 只有在按钮内部抬起时，才算作一次成功的点击，触发事件
-        if (isHovered && onClickEvent != null)
+        // 只有在按钮内部抬起时，才算作一次成功的鼠标点击
+        if (isHovered)
         {
-            onClickEvent.Invoke();
+            TriggerButtonClick();
         }
     }
 
     private void OnDisable()
     {
-        fillImage.fillAmount = 0f;
-        isHovered = false;
+        ResetAllStates();
     }
 
     private void OnEnable()
     {
-        fillImage.fillAmount = 0f;
+        ResetAllStates();
+    }
+
+    /// <summary>
+    /// 当UI激活、隐藏时，安全重置所有交互状态，防止逻辑卡死
+    /// </summary>
+    private void ResetAllStates()
+    {
+        if (fillImage != null) fillImage.fillAmount = 0f;
         isHovered = false;
+        isPressed = false;
+        isKeyHolding = false;
+        currentKeyHoldTime = 0f;
+        keyTriggered = false;
     }
 
     #endregion
