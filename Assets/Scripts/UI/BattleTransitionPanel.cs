@@ -50,8 +50,12 @@ using UnityEngine.SceneManagement;
     {
         StartCoroutine(TransitionRoutine(battleSceneName));
     }
+    public void TransitionEndBattle(string battleSceneName, string endLog)
+    {
+        StartCoroutine(TransitionRoutine(battleSceneName, true, endLog));
+    }
 
-    private IEnumerator TransitionRoutine(string battleSceneName)
+    private IEnumerator TransitionRoutine(string battleSceneName, bool isQuitBattle = false, string endLog = "")
     {
         fadeCanvasGroup.gameObject.SetActive(true);
         // ==========================================
@@ -123,6 +127,10 @@ using UnityEngine.SceneManagement;
         // ==========================================
         if (loadingPanel != null) loadingPanel.SetActive(false);
 
+        if (isQuitBattle)
+        {
+            GM.Ins.BackToMainMapFinish();
+        }
         // ==========================================
         // 7. 黑色背景淡出 (Fade Out)
         // ==========================================
@@ -131,7 +139,11 @@ using UnityEngine.SceneManagement;
         // ==========================================
         // 8. 场景完全加载并恢复后，通知战斗管理器
         // ==========================================
-        NotifyBattleManager();
+        
+        if (!isQuitBattle)
+        {
+            NotifyBattleManager();
+        }
     }
 
     /// <summary>

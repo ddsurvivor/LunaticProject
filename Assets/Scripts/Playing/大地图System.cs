@@ -64,11 +64,12 @@ public class 大地图System : SerializedMonoBehaviour
             大地图System.instance.开始剧情("PR0");
             GM.Ins.PLAYERPROFILE.isNewGame = false;
             blackFront.SetActive(true);
-            DOVirtual.DelayedCall(2.2f,()=>{
+            DOVirtual.DelayedCall(5.2f,()=>{
                 blackFront.SetActive(false);
             });
         }
     }
+    
 
     public void 开始剧情(string t)
     {
@@ -196,5 +197,17 @@ public class 大地图System : SerializedMonoBehaviour
     {
         // 加载开始场景
         UnityEngine.SceneManagement.SceneManager.LoadScene("StartScene");
+    }
+
+    public void BlackSceneChapter(string endLog)
+    {
+        if (endLog != "")
+        {
+            blackFront.SetActive(true);
+            大地图System.instance.开始剧情(endLog);
+            DOVirtual.DelayedCall(5.2f,()=>{
+                blackFront.SetActive(false);
+            });
+        }
     }
 }
