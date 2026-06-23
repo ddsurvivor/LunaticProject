@@ -336,6 +336,6 @@ public static class NavMeshAgentExtensions
     public static float stoppingDestinationDistance(this NavMeshAgent agent)
     {
         // 健壮性处理：如果停止距离设置得太小，强制给一个极小的物理容错范围
-        return agent.stoppingDistance == 0 ? 0.1f : agent.stoppingDistance;
+        return agent.stoppingDistance == 0 ? 0.3f : agent.stoppingDistance;
     }
 }

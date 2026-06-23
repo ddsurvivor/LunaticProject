@@ -62,7 +62,7 @@ public class PlayerController : SerializedMonoBehaviour
         {
             if (piece.gameObject.activeInHierarchy && !piece.isDead)
             {
-                BattleScene.Ins.BM.camera.SetFollow(piece.transform);
+                BattleScene.Ins.BM.cameraController.SetFollow(piece.transform);
                 break;
             }
         }

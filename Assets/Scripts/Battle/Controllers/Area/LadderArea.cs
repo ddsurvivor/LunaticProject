@@ -57,7 +57,7 @@ public class LadderArea : InteractArea
                 BattleScene.Ins.BM.AIController.OnScanFog(upFogEffect);
             }
         }
-        BattleScene.Ins.BM.camera.SetFollow(piece.transform);
+        BattleScene.Ins.BM.cameraController.SetFollow(piece.transform);
         piece.GetComponent<NavMeshAgent>().enabled = true;
     }
 

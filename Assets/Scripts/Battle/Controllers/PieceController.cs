@@ -388,6 +388,84 @@ public class PieceController : MonoBehaviour
         }
     }*/
 
+    public void CastMeleeAttack(PieceController pieceController)
+    {
+        _curAttackPack = _pieceData.meleeAtk;
+        if(!_isAttacking) return;
+        // 根据范围获取所有棋子
+        List<PieceController> targets = new List<PieceController>(){pieceController};
+        if (targets.Count < 1)
+        {
+            Debug.Log("未选中任何目标，无法发动技能");
+            return;
+        }
+
+        Debug.Log("棋子攻击");
+        CheckFace(targets[0].transform.position - transform.position);
+        if (_curAtkType == ActionType.近战攻击)
+        {
+            pieceDisplay.ChangeDisplayState(PieceDisplayState.Attack, false, 1f);
+            PlayAudio(ActionType.近战攻击);
+            PassiveTrigger(PassiveTriggerType.OnMeleeAttack);
+        }
+        else if (_curAtkType == ActionType.远程攻击)
+        {
+            pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
+            // 消耗弹药
+            unitAttrCenter.CostAmmo();
+            PlayAudio(ActionType.远程攻击);
+            PassiveTrigger(PassiveTriggerType.OnRangedAttack);
+        }
+
+
+        // // 聚能充能
+        // if (isPlayerPiece)
+        // {
+        //     if (!BattleScene.Ins.BM.PlayerController.isBursting)
+        //     {
+        //         // 攻击充能
+        //         BattleScene.Ins.BM.PlayerController.ChargeBurst(GameConst.attackBurstCharge);
+        //     }
+        // }
+
+
+        // 结束攻击状态
+        _isAttacking = false;
+        if (targets.Count > 0)
+        {
+            ShootBolt(targets[0].transform.position, _curAttackPack.bulletVFXType);
+        }
+        Transform atkPos = rangeUI.GetSkillTransform();
+        if (atkPos != null && _curAttackPack.skillVFXType != 0)
+        {
+                    
+            GameObject fx  = ObjectPool.Ins.GenerateObject(
+                _curAttackPack.skillVFXType,
+                atkPos.position + Vector3.up * 0.1f,
+                atkPos.localRotation);
+            if (_curAttackPack.isRotate)
+            {
+                // fx沿 z轴 旋转，方向为从transfrom指向atkPos
+                Vector3 dir = (atkPos.position - transform.position).normalized;
+                dir.y = 0;
+                float angle = Mathf.Atan2(dir.z, dir.x) * Mathf.Rad2Deg;
+                fx.transform.rotation = Quaternion.Euler(45,  -45, angle + 90f);
+                Debug.Log($"生成技能特效{_curAttackPack.skillVFXType},{dir}旋转角度{angle}");
+            }
+        }
+        // 延迟0.3f
+        DOVirtual.DelayedCall(0.3f
+            , () =>
+            {
+                if (!unitAttrCenter.CostMP()) return;
+                BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack,
+                    atkPos !=null ? atkPos.position : Vector3.zero
+                    , _curAtkType);
+                rangeUI.CloseRange();
+            }, false);
+
+    }
+
     private void CastAttack()
     {
         if(!_isAttacking) return;

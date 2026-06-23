@@ -163,7 +163,7 @@ public class ClickManager : MonoBehaviour
             BattleScene.Ins.UM.ShowPieceActionPanel(piece);
             BattleScene.Ins.UM.ShowPieceState(piece);
             BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(piece);
-            BattleScene.Ins.BM.camera.SetFollow(piece.transform);
+            BattleScene.Ins.BM.cameraController.SetFollow(piece.transform);
         }
     }
 
@@ -197,7 +197,7 @@ public class ClickManager : MonoBehaviour
             BattleScene.Ins.UM.ShowPieceActionPanel(piece);
             BattleScene.Ins.UM.ShowPieceState(piece);
             BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(piece);
-            BattleScene.Ins.BM.camera.SetFollow(piece.transform);
+            BattleScene.Ins.BM.cameraController.SetFollow(piece.transform);
             GM.Ins.AM.PlayAudio(AudioCueType.Select);
             /*_selectedPiece.StartDrag();
             
@@ -214,7 +214,7 @@ public class ClickManager : MonoBehaviour
 
     public void StartDarg(PieceController piece)
     {
-        BattleScene.Ins.BM.camera.SetFollow(null);
+        BattleScene.Ins.BM.cameraController.SetFollow(null);
         _selectedPiece = piece;
         _selectedPiece.StartDrag();
         _isDragging = true;
@@ -313,7 +313,7 @@ public class ClickManager : MonoBehaviour
         {
             Debug.Log("停止拖动棋子");
             _isDragging = false;
-            BattleScene.Ins.BM.camera.SetFollow(_selectedPiece.transform);
+            BattleScene.Ins.BM.cameraController.SetFollow(_selectedPiece.transform);
             _selectedPiece.unitAttrCenter.CostMP();
             _selectedPiece.StopDrag();
             _rangeUI.CloseRange();
@@ -327,7 +327,7 @@ public class ClickManager : MonoBehaviour
         {
             Debug.Log("停止拖动棋子");
             _isDragging = false;
-            BattleScene.Ins.BM.camera.SetFollow(_selectedPiece.transform);
+            BattleScene.Ins.BM.cameraController.SetFollow(_selectedPiece.transform);
             _selectedPiece.unitAttrCenter.CostMP();
             Vector3 targetPos = new Vector3(_rangeUI.moveIcon.transform.position.x,
                 _selectedPiece.transform.position.y,

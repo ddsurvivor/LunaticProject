@@ -8,13 +8,14 @@ using JetBrains.Annotations;
 using Sirenix.OdinInspector;
 using SkillSystem;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public class BattleManager : MonoBehaviour
 {
     public AIController AIController;
     public PlayerController PlayerController;
-    public CameraController camera;
+    [FormerlySerializedAs("camera")] public CameraController cameraController;
     public BuffManager buffManager;
     public SkillManager skillManager;
     public SpriteManager spriteManager;
@@ -38,20 +39,22 @@ public class BattleManager : MonoBehaviour
     private int _turnNumber = 0;
 
     private bool inBattle = false; // 是否在战斗中，防止重复初始化
-    
-    [SerializeField][LabelText("镜头移动等待时间")] float moveWaitTime = 1.0f; // 
-    [SerializeField][LabelText("镜头注视时间")]float gazeWaitTime = 0.5f; // 
-    
+
+    [SerializeField] [LabelText("镜头移动等待时间")]
+    float moveWaitTime = 1.0f; // 
+
+    [SerializeField] [LabelText("镜头注视时间")] float gazeWaitTime = 0.5f; // 
+
     private Sequence startSequence; // 战斗开始时的镜头动画序列
     private Coroutine sweepCoroutine;
-    
+
     public void Init()
     {
         inBattle = true;
         _turnNumber = 0;
         PlayerController.Init();
         AIController.Init();
-        ApplySetting(GM.Ins.battleSetting);// 在完成所有棋子初始化以后，更新预设
+        ApplySetting(GM.Ins.battleSetting); // 在完成所有棋子初始化以后，更新预设
         _delaySkillPack = null;
         //StartBattle();
         //gray = Resources.Load<Material>("Materials/Gray");
@@ -62,13 +65,13 @@ public class BattleManager : MonoBehaviour
     {
         // 初始化角色技能系统
         characterSkillManager.Init(PlayerController.pieces);
-        
+
         startSequence = DOTween.Sequence();
         startSequence.AppendInterval(0.5f);
-        
+
         // 触发扫视
         startSequence.AppendCallback(SweepActiveEnemies);
-        
+
         startSequence.AppendInterval(CalculateTotalTime());
         startSequence.AppendCallback(() =>
         {
@@ -311,7 +314,7 @@ public class BattleManager : MonoBehaviour
             foreach (var attackPack in skillPack.attackPacks)
             {
                 Debug.Log($"依次计算伤害");
-                
+
                 /*
                  // 旧伤害函数：伤害 = 基础伤害 - 护甲
                  int realDamage = attackPack.damage;
@@ -343,7 +346,7 @@ public class BattleManager : MonoBehaviour
                 }
 
                 realDamage = DamageCalculator.CalculateActualDamage(realDamage, armor
-                    ,isCrit, attacker.unitAttrCenter.critDamageRate);
+                    , isCrit, attacker.unitAttrCenter.critDamageRate);
                 // 减伤
                 realDamage = (int)(realDamage
                                    * (100 + attacker.unitAttrCenter.buffAttrDic[
@@ -370,8 +373,10 @@ public class BattleManager : MonoBehaviour
                 if (target.unitAttrCenter.CurHealth <= 0)
                 {
                     // 触发击杀
-                    BattleScene.Ins.BM.characterSkillManager.NotifyKillEnemy(attacker.gameObject,target.gameObject);
+                    BattleScene.Ins.BM.characterSkillManager.NotifyKillEnemy(attacker.gameObject
+                        , target.gameObject);
                 }
+
                 if (target is EnemyController enemy)
                 {
                     enemy.AddDamageRecord(attacker, realDamage);
@@ -409,7 +414,7 @@ public class BattleManager : MonoBehaviour
                 else if (buffPack.target == SkillTarget.EnemyAll ||
                          buffPack.target == SkillTarget.Enemy)
                 {
-                    if(target.isPlayerPiece) continue; // 友军不受敌方buff影响
+                    if (target.isPlayerPiece) continue; // 友军不受敌方buff影响
                     if (GameConst.CheckRate(buffPack.rate))
                     {
                         buffManager.AddBuff(target.unitAttrCenter, buffPack.buffType
@@ -418,7 +423,7 @@ public class BattleManager : MonoBehaviour
                 }
                 else if (buffPack.target == SkillTarget.Ally)
                 {
-                    if(!target.isPlayerPiece) continue; // 敌军不受友方buff影响
+                    if (!target.isPlayerPiece) continue; // 敌军不受友方buff影响
                     if (GameConst.CheckRate(buffPack.rate))
                     {
                         buffManager.AddBuff(target.unitAttrCenter, buffPack.buffType
@@ -446,6 +451,9 @@ public class BattleManager : MonoBehaviour
                         }, attacker, target, targetPos);
                 }
             }
+            
+            // 判定夹击
+            CheckFlankAttack( attacker, target);
         }
 
         // 操作记录系统
@@ -458,11 +466,11 @@ public class BattleManager : MonoBehaviour
         {
             if (isCrit)
             {
-                BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
+                BattleScene.Ins.BM.cameraController.FocusShake(targets[0].transform);
             }
             else
             {
-                BattleScene.Ins.BM.camera.FocusTarget(targets[0].transform);
+                BattleScene.Ins.BM.cameraController.FocusTarget(targets[0].transform);
             }
         }
 
@@ -549,12 +557,14 @@ public class BattleManager : MonoBehaviour
                 }
             }
         }
+
         BattleScene.Ins.UM.battleStartUIPanel.PlayBattleStartAnimation(1);
 
-        DOVirtual.DelayedCall(1.0f, () =>
-        {
-            BattleScene.Ins.UM.battleFinishPanel.ShowPanel(true, finishDrop, finishExp);
-        });
+        DOVirtual.DelayedCall(1.0f
+            , () =>
+            {
+                BattleScene.Ins.UM.battleFinishPanel.ShowPanel(true, finishDrop, finishExp);
+            });
         PlayerController.EndBurstMode(); // 结束聚能状态
         // 延迟后退出战斗
         //DOVirtual.DelayedCall(1.0f, () => { BattleScene.Ins.BM.OnClickQuitBattle(); });
@@ -921,6 +931,7 @@ public class BattleManager : MonoBehaviour
                             result.HitPieces.Add(pc);
                         }
                     }
+
                     Debug.Log($"检测到碰撞: {wallHit.collider.name} at {wallHit.point}");
 
                     // 记录碰撞并计算最终停留点（向后微调 0.2f 避免模型穿插）
@@ -933,11 +944,12 @@ public class BattleManager : MonoBehaviour
 
             // 2. 地面检测 (垂直向下检测路径是否合法)
             Ray groundRay = new Ray(nextStepPos + Vector3.up * 10f, Vector3.down);
-            if (Physics.Raycast(groundRay, out RaycastHit groundHit, 30f,LayerMask.GetMask("Ground","Wall")))//
+            if (Physics.Raycast(groundRay, out RaycastHit groundHit, 30f
+                    , LayerMask.GetMask("Ground", "Wall"))) //
             {
                 if (groundHit.collider.CompareTag("Ground"))
                 {
-                    lastValidPos = new Vector3( groundHit.point.x, origin.y, groundHit.point.z);
+                    lastValidPos = new Vector3(groundHit.point.x, origin.y, groundHit.point.z);
                 }
                 else if (groundHit.collider.gameObject != selfObj)
                 {
@@ -964,7 +976,7 @@ public class BattleManager : MonoBehaviour
         return result;
     }
 
-    
+
     /// <summary>
     /// 扩展方法：在战斗开始时扫视所有已经激活的敌人（参数内嵌版）
     /// </summary>
@@ -972,16 +984,16 @@ public class BattleManager : MonoBehaviour
     /// <param name="gameCamera">镜头控制组件</param>
     public void SweepActiveEnemies()
     {
-        if (camera == null)
+        if (cameraController == null)
         {
             Debug.LogError("[BattleExtension] 扫视初始化失败：BattleManager 或 Camera 为空。");
             return;
         }
 
         // ====== 新增：开始扫视时激活跳过按钮 ======
-        
+
         BattleScene.Ins.UM.skipButton?.gameObject.SetActive(true);
-        
+
         // =========================================
 
         sweepCoroutine = StartCoroutine(SweepRoutine(moveWaitTime, gazeWaitTime));
@@ -1016,7 +1028,7 @@ public class BattleManager : MonoBehaviour
             if (enemy != null && enemy.isActived)
             {
                 // 1. 镜头追踪当前敌人
-                camera.SetFollow(enemy.transform);
+                cameraController.SetFollow(enemy.transform);
 
                 // 2. 等待镜头移动到位
                 yield return new WaitForSeconds(moveWaitTime);
@@ -1030,7 +1042,7 @@ public class BattleManager : MonoBehaviour
 
         // 回调主管理器的开战函数
     }
-    
+
     /// <summary>
     /// 提取出的后续核心战斗步骤
     /// </summary>
@@ -1045,7 +1057,8 @@ public class BattleManager : MonoBehaviour
             StopCoroutine(sweepCoroutine);
             sweepCoroutine = null;
         }
-        startSequence?.Kill(); 
+
+        startSequence?.Kill();
 
         if (tutorialManager.CheckAndShowTutorial())
         {
@@ -1056,6 +1069,7 @@ public class BattleManager : MonoBehaviour
             PlayerStart();
         }
     }
+
     /// <summary>
     /// 跳过战前扫视，直接进入战斗
     /// </summary>
@@ -1065,14 +1079,15 @@ public class BattleManager : MonoBehaviour
         {
             StopCoroutine(sweepCoroutine);
             Debug.Log("【战前扫视】玩家选择跳过。");
-            
+
             // 强行把相机拉回玩家棋子
             if (PlayerController.pieces != null && PlayerController.pieces.Count > 0)
             {
-                var firstPlayer = PlayerController.pieces.FirstOrDefault(p => p != null && !p.isDead);
+                var firstPlayer =
+                    PlayerController.pieces.FirstOrDefault(p => p != null && !p.isDead);
                 if (firstPlayer != null)
                 {
-                    camera.SetFollow(firstPlayer.transform);
+                    cameraController.SetFollow(firstPlayer.transform);
                 }
             }
 
@@ -1080,7 +1095,7 @@ public class BattleManager : MonoBehaviour
             EnterBattleSequence();
         }
     }
-    
+
     // ===== 掩体判定 ========== //
     /// <summary>
     /// 判定掩体是否在攻击射线上生效
@@ -1115,7 +1130,104 @@ public class BattleManager : MonoBehaviour
         return null;
     }
 
-    
+
+    // ===== 夹击判定 ========== //
+    private bool _isFlankAttacking = false; // 防重入锁：标记当前是否正在执行夹击结算
+    /// <summary>
+    /// 夹击判定：当目标受到攻击后，检查攻击者的队友是否也能触及该目标，若满足则触发协同普攻
+    /// </summary>
+    /// <param name="attacker">发起当前攻击的棋子</param>
+    /// <param name="target">被攻击的受害者</param>
+    /// 
+    public void CheckFlankAttack(PieceController attacker, PieceController target)
+    {
+        if (_isFlankAttacking) return;
+        if (target == null || attacker == null || target.unitAttrCenter.CurHealth <= 0) return;
+
+        // 获取攻击者的队友列表
+        IEnumerable<PieceController> teammates = attacker.isPlayerPiece
+            ? PlayerController.pieces
+            : AIController.pieces.Cast<PieceController>();
+
+        PieceController closestPartner = null;
+        float minDistance = float.MaxValue; // 初始化一个极大值用于比对
+
+        foreach (var partner in teammates)
+        {
+            // 排除：自身、空引用、已死亡的队友
+            if (partner == attacker || partner == null ||
+                partner.unitAttrCenter.CurHealth <= 0) continue;
+
+            // 如果是敌方单位，还需确保其已激活
+            if (partner is EnemyController enemy && !enemy.isActived) continue;
+
+            // 1. 判定目标是否在该队友的攻击范围内
+            if (IsTargetInAttackRange(partner, target))
+            {
+                // 2. 计算该队友与【受击目标】之间的物理距离
+                float currentDistance =
+                    Vector3.Distance(partner.transform.position, target.transform.position);
+
+                // 3. 筛选出距离最近的队友
+                if (currentDistance < minDistance)
+                {
+                    minDistance = currentDistance;
+                    closestPartner = partner;
+                }
+            }
+        }
+
+        // ====== 循环结束后，只有最近的那个队友触发夹击 ======
+        if (closestPartner != null)
+        {
+            Debug.Log(
+                $"【夹击触发】最近的队友 {closestPartner.pieceData.pieceName} 对 {target.pieceData.pieceName} 发动协同夹击！（距离：{minDistance:F2}米）");
+
+            // 获取普攻数据
+            SkillPack normalAttackPack = closestPartner.pieceData.meleeAtk;
+
+            if (normalAttackPack != null)
+            {
+                try
+                {
+                    // 开启防重入锁：此时由这个协同攻击造成的任何伤害/击退，再次调用 CheckFlankAttack 时都会在开头被 return
+                    _isFlankAttacking = true;
+                    DOVirtual.DelayedCall(0.5f, () =>
+                    {
+                        // 触发协同普攻
+                        if (closestPartner.isPlayerPiece)
+                        {
+                            //closestPartner.StartNormalAttack();
+                            closestPartner.CastMeleeAttack(target);
+                        }
+                        else
+                        {
+                            closestPartner.StartNormalAttack();
+                            ((EnemyController)closestPartner).CastAttackOnTarget(target);
+                        }
+                    });
+                    
+                }
+                finally
+                {
+                    DOVirtual.DelayedCall(1f, () =>
+                    {
+                        _isFlankAttacking = false;
+                    });
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 辅助方法：判定目标棋子是否在指定棋子的攻击范围内
+    /// </summary>
+    private bool IsTargetInAttackRange(PieceController checker, PieceController target)
+    {
+        float distance = Vector3.Distance(checker.transform.position, target.transform.position);
+        return distance <= checker.pieceData.meleeAtk.rangeValue;
+    }
+
 
     // ===== Test ======//
     public void OnClickQuitBattle()
@@ -1129,7 +1241,9 @@ public class BattleManager : MonoBehaviour
                 if (playerPiece != null)
                 {
                     GM.Ins.PLAYERPROFILE.SetPlayer(i,
-                        playerPiece.unitAttrCenter.CurHealth > 0 ? playerPiece.unitAttrCenter.CurHealth : -1,
+                        playerPiece.unitAttrCenter.CurHealth > 0
+                            ? playerPiece.unitAttrCenter.CurHealth
+                            : -1,
                         playerPiece.unitAttrCenter.AmmoCount,
                         playerPiece.unitAttrCenter.ManaPoint);
                 }
