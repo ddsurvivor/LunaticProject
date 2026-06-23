@@ -9952,7 +9952,7 @@ MonoBehaviour:
   m_Follow: {fileID: 173603420}
   m_Lens:
     FieldOfView: 60
-    OrthographicSize: 12
+    OrthographicSize: 24
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
@@ -13973,6 +13973,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1547541495}
   - component: {fileID: 1547541494}
+  - component: {fileID: 1547541496}
   m_Layer: 0
   m_Name: haze1_001 (1)
   m_TagString: Untagged
@@ -14040,13 +14041,34 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1547541493}
   m_LocalRotation: {x: 0.35355338, y: -0.35355338, z: 0.1464466, w: 0.8535535}
-  m_LocalPosition: {x: -75.4, y: -19.20688, z: 21.5}
+  m_LocalPosition: {x: -73.5, y: -19.20688, z: -1.7}
   m_LocalScale: {x: 3.5001423, y: 1, z: 1.0437294}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 35
   m_LocalEulerAnglesHint: {x: 45, y: -45, z: 0}
+--- !u!95 &1547541496
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1547541493}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 6954ca2e53ff93b428706085e33cd55c, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &1554963769
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15540,7 +15562,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 12
+  orthographic size: 24
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -18853,7 +18875,7 @@ MonoBehaviour:
   m_Follow: {fileID: 0}
   m_Lens:
     FieldOfView: 60
-    OrthographicSize: 12
+    OrthographicSize: 24
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
@@ -19005,6 +19027,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2065921873}
   - component: {fileID: 2065921872}
+  - component: {fileID: 2065921874}
   m_Layer: 0
   m_Name: haze1_001
   m_TagString: Untagged
@@ -19072,13 +19095,34 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2065921871}
   m_LocalRotation: {x: 0.35355338, y: -0.35355338, z: 0.1464466, w: 0.8535535}
-  m_LocalPosition: {x: -53.7, y: -19.20688, z: -10}
+  m_LocalPosition: {x: -49.5, y: -19.20688, z: 8.5}
   m_LocalScale: {x: 2.626153, y: 1, z: 0.86729664}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 34
   m_LocalEulerAnglesHint: {x: 45, y: -45, z: 0}
+--- !u!95 &2065921874
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2065921871}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: b311682e4856d604c8ed3002c46005ea, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &2084346834
 GameObject:
   m_ObjectHideFlags: 0
