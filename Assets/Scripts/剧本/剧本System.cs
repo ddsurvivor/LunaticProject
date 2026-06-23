@@ -345,6 +345,7 @@ public class 剧本System : MonoBehaviour
         var face = tar.Split(Center.Plot指令分隔符);
         foreach (var key in face)
         {
+            string command = GetCommand(key);
             if (key.Contains(Center.Command_Modify))
             {
                 var prams = 指令切割(key);
@@ -665,7 +666,7 @@ public class 剧本System : MonoBehaviour
                 }
             }
 
-            if (key.Contains(Center.Command_Battle)) // 进入战斗
+            if (command.Equals(Center.Command_Battle)) // 进入战斗
             {
                 var prams = 指令切割(key);
                 if (prams.Length >= 3)
@@ -867,7 +868,14 @@ public class 剧本System : MonoBehaviour
                 var prams = 指令切割(key);
                 if (prams.Length >= 1)
                 {
-                    大地图System.instance.tutorial.Show(prams[0]);
+                    if (大地图System.instance != null)
+                    {
+                        大地图System.instance.tutorial.Show(prams[0]);
+                    }
+                    else if (BattleScene.Ins!=null)
+                    {
+                        BattleScene.Ins.BM.tutorialManager.tutorialPanel.Show(prams[0]);
+                    }
                 }
             }
 
@@ -951,6 +959,17 @@ public class 剧本System : MonoBehaviour
         }
 
         return null;
+    }
+
+    public static string GetCommand(string command)
+    {
+        var match = Regex.Match(command, @"\(([^)]*)\)");
+        if (match.Success)
+        {
+            return  match.Groups[0].Value;
+        }
+
+        return "";
     }
 
     // 休息

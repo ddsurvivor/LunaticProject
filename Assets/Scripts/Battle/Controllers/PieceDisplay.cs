@@ -28,9 +28,9 @@ public class PieceDisplay : SerializedMonoBehaviour
     public List<List<Sprite>> skillSpriteList = new();
 
     private UnityAction finishAction;
-    
-    
-    private float frameDuration = 0.2f; // 每帧持续时间，默认为0.2秒
+
+
+    private float frameDuration = 1 / 6f; // 12帧 //0.2f; // 每帧持续时间，默认为0.2秒
     /// <summary>
     /// 更改显示状态脚本，传入一个状态和一个持续时间。
     /// 如果是-1则表示永久更改（或等待动画播放完毕），否则持续时间结束后恢复到idle状态。

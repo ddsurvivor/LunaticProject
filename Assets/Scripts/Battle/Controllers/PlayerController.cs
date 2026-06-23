@@ -93,7 +93,8 @@ public class PlayerController : SerializedMonoBehaviour
     public void ChargeBurst(float amount)
     {
         if (isBursting) return;
-
+        if (burstCharge >= maxBurstCharge) return;
+        
         burstCharge += amount;
         if (burstCharge >= maxBurstCharge)
         {

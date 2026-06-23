@@ -7,7 +7,7 @@ public class TutorialManager : MonoBehaviour
 
     [Header("配置")]
     [SerializeField] private TutorialDatabaseSO database;
-    [SerializeField] private TutorialUI tutorialPanel;
+    [SerializeField] public TutorialUI tutorialPanel;
 
     private void OnEnable()
     {
