@@ -137,7 +137,7 @@ public class PlayerController : SerializedMonoBehaviour
 
         // 用相机滤镜模式
         //BattleScene.Ins.BM.camera.ActiveBurstMode(true);
-        BattleScene.Ins.UM.burstBtnImage.gameObject.SetActive(true);
+        //BattleScene.Ins.UM.burstBtnImage.gameObject.SetActive(true);
         BattleScene.Ins.UM.burstStart.color = new Color(1f, 1f, 1f, 1f);
         BattleScene.Ins.UM.burstStart.gameObject.SetActive(true);
         BattleScene.Ins.UM.burstStart.DOFade(0f, 0.5f).SetDelay(0.6f).OnComplete(() =>
@@ -156,7 +156,7 @@ public class PlayerController : SerializedMonoBehaviour
         {
             BattleScene.Ins.BM.ShowBurstGray(false);
             BattleScene.Ins.UM.ShowBurstReady(false);
-            BattleScene.Ins.UM.burstBtnImage.gameObject.SetActive(false);
+            //BattleScene.Ins.UM.burstBtnImage.gameObject.SetActive(false);
             BattleScene.Ins.UM.burstEnd.color = new Color(1f, 1f, 1f, 1f);
             BattleScene.Ins.UM.burstEnd.gameObject.SetActive(true);
             BattleScene.Ins.UM.burstEnd.DOFade(0f, 0.5f)
@@ -188,7 +188,8 @@ public class PlayerController : SerializedMonoBehaviour
         if (!this.isInTurn) return; //只能在回合内发动聚能
         Debug.Log("发动聚能");
         //BattleScene.Ins.UM.ShowBurstReady(false);
-        BattleScene.Ins.UM.burstButton.interactable = false;
+        BattleScene.Ins.UM.burstButton.gameObject.SetActive(false);
+        //BattleScene.Ins.UM.burstButton.interactable = false;
         if (BattleScene.Ins.BM.AIController.ableBurst)
         {
             Debug.Log("敌人也准备发动聚能，进入拼点环节");

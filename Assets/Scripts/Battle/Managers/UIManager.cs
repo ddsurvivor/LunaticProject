@@ -13,7 +13,7 @@ public class UIManager : SerializedMonoBehaviour
     public CustomAdvancedButton endTurnButton;
     public InfoBox infoBox;
     public Button burstButton;
-    public Image burstBtnImage;
+    //public Image burstBtnImage;
     public TeamPanel teamPanel;
     public PieceInfoPanel pieceInfoPanel;
     public GameObject restartButton; // 重启战斗
@@ -171,9 +171,9 @@ public class UIManager : SerializedMonoBehaviour
         img.color = new Color(img.color.r, img.color.g, img.color.b, 0);
         img.gameObject.SetActive(true);
         Sequence seq = DOTween.Sequence();
-        seq.Append(img.DOFade(1, 0.3f));
+        seq.Append(img.DOFade(1, 0.2f));
         seq.AppendInterval(1f);
-        seq.Append(img.DOFade(0, 0.3f));
+        seq.Append(img.DOFade(0, 0.5f));
         seq.OnComplete(() => img.gameObject.SetActive(false));
     }
 }
