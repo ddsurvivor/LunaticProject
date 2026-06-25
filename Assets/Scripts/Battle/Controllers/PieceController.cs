@@ -388,9 +388,10 @@ public class PieceController : MonoBehaviour
         }
     }*/
 
-    public void CastMeleeAttack(PieceController pieceController)
+    public void CastNormalAttack(PieceController pieceController, bool range = false)
     {
-        _curAttackPack = _pieceData.meleeAtk;
+        _curAttackPack = range? _pieceData.rangedAtk : _pieceData.meleeAtk;
+        _curAtkType = range ? ActionType.远程攻击 : ActionType.近战攻击; 
         if(!_isAttacking) return;
         // 根据范围获取所有棋子
         List<PieceController> targets = new List<PieceController>(){pieceController};

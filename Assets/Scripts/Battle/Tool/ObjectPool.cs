@@ -91,6 +91,9 @@ public enum ItemType
     
     [LabelText("爆炸桶爆炸")]
     EXPLOSIVE_BARREL = 50, // 爆炸桶爆炸
+    
+    [LabelText("夹击特效")]
+    PincerAttackFx = 51, // 夹击特效
 }
 /// <summary>
 /// 对象池
