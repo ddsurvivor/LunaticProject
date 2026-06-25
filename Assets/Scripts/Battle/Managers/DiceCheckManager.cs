@@ -41,6 +41,7 @@
             }
             else if (total >= 1.5f * counterAttr)
             {
+                
                 return CheckResult.MustCrit;
             }
             else // total > counterAttr && total < 1.5 * counterAttr

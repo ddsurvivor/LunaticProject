@@ -38,6 +38,7 @@ public class PieceData
     //[LabelText("专长技能")] public List<PassiveSkillPack> passiveSkillPacks = new List<PassiveSkillPack>();
     [LabelText("专长类型")] public List<PassiveSkillType> passiveSkillTypes = new List<PassiveSkillType>();
     [LabelText("武器icon")] public Sprite weaponIcon;
+    [LabelText("指令")] public List<OrderProfile> orderProfiles;
 }
 
 [SerializeField]

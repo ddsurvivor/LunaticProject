@@ -103,6 +103,7 @@ public class CheckDicePanel : MonoBehaviour
             }
         }
 
+        BattleScene.Ins.UM.ShowCheckResult(isSuccess);
         yield return new WaitForSeconds(closeDelay);
         // 关闭界面
         gameObject.SetActive(false);

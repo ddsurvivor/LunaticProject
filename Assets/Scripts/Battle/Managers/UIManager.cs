@@ -36,6 +36,9 @@ public class UIManager : SerializedMonoBehaviour
     public Image burstEnd;
     public SkillTooltipUI skillTooltipUI;
     public CustomAdvancedButton skipButton;
+    public Image checkSuccess;// 检定成功
+    public Image checkFail;// 检定失败
+    
 
     public Dictionary<KeyCode, GameObject> keyPanelDic = new();
     
@@ -159,6 +162,18 @@ public class UIManager : SerializedMonoBehaviour
         seq.Append(imgRect.DOLocalMoveY(-110, 0.3f));
         seq.AppendInterval(1f);
         seq.Append(imgRect.DOLocalMoveY(0, 0.3f));
-        
+    }
+    
+    public void ShowCheckResult(bool success)
+    {
+        // 显示检定结果对应图片，并进行淡入淡出
+        Image img = success ? checkSuccess : checkFail;
+        img.color = new Color(img.color.r, img.color.g, img.color.b, 0);
+        img.gameObject.SetActive(true);
+        Sequence seq = DOTween.Sequence();
+        seq.Append(img.DOFade(1, 0.3f));
+        seq.AppendInterval(1f);
+        seq.Append(img.DOFade(0, 0.3f));
+        seq.OnComplete(() => img.gameObject.SetActive(false));
     }
 }

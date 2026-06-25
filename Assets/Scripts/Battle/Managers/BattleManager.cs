@@ -636,8 +636,9 @@ public class BattleManager : MonoBehaviour
             switch (effect)
             {
                 case SkillEffect.Blink:
+                    // TODO: 优化为移动
                     caster.transform.position =
-                        targetPos + new Vector3(-0.5f, 0, -0.5f);
+                        targetPos + new Vector3(-1.5f, 0, -1.5f);
                     break;
                 case SkillEffect.HealArea:
                     Debug.Log("生成治疗区");
@@ -1185,36 +1186,37 @@ public class BattleManager : MonoBehaviour
 
             // 获取普攻数据
             SkillPack normalAttackPack = closestPartner.pieceData.meleeAtk;
-
-            if (normalAttackPack != null)
+            // 音效特效
+            GM.Ins.AM.PlayAudio(AudioCueType.PincerTrigger);
+            ObjectPool.Ins.GenerateObject(ItemType.PincerAttackFx
+                , closestPartner.transform.position + Vector3.up * 1.2f, Quaternion.identity);
+            if (normalAttackPack == null) return;
+            try
             {
-                try
+                // 开启防重入锁：此时由这个协同攻击造成的任何伤害/击退，再次调用 CheckFlankAttack 时都会在开头被 return
+                _isFlankAttacking = true;
+                DOVirtual.DelayedCall(0.5f, () =>
                 {
-                    // 开启防重入锁：此时由这个协同攻击造成的任何伤害/击退，再次调用 CheckFlankAttack 时都会在开头被 return
-                    _isFlankAttacking = true;
-                    DOVirtual.DelayedCall(0.5f, () =>
+                    // 触发协同普攻
+                    if (closestPartner.isPlayerPiece)
                     {
-                        // 触发协同普攻
-                        if (closestPartner.isPlayerPiece)
-                        {
-                            //closestPartner.StartNormalAttack();
-                            closestPartner.CastMeleeAttack(target);
-                        }
-                        else
-                        {
-                            closestPartner.StartNormalAttack();
-                            ((EnemyController)closestPartner).CastAttackOnTarget(target);
-                        }
-                    });
+                        //closestPartner.StartNormalAttack();
+                        closestPartner.CastNormalAttack(target);
+                    }
+                    else
+                    {
+                        closestPartner.StartNormalAttack();
+                        ((EnemyController)closestPartner).CastAttackOnTarget(target);
+                    }
+                });
                     
-                }
-                finally
+            }
+            finally
+            {
+                DOVirtual.DelayedCall(1f, () =>
                 {
-                    DOVirtual.DelayedCall(1f, () =>
-                    {
-                        _isFlankAttacking = false;
-                    });
-                }
+                    _isFlankAttacking = false;
+                });
             }
         }
     }

@@ -24,7 +24,7 @@ public class AIController : PlayerController
 
 
     private float _timer;
-    private float _actionInterval = 3.0f; // 每个动作之间的间隔时间
+    private float _actionInterval = 2.0f; // 每个动作之间的间隔时间
 
     public void OnScanFog(GameObject fog)
     {

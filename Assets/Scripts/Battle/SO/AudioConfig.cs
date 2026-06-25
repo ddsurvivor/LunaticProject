@@ -19,6 +19,7 @@ public enum AudioCueType
     [LabelText("聚能充满")] ChargeFull = 90,
     [LabelText("聚能启动")] ChargeStart = 100,
     [LabelText("聚能退出")] ChargeExit = 110,
+    [LabelText("夹击触发")] PincerTrigger = 120,
 }
 
 [CreateAssetMenu(fileName = "AudioConfig", menuName = "Config/Audio Config")]
