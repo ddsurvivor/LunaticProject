@@ -637,8 +637,9 @@ public class BattleManager : MonoBehaviour
             {
                 case SkillEffect.Blink:
                     // TODO: 优化为移动
-                    caster.transform.position =
-                        targetPos + new Vector3(-1.5f, 0, -1.5f);
+                    moveManager.TeleportPawnSuccess(caster.gameObject, targetPos+ new Vector3(-1.5f, 0, -1.5f));
+                    /*caster.transform.position =
+                        targetPos + new Vector3(-1.5f, 0, -1.5f);*/
                     break;
                 case SkillEffect.HealArea:
                     Debug.Log("生成治疗区");
@@ -1201,6 +1202,7 @@ public class BattleManager : MonoBehaviour
                     if (closestPartner.isPlayerPiece)
                     {
                         //closestPartner.StartNormalAttack();
+                        Debug.Log($"【协同普攻】{closestPartner.pieceData.pieceName} 对 {target.pieceData.pieceName} 发动协同普攻！");
                         closestPartner.CastNormalAttack(target);
                     }
                     else
@@ -1210,6 +1212,10 @@ public class BattleManager : MonoBehaviour
                     }
                 });
                     
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"夹击协同攻击触发异常：{e.Message}");
             }
             finally
             {

@@ -392,7 +392,7 @@ public class PieceController : MonoBehaviour
     {
         _curAttackPack = range? _pieceData.rangedAtk : _pieceData.meleeAtk;
         _curAtkType = range ? ActionType.远程攻击 : ActionType.近战攻击; 
-        if(!_isAttacking) return;
+        //if(!_isAttacking) return;
         // 根据范围获取所有棋子
         List<PieceController> targets = new List<PieceController>(){pieceController};
         if (targets.Count < 1)
@@ -436,7 +436,7 @@ public class PieceController : MonoBehaviour
         {
             ShootBolt(targets[0].transform.position, _curAttackPack.bulletVFXType);
         }
-        Transform atkPos = rangeUI.GetSkillTransform();
+        Transform atkPos = targets[0].transform;
         if (atkPos != null && _curAttackPack.skillVFXType != 0)
         {
                     
@@ -458,7 +458,7 @@ public class PieceController : MonoBehaviour
         DOVirtual.DelayedCall(0.3f
             , () =>
             {
-                if (!unitAttrCenter.CostMP()) return;
+                //if (!unitAttrCenter.CostMP()) return;
                 BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack,
                     atkPos !=null ? atkPos.position : Vector3.zero
                     , _curAtkType);

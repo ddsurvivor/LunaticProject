@@ -197,71 +197,79 @@ public class MoveManager : MonoBehaviour
     {
         lastValidPreviewPosition = Vector3.positiveInfinity;
         lastMousePreviewPosition = Vector3.positiveInfinity; // 新增重置
+        RestoreAllMovementPriorities();
         ClearPathLine();
     }
 
     /// <summary>
-    /// 【核心准备函数】在棋子真正开始平移前调用，动态重置全场棋子的避障权重
-    /// </summary>
-    /// <param name="movingPawn">当前准备移动的棋子 GameObject</param>
-    public void SetupMovementPriorities(GameObject movingPawn)
+/// 【优化版】在棋子真正开始平移前调用，直接让其他静止棋子“隐形”，规避二人转
+/// </summary>
+public void SetupMovementPriorities(GameObject movingPawn)
+{
+    if (movingPawn == null) return;
+
+    // 1. 激活并初始化当前移动棋子的 Agent
+    NavMeshAgent movingAgent = movingPawn.GetComponent<NavMeshAgent>();
+    if (movingAgent != null)
     {
-        if (movingPawn == null)
-        {
-            Debug.LogWarning("[MoveManager] 准备移动的棋子为空，取消权重设置。");
-            return;
-        }
+        movingAgent.enabled = true;
+        movingAgent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+        movingAgent.avoidancePriority = 99;
+    }
 
-        // 1. 将当前移动棋子的优先级降到最低 (99)，使其作为寻路者主动绕行
-        NavMeshAgent movingAgent = movingPawn.GetComponent<NavMeshAgent>();
-        if (movingAgent != null)
-        {
-            movingAgent.avoidancePriority = 99;
-        }
+    if (BattleScene.Ins == null || BattleScene.Ins.BM == null) return;
 
-        // 2. 验证单例引用是否安全
-        if (BattleScene.Ins == null || BattleScene.Ins.BM == null)
-        {
-            Debug.LogError("[MoveManager] 战斗场景单例 BattleScene.Ins 或 BM 未初始化！");
-            return;
-        }
+    // 2. 遍历所有棋子，让静止的棋子完全不参与避障计算（变成空气）
+    SetOtherAgentsAvoidance(movingPawn, false);
+}
 
-        // 3. 处理玩家的所有棋子
-        var playerController = BattleScene.Ins.BM.PlayerController;
-        if (playerController != null && playerController.pieces != null)
+/// <summary>
+/// 【新增】当移动结束时，恢复全场棋子的基本避障设置
+/// </summary>
+private void RestoreAllMovementPriorities()
+{
+    if (BattleScene.Ins == null || BattleScene.Ins.BM == null) return;
+    
+    // 传入 null 代表没有移动棋子，全场恢复默认
+    SetOtherAgentsAvoidance(null, true);
+}
+
+// 提取的辅助内部方法：用来批量开启/关闭其他棋子的避障
+private void SetOtherAgentsAvoidance(GameObject movingPawn, bool enableAvoidance)
+{
+    var bm = BattleScene.Ins.BM;
+    
+    // 处理玩家棋子
+    if (bm.PlayerController?.pieces != null)
+    {
+        foreach (var piece in bm.PlayerController.pieces)
         {
-            foreach (var piece in playerController.pieces)
+            if (piece == null || piece.gameObject == movingPawn) continue;
+            var agent = piece.gameObject.GetComponent<NavMeshAgent>();
+            if (agent != null)
             {
-                // 过滤无效棋子，并确保不操作当前移动的棋子
-                if (piece == null || piece.gameObject == movingPawn) continue;
-
-                // 将静止棋子的优先级拉到最高 (0)，使其稳如泰山，绝不让路
-                NavMeshAgent agent = piece.gameObject.GetComponent<NavMeshAgent>();
-                if (agent != null)
-                {
-                    agent.avoidancePriority = 0;
-                }
-            }
-        }
-
-        // 4. 处理 AI 的所有棋子
-        var aiController = BattleScene.Ins.BM.AIController;
-        if (aiController != null && aiController.pieces != null)
-        {
-            foreach (var piece in aiController.pieces)
-            {
-                // 过滤无效棋子，并确保不操作当前移动的棋子
-                if (piece == null || piece.gameObject == movingPawn) continue;
-
-                // 同理，将 AI 静止棋子的优先级拉到最高 (0)
-                NavMeshAgent agent = piece.gameObject.GetComponent<NavMeshAgent>();
-                if (agent != null)
-                {
-                    agent.avoidancePriority = 0;
-                }
+                // 如果不参与避障，直接设为 NoAvoidance，杜绝二人转；恢复时设为默认
+                agent.obstacleAvoidanceType = enableAvoidance ? ObstacleAvoidanceType.LowQualityObstacleAvoidance : ObstacleAvoidanceType.NoObstacleAvoidance;
+                agent.avoidancePriority = enableAvoidance ? 50 : 0; 
             }
         }
     }
+
+    // 处理 AI 棋子
+    if (bm.AIController?.pieces != null)
+    {
+        foreach (var piece in bm.AIController.pieces)
+        {
+            if (piece == null || piece.gameObject == movingPawn) continue;
+            var agent = piece.gameObject.GetComponent<NavMeshAgent>();
+            if (agent != null)
+            {
+                agent.obstacleAvoidanceType = enableAvoidance ? ObstacleAvoidanceType.LowQualityObstacleAvoidance : ObstacleAvoidanceType.NoObstacleAvoidance;
+                agent.avoidancePriority = enableAvoidance ? 50 : 0;
+            }
+        }
+    }
+}
 
     /// <summary>
     /// 【公共接口】正式请求移动（此处的计算直接使用最后确认的有效路径，防止漂移）
@@ -300,6 +308,53 @@ public class MoveManager : MonoBehaviour
     public void ClearPathLine()
     {
         if (pathRenderer != null) pathRenderer.positionCount = 0;
+    }
+    
+    /// <summary>
+    /// 【新增公共接口】专治技能瞬移退回原点 Bug
+    /// </summary>
+    /// <param name="pawnObject">要瞬移的棋子</param>
+    /// <param name="targetPosition">技能锁定的目标点（可能不精准）</param>
+    /// <returns>是否成功定位并瞬移</returns>
+    public bool TeleportPawnSuccess(GameObject pawnObject, Vector3 targetPosition)
+    {
+        if (pawnObject == null) return false;
+
+        NavMeshAgent agent = pawnObject.GetComponent<NavMeshAgent>();
+    
+        // 1. 先关闭 Agent，防止它在此期间进行任何是非合法的坐标修正
+        if (agent != null)
+        {
+            agent.enabled = false;
+        }
+
+        // 2. 核心：在目标点半径 2.0m 范围内，寻找最近的合法 NavMesh 烘焙表面点
+        // 如果你的地图落差很大，可以把 2.0f 稍微放大
+        NavMeshHit hit;
+        Vector3 safePosition = targetPosition;
+    
+        if (NavMesh.SamplePosition(targetPosition, out hit, 2.0f, NavMesh.AllAreas))
+        {
+            // 找到了最近的合法网格点
+            safePosition = hit.position;
+        }
+        else
+        {
+            // 如果方圆 2 米内连物理网格都没有，说明这个技能点选得太离谱（比如掉出地图外了）
+            Debug.LogWarning($"[MoveManager] 瞬移目标点 {targetPosition} 附近没有合法的 NavMesh，强行矫正可能会出错！");
+            // 容错：可以保持原样，或者返回 false 拒绝瞬移
+        }
+
+        // 3. 强行更改物理坐标
+        pawnObject.transform.position = safePosition;
+
+        // 4. 重新开启 Agent（内部会自动刷新它在 NavMesh 上的采样点）
+        if (agent != null)
+        {
+            agent.enabled = true;
+        }
+
+        return true;
     }
 
     #region 内部辅助方法（计算长度与渲染）
