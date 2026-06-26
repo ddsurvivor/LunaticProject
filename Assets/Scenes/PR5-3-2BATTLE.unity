@@ -17334,7 +17334,7 @@ MonoBehaviour:
   m_Follow: {fileID: 320141619}
   m_Lens:
     FieldOfView: 60
-    OrthographicSize: 22.25868
+    OrthographicSize: 26
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
@@ -18816,7 +18816,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AIController: {fileID: 1713777227}
   PlayerController: {fileID: 1713777229}
-  camera: {fileID: 0}
+  cameraController: {fileID: 0}
   buffManager: {fileID: 1713777230}
   skillManager: {fileID: 0}
   spriteManager: {fileID: 0}
@@ -18826,6 +18826,7 @@ MonoBehaviour:
   moveManager: {fileID: 0}
   battleDialogueManager: {fileID: 0}
   characterSkillManager: {fileID: 0}
+  orderManager: {fileID: 0}
   pieceDataListSO: {fileID: 0}
   areaList: []
   finishDrop: {fileID: 0}
@@ -18970,7 +18971,6 @@ MonoBehaviour:
   endTurnButton: {fileID: 0}
   infoBox: {fileID: 797644601}
   burstButton: {fileID: 588414090}
-  burstBtnImage: {fileID: 0}
   teamPanel: {fileID: 208797652}
   pieceInfoPanel: {fileID: 0}
   restartButton: {fileID: 0}
@@ -18990,6 +18990,8 @@ MonoBehaviour:
   burstEnd: {fileID: 0}
   skillTooltipUI: {fileID: 0}
   skipButton: {fileID: 0}
+  checkSuccess: {fileID: 0}
+  checkFail: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19621,7 +19623,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 22.25868
+  orthographic size: 26
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -19645,7 +19647,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1734752369}
   m_LocalRotation: {x: 0.35355338, y: -0.35355338, z: 0.1464466, w: 0.8535535}
-  m_LocalPosition: {x: 18.756275, y: 67.30265, z: -20.956306}
+  m_LocalPosition: {x: 18.756273, y: 67.30264, z: -20.956299}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -22554,7 +22556,7 @@ MonoBehaviour:
   m_Follow: {fileID: 0}
   m_Lens:
     FieldOfView: 60
-    OrthographicSize: 22.25868
+    OrthographicSize: 26
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
@@ -24428,6 +24430,7 @@ MonoBehaviour:
     dropRate: 0
     passiveSkillTypes: 
     weaponIcon: {fileID: 0}
+    orderProfiles: []
   playerData:
     curHealth: 0
     curAmmo: 0
@@ -24439,6 +24442,7 @@ MonoBehaviour:
   pieceID: 2
   player: {fileID: 0}
   isPlayerPiece: 1
+  isUsingOrder: 0
   _attackPack:
     damage: 0
     damageType: 0
@@ -24475,6 +24479,7 @@ MonoBehaviour:
   cantControl: 1
   ableMove: 1
   deadNotDelete: 0
+  ableStrick: 0
   OnInit:
     m_PersistentCalls:
       m_Calls: []
