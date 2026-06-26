@@ -508,6 +508,20 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 1c8e96dc432b9754c9da84a98cd9cc91, type: 3}
   moveSprite:
   - {fileID: 21300000, guid: 7bf6d24286f0a304891a1e019290aeba, type: 3}
+  - {fileID: 21300000, guid: bfd63a9a2380bf042aeeaee52bc0567d, type: 3}
+  - {fileID: 21300000, guid: e0e8af733007dfa4f8f9efeae6f13233, type: 3}
+  - {fileID: 21300000, guid: 122113ea7077be049977ac22f97d04f5, type: 3}
+  - {fileID: 21300000, guid: bbb1e9243e074c0449d49095a587412d, type: 3}
+  - {fileID: 21300000, guid: bcea36c9c0c81514a840a14b4b00f809, type: 3}
+  - {fileID: 21300000, guid: 3e5b020e312ba774c96ae6f0ef043194, type: 3}
+  - {fileID: 21300000, guid: ed6651127fe1f1545a50b2dc5a881486, type: 3}
+  - {fileID: 21300000, guid: bfd63a9a2380bf042aeeaee52bc0567d, type: 3}
+  - {fileID: 21300000, guid: e0e8af733007dfa4f8f9efeae6f13233, type: 3}
+  - {fileID: 21300000, guid: 122113ea7077be049977ac22f97d04f5, type: 3}
+  - {fileID: 21300000, guid: bbb1e9243e074c0449d49095a587412d, type: 3}
+  - {fileID: 21300000, guid: bcea36c9c0c81514a840a14b4b00f809, type: 3}
+  - {fileID: 21300000, guid: 3e5b020e312ba774c96ae6f0ef043194, type: 3}
+  - {fileID: 21300000, guid: ed6651127fe1f1545a50b2dc5a881486, type: 3}
   meleeSprites:
   - {fileID: 21300000, guid: cfb2cf164973b264ba8938a466573209, type: 3}
   rangeSprites:
@@ -523,12 +537,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 917cdb31f9a69d54e82df1d5376aead5, type: 3}
   - {fileID: 21300000, guid: 21cbf0a7ff398f94bb3c857d822afa81, type: 3}
   - {fileID: 21300000, guid: 6120ceb8a445ccb489eeaac5a9cf3048, type: 3}
-  idleBackSprite: {fileID: 0}
-  moveBackSprite: {fileID: 21300000, guid: d26e0a20a0efb3d4fba9d9f948f988d7, type: 3}
-  attackBackSprite: {fileID: 0}
-  shootBackSprite: {fileID: 0}
-  dodgeBackSprite: {fileID: 0}
-  hitBackSprite: {fileID: 0}
   path: "Assets/A\u7F8E\u672F/BattleSprites/\u9A6C\u8D5B\u6210\u5E74\u52A8\u4F5C"
   pieceName: PC03A
 --- !u!114 &439568009330001271
@@ -614,16 +622,19 @@ MonoBehaviour:
     dropRate: 0
     passiveSkillTypes: 
     weaponIcon: {fileID: 0}
+    orderProfiles: []
   playerData:
     curHealth: 0
     curAmmo: 0
     curMana: 0
+    deadCount: 0
     spriteName: 
     normalSlots: 000000000000000000000000
     weaponSlots: 0000000000000000
   pieceID: 1001
   player: {fileID: 0}
   isPlayerPiece: 0
+  isUsingOrder: 0
   _attackPack:
     damage: 0
     damageType: 0
@@ -660,6 +671,7 @@ MonoBehaviour:
   cantControl: 0
   ableMove: 1
   deadNotDelete: 0
+  ableStrick: 0
   OnInit:
     m_PersistentCalls:
       m_Calls: []

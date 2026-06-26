@@ -3292,7 +3292,7 @@ MonoBehaviour:
   m_Follow: {fileID: 320141619}
   m_Lens:
     FieldOfView: 60
-    OrthographicSize: 29
+    OrthographicSize: 30
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
@@ -16586,7 +16586,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AIController: {fileID: 1713777227}
   PlayerController: {fileID: 1713777229}
-  camera: {fileID: 0}
+  cameraController: {fileID: 0}
   buffManager: {fileID: 1713777230}
   skillManager: {fileID: 0}
   spriteManager: {fileID: 0}
@@ -16595,6 +16595,8 @@ MonoBehaviour:
   tipTextManager: {fileID: 0}
   moveManager: {fileID: 0}
   battleDialogueManager: {fileID: 0}
+  characterSkillManager: {fileID: 0}
+  orderManager: {fileID: 0}
   pieceDataListSO: {fileID: 0}
   areaList: []
   finishDrop: {fileID: 0}
@@ -16736,10 +16738,9 @@ MonoBehaviour:
       Data: 
   turnPanel: {fileID: 1081070822}
   turnImage: []
-  endTurnButton: {fileID: 1052199133}
+  endTurnButton: {fileID: 0}
   infoBox: {fileID: 797644601}
   burstButton: {fileID: 588414090}
-  burstBtnImage: {fileID: 0}
   teamPanel: {fileID: 208797652}
   pieceInfoPanel: {fileID: 0}
   restartButton: {fileID: 0}
@@ -16758,6 +16759,9 @@ MonoBehaviour:
   burstStart: {fileID: 0}
   burstEnd: {fileID: 0}
   skillTooltipUI: {fileID: 0}
+  skipButton: {fileID: 0}
+  checkSuccess: {fileID: 0}
+  checkFail: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16951,7 +16955,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 29
+  orthographic size: 30
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -19297,7 +19301,7 @@ MonoBehaviour:
   m_Follow: {fileID: 0}
   m_Lens:
     FieldOfView: 60
-    OrthographicSize: 29
+    OrthographicSize: 30
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
