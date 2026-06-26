@@ -25,6 +25,7 @@ public class BattleManager : MonoBehaviour
     public MoveManager moveManager;
     public BattleDialogueManager battleDialogueManager;
     public CharacterSkillManager characterSkillManager;
+    public OrderManager orderManager;
 
     public PieceDataListSO pieceDataListSO;
 
@@ -66,6 +67,7 @@ public class BattleManager : MonoBehaviour
         // 初始化角色技能系统
         characterSkillManager.Init(PlayerController.pieces);
 
+        startSequence?.Kill();
         startSequence = DOTween.Sequence();
         startSequence.AppendInterval(0.5f);
 
@@ -1159,6 +1161,7 @@ public class BattleManager : MonoBehaviour
             // 排除：自身、空引用、已死亡的队友
             if (partner == attacker || partner == null ||
                 partner.unitAttrCenter.CurHealth <= 0) continue;
+            if(!partner.ableStrick) continue;// 排除：无法夹击的队友
 
             // 如果是敌方单位，还需确保其已激活
             if (partner is EnemyController enemy && !enemy.isActived) continue;

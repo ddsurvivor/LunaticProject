@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 警戒指令管理器
+/// </summary>
 public class OrderManager : MonoBehaviour
 {
     // 战斗管理器里维护一份"当前所有警戒中的单位"列表,而不是去遍历allUnits筛选
@@ -14,15 +17,6 @@ public class OrderManager : MonoBehaviour
     /// </summary>
     /// <param name="unit"></param>
     /// <param name="type"></param>
-    public void BeginAimOrder(PieceController unit, OrderType type)
-    {
-        // 逻辑与选择扇形攻击范围类似
-
-        OrderProfile orderProfile = unit.pieceData.orderProfiles.Find(t => t.type == type);
-
-        if (orderProfile == null) return;
-    }
-
     public void BeginIssueOrder(PieceController unit, OrderType type)
     {
         // 1. 根据type从配置表/预设里取出对应OrderProfile(近战或远程的半径/角度参数)
@@ -32,6 +26,8 @@ public class OrderManager : MonoBehaviour
 
 
         // 2. 开始瞄准，开启范围显示系统
+        // rangui
+        unit.rangeUI.ShowOrderRange(orderProfile);
 
 
         // 3. 玩家确认方向后:
@@ -150,6 +146,9 @@ public enum OrderType
     Ranged // 远程指令：扇形半径长、角度窄（狙击警戒）
 }
 
+/// <summary>
+/// 警戒预设范围
+/// </summary>
 [System.Serializable]
 public class OrderProfile
 {

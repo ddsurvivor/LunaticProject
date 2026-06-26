@@ -331,6 +331,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 break;
             case ActionType.指令:
                 OpenCommandPanel();
+                return;
                 break;
             default:
                 Debug.LogWarning($"{actionType} 未实现");
@@ -424,20 +425,37 @@ public class PieceActionListPanel : SerializedMonoBehaviour
 
     private void OpenCommandPanel()
     {
+        // 复用技能按钮
+        skillListPanel.SetActive(true);
+        foreach (var skillButton in skillButtons)
+        {
+            skillButton.gameObject.SetActive(false);
+            skillButton.onClick.RemoveAllListeners();
+        }
+        List<Transform> targetsToAnimate = new List<Transform>();
+        targetsToAnimate.Add(skillButtons[0].transform);
+        targetsToAnimate.Add(skillButtons[1].transform);
+        
         // 打开指令二级菜单
         skillButtons[0].gameObject.SetActive(true);
         skillButtons[0].GetComponentInChildren<Text>().text = "近战指令";
         skillButtons[0].onClick.RemoveAllListeners();
         skillButtons[0].onClick.AddListener(() => {
+            gameObject.SetActive(false);
             // 进行警戒功能
+            BattleScene.Ins.BM.orderManager.BeginIssueOrder(pc, OrderType.Melee);
         });
         
         skillButtons[1].gameObject.SetActive(true);
         skillButtons[1].GetComponentInChildren<Text>().text = "远程指令";
         skillButtons[1].onClick.RemoveAllListeners();
         skillButtons[1].onClick.AddListener(() => {
+            gameObject.SetActive(false);
             // 进行警戒功能
+            BattleScene.Ins.BM.orderManager.BeginIssueOrder(pc, OrderType.Ranged);
         });
+        
+        PlayShowAnimation(targetsToAnimate);
     }
     
 }

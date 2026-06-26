@@ -346,6 +346,7 @@ public class 剧本System : MonoBehaviour
         foreach (var key in face)
         {
             string command = GetCommand(key);
+            //Debug.Log($"进行命令{command}");
             if (key.Contains(Center.Command_Modify))
             {
                 var prams = 指令切割(key);
@@ -963,13 +964,16 @@ public class 剧本System : MonoBehaviour
 
     public static string GetCommand(string command)
     {
-        var match = Regex.Match(command, @"\(([^)]*)\)");
+        // 匹配开头任意非括号字符，并在后面可能有括号包裹的内容
+        var match = Regex.Match(command, @"^([^(\s]+)(?:\(.*?\))?");
+    
         if (match.Success)
         {
-            return  match.Groups[0].Value;
+            // Groups[1] 对应的是第一个括号 ([^(\s]+) 捕获到的纯指令内容
+            return match.Groups[1].Value;
         }
 
-        return "";
+        return command; // 如果完全没匹配到，安全起见返回原字符串
     }
 
     // 休息

@@ -54,7 +54,13 @@ public class PieceController : MonoBehaviour
     // 当前攻击数据
     private bool _isAttacking = false; // 是否正在攻击
     private bool _isUsingSkill = false; // 是否正在使用技能
-    public bool IsUsingSkill => _isUsingSkill || _isAttacking;
+    public bool IsUsingSkill
+    {
+        get { return _isUsingSkill || _isAttacking; }
+    }
+
+    public bool isUsingOrder;
+
     [SerializeField] [ReadOnly] private AttackPack _attackPack; // 当前正在使用的攻击
     protected SkillPack _curAttackPack;
     protected ActionType _curAtkType;
@@ -78,6 +84,9 @@ public class PieceController : MonoBehaviour
     public bool cantControl; // 无法被控制（眩晕等状态）
     public bool ableMove = true; // 是否能移动
     public bool deadNotDelete = false; // 死亡后不删除，用于剧情需要
+
+    public bool ableStrick;// 已经触发过夹击
+    
     [FoldoutGroup("事件")] public UnityEvent OnInit;
     [FoldoutGroup("事件")] public UnityEvent OnTurnStart;
     [FoldoutGroup("事件")] public UnityEvent OnTurnEnd;
@@ -99,6 +108,7 @@ public class PieceController : MonoBehaviour
             //availableActions.Add(ActionType.重新装填); // 装填
             availableActions.Add(ActionType.技能); // 技能
             availableActions.Add(ActionType.道具);
+            availableActions.Add(ActionType.指令);
         }
 
         //Debug.Log(_pieceDisplay.name);
@@ -180,6 +190,21 @@ public class PieceController : MonoBehaviour
                 rangeUI.CloseRange();
             }
         }
+
+        if (isUsingOrder)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                CastOrder();
+            }
+
+            // 点击右键取消
+            if (Input.GetMouseButtonDown(1))
+            {
+                isUsingOrder = false;
+                rangeUI.CloseRange();
+            }            
+        }
     }
 
     public virtual void TurnStart()
@@ -191,6 +216,7 @@ public class PieceController : MonoBehaviour
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
         // 恢复idle动画
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
+        ableStrick = true;// 重置夹击状态
     }
 
     public void TurnEnd()
@@ -987,6 +1013,11 @@ public class PieceController : MonoBehaviour
     /// </summary>
     public virtual void OnBeTarget(PieceController attacker, SkillPack skillPack)
     {
+    }
+
+    public void CastOrder()
+    {
+        
     }
 
     public virtual void OnCloseHitInfo()

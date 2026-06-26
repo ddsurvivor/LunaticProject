@@ -250,7 +250,7 @@ public class RangeUI : MonoBehaviour
     public void Update()
     {
         if (!isPlayerRange) return;
-        if (_owner != null && !_owner.IsUsingSkill) return;
+        if (_owner != null && (!_owner.IsUsingSkill && !_owner.isUsingOrder)) return;
         // attackIcon跟随鼠标移动
         if (attackIcon.activeInHierarchy)
         {
@@ -625,6 +625,34 @@ public class RangeUI : MonoBehaviour
     public void ShowSelect(bool option)
     {
         selectCircle.SetActive(option);
+    }
+
+    /// <summary>
+    /// 显示警戒指令范围
+    /// </summary>
+    /// <param name="orderProfile"></param>
+    public void ShowOrderRange(OrderProfile orderProfile)
+    {
+        _owner.isUsingOrder = true;
+        // 显示扇形范围
+        fanRoot.SetActive(true);
+        float r = orderProfile.sectorRadius;
+        float angle = orderProfile.sectorAngleDeg;
+        fanCircle.transform.localScale =  r* circleRadius * Vector3.one;
+        fanCircle.fillAmount = angle / 360f;
+        float halfAngle = angle / 2f;
+        fanCircle.transform.localRotation = Quaternion.Euler(90, 0
+            , 180f - angle + angle + halfAngle);
+        fanLine1.transform.localScale = r * circleRadius * Vector3.one;
+        fanLine2.transform.localScale = r * circleRadius * Vector3.one;
+        fanLine1.transform.localRotation = Quaternion.Euler(90, 0, halfAngle + 90);
+        fanLine2.transform.localRotation = Quaternion.Euler(90, 0, -halfAngle + 90);
+        _curSkillPack = new SkillPack()
+        {
+            rangeType = RangeType.Fan,
+            rangeValue = r,
+            rangeAgle = angle,
+        };
     }
 
 
