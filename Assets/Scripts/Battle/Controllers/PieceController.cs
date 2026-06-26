@@ -60,6 +60,7 @@ public class PieceController : MonoBehaviour
     }
 
     public bool isUsingOrder;
+    public bool isGrauding;// 正在警戒
 
     [SerializeField] [ReadOnly] private AttackPack _attackPack; // 当前正在使用的攻击
     protected SkillPack _curAttackPack;
@@ -298,7 +299,8 @@ public class PieceController : MonoBehaviour
     {
         Debug.Log("取消选择棋子");
         _isAttacking = false;
-        rangeUI?.CloseRange();
+        rangeUI.ShowSelect(false);
+        if(!isGrauding) rangeUI?.CloseRange();
         // _actionListPanel.gameObject.SetActive(false);
         BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
     }
@@ -1015,9 +1017,20 @@ public class PieceController : MonoBehaviour
     {
     }
 
+    private OrderProfile _orderProfile;
+    public void StartOrderGraud(OrderProfile orderProfile)
+    {
+        _orderProfile = orderProfile;
+        rangeUI.ShowOrderRange(orderProfile);
+        isUsingOrder = true;
+    }
     public void CastOrder()
     {
-        
+        Debug.Log($"确认指令:{_orderProfile.orderName}");
+        BattleScene.Ins.BM.orderManager.ConfirmOrder(this, _orderProfile,rangeUI.fanRoot.transform.localRotation);
+        isUsingOrder = false;
+        isGrauding = true;
+        _orderProfile = null;
     }
 
     public virtual void OnCloseHitInfo()

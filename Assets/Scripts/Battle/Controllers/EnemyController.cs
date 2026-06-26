@@ -210,7 +210,7 @@ public class EnemyController : PieceController
     public override void ShowOutline(bool option)
     {
         base.ShowOutline(option);
-        Debug.Log($"ShowOutline {option} - {_curTargetPc?.name}");
+        //Debug.Log($"ShowOutline {option} - {_curTargetPc?.name}");
         if (!option)
         {
             tagetLine.enabled = false;

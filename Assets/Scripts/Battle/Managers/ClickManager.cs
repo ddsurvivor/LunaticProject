@@ -27,11 +27,11 @@ public class ClickManager : MonoBehaviour
         // 鼠标左键点击时发射射线检测
         if (Input.GetMouseButtonDown(0))
         {
-            // 判定是否点击到UI
+            /*// 判定是否点击到UI
             if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
             {
                 return;
-            }
+            }*/
 
             if (!_isDragging)
             {
@@ -42,10 +42,10 @@ public class ClickManager : MonoBehaviour
         if (_selectedPiece != null && _isDragging)
         {
             // 判定是否点击到UI
-            if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
-            {
-                return;
-            }
+            // if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            // {
+            //     return;
+            // }
 
             if (dragMove)
             {
@@ -66,13 +66,13 @@ public class ClickManager : MonoBehaviour
         //     DragPiece();
         // }
 
-        if (Input.GetMouseButtonUp(0) && _isDragging)
+        if (Input.GetMouseButtonDown(0) && _isDragging)
         {
             // 判定是否点击到UI
-            if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            /*if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
             {
                 return;
-            }
+            }*/
 
             if (dragMove)
             {

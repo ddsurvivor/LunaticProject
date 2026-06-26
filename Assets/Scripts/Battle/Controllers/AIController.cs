@@ -302,7 +302,7 @@ public class AIController : PlayerController
         }
         else
         {
-            EnemyMove(aiPiece, target.transform.position, meleeRange);
+            EnemyMove(aiPiece, target.transform.position, rangedRange);
         }
     }
 
@@ -335,7 +335,6 @@ public class AIController : PlayerController
         //         , aiPiece.gameObject, true);
         // float originalDist = Vector3.Distance(currentPos, moveResult.FinalPosition);
         BattleScene.Ins.BM.moveManager.PreviewMove(aiPiece.gameObject, idealAttackPos, moveRange);
-        
 
         // 5. 最终执行位移
         aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);

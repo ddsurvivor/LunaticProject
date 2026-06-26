@@ -35,7 +35,7 @@ public class MoveManager : MonoBehaviour
             if (agent.remainingDistance <= agent.stoppingDestinationDistance())
             {
                 // 双重保障：确保棋子真的停下来了
-                if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)
+                if (!agent.hasPath || agent.velocity.sqrMagnitude <= 2f)
                 {
                     isTracking = false;
 
@@ -46,6 +46,7 @@ public class MoveManager : MonoBehaviour
                     }
                     pathRenderer.gameObject.SetActive(false); // 隐藏路径渲染器
                     ResetPreviewState(); // 重置预览状态，准备下一次使用
+                    BattleScene.Ins.BM.orderManager.OnUnityMoveEnd(agent.GetComponent<PieceController>());
                 }
             }
         }
@@ -280,8 +281,10 @@ private void SetOtherAgentsAvoidance(GameObject movingPawn, bool enableAvoidance
 
         NavMeshAgent agent = pawnObject.GetComponent<NavMeshAgent>();
         if (agent == null) return 0f;
+        
+        BattleScene.Ins.BM.orderManager.OnUnitMoveStart(pawnObject.GetComponent<PieceController>());
 
-        SetupMovementPriorities(pawnObject); // 在正式移动前设置权重，确保避障行为正确
+        SetupMovementPriorities(pawnObject.gameObject); // 在正式移动前设置权重，确保避障行为正确
         this.agent = agent;
         this.onReachDestination = onMoveComplete;
         isTracking = true;

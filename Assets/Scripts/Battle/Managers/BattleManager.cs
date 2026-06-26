@@ -64,6 +64,7 @@ public class BattleManager : MonoBehaviour
 
     public void StartBattle()
     {
+        Debug.Log("战斗开始");
         // 初始化角色技能系统
         characterSkillManager.Init(PlayerController.pieces);
 

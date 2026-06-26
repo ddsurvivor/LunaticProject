@@ -13,31 +13,23 @@ public class OrderManager : MonoBehaviour
     private PieceController moveUnit;
 
     /// <summary>
-    /// 开始指令瞄准状态
+    /// 确认下达警戒指令
     /// </summary>
     /// <param name="unit"></param>
-    /// <param name="type"></param>
-    public void BeginIssueOrder(PieceController unit, OrderType type)
+    /// <param name="orderProfile"></param>
+    public void ConfirmOrder(PieceController unit, OrderProfile orderProfile, Quaternion rotate)
     {
-        // 1. 根据type从配置表/预设里取出对应OrderProfile(近战或远程的半径/角度参数)
-        OrderProfile orderProfile = unit.pieceData.orderProfiles.Find(t => t.type == type);
-
-        if (orderProfile == null) return;
-
-
-        // 2. 开始瞄准，开启范围显示系统
-        // rangui
-        unit.rangeUI.ShowOrderRange(orderProfile);
-
-
         // 3. 玩家确认方向后:
         UnitOrderState unitOrderState = new UnitOrderState()
         {
-            guard = unit, profile = orderProfile,
+            guard = unit, 
+            profile = orderProfile,
             // 方向根据范围指示器
             remainingTriggers = orderProfile.maxTriggerCount
             ,
         };
+        activeOrders.Add(unitOrderState);
+        BattleScene.Ins.BM.tipTextManager.ShowTip(unit.transform, "确认指令");
     }
 
 
@@ -96,6 +88,7 @@ public class OrderManager : MonoBehaviour
             if (state.profile.type == OrderType.Melee)
             {
                 state.guard.CastNormalAttack(target);
+                BattleScene.Ins.BM.tipTextManager.ShowTip(state.guard.transform, "触发指令");
                 DisarmOrder(state);
             }
             else if (state.profile.type == OrderType.Ranged)
@@ -124,6 +117,8 @@ public class OrderManager : MonoBehaviour
     {
         activeOrders.Remove(state);
         // 关闭范围显示
+        state.guard.rangeUI.CloseRange();
+        state.guard.isGrauding = false;
     }
 
     // 扇形几何判定:以guard站立点为顶点,facingDir为朝向,
@@ -136,6 +131,15 @@ public class OrderManager : MonoBehaviour
         
         float angleToTarget = Vector2.Angle(state.facingDir, toTarget);
         return angleToTarget <= state.profile.sectorAngleDeg * 0.5f;
+    }
+
+    public void ClearAll()
+    {
+        foreach (var activeOrder in activeOrders)
+        {
+            DisarmOrder(activeOrder);
+        }
+        activeOrders.Clear();
     }
 }
 
@@ -152,6 +156,7 @@ public enum OrderType
 [System.Serializable]
 public class OrderProfile
 {
+    public string orderName;
     public OrderType type; // 决定攻击伤害及特效
     public float sectorRadius; // 扇形半径
     public float sectorAngleDeg; // 扇形张角（全角，不是半角）

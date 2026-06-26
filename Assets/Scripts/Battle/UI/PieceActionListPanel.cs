@@ -433,28 +433,19 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             skillButton.onClick.RemoveAllListeners();
         }
         List<Transform> targetsToAnimate = new List<Transform>();
-        targetsToAnimate.Add(skillButtons[0].transform);
-        targetsToAnimate.Add(skillButtons[1].transform);
-        
-        // 打开指令二级菜单
-        skillButtons[0].gameObject.SetActive(true);
-        skillButtons[0].GetComponentInChildren<Text>().text = "近战指令";
-        skillButtons[0].onClick.RemoveAllListeners();
-        skillButtons[0].onClick.AddListener(() => {
-            gameObject.SetActive(false);
-            // 进行警戒功能
-            BattleScene.Ins.BM.orderManager.BeginIssueOrder(pc, OrderType.Melee);
-        });
-        
-        skillButtons[1].gameObject.SetActive(true);
-        skillButtons[1].GetComponentInChildren<Text>().text = "远程指令";
-        skillButtons[1].onClick.RemoveAllListeners();
-        skillButtons[1].onClick.AddListener(() => {
-            gameObject.SetActive(false);
-            // 进行警戒功能
-            BattleScene.Ins.BM.orderManager.BeginIssueOrder(pc, OrderType.Ranged);
-        });
-        
+        for (int i = 0; i < pc.pieceData.orderProfiles.Count; i++)
+        {
+            int index = i;
+            skillButtons[index].gameObject.SetActive(true);
+            skillButtons[index].GetComponentInChildren<Text>().text = 
+                pc.pieceData.orderProfiles[index].orderName;
+            skillButtons[index].onClick.RemoveAllListeners();
+            skillButtons[index].onClick.AddListener(() => {
+                gameObject.SetActive(false);
+                // 进行警戒功能
+                pc.StartOrderGraud(pc.pieceData.orderProfiles[index]);
+            });
+        }
         PlayShowAnimation(targetsToAnimate);
     }
     
