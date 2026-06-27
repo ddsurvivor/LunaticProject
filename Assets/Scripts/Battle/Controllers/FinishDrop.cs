@@ -37,6 +37,8 @@ public class FinishDrop : MonoBehaviour
             sb.AppendLine($"掉落了组件: {compData.itemName}");
             // 添加组件到存档里
             GM.Ins.PLAYERPROFILE.AddComponentToInventory(dropCompId);
+            // 显示提示
+            if(BattleScene.Ins!=null) BattleScene.Ins.UM.ShowItemGet(compData);
         }
         dropSummary = sb.ToString();
         // 显示掉落界面

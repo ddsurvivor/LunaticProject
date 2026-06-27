@@ -27,7 +27,7 @@ public class UIManager : SerializedMonoBehaviour
     public 剧本System logSystem;
 
     public MessagePanel messagePanel;
-    public ItemGetPanel itemGetPanel;
+    //public ItemGetPanel itemGetPanel;
     public PlayerLogPanel logPanel;
     public BattleFinishPanel battleFinishPanel;
     public CheckDicePanel checkDicePanel;
@@ -38,6 +38,7 @@ public class UIManager : SerializedMonoBehaviour
     public CustomAdvancedButton skipButton;
     public Image checkSuccess;// 检定成功
     public Image checkFail;// 检定失败
+    public NotificationManager notificationManager;
     
 
     public Dictionary<KeyCode, GameObject> keyPanelDic = new();
@@ -175,5 +176,15 @@ public class UIManager : SerializedMonoBehaviour
         seq.AppendInterval(1f);
         seq.Append(img.DOFade(0, 0.5f));
         seq.OnComplete(() => img.gameObject.SetActive(false));
+    }
+
+    public void ShowItemGet(ItemPack itemPack)
+    {
+        notificationManager.PushNotification(itemPack);
+    }
+
+    public void ShowItemGet(ComponentData itemData)
+    {
+        notificationManager.PushNotification(itemData);
     }
 }

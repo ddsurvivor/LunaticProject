@@ -171,7 +171,7 @@ public class EnemyController : PieceController
                     // 添加道具到存档里
                     GM.Ins.PLAYERPROFILE.AddItem(dropItem.itemName, dropItem.itemNum);
                     // 显示提示
-                    BattleScene.Ins.UM.itemGetPanel.ShowPanel(dropItem);
+                    BattleScene.Ins.UM.ShowItemGet(dropItem);
                 }
             }
         }

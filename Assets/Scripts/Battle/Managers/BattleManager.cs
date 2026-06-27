@@ -566,7 +566,8 @@ public class BattleManager : MonoBehaviour
         DOVirtual.DelayedCall(1.0f
             , () =>
             {
-                BattleScene.Ins.UM.battleFinishPanel.ShowPanel(true, finishDrop, finishExp);
+                OnClickQuitBattle();
+                //BattleScene.Ins.UM.battleFinishPanel.ShowPanel(true, finishDrop, finishExp);
             });
         PlayerController.EndBurstMode(); // 结束聚能状态
         // 延迟后退出战斗

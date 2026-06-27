@@ -9877,7 +9877,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh60796
+  m_Name: pb_Mesh39694
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -10041,7 +10041,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh337662
+  m_Name: pb_Mesh39482
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -15165,7 +15165,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh60396
+  m_Name: pb_Mesh39294
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -23778,6 +23778,10 @@ PrefabInstance:
       propertyPath: winTurnCondition
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 6891228850527105862, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 6891228850527105862, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
     - target: {fileID: 7162913518181066253, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -24443,6 +24447,7 @@ MonoBehaviour:
   player: {fileID: 0}
   isPlayerPiece: 1
   isUsingOrder: 0
+  isGrauding: 0
   _attackPack:
     damage: 0
     damageType: 0
@@ -25039,6 +25044,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5062046176402151726}
   - component: {fileID: 5062046176402151721}
+  - component: {fileID: 5062046176402151728}
   m_Layer: 0
   m_Name: sprite
   m_TagString: Untagged
@@ -25046,6 +25052,27 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!95 &5062046176402151728
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5062046176402151727}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: bb37f7d9a003ffe44b8c09c34d6758dc, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &6112993051385825829
 PrefabInstance:
   m_ObjectHideFlags: 0
