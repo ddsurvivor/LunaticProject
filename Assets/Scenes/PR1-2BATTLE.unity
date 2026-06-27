@@ -15200,7 +15200,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AIController: {fileID: 1713777227}
   PlayerController: {fileID: 1713777229}
-  camera: {fileID: 0}
+  cameraController: {fileID: 0}
   buffManager: {fileID: 1713777230}
   skillManager: {fileID: 0}
   spriteManager: {fileID: 0}
@@ -15209,6 +15209,8 @@ MonoBehaviour:
   tipTextManager: {fileID: 0}
   moveManager: {fileID: 0}
   battleDialogueManager: {fileID: 0}
+  characterSkillManager: {fileID: 0}
+  orderManager: {fileID: 0}
   pieceDataListSO: {fileID: 0}
   areaList: []
   finishDrop: {fileID: 0}
@@ -15353,7 +15355,6 @@ MonoBehaviour:
   endTurnButton: {fileID: 0}
   infoBox: {fileID: 797644601}
   burstButton: {fileID: 588414090}
-  burstBtnImage: {fileID: 0}
   teamPanel: {fileID: 208797652}
   pieceInfoPanel: {fileID: 0}
   restartButton: {fileID: 0}
@@ -15373,6 +15374,8 @@ MonoBehaviour:
   burstEnd: {fileID: 0}
   skillTooltipUI: {fileID: 0}
   skipButton: {fileID: 0}
+  checkSuccess: {fileID: 0}
+  checkFail: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20728,15 +20731,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7751152476857923051, guid: a2573e13303c0f9438df1c7a2451c183, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -18.12
+      value: -11.14
       objectReference: {fileID: 0}
     - target: {fileID: 7751152476857923051, guid: a2573e13303c0f9438df1c7a2451c183, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 11.90688
       objectReference: {fileID: 0}
     - target: {fileID: 7751152476857923051, guid: a2573e13303c0f9438df1c7a2451c183, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 38.8
+      value: 31.58
       objectReference: {fileID: 0}
     - target: {fileID: 7751152476857923051, guid: a2573e13303c0f9438df1c7a2451c183, type: 3}
       propertyPath: m_LocalRotation.w
