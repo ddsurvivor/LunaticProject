@@ -169,7 +169,7 @@ MonoBehaviour:
       Data: 2
     - Name: rate
       Entry: 3
-      Data: 100
+      Data: 10
     - Name: target
       Entry: 3
       Data: 1
@@ -1019,19 +1019,7 @@ MonoBehaviour:
         mscorlib
     - Name: 
       Entry: 12
-      Data: 1
-    - Name: 
-      Entry: 7
-      Data: 45|HitBackEffect, Assembly-CSharp
-    - Name: dis
-      Entry: 4
-      Data: 5
-    - Name: hitBackDamage
-      Entry: 3
-      Data: 10
-    - Name: 
-      Entry: 8
-      Data: 
+      Data: 0
     - Name: 
       Entry: 13
       Data: 
@@ -1043,7 +1031,7 @@ MonoBehaviour:
       Data: 
     - Name: rangedAtk
       Entry: 7
-      Data: 46|SkillPack, Assembly-CSharp
+      Data: 45|SkillPack, Assembly-CSharp
     - Name: skillName
       Entry: 1
       Data: 
@@ -1085,17 +1073,17 @@ MonoBehaviour:
       Data: 0
     - Name: attackPacks
       Entry: 7
-      Data: 47|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+      Data: 46|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 48|AttackPack, Assembly-CSharp
+      Data: 47|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
-      Data: 18
+      Data: 16
     - Name: damageType
       Entry: 3
       Data: 2
@@ -1116,13 +1104,13 @@ MonoBehaviour:
       Data: 0
     - Name: buffPacks
       Entry: 7
-      Data: 49|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+      Data: 48|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 1
     - Name: 
       Entry: 7
-      Data: 50|BuffPack, Assembly-CSharp
+      Data: 49|BuffPack, Assembly-CSharp
     - Name: buffType
       Entry: 3
       Data: 104
@@ -1146,7 +1134,7 @@ MonoBehaviour:
       Data: 
     - Name: skillEffects
       Entry: 7
-      Data: 51|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+      Data: 50|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -1162,7 +1150,7 @@ MonoBehaviour:
       Data: 1
     - Name: consumeItems
       Entry: 7
-      Data: 52|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+      Data: 51|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -1186,11 +1174,23 @@ MonoBehaviour:
       Data: false
     - Name: additionalEffects
       Entry: 7
-      Data: 53|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
+      Data: 52|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
-      Data: 0
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 53|HitBackEffect, Assembly-CSharp
+    - Name: dis
+      Entry: 4
+      Data: 5
+    - Name: hitBackDamage
+      Entry: 3
+      Data: 10
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: 
       Entry: 13
       Data: 
@@ -3075,7 +3075,7 @@ MonoBehaviour:
       Data: 2
     - Name: rangeValue
       Entry: 4
-      Data: 9
+      Data: 13
     - Name: rangeAgle
       Entry: 4
       Data: 150
@@ -3264,7 +3264,7 @@ MonoBehaviour:
       Data: 6
     - Name: hitBackDamage
       Entry: 3
-      Data: 18
+      Data: 13
     - Name: 
       Entry: 8
       Data: 
@@ -4276,7 +4276,7 @@ MonoBehaviour:
       Data: 189|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
-      Data: 21
+      Data: 19
     - Name: damageType
       Entry: 3
       Data: 2
@@ -5170,7 +5170,7 @@ MonoBehaviour:
       Data: 227|AttackPack, Assembly-CSharp
     - Name: damage
       Entry: 3
-      Data: 28
+      Data: 25
     - Name: damageType
       Entry: 3
       Data: 2
@@ -11612,7 +11612,7 @@ MonoBehaviour:
       buffPacks:
       - buffType: 105
         stacks: 2
-        rate: 100
+        rate: 10
         target: 1
       skillEffects: 
       skillSound: {fileID: 8300000, guid: 9c7d7f119505acd4cb1de09a4602c546, type: 3}
@@ -11756,7 +11756,7 @@ MonoBehaviour:
       isRotate: 1
       bulletVFXType: 0
       attackPacks:
-      - damage: 18
+      - damage: 16
         damageType: 2
         isCritical: 0
       atkTimes: 0
@@ -12047,7 +12047,7 @@ MonoBehaviour:
       mpCost: 3
       target: 6
       rangeType: 2
-      rangeValue: 9
+      rangeValue: 13
       rangeAgle: 150
       explodeRadius: 0
       arcWeight: 0
@@ -12244,7 +12244,7 @@ MonoBehaviour:
       isRotate: 0
       bulletVFXType: 0
       attackPacks:
-      - damage: 21
+      - damage: 19
         damageType: 2
         isCritical: 0
       atkTimes: 0
@@ -12390,7 +12390,7 @@ MonoBehaviour:
       - damage: 12
         damageType: 1
         isCritical: 0
-      - damage: 28
+      - damage: 25
         damageType: 2
         isCritical: 0
       atkTimes: 0
