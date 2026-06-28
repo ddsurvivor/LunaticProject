@@ -98,7 +98,7 @@ public class EnemyController : PieceController
         }
 
         // 延迟0.3f
-        DOVirtual.DelayedCall(0.3f, () =>
+        DOVirtual.DelayedCall(0.6f, () =>
         {
             if (targets == null || targets.Count == 0) return;
             Debug.Log($"技能命中数量{targets.Count}");
@@ -145,7 +145,7 @@ public class EnemyController : PieceController
         }
 
         // 延迟0.3f
-        DOVirtual.DelayedCall(0.3f, () =>
+        DOVirtual.DelayedCall(0.6f, () =>
         {
             if (targets.Count == 0) return;
             Debug.Log($"攻击命中数量{targets.Count}");

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI; // 使用旧版 UI 组件
 using UnityEngine.SceneManagement;
@@ -7,7 +8,10 @@ using UnityEngine.SceneManagement;
 {
     //public static BattleTransitionManager Instance { get; private set; }
 
-    [Header("UI 元素引用")]
+    [Header("UI 元素引用")] 
+    [SerializeField]
+    private Image backgroundImage;
+    [SerializeField]private List<Sprite> images = new();
     [Tooltip("用于控制黑屏渐变的面版，建议挂载 CanvasGroup 组件")]
     [SerializeField] private CanvasGroup fadeCanvasGroup;
     [Tooltip("整个加载界面的根节点 GameObject")]
@@ -17,6 +21,7 @@ using UnityEngine.SceneManagement;
 
     [SerializeField]
     private Image progressBar2;
+
     [Tooltip("提示文本或百分比文本（使用旧版 Text）")]
     [SerializeField] private Text progressText;
 
@@ -25,12 +30,12 @@ using UnityEngine.SceneManagement;
     [SerializeField] private float fadeDuration = 1.0f;
     [Tooltip("手动的假加载持续时间（秒）")]
     [SerializeField] private float fakeLoadingDuration = 2.0f;
+    
+    
 
     private void Awake()
     {
-        
         InitUIState();
-        
     }
 
     /// <summary>
@@ -48,6 +53,7 @@ using UnityEngine.SceneManagement;
     /// <param name="battleSceneName">目标战斗场景的名称</param>
     public void TransitionToBattle(string battleSceneName)
     {
+        if(images.Count>0) backgroundImage.sprite = images[Random.Range(0, images.Count)];// 随机选择一张背景图
         StartCoroutine(TransitionRoutine(battleSceneName));
     }
     public void TransitionEndBattle(string battleSceneName, string endLog)

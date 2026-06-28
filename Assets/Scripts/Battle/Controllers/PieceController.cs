@@ -483,7 +483,7 @@ public class PieceController : MonoBehaviour
             }
         }
         // 延迟0.3f
-        DOVirtual.DelayedCall(0.3f
+        DOVirtual.DelayedCall(0.6f
             , () =>
             {
                 //if (!unitAttrCenter.CostMP()) return;
@@ -560,7 +560,7 @@ public class PieceController : MonoBehaviour
             }
         }
         // 延迟0.3f
-        DOVirtual.DelayedCall(0.3f
+        DOVirtual.DelayedCall(0.6f
             , () =>
             {
                 if (!unitAttrCenter.CostMP()) return;

@@ -7,6 +7,8 @@ public class KeyPanel : MonoBehaviour
     public KeyCode keyCode;
 
     public GameObject panel;
+
+    public UIPanel uiPanel;
     // Start is called before the first frame update
     void Start()
     {
@@ -18,7 +20,8 @@ public class KeyPanel : MonoBehaviour
     {
         if (Input.GetKeyDown(keyCode))
         {
-            panel.SetActive(true);
+            if(panel!=null) panel.SetActive(true);
+            if(uiPanel!= null) uiPanel.ShowPanel();
         }
     }
     
