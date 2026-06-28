@@ -11,7 +11,7 @@ public class TutorialUI : MonoBehaviour
     public Text inforText;
     public Button prevBtn;
     public Button nextBtn;
-    public Button completeBtn;
+    public GameObject completeBtn;
 
     private List<TutorialPage> _pages;
     private int _currentIndex = 0;

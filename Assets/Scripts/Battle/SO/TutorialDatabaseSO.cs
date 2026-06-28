@@ -67,3 +67,14 @@ public class TutorialPage
     [TextArea(4, 12)]
     public string description;
 }
+
+public enum FirstTutorialType
+{
+    [LabelText("无")]
+    None,
+    [LabelText("初次战斗")]FirstBattle,
+    [LabelText("初次聚能")]FirstBurst,
+    [LabelText("初次技能")]FirstSkill,
+    [LabelText("初次获得插件")]FirstComp,
+    [LabelText("初次夹击")]FirstStrick,
+}
