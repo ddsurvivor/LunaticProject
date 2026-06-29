@@ -42,6 +42,47 @@ using UnityEngine.UI;
         UpdateDisplay();
     }
     
+    public void SetPlayer(Player playerData, int pieceId)
+    {
+        if(playerData == null) return;
+        string name = "CG/PC0" + pieceId + "C1";
+        if (pieceId>100)
+        {
+            name = "CG/PC0" + (pieceId-100).ToString() + "01";
+        }
+        head.sprite = Resources.Load<Sprite>(name);
+        pieceName.text = playerData.NAME;
+        // 更新血量
+        float hpPercent = (float)piece.unitAttrCenter.CurHealth / piece.unitAttrCenter.MaxHealth;
+        hpBar.fillAmount = hpPercent;
+        hpNumText.text = piece.unitAttrCenter.CurHealth.ToString();
+        hpMaxText.text = "/" + piece.unitAttrCenter.MaxHealth.ToString();
+        // 更新魔法值图标
+        int curMP = piece.unitAttrCenter.CurMovePoint;
+        mpNumText.text = curMP.ToString();
+        mpMaxText.text = "/" + piece.unitAttrCenter.MaxMovePoint.ToString();
+        /*for (int i = 0; i < mpIcons.Count; i++)
+        {
+            if (i < curMP)
+            {
+                mpIcons[i].SetActive(true);
+            }
+            else
+            {
+                mpIcons[i].SetActive(false);
+            }
+        }*/
+        int curMana = piece.unitAttrCenter.ManaPoint;
+        manaNumText.text = curMana.ToString();
+        manaMaxText.text = "/" + piece.unitAttrCenter.MaxManaPoint.ToString();
+        float manaPercent = (float)curMana / piece.unitAttrCenter.MaxManaPoint;
+        manaBar.fillAmount = manaPercent;
+        
+        int ammo = piece.unitAttrCenter.AmmoCount;
+        ammoNumText.text = ammo.ToString();
+        ammoBar.fillAmount = (float)ammo / piece.unitAttrCenter.MaxAmmoCount;
+    }
+    
     public override void UpdateDisplay()
     {
         if(piece == null) return;

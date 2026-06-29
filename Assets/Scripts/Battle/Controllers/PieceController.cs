@@ -86,7 +86,7 @@ public class PieceController : MonoBehaviour
     public bool ableMove = true; // 是否能移动
     public bool deadNotDelete = false; // 死亡后不删除，用于剧情需要
 
-    public bool ableStrick;// 已经触发过夹击
+    public bool ableStrick;// 能否触发夹击
     
     [FoldoutGroup("事件")] public UnityEvent OnInit;
     [FoldoutGroup("事件")] public UnityEvent OnTurnStart;
@@ -109,7 +109,7 @@ public class PieceController : MonoBehaviour
             //availableActions.Add(ActionType.重新装填); // 装填
             availableActions.Add(ActionType.技能); // 技能
             availableActions.Add(ActionType.道具);
-            availableActions.Add(ActionType.指令);
+            availableActions.Add(ActionType.警戒指令);
         }
 
         //Debug.Log(_pieceDisplay.name);
@@ -416,6 +416,11 @@ public class PieceController : MonoBehaviour
         }
     }*/
 
+    /// <summary>
+    /// 夹击和警戒专用，直接发动普通攻击
+    /// </summary>
+    /// <param name="pieceController"></param>
+    /// <param name="range"></param>
     public void CastNormalAttack(PieceController pieceController, bool range = false)
     {
         _curAttackPack = range? _pieceData.rangedAtk : _pieceData.meleeAtk;
@@ -447,7 +452,7 @@ public class PieceController : MonoBehaviour
         }
 
 
-        // // 聚能充能
+        // // 不进行聚能充能
         // if (isPlayerPiece)
         // {
         //     if (!BattleScene.Ins.BM.PlayerController.isBursting)

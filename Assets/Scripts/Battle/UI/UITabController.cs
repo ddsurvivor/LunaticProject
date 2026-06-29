@@ -63,7 +63,7 @@ public class UITabController : MonoBehaviour
         // 边界安全检查
         if (targetIndex < 0 || targetIndex >= tabs.Count) return;
         // 如果点的已经是当前页，且不是强制初始化，则无视
-        if (targetIndex == currentSelectedIndex && !isImmediate) return;
+        //if (targetIndex == currentSelectedIndex && !isImmediate) return;
 
         currentSelectedIndex = targetIndex;
 

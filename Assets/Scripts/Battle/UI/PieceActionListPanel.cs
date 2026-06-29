@@ -329,7 +329,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             case ActionType.交互:
                 pc.PlayAudio(actionType);
                 break;
-            case ActionType.指令:
+            case ActionType.警戒指令:
                 OpenCommandPanel();
                 return;
                 break;
@@ -417,6 +417,18 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                     gameObject.SetActive(false);
                     pc.UseItem(itemData);
                 });
+                
+                HoverScale hoverScale = skillButtons[j].GetComponent<HoverScale>();
+                hoverScale.onHoverEnter.RemoveAllListeners();
+                hoverScale.onHoverExit.RemoveAllListeners();
+                hoverScale.onHoverEnter.AddListener(() =>
+                {
+                    BattleScene.Ins.UM.skillTooltipUI.ShowItemTip(itemData);
+                });
+                hoverScale.onHoverExit.AddListener(() =>
+                {
+                    BattleScene.Ins.UM.skillTooltipUI.HideTooltip();
+                });
             }
         }
         
@@ -445,6 +457,10 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 // 进行警戒功能
                 pc.StartOrderGraud(pc.pieceData.orderProfiles[index]);
             });
+            
+            HoverScale hoverScale = skillButtons[index].GetComponent<HoverScale>();
+            hoverScale.onHoverEnter.RemoveAllListeners();
+            hoverScale.onHoverExit.RemoveAllListeners();
         }
         PlayShowAnimation(targetsToAnimate);
     }

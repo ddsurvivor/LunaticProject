@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
@@ -9,14 +10,14 @@ public class CharacterUIPage : UIPanel
 {
     public Player player;
     private int unitID;
-    public Text nameText;
+    
     public Text skillPointNumText;
-    public Image avatarImage;
-    public Image weaponImage;
+    
     public UIDetailPanel detailPanel;
     public GameObject applyBtn;
     public GameObject resetBtn;
 
+    public Image weaponImage;
     [Header("Pre-placed UI Slots")]
     // 在 Inspector 里手动拖入 3 个固定格子
     public List<UIItemSlot> normalUISlots = new List<UIItemSlot>();
@@ -40,11 +41,19 @@ public class CharacterUIPage : UIPanel
     //public SkillPointPanel skillPointPanel;
     private int tempPoints;
     private PieceData pieceData;
+    
+    public CharactorPanel charactorPanel;
+
+    private void Start()
+    {
+        ShowPanel(charactorPanel.player, charactorPanel.unitID);
+    }
 
     public void ShowPanel(Player player, int unitID)
     {
         this.player = player;
         this.unitID = unitID;
+        // TODO: 这里可以根据 player数据 获取对应的 PieceData
         pieceData = GM.Ins.DM.pieceDataListSO.GetPieceData(unitID);
         RefreshUI();
         Open();
@@ -120,33 +129,33 @@ public class CharacterUIPage : UIPanel
 
     public void RefreshUI()
     {
-        avatarImage.sprite = Resources.Load<Sprite>("CG/" + player.spriteName);
-        weaponImage.sprite = pieceData.weaponIcon;
-        nameText.text = player.NAME;
-
-        // 1. 刷新普通装备槽
-        for (int i = 0; i < normalUISlots.Count; i++)
-        {
-            int id = (i < player.normalSlots.Length) ? player.normalSlots[i] : 0;
-            normalUISlots[i].Init(id, this);
-        }
-
-        // 2. 刷新武器装备槽
-        for (int i = 0; i < weaponUISlots.Count; i++)
-        {
-            int id = (i < player.weaponSlots.Length) ? player.weaponSlots[i] : 0;
-            weaponUISlots[i].Init(id, this);
-        }
-
-        // 3. 刷新插件背包 (预置格子循环利用)
-        for (int i = 0; i < plugsUISlots.Count; i++)
-        {
-            // 如果玩家背包里的物品数量超过了预设格数，这里会截断（建议预设足够多）
-            int id = (i < GM.Ins.PLAYERPROFILE.componentInventory.Count)
-                ? GM.Ins.PLAYERPROFILE.componentInventory[i]
-                : 0;
-            plugsUISlots[i].Init(id, this);
-        }
+        //avatarImage.sprite = Resources.Load<Sprite>("CG/" + player.spriteName);
+        // weaponImage.sprite = pieceData.weaponIcon;
+        // //nameText.text = player.NAME;
+        //
+        // // 1. 刷新普通装备槽
+        // for (int i = 0; i < normalUISlots.Count; i++)
+        // {
+        //     int id = (i < player.normalSlots.Length) ? player.normalSlots[i] : 0;
+        //     normalUISlots[i].Init(id, this);
+        // }
+        //
+        // // 2. 刷新武器装备槽
+        // for (int i = 0; i < weaponUISlots.Count; i++)
+        // {
+        //     int id = (i < player.weaponSlots.Length) ? player.weaponSlots[i] : 0;
+        //     weaponUISlots[i].Init(id, this);
+        // }
+        //
+        // // 3. 刷新插件背包 (预置格子循环利用)
+        // for (int i = 0; i < plugsUISlots.Count; i++)
+        // {
+        //     // 如果玩家背包里的物品数量超过了预设格数，这里会截断（建议预设足够多）
+        //     int id = (i < GM.Ins.PLAYERPROFILE.componentInventory.Count)
+        //         ? GM.Ins.PLAYERPROFILE.componentInventory[i]
+        //         : 0;
+        //     plugsUISlots[i].Init(id, this);
+        // }
 
         // 1. 获取玩家原始背包数据
         List<ItemPack> rawPacks = GM.Ins.PLAYERPROFILE.itemPacks;
@@ -191,6 +200,7 @@ public class CharacterUIPage : UIPanel
             , pieceData.critRate + (player.AccessAttribute(3, AttrOp.Get) +
                                     player.AccessAttribute(4, AttrOp.Get)) * 2, 100);
         battleRowList[4].UpdateInfo("对抗", (int)(player.AccessAttribute(4, AttrOp.Get) * 0.5f), 100);
+        
     }
 
     void InitPanel()
@@ -233,33 +243,9 @@ public class CharacterUIPage : UIPanel
         resetBtn.SetActive(tempPoints > 0);
     }
 
-    public void ShowDetail(int id, Vector3 pos)
-    {
-        detailPanel.gameObject.SetActive(true);
-        // 3. 设定基础偏移量
-        float offsetX = 220f;
+    
 
-        // 4. 边界判定逻辑：
-        // 如果 点击位置 + 偏移量 + 面板一半宽度 > 屏幕宽度，说明右边放不下了
-        if (pos.x + offsetX + 100f > 1920f)
-        {
-            offsetX = -220f;
-        }
-
-        detailPanel.transform.position = pos + new Vector3(offsetX, 0, 0);
-        detailPanel.Setup(id, this);
-    }
-
-    public bool CheckIsEquipped(int id)
-    {
-        foreach (int i in player.normalSlots)
-            if (i == id)
-                return true;
-        foreach (int i in player.weaponSlots)
-            if (i == id)
-                return true;
-        return false;
-    }
+    
 
     public void OnClickSkillPoints()
     {

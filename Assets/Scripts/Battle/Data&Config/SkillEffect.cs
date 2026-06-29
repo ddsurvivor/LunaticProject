@@ -46,7 +46,6 @@ public class ShootFxEffect : SkillEffectBase
         {
             fx.transform.rotation = Quaternion.identity;
         }
-        
     }
 }
 
@@ -69,8 +68,14 @@ public class SummonEffect : SkillEffectBase
     [LabelText("召唤棋子编号")]
     public int summonPieceId;
 
-    public void ApplyEffect(Vector3 pos)
+    public void ApplyEffect(Vector3 pos, PlayerController summoner)
     {
         // 在指定地点生成召唤棋子，并且初始化
+        PieceController summonPiece = ObjectPool.Ins.GenerateObject(ItemType.BulletFx, pos, Quaternion.identity)
+            ?.GetComponent<PieceController>();
+        if(summonPiece== null) return;
+        PieceData pieceData = BattleScene.Ins.BM.pieceDataListSO.GetPieceData(summonPieceId);
+        summonPiece.Init(summoner, pieceData);
+        summoner.pieces.Add(summonPiece);// 将召唤的棋子加入召唤者的棋子列表
     }
 }

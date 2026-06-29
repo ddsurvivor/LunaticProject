@@ -22,8 +22,10 @@ public class CharacterUnitUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     [SerializeField] private List<DetailAttributeRow> cachedRows = new List<DetailAttributeRow>();
 
-    public SkillPointPanel skillPointPanel;
+    //public SkillPointPanel skillPointPanel;
     public CharacterUIPage characterUIPage;
+    public CharactorPanel charactorPanel;
+    public GameObject unitPanel;
 
     void OnEnable()
     {
@@ -86,7 +88,9 @@ public class CharacterUnitUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     {
         // 打开技能面板
         //skillPointPanel.ShowPanel(unitID);
+        unitPanel.SetActive(false);
         characterUIPage.ShowPanel(playerData, unitID+1);
+        charactorPanel.SetPlayer(playerData, unitID+1);
         GM.Ins.AM.PlayAudio(AudioCueType.Click);
     }
 }

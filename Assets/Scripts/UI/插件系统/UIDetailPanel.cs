@@ -9,9 +9,9 @@ public class UIDetailPanel : MonoBehaviour
     public GameObject unequipButton;
 
     private int targetID;
-    private CharacterUIPage mainPage;
+    private WeaponPanel mainPage;
 
-    public void Setup(int id, CharacterUIPage page)
+    public void Setup(int id, WeaponPanel page)
     {
         targetID = id;
         mainPage = page;
@@ -29,14 +29,14 @@ public class UIDetailPanel : MonoBehaviour
 
     public void OnEquipClick()
     {
-        mainPage.player.Equip(targetID);
+        mainPage.charactorPanel.player.Equip(targetID);
         mainPage.RefreshUI();
         gameObject.SetActive(false);
     }
 
     public void OnUnequipClick()
     {
-        mainPage.player.Unequip(targetID);
+        mainPage.charactorPanel.player.Unequip(targetID);
         mainPage.RefreshUI();
         gameObject.SetActive(false);
     }

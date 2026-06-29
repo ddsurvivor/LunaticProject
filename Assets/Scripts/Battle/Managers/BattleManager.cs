@@ -8,6 +8,7 @@ using JetBrains.Annotations;
 using Sirenix.OdinInspector;
 using SkillSystem;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
@@ -131,6 +132,7 @@ public class BattleManager : MonoBehaviour
         PlayerController.TurnStart();
         BattleScene.Ins.UM.endTurnButton.enabled = true;
         BattleScene.Ins.UM.ShowTurnChange(true);
+        orderManager.ClearAll(true); //取消所有警戒状态
         //BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家回合");
         _turnNumber++;
         battleDialogueManager.TriggerTurnNumStart(_turnNumber);
@@ -440,10 +442,11 @@ public class BattleManager : MonoBehaviour
             ApplyAddEffect(skillPack, attacker, target, targetPos);
             if (attacker.player != null && attacker.player.isBursting) // 聚能状态下所有攻击附加击退效果
             {
+                SpaceBombEffect(skillPack, attacker, target, targetPos, true); // 去除假死
+                // 如果没有击退效果则添加默认击退效果，如果有击退效果则不添加
                 if (skillPack.additionalEffects == null ||
                     !skillPack.additionalEffects.Any(e => e is HitBackEffect))
                 {
-                    SpaceBombEffect(skillPack, attacker, target, targetPos, true); // 去除假死
                     // 击退距离为默认值加上每10点伤害增加0.5f
                     float dis = 1f + damageInfos.Sum(d => d.damageValue) / 10f * 0.5f;
                     HitBackEffect(
@@ -454,9 +457,9 @@ public class BattleManager : MonoBehaviour
                         }, attacker, target, targetPos);
                 }
             }
-            
+
             // 判定夹击
-            CheckFlankAttack( attacker, target);
+            CheckFlankAttack(attacker, target);
         }
 
         // 操作记录系统
@@ -641,7 +644,8 @@ public class BattleManager : MonoBehaviour
             {
                 case SkillEffect.Blink:
                     // TODO: 优化为移动
-                    moveManager.TeleportPawnSuccess(caster.gameObject, targetPos+ new Vector3(-1.5f, 0, -1.5f));
+                    moveManager.TeleportPawnSuccess(caster.gameObject
+                        , targetPos + new Vector3(-1.5f, 0, -1.5f));
                     /*caster.transform.position =
                         targetPos + new Vector3(-1.5f, 0, -1.5f);*/
                     break;
@@ -687,6 +691,9 @@ public class BattleManager : MonoBehaviour
                 case SelfExplosionEffect selfExplosionEffect:
                     selfExplosionEffect.ApplyEffect(caster);
                     break;
+                case SummonEffect summonEffect:
+                    summonEffect.ApplyEffect(targetPos, caster.player);
+                    break;
                 default:
                     break;
             }
@@ -727,6 +734,99 @@ public class BattleManager : MonoBehaviour
                     moveResult.HitPieces.Add(target);
 
                 TriggerCollisionDamage(moveResult.HitPieces, hitBackEffect.hitBackDamage);
+            }
+        });
+    }
+
+
+    /// <summary>
+    /// 【NavMesh优化版】击退效果
+    /// </summary>
+    private void HitBackEffect2(HitBackEffect hitBackEffect, PieceController caster = null,
+        PieceController target = null, Vector3 targetPos = default)
+    {
+        if (target == null || target.ableMove == false) return;
+
+        // 获取目标棋子的 NavMeshAgent
+        NavMeshAgent agent = target.GetComponent<NavMeshAgent>();
+
+        // 计算击退方向
+        Vector3 dir = (target.transform.position - caster.transform.position);
+        dir.y = 0;
+        dir.Normalize();
+
+        // 理论上的理想击退终点
+        Vector3 desiredEndPos = target.transform.position + dir * hitBackEffect.dis;
+
+        Vector3 finalPos = desiredEndPos;
+        bool hitWall = false;
+
+        // =================【核心优化：NavMesh 环境碰撞拦截】=================
+        // NavMesh.Raycast 会沿着网格表面“扫射”，如果中途遇到烘焙的边缘/墙体，会返回 true
+        if (NavMesh.Raycast(target.transform.position, desiredEndPos, out NavMeshHit navHit
+                , NavMesh.AllAreas))
+        {
+            // 预撞墙！将终点精准截断在墙面边缘
+            finalPos = navHit.position;
+            hitWall = true;
+        }
+        else
+        {
+            // 如果没撞墙，为了保险起见（防止终点稍微悬空），在终点处向下安全采样一次网格点
+            if (NavMesh.SamplePosition(desiredEndPos, out NavMeshHit sampleHit, 1.0f
+                    , NavMesh.AllAreas))
+            {
+                finalPos = sampleHit.position;
+            }
+        }
+
+        // =================【核心优化：与原有角色碰撞算法融合】=================
+        // 此时根据 NavMesh 算出的安全距离，重新限制你原本的角色间寻路/碰撞算法
+        float allowedDis = Vector3.Distance(target.transform.position, finalPos);
+        MoveResult moveResult = CalculateValidMovePos(target.transform.position, dir, allowedDis
+            , target.gameObject);
+
+        // 最终位置取双重保险：谁近听谁的（防止穿墙，也防止穿人）
+        if (Vector3.Distance(target.transform.position, moveResult.FinalPosition) < allowedDis)
+        {
+            finalPos = moveResult.FinalPosition;
+        }
+
+        // 综合碰撞判定：撞了烘焙墙体 OR 撞了其他角色棋子
+        bool isCollided = hitWall || moveResult.IsCollided;
+
+        // =================【核心优化：防止 Agent 与 Tween 打架】=================
+        // 在用 DOTween 强行平移前，必须关闭 Agent 避障与定位，否则会发生剧烈抖动或无法位移
+        if (agent != null)
+        {
+            agent.enabled = false;
+        }
+
+        // 锁定Y轴，防止击退造成高度偏差
+        finalPos.y = target.transform.position.y;
+
+        // 执行位移
+        target.transform.DOMove(finalPos, 0.2f).SetEase(Ease.OutQuad).OnComplete(() =>
+        {
+            // =================【核心优化：位移结束同步网格】=================
+            if (agent != null)
+            {
+                agent.enabled = true;
+                // 核心关键：使用 Warp 强行将 Agent 的内部坐标刷新到当前物理坐标，彻底根治“退回原点”Bug
+                agent.Warp(finalPos);
+            }
+
+            if (isCollided)
+            {
+                // 初始化或获取伤害列表
+                var hitPieces = moveResult.HitPieces ??
+                                new System.Collections.Generic.List<PieceController>();
+
+                // 将自身加入伤害列表，处理碰撞反馈
+                if (!hitPieces.Contains(target))
+                    hitPieces.Add(target);
+
+                TriggerCollisionDamage(hitPieces, hitBackEffect.hitBackDamage);
             }
         });
     }
@@ -1139,6 +1239,7 @@ public class BattleManager : MonoBehaviour
 
     // ===== 夹击判定 ========== //
     private bool _isFlankAttacking = false; // 防重入锁：标记当前是否正在执行夹击结算
+
     /// <summary>
     /// 夹击判定：当目标受到攻击后，检查攻击者的队友是否也能触及该目标，若满足则触发协同普攻
     /// </summary>
@@ -1163,7 +1264,7 @@ public class BattleManager : MonoBehaviour
             // 排除：自身、空引用、已死亡的队友
             if (partner == attacker || partner == null ||
                 partner.unitAttrCenter.CurHealth <= 0) continue;
-            if(!partner.ableStrick) continue;// 排除：无法夹击的队友
+            if (!partner.ableStrick) continue; // 排除：无法夹击的队友
 
             // 如果是敌方单位，还需确保其已激活
             if (partner is EnemyController enemy && !enemy.isActived) continue;
@@ -1206,17 +1307,18 @@ public class BattleManager : MonoBehaviour
                     // 触发协同普攻
                     if (closestPartner.isPlayerPiece)
                     {
-                        //closestPartner.StartNormalAttack();
-                        Debug.Log($"【协同普攻】{closestPartner.pieceData.pieceName} 对 {target.pieceData.pieceName} 发动协同普攻！");
+                        Debug.Log(
+                            $"【协同普攻】{closestPartner.pieceData.pieceName} 对 {target.pieceData.pieceName} 发动协同普攻！");
                         closestPartner.CastNormalAttack(target);
+                        closestPartner.ableStrick = false;
                     }
                     else
                     {
                         closestPartner.StartNormalAttack();
                         ((EnemyController)closestPartner).CastAttackOnTarget(target);
+                        closestPartner.ableStrick = false;
                     }
                 });
-                    
             }
             catch (Exception e)
             {
@@ -1224,10 +1326,7 @@ public class BattleManager : MonoBehaviour
             }
             finally
             {
-                DOVirtual.DelayedCall(1f, () =>
-                {
-                    _isFlankAttacking = false;
-                });
+                DOVirtual.DelayedCall(1f, () => { _isFlankAttacking = false; });
             }
         }
     }

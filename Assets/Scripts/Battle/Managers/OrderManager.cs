@@ -22,8 +22,7 @@ public class OrderManager : MonoBehaviour
         // 3. 玩家确认方向后:
         UnitOrderState unitOrderState = new UnitOrderState()
         {
-            guard = unit, 
-            profile = orderProfile,
+            guard = unit, profile = orderProfile,
             // 方向根据范围指示器
             remainingTriggers = orderProfile.maxTriggerCount
             ,
@@ -125,20 +124,45 @@ public class OrderManager : MonoBehaviour
     // 判断targetPos是否同时满足"距离<=半径"和"夹角<=半张角"
     private bool IsInsideSector(UnitOrderState state, Vector3 targetWorldPos)
     {
-        Vector2 toTarget = (Vector2)(targetWorldPos - state.guard.transform.position);
+        // 1. 获取扇形参数
+        float halfAngle = state.profile.sectorAngleDeg / 2f;
+        float range = state.profile.sectorRadius;
+        Vector3 origin = state.guard.transform.position;
+        Vector3 forward = state.guard.rangeUI.fanRoot.transform.forward;
+
+
+        Vector3 dir = (targetWorldPos - origin);
+        dir.y = 0; // 忽略y轴
+        if (dir.magnitude > range || dir.magnitude < 1f) return false; // 超出半径
+
+        float angle = Vector3.Angle(forward, dir);
+        if (angle <= halfAngle)
+        {
+            return true; // 在扇形内
+        }
+        else
+        {
+            return false; // 不在扇形内
+        }
+        /*Vector2 toTarget = (Vector2)(targetWorldPos - state.guard.transform.position);
         float dist = toTarget.magnitude;
         if (dist > state.profile.sectorRadius) return false;
         
         float angleToTarget = Vector2.Angle(state.facingDir, toTarget);
-        return angleToTarget <= state.profile.sectorAngleDeg * 0.5f;
+        return angleToTarget <= state.profile.sectorAngleDeg * 0.5f;*/
     }
 
-    public void ClearAll()
+    /// <summary>
+    /// 关闭所有警戒
+    /// </summary>
+    public void ClearAll(bool isPlayer)
     {
-        foreach (var activeOrder in activeOrders)
+        for (var i = activeOrders.Count - 1; i >= 0; i--)
         {
-            DisarmOrder(activeOrder);
+            var activeOrder = activeOrders[i];
+            if (activeOrder.guard.isPlayerPiece) DisarmOrder(activeOrder);
         }
+
         activeOrders.Clear();
     }
 }

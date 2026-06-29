@@ -21,7 +21,7 @@ public class KeyPanel : MonoBehaviour
         if (Input.GetKeyDown(keyCode))
         {
             if(panel!=null) panel.SetActive(true);
-            if(uiPanel!= null) uiPanel.ShowPanel();
+            if(uiPanel!= null && !uiPanel.gameObject.activeInHierarchy) uiPanel.Open();
         }
     }
     

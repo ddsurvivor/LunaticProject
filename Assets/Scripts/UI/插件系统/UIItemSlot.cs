@@ -9,9 +9,9 @@ public class UIItemSlot : MonoBehaviour, IPointerClickHandler
 {
     public Image iconImage;
     public int currentItemID; // 当前格子存储的ID
-    private CharacterUIPage mainPage;
+    private WeaponPanel mainPage;
 
-    public void Init(int id, CharacterUIPage page)
+    public void Init(int id, WeaponPanel page)
     {
         mainPage = page;
         currentItemID = id;

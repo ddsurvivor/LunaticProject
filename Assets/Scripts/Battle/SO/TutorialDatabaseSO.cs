@@ -70,8 +70,7 @@ public class TutorialPage
 
 public enum FirstTutorialType
 {
-    [LabelText("无")]
-    None,
+    [LabelText("无")] None,
     [LabelText("初次战斗")]FirstBattle,
     [LabelText("初次聚能")]FirstBurst,
     [LabelText("初次技能")]FirstSkill,

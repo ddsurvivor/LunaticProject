@@ -10,6 +10,7 @@ public enum AttrOp { Get=0, Add=1, Set=2,Sub=3 } // 定义操作：读取、累�
 /// </summary>
 public class Player
 {
+    public int pieceId;
     [ShowInInspector]private string name;
     [ShowInInspector]private int hp;
     [ShowInInspector]private int _hpmax;

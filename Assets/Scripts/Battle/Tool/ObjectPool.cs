@@ -94,6 +94,9 @@ public enum ItemType
     
     [LabelText("夹击特效")]
     PincerAttackFx = 51, // 夹击特效
+    
+    [LabelText("召唤无人机")]
+    SUMMON_DRONE = 100, // 召唤无人机
 }
 /// <summary>
 /// 对象池

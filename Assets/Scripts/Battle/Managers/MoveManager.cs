@@ -352,10 +352,10 @@ private void SetOtherAgentsAvoidance(GameObject movingPawn, bool enableAvoidance
         pawnObject.transform.position = safePosition;
 
         // 4. 重新开启 Agent（内部会自动刷新它在 NavMesh 上的采样点）
-        if (agent != null)
+        /*if (agent != null)
         {
             agent.enabled = true;
-        }
+        }*/
 
         return true;
     }

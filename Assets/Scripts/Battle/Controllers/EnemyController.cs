@@ -213,7 +213,7 @@ public class EnemyController : PieceController
         //Debug.Log($"ShowOutline {option} - {_curTargetPc?.name}");
         if (!option)
         {
-            tagetLine.enabled = false;
+            if(tagetLine!=null) tagetLine.enabled = false;
             return;
         }
         /*// 显示攻击目标指示线

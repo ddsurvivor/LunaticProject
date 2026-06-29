@@ -9,6 +9,9 @@ public class SkillTooltipUI : MonoBehaviour
     [SerializeField] private Text nameText;           // 专门显示技能名字的 Text
     [SerializeField] private Text infoText;           // 显示消耗、范围、描述的 Text
 
+    
+    [SerializeField]
+    private Image tooltipImage; // 提示窗口的背景图片组件
     /// <summary>
     /// 显示并更新技能提示信息
     /// </summary>
@@ -75,6 +78,8 @@ public class SkillTooltipUI : MonoBehaviour
         // 3. 赋值给详细信息 Text
         infoText.text = sb.ToString();
 
+        
+        tooltipImage.gameObject.SetActive(false);
         // 4. 显示面板
         this.gameObject.SetActive(true);
     }
@@ -87,5 +92,29 @@ public class SkillTooltipUI : MonoBehaviour
         this.gameObject.SetActive(false);
     }
 
+    public void ShowItemTip(ItemData itemData)
+    {
+        if (itemData == null) return;
+
+        // 1. 设置物品名字
+        nameText.text = itemData.itemName.ToString();
+
+        // 2. 拼接物品详细信息（描述等）
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        
+        sb.AppendLine($"物品标签: {itemData.itemTag.ToString()}");
+        sb.AppendLine($"使用类别: {itemData.useType.ToString()}");
+        sb.AppendLine($"物品描述: {itemData.itemDescription}");
+        
+        // 设置icon
+        tooltipImage.sprite = itemData.itemIcon;
+        tooltipImage.gameObject.SetActive(true);
+        
+        // 3. 赋值给详细信息 Text
+        infoText.text = sb.ToString();
+
+        // 4. 显示面板
+        this.gameObject.SetActive(true);
+    }
     
 }
