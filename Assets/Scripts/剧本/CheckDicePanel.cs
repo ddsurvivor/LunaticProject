@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 
 public class CheckDicePanel : MonoBehaviour
 {
@@ -24,6 +25,9 @@ public class CheckDicePanel : MonoBehaviour
     [Header("骰子UI对象（场景预放置）")] public List<Image> diceImages = new List<Image>();
 
     //public GameObject blur;
+    
+    public Image checkSuccess;// 检定成功
+    public Image checkFail;// 检定失败
 
     public AudioClip rollSound; // 滚动音效
     public AudioClip successSound; // 成功音效
@@ -103,9 +107,29 @@ public class CheckDicePanel : MonoBehaviour
             }
         }
 
-        BattleScene.Ins.UM.ShowCheckResult(isSuccess);
+        if (BattleScene.Ins != null)
+        {
+            BattleScene.Ins.UM.ShowCheckResult(isSuccess);
+        }
+        else
+        {
+            ShowCheckResult(isSuccess);
+        }
         yield return new WaitForSeconds(closeDelay);
         // 关闭界面
         gameObject.SetActive(false);
+    }
+    
+    public void ShowCheckResult(bool success)
+    {
+        // 显示检定结果对应图片，并进行淡入淡出
+        Image img = success ? checkSuccess : checkFail;
+        img.color = new Color(img.color.r, img.color.g, img.color.b, 0);
+        img.gameObject.SetActive(true);
+        Sequence seq = DOTween.Sequence();
+        seq.Append(img.DOFade(1, 0.2f));
+        seq.AppendInterval(1f);
+        seq.Append(img.DOFade(0, 0.5f));
+        seq.OnComplete(() => img.gameObject.SetActive(false));
     }
 }

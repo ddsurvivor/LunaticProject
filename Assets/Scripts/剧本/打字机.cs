@@ -204,6 +204,7 @@ public class 打字机 : MonoBehaviour
     /// </summary>
     public void ShowSelect()
     {
+        _textComponent.GetComponent<Text>().color = Color.white;
         fill.gameObject.SetActive(true);
         fill.sizeDelta = _textComponent.GetComponent<RectTransform>().sizeDelta + new Vector2(20, 20); // 根据文本大小调整背景框
     }
