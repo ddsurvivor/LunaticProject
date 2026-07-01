@@ -9,6 +9,8 @@ public class CharactorPanel : UIPanel
     public PieceData pieceData;
     public Text nameText;
     public Image avatarImage;
+    
+    public PieceInfoPanel pieceInfoPanel;
 
     private void Start()
     {
@@ -24,5 +26,6 @@ public class CharactorPanel : UIPanel
         //RefreshUI();
         avatarImage.sprite = Resources.Load<Sprite>("CG/" + player.spriteName);
         nameText.text = player.NAME;
+        pieceInfoPanel.SetPlayer(player, pieceData);
     }
 }

@@ -984,6 +984,8 @@ public class 剧本System : MonoBehaviour
         大地图System.instance.daytimeSystem.NextDay();
     }
 
+    
+
     // ====== Test ======= //
     [Button("测试Log")]
     public void TestLog(string log)
