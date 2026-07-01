@@ -45,6 +45,7 @@ public static class SkillPackExtension
 
         // 2. 拼接技能详细信息（消耗、范围、描述等）
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        sb.AppendLine($"{skill.description}");
 
         sb.AppendLine($"能量消耗: {skill.mpCost}");
         sb.AppendLine($"作用目标: {(skill.target.ToChinese())}");
@@ -63,7 +64,6 @@ public static class SkillPackExtension
         sb.AppendLine(); // 换行
 
         //sb.AppendLine("---------------------------");
-        sb.AppendLine($"技能描述: {skill.description}");
 
         // 3. 新增：在描述末尾动态追加技能伤害信息
         if (skill.attackPacks != null && skill.attackPacks.Count > 0)

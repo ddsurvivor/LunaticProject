@@ -33,6 +33,7 @@ public class AttrModRow : MonoBehaviour {
         pendingAdd += delta;
         globalPoints -= delta;
         UpdateUI();
+        GM.Ins.AM.PlayAudio(AudioCueType.AddPointButton);
     }
 
     public void ResetRow(ref int globalPoints) {

@@ -14,6 +14,12 @@ public class WeaponPanel : UIPanel
     public CharactorPanel charactorPanel;
     public UIDetailPanel detailPanel;
 
+    public override void UpdateDisplay()
+    {
+        base.UpdateDisplay();
+        RefreshUI();
+    }
+
     public void RefreshUI()
     {
         PieceData pieceData = charactorPanel.pieceData;

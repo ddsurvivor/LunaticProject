@@ -71,9 +71,25 @@ public class UITabController : MonoBehaviour
         for (int i = 0; i < tabs.Count; i++)
         {
             bool isActive = (i == targetIndex);
-            
+
             if (tabs[i].subPage != null)
-                tabs[i].subPage.SetActive(isActive);
+            {
+                if (tabs[i].subPage.GetComponent<UIPanel>() != null)
+                {
+                    if (isActive)
+                    {
+                        tabs[i].subPage.GetComponent<UIPanel>()?.Open();
+                    }
+                    else
+                    {
+                        tabs[i].subPage.GetComponent<UIPanel>()?.Close();
+                    }
+                }
+                else
+                {
+                    tabs[i].subPage.SetActive(isActive);
+                }
+            }
 
             if (tabs[i].tabBgImage != null && activeTabSprite != null && inactiveTabSprite != null)
                 tabs[i].tabBgImage.sprite = isActive ? activeTabSprite : inactiveTabSprite;

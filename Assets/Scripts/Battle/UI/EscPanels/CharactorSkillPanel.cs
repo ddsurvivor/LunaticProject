@@ -9,6 +9,12 @@ public class CharactorSkillPanel : UIPanel
     public List<SkillGroup> passiveSkillGroupList = new List<SkillGroup>();
     public List<SkillGroup> activeSkillGroupList = new List<SkillGroup>();
 
+    public override void UpdateDisplay()
+    {
+        base.UpdateDisplay();
+        RefreshUI();
+    }
+
     public void RefreshUI()
     {
         PieceData pieceData = charactorPanel.pieceData;

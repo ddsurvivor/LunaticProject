@@ -91,7 +91,7 @@ public class CharacterUIPage : UIPanel
         skillPointNumText.text = player.SkillPoints.ToString();
 
 
-        foreach (var group in passiveSkillGroupList)
+        /*foreach (var group in passiveSkillGroupList)
         {
             group.gameObject.SetActive(false);
         }
@@ -123,12 +123,13 @@ public class CharacterUIPage : UIPanel
                 activeSkillGroupList[index].skillTitle.text = VARIABLE.skillName;
                 activeSkillGroupList[index].skillDesc.text = VARIABLE.GetSkillDesc();
             }
-        }
+        }*/
     }
 
 
     public void RefreshUI()
     {
+        Debug.Log($"RefreshUI called for player: {player.NAME}, unitID: {unitID}");
         //avatarImage.sprite = Resources.Load<Sprite>("CG/" + player.spriteName);
         // weaponImage.sprite = pieceData.weaponIcon;
         // //nameText.text = player.NAME;
@@ -270,7 +271,7 @@ public class CharacterUIPage : UIPanel
         // 在这里将修改后的 playerData 结构体存入你的存档系统或全局管理器
         // SaveToDisk(playerData); 
         RefreshUI();
-        InitPanel(); // 重新初始化界面显示，确保数值更新
+        //InitPanel(); // 重新初始化界面显示，确保数值更新
         //ShowPanel(player,unitID); // 刷新主界面显示
         Debug.Log("数据已更新至结构体并触发保存逻辑");
     }
@@ -279,6 +280,7 @@ public class CharacterUIPage : UIPanel
     {
         foreach (var row in rowList) row.ResetRow(ref tempPoints);
         skillPointNumText.text = tempPoints.ToString();
+        //RefreshUI();
         //InitPanel();
     }
 }
