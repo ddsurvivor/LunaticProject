@@ -14,6 +14,7 @@ public class ClickManager : MonoBehaviour
     private Vector3 _dragStartPos; // 拖动起始位置
 
     private bool _isDragging = false;
+    
 
     Vector3 point = Vector3.zero;
 
@@ -27,11 +28,14 @@ public class ClickManager : MonoBehaviour
         // 鼠标左键点击时发射射线检测
         if (Input.GetMouseButtonDown(0))
         {
-            /*// 判定是否点击到UI
-            if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            // 判定是否点击到UI
+            /*if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
             {
+                // 如果点击到的UI是RangUI，则不return
                 return;
             }*/
+            if(BattleScene.Ins.UM.pieceActionListPanel.gameObject.activeInHierarchy)
+            {return;}
 
             if (!_isDragging)
             {

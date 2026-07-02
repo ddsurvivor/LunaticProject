@@ -26,7 +26,7 @@ public class UIManager : SerializedMonoBehaviour
 
     public 剧本System logSystem;
 
-    public MessagePanel messagePanel;
+    //public MessagePanel messagePanel;
     //public ItemGetPanel itemGetPanel;
     public PlayerLogPanel logPanel;
     public BattleFinishPanel battleFinishPanel;

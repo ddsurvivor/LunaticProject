@@ -23,6 +23,22 @@ public class NotificationItem : MonoBehaviour
         panel.ShowPanel(componentData);
         StartSequence(onComplete);
     }
+    public void Initialize(string characterName, string expAmount, System.Action<NotificationItem> onComplete)
+    {
+        gameObject.SetActive(true);
+
+        // 1. 设置文本（例如："阿尔托莉雅 获得了 450 经验值"）
+        // 具体的 UI 组件名请根据你实际的组件替换（比如 titleText, countText 等）
+        panel.itemNameText.text = characterName;
+        panel.itemDescText.text = expAmount; 
+
+        // 2. 如果有图标，可以换成固定的“经验值/星星”图标
+        // itemIcon.sprite = expSprite; 
+
+        // 3. 执行现有的动画及回收逻辑
+        // 比如：StartCoroutine(AnimateAndReturn(onComplete));
+        StartSequence(onComplete);
+    }
 
     private void StartSequence(System.Action<NotificationItem> onComplete)
     {

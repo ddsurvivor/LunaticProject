@@ -91,7 +91,7 @@ public class UIPanel : MonoBehaviour
     {
         if(!_hasInitCheck) InitCheck();
         // 重置
-        canvasGroup.alpha          = 0f;
+        canvasGroup.alpha          = 1f;
         canvasGroup.interactable   = false;
         canvasGroup.blocksRaycasts = false;
         _rt.localScale       = _originalScale * popScaleFactor;
@@ -107,7 +107,7 @@ public class UIPanel : MonoBehaviour
         var seq = DOTween.Sequence();
         seq.Append(_rt.DOScale(_originalScale, T(0.28f)).SetEase(Ease.OutBack));
         seq.Join(_rt.DOAnchorPos(_originalAnchoredPos, T(0.28f)).SetEase(Ease.OutCubic));
-        seq.Join(canvasGroup.DOFade(1f, T(0.28f)));
+        //seq.Join(canvasGroup.DOFade(1f, T(0.28f)));
         yield return seq.WaitForCompletion();
 
         /*// Phase 2 · 所有 Text 子节点依次解码

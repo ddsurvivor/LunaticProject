@@ -44,6 +44,7 @@ public class 大地图System : SerializedMonoBehaviour
     public ItemGetPanel itemGetPanel;
     public MessagePanel messagePanel;
     public BattleStartUIPanel battleStartUIPanel;
+    public NotificationManager notificationManager;
 
     public GameObject blackFront;//黑幕
     public void 失败()

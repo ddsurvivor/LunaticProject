@@ -103,7 +103,7 @@ public class AIController : PlayerController
             }
         }
     }
-    
+
 
     private void EnemyAttack(EnemyController aiPiece, PieceController target)
     {
@@ -149,24 +149,30 @@ public class AIController : PlayerController
         }
         else if (enemyAIType == EnemyAIType.Shoot)
         {
-            if (distanceToTarget <= rangedRange * 0.6f)
+            if (distanceToTarget <= rangedRange)
             {
-                // 如果在远程攻击范围的60%内则逃跑
-                EnemyMove(aiPiece, target.transform.position, rangedRange, true);
-            }
-            else if (distanceToTarget <= rangedRange)
-            {
-                // 判定弹药是否足够
-                if (aiPiece.unitAttrCenter.AmmoCount <= 0)
+                if (aiPiece.unitAttrCenter.CurMovePoint >= 2)// 如果移动点数大于等于2，则优先远程攻击
                 {
-                    // 重新装填
-                    aiPiece.ReloadAmmo();
+                    // 判定弹药是否足够
+                    if (aiPiece.unitAttrCenter.AmmoCount <= 0)
+                    {
+                        // 重新装填
+                        aiPiece.ReloadAmmo();
+                    }
+                    else
+                    {
+                        // 远程攻击
+                        aiPiece.StartNormalAttack(true);
+                        aiPiece.CastAttackOnTarget(target);
+                    }
                 }
                 else
                 {
-                    // 远程攻击
-                    aiPiece.StartNormalAttack(true);
-                    aiPiece.CastAttackOnTarget(target);
+                    if (distanceToTarget <= rangedRange * 0.6f)
+                    {
+                        // 如果在远程攻击范围的60%内则逃跑
+                        EnemyMove(aiPiece, target.transform.position, rangedRange, true);
+                    }
                 }
             }
             else
@@ -306,8 +312,7 @@ public class AIController : PlayerController
         }
     }
 
-    
-    
+
     public void EnemyMove(EnemyController aiPiece, Vector3 targetPos, float range
         , bool leave = false)
     {
@@ -334,14 +339,13 @@ public class AIController : PlayerController
         //     BattleScene.Ins.BM.CalculateValidMovePos(currentPos, mainDir, testDistance
         //         , aiPiece.gameObject, true);
         // float originalDist = Vector3.Distance(currentPos, moveResult.FinalPosition);
-        BattleScene.Ins.BM.moveManager.PreviewMove(aiPiece.gameObject, idealAttackPos, moveRange);
+        bool canMove = BattleScene.Ins.BM.moveManager.PreviewAIMove(aiPiece.gameObject, idealAttackPos, moveRange);
 
         // 5. 最终执行位移
+        if(!canMove) return;
         aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
-        BattleScene.Ins.BM.moveManager.ExecuteMove(aiPiece.gameObject, () =>
-        {
-            aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
-        });
+        BattleScene.Ins.BM.moveManager.ExecuteMove(aiPiece.gameObject
+            , () => { aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle); });
         aiPiece.CheckFace(targetPos - currentPos);
     }
 

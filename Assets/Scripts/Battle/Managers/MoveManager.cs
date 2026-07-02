@@ -44,9 +44,11 @@ public class MoveManager : MonoBehaviour
                     {
                         onReachDestination.Invoke();
                     }
+
                     pathRenderer.gameObject.SetActive(false); // 隐藏路径渲染器
                     ResetPreviewState(); // 重置预览状态，准备下一次使用
-                    BattleScene.Ins.BM.orderManager.OnUnityMoveEnd(agent.GetComponent<PieceController>());
+                    BattleScene.Ins.BM.orderManager.OnUnityMoveEnd(
+                        agent.GetComponent<PieceController>());
                 }
             }
         }
@@ -143,6 +145,76 @@ public class MoveManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 【智能版 AI 专属接口】预测 AI 移动路径（目标点非法时自动贴墙/吸附网格边缘 + 超出范围自动截断）
+    /// </summary>
+    /// <param name="pawnObject">AI 棋子对象</param>
+    /// <param name="targetPosition">AI 企图移动的目标点</param>
+    /// <param name="maxDistance">AI 最大移动范围</param>
+    /// <returns>是否有可达路径。如果返回 false，建议 AI 放弃本次移动</returns>
+    public bool PreviewAIMove(GameObject pawnObject, Vector3 targetPosition, float maxDistance)
+    {
+        if (pawnObject == null || pathRenderer == null) return false;
+
+        NavMeshAgent agent = pawnObject.GetComponent<NavMeshAgent>();
+        if (agent == null || !agent.gameObject.activeInHierarchy) return false;
+
+        Vector3 startPosition = agent.transform.position;
+        Vector3 safeTargetPosition = targetPosition;
+
+        // 1. 边缘阻挡检测：从当前位置向目标点发射导航射线
+        NavMeshHit hit;
+        if (NavMesh.Raycast(startPosition, targetPosition, out hit, NavMesh.AllAreas))
+        {
+            // 射线被阻挡，说明目的地在网格外部或墙内，修正为撞墙的边缘临界点
+            safeTargetPosition = hit.position;
+        }
+
+        // 2. 严谨性兜底：将点垂直吸附到就近的网格表面
+        if (!NavMesh.SamplePosition(safeTargetPosition, out hit, 5.0f, NavMesh.AllAreas))
+        {
+            // 如果方圆 5 米内依然找不到任何网格（比如起点本身非法或掉出地图），直接拦截
+            Debug.LogWarning($"[MoveManager] AI 目标点 {targetPosition} 彻底非法，无法修正到网格边缘。");
+            return false;
+        }
+
+        safeTargetPosition = hit.position;
+
+        // 3. 计算完整的寻路路径
+        // 注意：如果起点和安全终点过近（例如已经贴墙且就在原地），CalculatePath 依旧会返回 true 并生成 1 个 corner
+        if (NavMesh.CalculatePath(startPosition, safeTargetPosition, NavMesh.AllAreas, tempPath))
+        {
+            // 健壮性检查：如果路径状态无效，或者属于不可达的孤岛路径
+            if (tempPath.status == NavMeshPathStatus.PathInvalid || tempPath.corners.Length == 0)
+            {
+                return false;
+            }
+
+            // 激活路径渲染器
+            pathRenderer.gameObject.SetActive(true);
+            float totalPathLength = CalculatePathLength(tempPath);
+
+            // 4. 距离步长判定
+            if (totalPathLength <= maxDistance)
+            {
+                // 情况 A：在行动力范围内，且已经贴墙/到位，正常绘制
+                DrawPath(tempPath);
+                lastValidPreviewPosition = safeTargetPosition;
+            }
+            else
+            {
+                // 情况 B：虽然修正到了边缘，但是边缘距离太远，超出了最大行动力！
+                // 沿着导航折线截取最大距离的点，并进行裁剪渲染
+                Vector3 croppedPoint = DrawAndGetCroppedPath(tempPath, maxDistance);
+                lastValidPreviewPosition = croppedPoint;
+            }
+
+            return true; // 成功找到并规划了有效路径（无论是完整路径还是截断路径）
+        }
+
+        return false; // 寻路计算彻底失败
+    }
+
+    /// <summary>
     /// 核心高效率函数：一边裁剪路径线段，一边直接把坐标喂给 LineRenderer，并返回最终截断点的坐标
     /// </summary>
     private Vector3 DrawAndGetCroppedPath(NavMeshPath path, float maxDistance)
@@ -203,76 +275,80 @@ public class MoveManager : MonoBehaviour
     }
 
     /// <summary>
-/// 【优化版】在棋子真正开始平移前调用，直接让其他静止棋子“隐形”，规避二人转
-/// </summary>
-public void SetupMovementPriorities(GameObject movingPawn)
-{
-    if (movingPawn == null) return;
-
-    // 1. 激活并初始化当前移动棋子的 Agent
-    NavMeshAgent movingAgent = movingPawn.GetComponent<NavMeshAgent>();
-    if (movingAgent != null)
+    /// 【优化版】在棋子真正开始平移前调用，直接让其他静止棋子“隐形”，规避二人转
+    /// </summary>
+    public void SetupMovementPriorities(GameObject movingPawn)
     {
-        movingAgent.enabled = true;
-        movingAgent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
-        movingAgent.avoidancePriority = 99;
-    }
+        if (movingPawn == null) return;
 
-    if (BattleScene.Ins == null || BattleScene.Ins.BM == null) return;
-
-    // 2. 遍历所有棋子，让静止的棋子完全不参与避障计算（变成空气）
-    SetOtherAgentsAvoidance(movingPawn, false);
-}
-
-/// <summary>
-/// 【新增】当移动结束时，恢复全场棋子的基本避障设置
-/// </summary>
-private void RestoreAllMovementPriorities()
-{
-    if (BattleScene.Ins == null || BattleScene.Ins.BM == null) return;
-    
-    // 传入 null 代表没有移动棋子，全场恢复默认
-    SetOtherAgentsAvoidance(null, true);
-}
-
-// 提取的辅助内部方法：用来批量开启/关闭其他棋子的避障
-private void SetOtherAgentsAvoidance(GameObject movingPawn, bool enableAvoidance)
-{
-    var bm = BattleScene.Ins.BM;
-    
-    // 处理玩家棋子
-    if (bm.PlayerController?.pieces != null)
-    {
-        foreach (var piece in bm.PlayerController.pieces)
+        // 1. 激活并初始化当前移动棋子的 Agent
+        NavMeshAgent movingAgent = movingPawn.GetComponent<NavMeshAgent>();
+        if (movingAgent != null)
         {
-            if (piece == null || piece.gameObject == movingPawn) continue;
-            var agent = piece.gameObject.GetComponent<NavMeshAgent>();
-            if (agent != null)
-            {
-                // 如果不参与避障，直接设为 NoAvoidance，杜绝二人转；恢复时设为默认
-                agent.obstacleAvoidanceType = enableAvoidance ? ObstacleAvoidanceType.LowQualityObstacleAvoidance : ObstacleAvoidanceType.NoObstacleAvoidance;
-                agent.avoidancePriority = enableAvoidance ? 50 : 0; 
-            }
+            movingAgent.enabled = true;
+            movingAgent.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+            movingAgent.avoidancePriority = 99;
         }
-    }
 
-    // 处理 AI 棋子
-    if (bm.AIController?.pieces != null)
-    {
-        foreach (var piece in bm.AIController.pieces)
-        {
-            if (piece == null || piece.gameObject == movingPawn) continue;
-            var agent = piece.gameObject.GetComponent<NavMeshAgent>();
-            if (agent != null)
-            {
-                agent.obstacleAvoidanceType = enableAvoidance ? ObstacleAvoidanceType.LowQualityObstacleAvoidance : ObstacleAvoidanceType.NoObstacleAvoidance;
-                agent.avoidancePriority = enableAvoidance ? 50 : 0;
-            }
-        }
+        if (BattleScene.Ins == null || BattleScene.Ins.BM == null) return;
+
+        // 2. 遍历所有棋子，让静止的棋子完全不参与避障计算（变成空气）
+        SetOtherAgentsAvoidance(movingPawn, false);
     }
-}
 
     /// <summary>
+    /// 【新增】当移动结束时，恢复全场棋子的基本避障设置
+    /// </summary>
+    private void RestoreAllMovementPriorities()
+    {
+        if (BattleScene.Ins == null || BattleScene.Ins.BM == null) return;
+
+        // 传入 null 代表没有移动棋子，全场恢复默认
+        SetOtherAgentsAvoidance(null, true);
+    }
+
+// 提取的辅助内部方法：用来批量开启/关闭其他棋子的避障
+    private void SetOtherAgentsAvoidance(GameObject movingPawn, bool enableAvoidance)
+    {
+        var bm = BattleScene.Ins.BM;
+
+        // 处理玩家棋子
+        if (bm.PlayerController?.pieces != null)
+        {
+            foreach (var piece in bm.PlayerController.pieces)
+            {
+                if (piece == null || piece.gameObject == movingPawn) continue;
+                var agent = piece.gameObject.GetComponent<NavMeshAgent>();
+                if (agent != null)
+                {
+                    // 如果不参与避障，直接设为 NoAvoidance，杜绝二人转；恢复时设为默认
+                    agent.obstacleAvoidanceType = enableAvoidance
+                        ? ObstacleAvoidanceType.LowQualityObstacleAvoidance
+                        : ObstacleAvoidanceType.NoObstacleAvoidance;
+                    agent.avoidancePriority = enableAvoidance ? 50 : 0;
+                }
+            }
+        }
+
+        // 处理 AI 棋子
+        if (bm.AIController?.pieces != null)
+        {
+            foreach (var piece in bm.AIController.pieces)
+            {
+                if (piece == null || piece.gameObject == movingPawn) continue;
+                var agent = piece.gameObject.GetComponent<NavMeshAgent>();
+                if (agent != null)
+                {
+                    agent.obstacleAvoidanceType = enableAvoidance
+                        ? ObstacleAvoidanceType.LowQualityObstacleAvoidance
+                        : ObstacleAvoidanceType.NoObstacleAvoidance;
+                    agent.avoidancePriority = enableAvoidance ? 50 : 0;
+                }
+            }
+        }
+    }
+
+    /*/// <summary>
     /// 【公共接口】正式请求移动（此处的计算直接使用最后确认的有效路径，防止漂移）
     /// </summary>
     public float ExecuteMove(GameObject pawnObject, UnityAction onMoveComplete = null)
@@ -281,7 +357,7 @@ private void SetOtherAgentsAvoidance(GameObject movingPawn, bool enableAvoidance
 
         NavMeshAgent agent = pawnObject.GetComponent<NavMeshAgent>();
         if (agent == null) return 0f;
-        
+
         BattleScene.Ins.BM.orderManager.OnUnitMoveStart(pawnObject.GetComponent<PieceController>());
 
         SetupMovementPriorities(pawnObject.gameObject); // 在正式移动前设置权重，确保避障行为正确
@@ -291,6 +367,48 @@ private void SetOtherAgentsAvoidance(GameObject movingPawn, bool enableAvoidance
         // 直接走向最后一次预览成功的有效位置
         if (NavMesh.CalculatePath(agent.transform.position, lastValidPreviewPosition
                 , NavMesh.AllAreas, tempPath))
+        {
+            agent.SetPath(tempPath);
+            return CalculatePathLength(tempPath);
+        }
+
+        return 0f;
+    }*/
+    /// <summary>
+    /// 【公共接口】正式请求移动
+    /// </summary>
+    /// <param name="pawnObject">要移动的棋子</param>
+    /// <param name="onMoveComplete">完成后的回调</param>
+    /// <param name="customTargetPosition">可选：AI或脚本直接指定的目的地。如果不传，则默认使用上一次鼠标预览的有效点</param>
+    public float ExecuteMove(GameObject pawnObject, UnityAction onMoveComplete = null
+        , Vector3? customTargetPosition = null)
+    {
+        if (pawnObject == null) return 0f;
+
+        NavMeshAgent agent = pawnObject.GetComponent<NavMeshAgent>();
+        if (agent == null) return 0f;
+
+        BattleScene.Ins.BM.orderManager.OnUnitMoveStart(pawnObject.GetComponent<PieceController>());
+
+        SetupMovementPriorities(pawnObject.gameObject); // 在正式移动前设置权重，确保避障行为正确
+        this.agent = agent;
+        this.onReachDestination = onMoveComplete;
+        isTracking = true;
+
+        // 确定最终目的地：如果传了自定义坐标就用自定义的，否则用玩家预览的坐标
+        Vector3 finalTarget = customTargetPosition ?? lastValidPreviewPosition;
+
+        // 容错防御：如果最终目的地依旧是无穷大（说明既没有AI指定，玩家也没预览过）
+        if (float.IsPositiveInfinity(finalTarget.x))
+        {
+            Debug.LogError($"[MoveManager] 试图移动到无效的目的地(Infinity)！已拦截。物体: {pawnObject.name}");
+            isTracking = false;
+            return 0f;
+        }
+
+        // 正式计算并设置路径
+        if (NavMesh.CalculatePath(agent.transform.position, finalTarget, NavMesh.AllAreas
+                , tempPath))
         {
             agent.SetPath(tempPath);
             return CalculatePathLength(tempPath);
@@ -312,7 +430,7 @@ private void SetOtherAgentsAvoidance(GameObject movingPawn, bool enableAvoidance
     {
         if (pathRenderer != null) pathRenderer.positionCount = 0;
     }
-    
+
     /// <summary>
     /// 【新增公共接口】专治技能瞬移退回原点 Bug
     /// </summary>
@@ -324,7 +442,7 @@ private void SetOtherAgentsAvoidance(GameObject movingPawn, bool enableAvoidance
         if (pawnObject == null) return false;
 
         NavMeshAgent agent = pawnObject.GetComponent<NavMeshAgent>();
-    
+
         // 1. 先关闭 Agent，防止它在此期间进行任何是非合法的坐标修正
         if (agent != null)
         {
@@ -335,7 +453,7 @@ private void SetOtherAgentsAvoidance(GameObject movingPawn, bool enableAvoidance
         // 如果你的地图落差很大，可以把 2.0f 稍微放大
         NavMeshHit hit;
         Vector3 safePosition = targetPosition;
-    
+
         if (NavMesh.SamplePosition(targetPosition, out hit, 2.0f, NavMesh.AllAreas))
         {
             // 找到了最近的合法网格点

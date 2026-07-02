@@ -357,7 +357,9 @@ public class 剧本System : MonoBehaviour
                     int.TryParse(prams[2], out int opIndex);
                     int.TryParse(prams[3], out int value);
                     GM.Ins.PLAYERPROFILE.ModPlayer(index, attr, opIndex, value);
-                    大地图System.instance.messagePanel.ShowModifyMessage(index, attr, opIndex, value);
+                    // 消息系统
+                    //大地图System.instance.messagePanel.ShowModifyMessage(index, attr, opIndex, value);
+                    大地图System.instance.notificationManager.ShowModifyMessage(index, attr, opIndex, value);
                 }
                 else if (prams.Length >= 3)
                 {
