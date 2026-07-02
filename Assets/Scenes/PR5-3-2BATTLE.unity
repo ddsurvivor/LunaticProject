@@ -18980,10 +18980,9 @@ MonoBehaviour:
   skillNameDisplay: {fileID: 0}
   skillNamText: {fileID: 0}
   logSystem: {fileID: 0}
-  messagePanel: {fileID: 0}
-  itemGetPanel: {fileID: 0}
   logPanel: {fileID: 0}
   battleFinishPanel: {fileID: 0}
+  battleLossPanel: {fileID: 0}
   checkDicePanel: {fileID: 0}
   battleStartUIPanel: {fileID: 0}
   burstStart: {fileID: 0}
@@ -18992,6 +18991,7 @@ MonoBehaviour:
   skipButton: {fileID: 0}
   checkSuccess: {fileID: 0}
   checkFail: {fileID: 0}
+  notificationManager: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23322,6 +23322,22 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2059250724415007177, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2059250724415007177, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2059250724415007177, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2059250724415007177, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2123276656743940928, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -23598,6 +23614,22 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6178400516153279716, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6178400516153279716, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6178400516153279716, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6178400516153279716, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6793405397572969120, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -23776,7 +23808,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6793405397572969135, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: winTurnCondition
-      value: 6
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 6891228850527105862, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: serializationData.Prefab
@@ -24436,6 +24468,7 @@ MonoBehaviour:
     weaponIcon: {fileID: 0}
     orderProfiles: []
   playerData:
+    pieceId: 0
     curHealth: 0
     curAmmo: 0
     curMana: 0
