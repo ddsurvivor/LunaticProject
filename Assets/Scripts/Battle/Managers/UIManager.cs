@@ -30,6 +30,7 @@ public class UIManager : SerializedMonoBehaviour
     //public ItemGetPanel itemGetPanel;
     public PlayerLogPanel logPanel;
     public BattleFinishPanel battleFinishPanel;
+    public GameObject battleLossPanel;
     public CheckDicePanel checkDicePanel;
     public BattleStartUIPanel battleStartUIPanel;// 复用为战斗胜利提示
     public Image burstStart;
