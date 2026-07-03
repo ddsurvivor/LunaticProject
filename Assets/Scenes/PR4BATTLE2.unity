@@ -129,7 +129,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh419610
+  m_Name: pb_Mesh359342
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -2394,6 +2394,8 @@ MonoBehaviour:
     itemNum: 4
   - itemName: 5
     itemNum: 3
+  - itemName: 8
+    itemNum: 2
   dropCompIds: 0d000000
   dropSummary: 
 --- !u!1001 &180457541
@@ -5056,7 +5058,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh335424
+  m_Name: pb_Mesh359210
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -14007,7 +14009,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh419874
+  m_Name: pb_Mesh359606
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -16944,7 +16946,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AIController: {fileID: 1713777227}
   PlayerController: {fileID: 1713777229}
-  camera: {fileID: 0}
+  cameraController: {fileID: 0}
   buffManager: {fileID: 1713777230}
   skillManager: {fileID: 0}
   spriteManager: {fileID: 0}
@@ -16952,12 +16954,17 @@ MonoBehaviour:
   tutorialManager: {fileID: 0}
   tipTextManager: {fileID: 0}
   moveManager: {fileID: 0}
+  battleDialogueManager: {fileID: 0}
+  characterSkillManager: {fileID: 0}
+  orderManager: {fileID: 0}
   pieceDataListSO: {fileID: 0}
   areaList: []
   finishDrop: {fileID: 0}
   finishExp: 100
   winTurnCondition: 999
   battleSetController: {fileID: 0}
+  moveWaitTime: 1
+  gazeWaitTime: 0.5
   gray: {fileID: 0}
   grayEnemy: {fileID: 0}
 --- !u!114 &1713777225
@@ -17091,10 +17098,9 @@ MonoBehaviour:
       Data: 
   turnPanel: {fileID: 1081070822}
   turnImage: []
-  endTurnButton: {fileID: 1052199133}
+  endTurnButton: {fileID: 0}
   infoBox: {fileID: 797644601}
   burstButton: {fileID: 588414090}
-  burstBtnImage: {fileID: 0}
   teamPanel: {fileID: 208797652}
   pieceInfoPanel: {fileID: 0}
   restartButton: {fileID: 0}
@@ -17104,15 +17110,18 @@ MonoBehaviour:
   skillNameDisplay: {fileID: 0}
   skillNamText: {fileID: 0}
   logSystem: {fileID: 0}
-  messagePanel: {fileID: 0}
-  itemGetPanel: {fileID: 0}
   logPanel: {fileID: 0}
   battleFinishPanel: {fileID: 0}
+  battleLossPanel: {fileID: 0}
   checkDicePanel: {fileID: 0}
   battleStartUIPanel: {fileID: 0}
   burstStart: {fileID: 0}
   burstEnd: {fileID: 0}
   skillTooltipUI: {fileID: 0}
+  skipButton: {fileID: 0}
+  checkSuccess: {fileID: 0}
+  checkFail: {fileID: 0}
+  notificationManager: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0

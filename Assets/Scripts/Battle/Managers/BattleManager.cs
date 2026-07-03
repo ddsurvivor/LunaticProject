@@ -252,7 +252,7 @@ public class BattleManager : MonoBehaviour
                 isHit = true; // 聚能状态下必中
             }
             else if (skillPack.target is SkillTarget.EnemyAll
-                     or SkillTarget.All or SkillTarget.Self)
+                     or SkillTarget.All or SkillTarget.Self or SkillTarget.AllyBody or SkillTarget.Ally)
             {
                 isHit = true; // AOE必中
             }
@@ -695,13 +695,16 @@ public class BattleManager : MonoBehaviour
                 case SummonEffect summonEffect:
                     summonEffect.ApplyEffect(targetPos, caster.player);
                     break;
+                case ReviveEffect reviveEffect:
+                    reviveEffect.ApplyEffect(target);
+                    break;
                 default:
                     break;
             }
         }
     }
 
-    /// <summary>
+    /*/// <summary>
     /// 击退效果
     /// </summary>
     /// <param name="hitBackEffect"></param>
@@ -737,13 +740,13 @@ public class BattleManager : MonoBehaviour
                 TriggerCollisionDamage(moveResult.HitPieces, hitBackEffect.hitBackDamage);
             }
         });
-    }
+    }*/
 
 
     /// <summary>
     /// 【NavMesh优化版】击退效果
     /// </summary>
-    private void HitBackEffect2(HitBackEffect hitBackEffect, PieceController caster = null,
+    private void HitBackEffect(HitBackEffect hitBackEffect, PieceController caster = null,
         PieceController target = null, Vector3 targetPos = default)
     {
         if (target == null || target.ableMove == false) return;
@@ -1251,6 +1254,7 @@ public class BattleManager : MonoBehaviour
     {
         if (_isFlankAttacking) return;
         if (target == null || attacker == null || target.unitAttrCenter.CurHealth <= 0) return;
+        if(attacker.isPlayerPiece == target.isPlayerPiece) return;// 排除：攻击者与目标属于同一阵营
 
         // 获取攻击者的队友列表
         IEnumerable<PieceController> teammates = attacker.isPlayerPiece

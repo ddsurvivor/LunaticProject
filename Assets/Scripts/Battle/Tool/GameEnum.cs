@@ -171,6 +171,7 @@ public enum SkillTarget
     Area = 5,// 区域
     All = 6,// 全体单位
     FarthestEnemy = 7,// 最远敌人
+    AllyBody = 8,// 友军尸体
 }
 
 
@@ -273,6 +274,9 @@ public enum PassiveType
 
     [LabelText("长远利益")]
     LongTermInterests = 2,
+    
+    [LabelText("内爆")]
+    Implosion = 3,
 }
 
 public enum PassiveTriggerType

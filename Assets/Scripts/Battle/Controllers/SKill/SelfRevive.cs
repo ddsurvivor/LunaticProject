@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 角色复活
@@ -48,12 +49,13 @@ public class SelfRevive : MonoBehaviour
         isFakeDead = false;
         if (isBurstHit)
         {
+            // 如果当前场景名称是"PRBossFight"，则奖励玩家一个插件
+            if(SceneManager.GetActiveScene().name != "PRBossFight") return;
             // 如果是聚能杀死，则奖励玩家一个插件
             GM.Ins.PLAYERPROFILE.AddComponentToInventory(compId);
             ComponentData compData = GM.Ins.DM.componentConfig.GetData(compId);
             // 显示提示
             if(BattleScene.Ins!=null) BattleScene.Ins.UM.ShowItemGet(compData);
-
         }
         DOVirtual.DelayedCall(0.5f, () =>
         {

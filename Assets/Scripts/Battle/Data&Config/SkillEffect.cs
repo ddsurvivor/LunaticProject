@@ -67,15 +67,30 @@ public class SummonEffect : SkillEffectBase
 {
     [LabelText("召唤棋子编号")]
     public int summonPieceId;
+    public ItemType summonPieceObj;
 
     public void ApplyEffect(Vector3 pos, PlayerController summoner)
     {
         // 在指定地点生成召唤棋子，并且初始化
-        PieceController summonPiece = ObjectPool.Ins.GenerateObject(ItemType.BulletFx, pos, Quaternion.identity)
+        PieceController summonPiece = ObjectPool.Ins.GenerateObject(summonPieceObj, pos, Quaternion.identity)
             ?.GetComponent<PieceController>();
         if(summonPiece== null) return;
         PieceData pieceData = BattleScene.Ins.BM.pieceDataListSO.GetPieceData(summonPieceId);
         summonPiece.Init(summoner, pieceData);
         summoner.pieces.Add(summonPiece);// 将召唤的棋子加入召唤者的棋子列表
+    }
+}
+
+public class ReviveEffect: SkillEffectBase
+{
+    [LabelText("复活回血比例【%】")]
+    public int reviveHealthPercent = 50;
+
+    public void ApplyEffect(PieceController taget)
+    {
+        // 将棋子复活，恢复一定量的生命值，显示动画为Idle状态
+        int healAmount = (int)(taget.unitAttrCenter.MaxHealth * reviveHealthPercent / 100f);
+        taget.unitAttrCenter.Heal(healAmount);
+        taget.pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
     }
 }

@@ -414,7 +414,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                     itemData.itemName.ToString() + $" x{num}";
                 skillButtons[j].onClick.RemoveAllListeners();
                 skillButtons[j].onClick.AddListener(() => {
-                    gameObject.SetActive(false);
+                    //gameObject.SetActive(false);
                     pc.UseItem(itemData);
                 });
                 
@@ -464,5 +464,9 @@ public class PieceActionListPanel : SerializedMonoBehaviour
         }
         PlayShowAnimation(targetsToAnimate);
     }
-    
+
+    private void OnDisable()
+    {
+        BattleScene.Ins.UM.skillTooltipUI.HideTooltip();
+    }
 }

@@ -509,6 +509,14 @@ public class RangeUI : MonoBehaviour
                     newTargets.Add(piece);
                 }
             }
+            else if (_curSkillPack.target == SkillTarget.AllyBody)
+            {
+                if (piece.isPlayerPiece && piece.isDead)
+                {
+                    piece.ShowHighlight(true);
+                    newTargets.Add(piece);
+                }
+            }
         }
 
         foreach (var piece in _curTargets)
@@ -561,6 +569,22 @@ public class RangeUI : MonoBehaviour
             else if (_curSkillPack.target == SkillTarget.Ally)
             {
                 if (piece.isPlayerPiece)
+                {
+                    piece.ShowHighlight(true);
+                    newTargets.Add(piece);
+                }
+            }
+            else if (_curSkillPack.target == SkillTarget.Self)
+            {
+                if (piece == _owner)
+                {
+                    piece.ShowHighlight(true);
+                    newTargets.Add(piece);
+                }
+            }
+            else if (_curSkillPack.target == SkillTarget.AllyBody)
+            {
+                if (piece.isPlayerPiece && piece.isDead)
                 {
                     piece.ShowHighlight(true);
                     newTargets.Add(piece);

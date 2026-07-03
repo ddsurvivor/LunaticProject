@@ -816,7 +816,7 @@ public class 剧本System : MonoBehaviour
 
             if (key.Contains(Center.Command_Shop))
             {
-                Debug.LogError("打开商城");
+                //Debug.LogError("打开商城");
                 var prams = 指令切割(key);
                 int result = 0;
                 int discount = 100; // 默认没有折扣

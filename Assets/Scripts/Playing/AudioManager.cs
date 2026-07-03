@@ -145,6 +145,20 @@ public class AudioManager : SerializedMonoBehaviour
             所有音效字典.Remove(audioName);
         }
     }
+
+    public void StopAll()
+    {
+        // 停止所有循环音效
+        foreach (var kvp in 循环音效字典)
+        {
+            GameObject seObject = kvp.Value;
+            if (seObject != null)
+            {
+                Destroy(seObject);
+            }
+        }
+        循环音效字典.Clear();
+    }
     
     public void 停止音乐()
     {

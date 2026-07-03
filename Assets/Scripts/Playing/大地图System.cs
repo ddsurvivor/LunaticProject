@@ -125,6 +125,7 @@ public class 大地图System : SerializedMonoBehaviour
     public void 剧情结束()
     {
         剧情.gameObject.SetActive(false);
+        GM.Ins.AM.StopAll();
         //当前地图.transform.DOScale(Vector3.one, 点击后放大进行时间);
         foreach (var node in NodeList)
         {

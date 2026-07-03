@@ -190,6 +190,7 @@ public class CharacterUIPage : UIPanel
         tempPoints = player.SkillPoints;
 
         // 刷新属性面板
+        if(pieceData == null) return;
 
         // 0生命，1能量，2攻击，3暴击，4对抗
         battleRowList[0].UpdateInfo("生命", pieceData.maxHealth, 100);

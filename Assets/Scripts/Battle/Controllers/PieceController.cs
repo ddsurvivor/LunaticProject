@@ -930,7 +930,7 @@ public class PieceController : MonoBehaviour
             case ItemName.UX210_枪骑兵:
                 break;
             case ItemName.能量包: // 回复能量
-                unitAttrCenter.AddMana(100);
+                unitAttrCenter.AddMana(3);
                 break;
             case ItemName.医疗单元I型:
                 unitAttrCenter.Heal(100);
@@ -940,6 +940,13 @@ public class PieceController : MonoBehaviour
                 break;
             case ItemName.礼盒:
                 break;
+            case ItemName.修复集群:
+                unitAttrCenter.FullHealth();// 回复满血
+                break;
+            case ItemName.能量包S:
+                unitAttrCenter.AddMana(9);
+                break;
+
             default:
                 throw new ArgumentOutOfRangeException();
         }
@@ -981,6 +988,12 @@ public class PieceController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 触发被动效果
+    /// </summary>
+    /// <param name="passiveTriggerType"></param>
+    /// <param name="skillPack"></param>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
     private void PassiveTrigger(PassiveTriggerType passiveTriggerType, SkillPack skillPack = null)
     {
         switch (passiveTriggerType)
@@ -989,6 +1002,11 @@ public class PieceController : MonoBehaviour
                 if (availablePassives.Contains(PassiveType.Lash))
                 {
                     unitAttrCenter.AddMana(3);
+                }
+
+                if (availablePassives.Contains(PassiveType.Implosion))
+                {
+                    // 造成扇形伤害
                 }
 
                 break;

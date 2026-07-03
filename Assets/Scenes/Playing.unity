@@ -12447,7 +12447,7 @@ MonoBehaviour:
   itemGetPanel: {fileID: 271953669}
   messagePanel: {fileID: 1988807614}
   battleStartUIPanel: {fileID: 1366025500}
-  notificationManager: {fileID: 0}
+  notificationManager: {fileID: 1715567259}
   blackFront: {fileID: 1012026792}
 --- !u!114 &1075042450
 MonoBehaviour:
@@ -19745,6 +19745,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1711031047}
   m_CullTransparentMesh: 1
+--- !u!114 &1715567259 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6135430108945315921, guid: 50b3479f81d53e046ac5d336f519b3b3, type: 3}
+  m_PrefabInstance: {fileID: 1083425662}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef0ebd2cb92b4fb5b544e7cb33519773, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1717364152
 GameObject:
   m_ObjectHideFlags: 0
@@ -24069,7 +24080,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9154696855077170348, guid: 27dea9d3c402f90448ab7fe008f3ece6, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9154696855077170348, guid: 27dea9d3c402f90448ab7fe008f3ece6, type: 3}
       propertyPath: m_AnchorMin.x
@@ -24077,7 +24088,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9154696855077170348, guid: 27dea9d3c402f90448ab7fe008f3ece6, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9154696855077170348, guid: 27dea9d3c402f90448ab7fe008f3ece6, type: 3}
       propertyPath: m_SizeDelta.x
@@ -24117,11 +24128,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9154696855077170348, guid: 27dea9d3c402f90448ab7fe008f3ece6, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 160
       objectReference: {fileID: 0}
     - target: {fileID: 9154696855077170348, guid: 27dea9d3c402f90448ab7fe008f3ece6, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 9154696855077170348, guid: 27dea9d3c402f90448ab7fe008f3ece6, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -24138,6 +24149,10 @@ PrefabInstance:
     - target: {fileID: 9154696855077170349, guid: 27dea9d3c402f90448ab7fe008f3ece6, type: 3}
       propertyPath: m_Name
       value: Button (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 9154696855077170349, guid: 27dea9d3c402f90448ab7fe008f3ece6, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 27dea9d3c402f90448ab7fe008f3ece6, type: 3}
@@ -25164,10 +25179,6 @@ PrefabInstance:
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 1449785372, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
-    - target: {fileID: 1449785373, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
-      propertyPath: pieceHPInherit
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 1449785373, guid: 68145afade0bb4e42842ba618e5675eb, type: 3}
       propertyPath: serializationData.Prefab
       value: 
