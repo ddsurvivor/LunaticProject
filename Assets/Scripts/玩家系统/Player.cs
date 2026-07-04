@@ -146,6 +146,7 @@ public class Player
                 break;
             }
         }
+        GM.Ins.AM.PlayAudio(AudioCueType.Equip);
     }
 
     public void Unequip(int id)
@@ -158,6 +159,7 @@ public class Player
             if (weaponSlots[i] == id) { weaponSlots[i] = 0; break; }
 
         GM.Ins.PLAYERPROFILE.componentInventory.Add(id); // 回到背包
+        GM.Ins.AM.PlayAudio(AudioCueType.Cancel);
     }
 
     

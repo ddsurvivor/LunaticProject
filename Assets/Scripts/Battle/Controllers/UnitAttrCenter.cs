@@ -235,6 +235,9 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         UpdateHpBar();
         Debug.Log($"恢复生命{healAmount}");
         BattleScene.Ins.UM.OnPieceStateChance(pc);
+        BattleScene.Ins.BM.tipTextManager.ShowHeal(pc.transform,healAmount);
+        ObjectPool.Ins.GenerateObject(ItemType.HEAL_EFFECT, pc.transform.position+Vector3.up*2f, Quaternion.identity);
+        GM.Ins.AM.PlayAudio(AudioCueType.Heal);
     }
 
     private void UpdateHpBar()

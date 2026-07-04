@@ -36,6 +36,7 @@ public class ClickManager : MonoBehaviour
             }*/
             if(BattleScene.Ins.UM.pieceActionListPanel.gameObject.activeInHierarchy)
             {return;}
+            if(_selectedPiece!=null && _selectedPiece.IsUsingSkill) return;
 
             if (!_isDragging)
             {

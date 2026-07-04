@@ -95,6 +95,11 @@ public enum ItemType
     [LabelText("夹击特效")]
     PincerAttackFx = 51, // 夹击特效
     
+    [LabelText("专长发动特效")]
+    SPECIALTY_ACTIVATE = 52, // 专长发动特效
+    [LabelText("回血特效")]
+    HEAL_EFFECT = 53, // 回血特效
+    
     [LabelText("召唤无人机")]
     SUMMON_DRONE = 100, // 召唤无人机
 }

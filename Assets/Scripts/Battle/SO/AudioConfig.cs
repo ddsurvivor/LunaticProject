@@ -22,6 +22,8 @@ public enum AudioCueType
     [LabelText("夹击触发")] PincerTrigger = 120,
     [LabelText("专长发动")] SpecialtyActivate = 130,
     [LabelText("加点按钮")] AddPointButton = 140,
+    [LabelText("治疗")] Heal = 150,
+    [LabelText("装备插件")] Equip = 160,
 }
 
 [CreateAssetMenu(fileName = "AudioConfig", menuName = "Config/Audio Config")]

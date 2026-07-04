@@ -4,6 +4,7 @@ using System.IO;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.Networking;
 
 public class AudioManager : SerializedMonoBehaviour
@@ -21,6 +22,9 @@ public class AudioManager : SerializedMonoBehaviour
     private Dictionary<string, List<GameObject>> 所有音效字典 = new Dictionary<string, List<GameObject>>();
 
     public AudioConfig audioConfig;
+    public AudioMixer audioMixer;
+    public AudioMixerGroup bgmMixerGroup;// 背景音乐
+    public AudioMixerGroup sfxMixerGroup;// 音效
 
     public void 初始化()
     {

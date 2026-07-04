@@ -24,6 +24,7 @@ namespace SkillSystem
             {
                 BattleScene.Ins.BM.tipTextManager.ShowTip(instigator.transform
                     , $"{data.skillName}");
+                ObjectPool.Ins.GenerateObject(ItemType.SPECIALTY_ACTIVATE, instigator.transform.position, Quaternion.identity);
                 _isTriggered = true;
                 Debug.Log($"[被动触发] {owner.name} 触发【继承者】：自身HP低于 {HP_THRESHOLD:P0}，防御力、攻击力和行动范围提升 {ATTRIBUTE_BONUS:P0}！");
                 UnitAttrCenter unitAttrCenter = instigator.GetComponent<UnitAttrCenter>();
@@ -57,6 +58,7 @@ namespace SkillSystem
             {
                 BattleScene.Ins.BM.tipTextManager.ShowTip(instigator.transform
                     , $"{data.skillName}");
+                ObjectPool.Ins.GenerateObject(ItemType.SPECIALTY_ACTIVATE, instigator.transform.position, Quaternion.identity);
                 PlayerController player = instigator.GetComponent<PieceController>().player;
 
                 foreach (var piece in player.pieces)
@@ -107,6 +109,7 @@ namespace SkillSystem
             {
                 BattleScene.Ins.BM.tipTextManager.ShowTip(instigator.transform
                     , $"{data.skillName}");
+                ObjectPool.Ins.GenerateObject(ItemType.SPECIALTY_ACTIVATE, instigator.transform.position, Quaternion.identity);
                 Debug.Log($"[被动触发] {owner.name} 遭受 {attacker.name} 攻击，触发【反射性电子对抗】：反向对攻击者施加 {OVERLOAD_LAYERS} 层 [过载]！");
                 BattleScene.Ins.BM.buffManager.AddBuff(targetUnitAttrCenter, BuffType.Overload
                     , OVERLOAD_LAYERS);
@@ -209,7 +212,8 @@ namespace SkillSystem
                 _remainingTurns = BUFF_DURATION_TURNS;
                 BattleScene.Ins.BM.tipTextManager.ShowTip(instigator.transform
                     , $"{data.skillName}");
-                // 添加持续3回合的buff
+                ObjectPool.Ins.GenerateObject(ItemType.SPECIALTY_ACTIVATE, instigator.transform.position, Quaternion.identity);
+                //TODO: 添加持续3回合的buff
                 
                 Debug.Log($"[被动触发] {owner.name} 自身累积遭受 {REQUIRED_HIT_COUNT} 次攻击，触发【边缘求生】：自身体力、意志和作战属性提升 {ATTRIBUTE_BONUS} 点，持续 {BUFF_DURATION_TURNS} 回合！");
             }

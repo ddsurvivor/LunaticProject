@@ -35,6 +35,8 @@ public class TipTextManager : MonoBehaviour
         public string buffAddedFormat = "+{0}{1}";
         
         public string missText = "未命中";
+        
+        public string healFormat = "+{0}HP";
     }
 
     [Header("文本内容配置")]
@@ -92,7 +94,7 @@ public class TipTextManager : MonoBehaviour
     /// </summary>
     /// <param name="target">世界场景物体的 Transform 变换组件</param>
     /// <param name="content">需要显示的具体文本内容</param>
-    private void SpawnTipAtTarget(Transform target, string content)
+    private void SpawnTipAtTarget(Transform target, string content, Color textColor = default)
     {
         if (target == null) return;
 
@@ -123,7 +125,7 @@ public class TipTextManager : MonoBehaviour
         tipGo.SetActive(true);
 
         // 5. 调用接口播放动画
-        tipScript.ShowTip(content);
+        tipScript.ShowTip(content, textColor);
     }
 
     #region 外部快捷调用接口
@@ -193,6 +195,12 @@ public class TipTextManager : MonoBehaviour
     public void ShowTip(Transform target, string content)
     {
         SpawnTipAtTarget(target, content);
+    }
+
+    public void ShowHeal(Transform target, int healAmount)
+    {
+        // 显示绿色的治疗提示
+        SpawnTipAtTarget(target, string.Format(presetData.healFormat, healAmount), Color.green);
     }
 
     #endregion

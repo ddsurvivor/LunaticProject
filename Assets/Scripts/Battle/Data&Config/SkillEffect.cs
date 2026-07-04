@@ -76,8 +76,9 @@ public class SummonEffect : SkillEffectBase
             ?.GetComponent<PieceController>();
         if(summonPiece== null) return;
         PieceData pieceData = BattleScene.Ins.BM.pieceDataListSO.GetPieceData(summonPieceId);
+        //summonPiece.Init(summoner, pieceData);
         summonPiece.Init(summoner, pieceData);
-        summoner.pieces.Add(summonPiece);// 将召唤的棋子加入召唤者的棋子列表
+        BattleScene.Ins.BM.summonPieces.Add(summonPiece);// 将召唤的棋子加入召唤者的棋子列表
     }
 }
 

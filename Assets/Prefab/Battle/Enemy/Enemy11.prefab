@@ -673,16 +673,21 @@ MonoBehaviour:
     dropRate: 0
     passiveSkillTypes: 
     weaponIcon: {fileID: 0}
+    orderProfiles: []
   playerData:
+    pieceId: 0
     curHealth: 0
     curAmmo: 0
     curMana: 0
+    deadCount: 0
     spriteName: 
     normalSlots: 000000000000000000000000
     weaponSlots: 0000000000000000
   pieceID: 1011
   player: {fileID: 0}
   isPlayerPiece: 0
+  isUsingOrder: 0
+  isGrauding: 0
   _attackPack:
     damage: 0
     damageType: 0
@@ -719,6 +724,7 @@ MonoBehaviour:
   cantControl: 0
   ableMove: 1
   deadNotDelete: 0
+  ableStrick: 0
   OnInit:
     m_PersistentCalls:
       m_Calls: []

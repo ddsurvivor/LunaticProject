@@ -505,14 +505,14 @@ public class PieceController : MonoBehaviour
         if(!_isAttacking) return;
         // 根据范围获取所有棋子
         List<PieceController> targets = rangeUI.GetCurTargets;
-        if (targets.Count < 1)
+        if (targets.Count < 1 && _curAttackPack.target != SkillTarget.Area)
         {
             Debug.Log("未选中任何目标，无法发动技能");
             return;
         }
 
         Debug.Log("棋子攻击");
-        CheckFace(targets[0].transform.position - transform.position);
+        if (targets.Count > 0) CheckFace(targets[0].transform.position - transform.position);
         if (_curAtkType == ActionType.近战攻击)
         {
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Attack, false, 1f);
@@ -913,6 +913,7 @@ public class PieceController : MonoBehaviour
         var items = new List<ItemPack>() { new ItemPack(itemData.itemName, 1) };
         if (!unitAttrCenter.HasItem(items)) return;
         if (!unitAttrCenter.HasMP()) return;
+        //BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
         unitAttrCenter.CostItem(items);
         if (itemData.useType == UseType.ActiveInBattle)
         {
@@ -952,6 +953,7 @@ public class PieceController : MonoBehaviour
         }
         
         if (!unitAttrCenter.CostMP()) return;
+        //BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
     }
     
     /// <summary>
@@ -962,9 +964,10 @@ public class PieceController : MonoBehaviour
     {
         _isAttacking = true;
         _curAttackPack = skillPack;
+        //_isUsingSkill = true;
+        //_skillPack = skillPack;
         rangeUI?.ShowSkillRange(_curAttackPack);
-        _curAtkType = ActionType.远程攻击;
-
+        _curAtkType = ActionType.近战攻击;
     }
 
     // ======= 插件 ====== //

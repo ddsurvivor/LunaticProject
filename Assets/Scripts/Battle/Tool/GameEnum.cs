@@ -198,6 +198,7 @@ public enum SkillEffect
     HealArea = 1,// 区域治疗
     Blink = 2,// 瞬移
     SpaceBomb = 3,// 轨道轰炸
+    Summon = 4,// 召唤
 }
 
 public enum Daytime

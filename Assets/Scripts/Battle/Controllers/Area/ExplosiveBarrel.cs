@@ -26,7 +26,7 @@ public class ExplosiveBarrel : MonoBehaviour
 
     public void Start()
     {
-        if (needInit)
+        if (needInit && pieceController != null)
         {
             pieceController.Init(null, new PieceData()
             {

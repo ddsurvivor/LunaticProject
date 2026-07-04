@@ -50,6 +50,8 @@ public class BattleManager : MonoBehaviour
     private Sequence startSequence; // 战斗开始时的镜头动画序列
     private Coroutine sweepCoroutine;
 
+    public List<PieceController> summonPieces = new();
+
     public void Init()
     {
         inBattle = true;
@@ -107,13 +109,21 @@ public class BattleManager : MonoBehaviour
         {
             PlayerController.isInTurn = false;
             PlayerController.TurnEnd();
-            DOVirtual.DelayedCall(1.5f, () =>
+            
+            float delayTime = 1.5f;
+            if(summonPieces.Count > 0)
             {
+                delayTime += summonPieces.Count*3f;
+            }
+
+            StartCoroutine(SummonsActionPhaseRoutine());
+            DOVirtual.DelayedCall(delayTime, () =>
+            {
+                BattleScene.Ins.UM.ShowTurnChange(false);
                 AIController.isInTurn = true;
                 AIController.TurnStart();
             });
             //BattleScene.Ins.UM.turnPanel.ShowTurnChange("敌人回合");
-            BattleScene.Ins.UM.ShowTurnChange(false);
         }
         else
         {
@@ -204,7 +214,7 @@ public class BattleManager : MonoBehaviour
         , SkillPack skillPack, Vector3 targetPos = default, ActionType actionType = 0
         , CheckResult checkResult = CheckResult.None)
     {
-        BattleScene.Ins.UM.PopSkillName(skillPack.skillName);
+        //BattleScene.Ins.UM.PopSkillName(skillPack.skillName);
         List<List<DamageInfo>> damageInfoList = new();
 
         bool isCrit = false;
@@ -657,6 +667,15 @@ public class BattleManager : MonoBehaviour
                         targetPos,
                         Quaternion.identity).GetComponent<HealArea>();
                     healArea.SetData(skillPack.buffPacks[0], 1, skillPack.explodeRadius);
+                    break;
+                case SkillEffect.Summon:
+                    foreach (var effectBase in skillPack.additionalEffects)
+                    {
+                        if (effectBase is SummonEffect summonEffect)
+                        {
+                            summonEffect.ApplyEffect(targetPos, caster.player);
+                        }
+                    }
                     break;
                 default:
                     break;
@@ -1331,7 +1350,7 @@ public class BattleManager : MonoBehaviour
             }
             finally
             {
-                DOVirtual.DelayedCall(1f, () => { _isFlankAttacking = false; });
+                DOVirtual.DelayedCall(2f, () => { _isFlankAttacking = false; });
             }
         }
     }
@@ -1369,5 +1388,27 @@ public class BattleManager : MonoBehaviour
 
         // 退出战斗，返回主界面
         GM.Ins.BattleEnd();
+    }
+    
+    // ==== 召唤物行动 ===== //
+    
+    // 所有召唤物依次行动
+    private IEnumerator SummonsActionPhaseRoutine()
+    {
+        foreach (var summon in summonPieces)
+        {
+            if (summon != null && summon.gameObject.activeInHierarchy)
+            {
+                SelfExploreSummonPiece summonPiece = summon.GetComponent<SelfExploreSummonPiece>();
+                if (summonPiece != null)
+                {
+                    Debug.Log($"召唤物 {summon.name} 开始行动！");
+                    summonPiece.ExecuteAI();
+                }
+                    
+            }
+            
+            yield return new WaitForSeconds(3f);
+        }
     }
 }

@@ -23,7 +23,7 @@ public class TipText : MonoBehaviour
     /// 外部调用的公共接口：初始化并播放提示动画
     /// </summary>
     /// <param name="message">需要显示的文本内容</param>
-    public void ShowTip(string message)
+    public void ShowTip(string message, Color textColor = default)
     {
         if (_text == null) return;
 
@@ -34,8 +34,9 @@ public class TipText : MonoBehaviour
         _text.text = message;
 
         // 2. 重置透明度
-        Color originalColor = _text.color;
-        _text.color = new Color(originalColor.r, originalColor.g, originalColor.b, 1f);
+        
+        //Color originalColor = _text.color;
+        _text.color = new Color(textColor.r, textColor.g, textColor.b, 1f);
 
         // 3. 创建动画序列
         _tipSequence = DOTween.Sequence();
