@@ -964,10 +964,10 @@ public class PieceController : MonoBehaviour
     {
         _isAttacking = true;
         _curAttackPack = skillPack;
+        _curAtkType = ActionType.使用道具;
         //_isUsingSkill = true;
         //_skillPack = skillPack;
         rangeUI?.ShowSkillRange(_curAttackPack);
-        _curAtkType = ActionType.近战攻击;
     }
 
     // ======= 插件 ====== //

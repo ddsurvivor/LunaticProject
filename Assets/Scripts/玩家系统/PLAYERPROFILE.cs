@@ -97,19 +97,19 @@ public class PLAYERPROFILE
 
 
         // 技能点测试
-        player[0].SkillPoints = 5;
+        /*player[0].SkillPoints = 5;
         player[1].SkillPoints = 5;
-        player[2].SkillPoints = 5;
+        player[2].SkillPoints = 5;*/
 
         componentInventory.AddRange(new List<int>(){5,13});
         // 道具
         itemPacks.Clear();
         itemPacks.Add(new ItemPack(ItemName.能量包, 6));
         itemPacks.Add(new ItemPack(ItemName.医疗单元I型, 3));
-        itemPacks.Add(new ItemPack(ItemName.专速达, 3));
+        //itemPacks.Add(new ItemPack(ItemName.专速达, 3));
         itemPacks.Add(new ItemPack(ItemName.巡飞雷, 3));
-        itemPacks.Add(new ItemPack(ItemName.便携手榴弹, 2));
-        itemPacks.Add(new ItemPack(ItemName.应急医疗单元, 2));
+        //itemPacks.Add(new ItemPack(ItemName.便携手榴弹, 2));
+        //itemPacks.Add(new ItemPack(ItemName.应急医疗单元, 2));
         //初始化
         isNewGame = true;
 
