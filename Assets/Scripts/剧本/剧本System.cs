@@ -929,6 +929,7 @@ public class 剧本System : MonoBehaviour
                     player.spriteName = $"PC0{index + 1}01";
                     GM.Ins.PLAYERPROFILE.dateYear = 1573;//6年后
                     GM.Ins.PLAYERPROFILE.dateMonth = 3;
+                    GM.Ins.PLAYERPROFILE.daytime = Daytime.上午;
                     
                     大地图System.instance.daytimeSystem.UpdateDaytimeImage();
                     player.curHealth += 50;

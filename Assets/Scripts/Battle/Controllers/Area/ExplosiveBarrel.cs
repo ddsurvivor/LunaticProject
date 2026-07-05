@@ -23,6 +23,8 @@ public class ExplosiveBarrel : MonoBehaviour
     private bool _hasExploded = false;
     public PieceController pieceController;
     public  bool needInit = true;
+    
+    public bool selfDestroy = true; // 是否在爆炸后销毁自身
 
     public void Start()
     {
@@ -82,7 +84,7 @@ public class ExplosiveBarrel : MonoBehaviour
         
         // 6. 最后销毁桶本身（或者更换为残骸模型）
         //Destroy(gameObject);
-        DOVirtual.DelayedCall(0.8f, () => gameObject.SetActive(false));
+        if(selfDestroy) DOVirtual.DelayedCall(0.8f, () => gameObject.SetActive(false));
         Debug.Log($"{barrelName} 爆炸，影响了 {targetPieces.Count} 个目标");
     }
 

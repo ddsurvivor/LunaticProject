@@ -65,7 +65,7 @@ public class Center : MonoBehaviour
     public static string Command_Tutorial = "TUTORIAL";//教程
     public static string Command_Map = "TOMAP";//地图
     public static string Command_Item = "ITEM";//物品
-    public static string Command_PlayerAd = "PLAYERAD";//玩家修改
+    public static string Command_PlayerAd = "PLAYERAD";//玩家修改(六年后)
     public static string Command_LoadScene = "LOADSCENE";//场景切换
     
  

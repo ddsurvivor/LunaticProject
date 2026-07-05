@@ -60,7 +60,7 @@ public class EnemyController : PieceController
                 {
                     this.gameObject.SetActive(false);
                     BattleScene.Ins.BM.PlayerCheckWin();
-                });
+                }).SetUpdate(UpdateType.Normal);
             }
             else
             {
