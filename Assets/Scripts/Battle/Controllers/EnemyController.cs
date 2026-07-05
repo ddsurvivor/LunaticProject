@@ -26,8 +26,8 @@ public class EnemyController : PieceController
 
     public override void TurnStart()
     {
-        if (!isActived) return;
         base.TurnStart();
+        if (!isActived) return;
         if (enemyCanvas != null) enemyCanvas.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
     }
 

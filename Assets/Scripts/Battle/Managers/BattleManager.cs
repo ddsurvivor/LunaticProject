@@ -349,7 +349,7 @@ public class BattleManager : MonoBehaviour
                 }
 
                 realDamage -= armor;*/
-                int realDamage = attackPack.damage;
+                int realDamage = attackPack.damage + addAtk;
                 if (coverDamageReduction > 0)
                     realDamage = (int)(realDamage * (100 - coverDamageReduction) / 100f); // 掩体伤害减免
                 int armor = target.unitAttrCenter.attr.GetArmor(attackPack.damageType);
@@ -360,8 +360,10 @@ public class BattleManager : MonoBehaviour
                                                BuffAttrType.MeleeArmorPercent] / 100f));
                 }
 
-                realDamage = DamageCalculator.CalculateActualDamage(realDamage, armor
+                int rollDamage = 
+                 DamageCalculator.CalculateActualDamage(realDamage, armor
                     , isCrit, attacker.unitAttrCenter.critDamageRate);
+                realDamage = rollDamage;
                 // 减伤
                 realDamage = (int)(realDamage
                                    * (100 + attacker.unitAttrCenter.buffAttrDic[
@@ -378,7 +380,7 @@ public class BattleManager : MonoBehaviour
 
                 if (realDamage < 0) realDamage = 0;
                 Debug.Log(
-                    $"Skill Attack: BaseDamage={attackPack.damage}, AddAtk={addAtk}, Armor={armor}, RealDamage={realDamage}");
+                    $"Skill Attack: BaseDamage={attackPack.damage}, AddAtk={addAtk}, Armor={armor},RollDamage={rollDamage}, RealDamage={realDamage}");
                 // TODO: 临时护盾功能
                 target.unitAttrCenter.TakeDamage(new AttackPack(realDamage, attackPack.damageType
                     , isCrit));

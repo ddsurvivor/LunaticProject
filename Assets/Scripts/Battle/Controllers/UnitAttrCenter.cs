@@ -224,7 +224,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         }
 
         BattleScene.Ins.UM.OnPieceStateChance(pc);
-        Debug.Log($"受到{attackPack.damageType}伤害{attackPack.damage}");
+        //Debug.Log($"受到{attackPack.damageType}伤害{attackPack.damage}");
     }
 
     public void Heal(int healAmount)

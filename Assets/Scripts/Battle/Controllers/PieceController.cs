@@ -210,6 +210,7 @@ public class PieceController : MonoBehaviour
 
     public virtual void TurnStart()
     {
+        Debug.Log($"TurnStart: {gameObject.name}");
         OnTurnStart?.Invoke();
         if (isDead) return;
         unitAttrCenter.FullMovePoint();

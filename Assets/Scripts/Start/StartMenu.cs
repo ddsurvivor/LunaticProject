@@ -8,6 +8,8 @@ public class StartMenu : MonoBehaviour
     public string startLevelName;
 
     public SavePanel savePanel;
+
+    public UIPanel settingPanel;
     // Start is called before the first frame update
     void Start()
     {
@@ -26,7 +28,9 @@ public class StartMenu : MonoBehaviour
     }
 
     public void OnClickSet()
-    {}
+    {
+        settingPanel.Open();
+    }
 
     public void OnClickQuit()
     {

@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI; // 严格使用旧版 UI
 using System.Collections.Generic;
 
-public class SettingPanel : MonoBehaviour
+public class SettingPanel : UIPanel
 {
     [System.Serializable]
     public struct TabItem

@@ -18,6 +18,7 @@ public class SelfRevive : MonoBehaviour
     public List<Sprite> reviveSpriteList; // 复活时的图片列表
 
     private int compId = 5;
+    public bool dropComponentOnDeath = true; // 是否在死亡时掉落插件
 
     public void OnDead()
     {
@@ -31,6 +32,7 @@ public class SelfRevive : MonoBehaviour
 
     public void Revive()
     {
+        Debug.Log($"[SelfRevive] {piece.name} 复活判定条件{isFakeDead}，{piece.gameObject.activeInHierarchy}");
         if (piece != null && isFakeDead && piece.gameObject.activeInHierarchy)
         {
             // 满血满状态复活
@@ -45,12 +47,13 @@ public class SelfRevive : MonoBehaviour
 
     public void TrueDeath(bool isBurstHit = false)
     {
+        Debug.Log("真实击杀");
         reviveCount = 0;
         isFakeDead = false;
         if (isBurstHit)
         {
-            // 如果当前场景名称是"PRBossFight"，则奖励玩家一个插件
-            if (SceneManager.GetActiveScene().name != "PRBossFight")
+            //奖励玩家一个插件
+            if (dropComponentOnDeath)
             {
                 // 如果是聚能杀死，则奖励玩家一个插件
                 GM.Ins.PLAYERPROFILE.AddComponentToInventory(compId);
