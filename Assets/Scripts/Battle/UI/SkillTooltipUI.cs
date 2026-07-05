@@ -102,8 +102,8 @@ public class SkillTooltipUI : MonoBehaviour
         // 2. 拼接物品详细信息（描述等）
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
         
-        sb.AppendLine($"物品标签: {itemData.itemTag.ToString()}");
-        sb.AppendLine($"使用类别: {itemData.useType.ToString()}");
+        sb.AppendLine($"物品标签: {itemData.itemTag.ToChinese()}");
+        sb.AppendLine($"使用类别: {itemData.useType.ToChinese()}");
         sb.AppendLine($"物品描述: {itemData.itemDescription}");
         
         // 设置icon

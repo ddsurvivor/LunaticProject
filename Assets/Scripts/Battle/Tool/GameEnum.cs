@@ -1,3 +1,4 @@
+using System;
 using Sirenix.OdinInspector;
 
 /// <summary>
@@ -52,6 +53,52 @@ public static class EnumExtensions
             case BuffType.Burn: return "燃烧";
             case BuffType.Frail: return "脆弱";
             default: return type.ToString();
+        }
+    }
+
+    public static string ToChinese(this ItemTag tag)
+    { 
+        // 转换为中文
+        switch (tag)
+        {
+            case ItemTag.All:
+                return "全部";
+                break;
+            case ItemTag.Consumables:return "消耗品";
+                break;
+            case ItemTag.Plugins:
+                return "插件";
+                break;
+            case ItemTag.Materials:
+                return "材料";
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(tag), tag, null);
+        }
+    }
+    public static string ToChinese(this UseType type)
+    {
+        switch (type)
+        {
+            case UseType.InBattle:
+                return "战斗中使用";
+                break;
+            case UseType.OutOfBattle:
+                return "战斗外使用";
+                break;
+            case UseType.WhenEnergyNotFull:
+                return "能量未满时使用";
+                break;
+            case UseType.WhenHpNotFull:
+                return "血量未满时使用";
+                break;
+            case UseType.WhenStaminaNotFull: return "行动力未满时使用";
+                break;
+            case UseType.ActiveInBattle:
+                return "战斗中主动使用";
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
     }
 }

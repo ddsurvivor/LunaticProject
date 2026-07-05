@@ -90,7 +90,7 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         }
         if(GM.Ins.PLAYERPROFILE.获取任务进度( gameObject.name.Replace("(Clone)",""))>=1)
         {
-            Debug.Log($"当前节点已完成则不显示{gameObject.name}");
+            //Debug.Log($"当前节点已完成则不显示{gameObject.name}");
             // 
             gameObject.SetActive(false);
             //GetComponent<Button>().enabled = false;
@@ -109,7 +109,7 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
             }
             else
             {
-                Debug.Log($"符合任务要求{前置任务要求[i1]}进度{前置任务进度要求[i1]}");
+                //Debug.Log($"符合任务要求{前置任务要求[i1]}进度{前置任务进度要求[i1]}");
                 gameObject.SetActive(true);
                 //GetComponent<Button>().enabled = true;
             }

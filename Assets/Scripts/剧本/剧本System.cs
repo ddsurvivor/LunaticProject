@@ -131,23 +131,25 @@ public class 剧本System : MonoBehaviour
 
     public void SkipNext()
     {
+        //Debug.Log($"跳过前，当前为{已阅读}/共{已储存剧本.Length}");
         进度条.normalizedPosition = new Vector2(0, -1f);
-        if (已阅读 >= 已储存剧本.Length)
+        if (已阅读 >= 已储存剧本.Length-1)
         {
             return;
         }
-
         if (当前说话内容.Contains(Center.Tag_notspawn))
         {
             进行指令(当前事件);
+            已阅读++;
             return;
         }
         //当文本更新时?.Invoke();
-
         //AudioManager.instance.播放音效("Key");
+        //Debug.Log($"跳过，当前为{已阅读}");
         进行指令(当前事件);
         生成剧本预制体();
         已阅读++;
+        
     }
 
     public void OnClickSkip(int num = 0)
@@ -905,8 +907,11 @@ public class 剧本System : MonoBehaviour
                     {
                         // 获得物品
                         GM.Ins.PLAYERPROFILE.AddItem((ItemName)itemId, count);
-                        大地图System.instance.itemGetPanel.ShowPanel(new ItemPack((ItemName)itemId
+                        大地图System.instance.notificationManager.PushNotification(new ItemPack(
+                            (ItemName)itemId
                             , count));
+                        /*大地图System.instance.itemGetPanel.ShowPanel(new ItemPack((ItemName)itemId
+                            , count));*/
                     }
                     else if (mode == 1)
                     {

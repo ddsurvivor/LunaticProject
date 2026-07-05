@@ -451,6 +451,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             skillButtons[index].gameObject.SetActive(true);
             skillButtons[index].GetComponentInChildren<Text>().text = 
                 pc.pieceData.orderProfiles[index].orderName;
+            skillButtons[index].enabled = true;
             skillButtons[index].onClick.RemoveAllListeners();
             skillButtons[index].onClick.AddListener(() => {
                 gameObject.SetActive(false);
