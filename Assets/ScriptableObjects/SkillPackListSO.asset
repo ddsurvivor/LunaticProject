@@ -17,6 +17,7 @@ MonoBehaviour:
     SerializedBytes: 
     ReferencedUnityObjects:
     - {fileID: 8300000, guid: 994a763418d61cc46b53f049d5ddee76, type: 3}
+    - {fileID: 8300000, guid: b15bb6609a0a89f4aae75fa4081429a0, type: 3}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -27,7 +28,7 @@ MonoBehaviour:
       Data: 0|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
-      Data: 3
+      Data: 4
     - Name: 
       Entry: 7
       Data: 1|SkillPack, Assembly-CSharp
@@ -444,6 +445,165 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: 
+      Entry: 7
+      Data: 22|SkillPack, Assembly-CSharp
+    - Name: skillName
+      Entry: 1
+      Data: "\u5185\u7206"
+    - Name: description
+      Entry: 1
+      Data: 
+    - Name: mpCost
+      Entry: 3
+      Data: 0
+    - Name: target
+      Entry: 3
+      Data: 6
+    - Name: rangeType
+      Entry: 3
+      Data: 2
+    - Name: rangeValue
+      Entry: 4
+      Data: 15
+    - Name: rangeAgle
+      Entry: 4
+      Data: 90
+    - Name: explodeRadius
+      Entry: 4
+      Data: 0
+    - Name: arcWeight
+      Entry: 4
+      Data: 0
+    - Name: arcCenterDis
+      Entry: 4
+      Data: 0
+    - Name: skillVFXType
+      Entry: 3
+      Data: 42
+    - Name: isRotate
+      Entry: 5
+      Data: true
+    - Name: bulletVFXType
+      Entry: 3
+      Data: 0
+    - Name: attackPacks
+      Entry: 7
+      Data: 23|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 24|AttackPack, Assembly-CSharp
+    - Name: damage
+      Entry: 3
+      Data: 13
+    - Name: damageType
+      Entry: 3
+      Data: 2
+    - Name: isCritical
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: atkTimes
+      Entry: 3
+      Data: 0
+    - Name: buffPacks
+      Entry: 7
+      Data: 25|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 26|BuffPack, Assembly-CSharp
+    - Name: buffType
+      Entry: 3
+      Data: 104
+    - Name: stacks
+      Entry: 3
+      Data: 3
+    - Name: rate
+      Entry: 3
+      Data: 35
+    - Name: target
+      Entry: 3
+      Data: 4
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: skillEffects
+      Entry: 7
+      Data: 27|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: skillSound
+      Entry: 10
+      Data: 1
+    - Name: consumeItems
+      Entry: 7
+      Data: 28|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: animationIndex
+      Entry: 3
+      Data: 0
+    - Name: isDelaySkill
+      Entry: 5
+      Data: false
+    - Name: layerSkill
+      Entry: 5
+      Data: false
+    - Name: isRecognitionCheck
+      Entry: 5
+      Data: false
+    - Name: additionalEffects
+      Entry: 7
+      Data: 29|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
       Entry: 13
       Data: 
     - Name: 
@@ -517,6 +677,36 @@ MonoBehaviour:
     buffPacks: []
     skillEffects: 04000000
     skillSound: {fileID: 0}
+    consumeItems: []
+    animationIndex: 0
+    isDelaySkill: 0
+    layerSkill: 0
+    isRecognitionCheck: 0
+  - skillName: "\u5185\u7206"
+    description: 
+    mpCost: 0
+    target: 6
+    rangeType: 2
+    rangeValue: 15
+    rangeAgle: 90
+    explodeRadius: 0
+    arcWeight: 0
+    arcCenterDis: 0
+    skillVFXType: 42
+    isRotate: 1
+    bulletVFXType: 0
+    attackPacks:
+    - damage: 13
+      damageType: 2
+      isCritical: 0
+    atkTimes: 0
+    buffPacks:
+    - buffType: 104
+      stacks: 3
+      rate: 35
+      target: 4
+    skillEffects: 
+    skillSound: {fileID: 8300000, guid: b15bb6609a0a89f4aae75fa4081429a0, type: 3}
     consumeItems: []
     animationIndex: 0
     isDelaySkill: 0

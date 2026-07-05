@@ -440,7 +440,7 @@ public class PieceController : MonoBehaviour
         {
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Attack, false, 1f);
             PlayAudio(ActionType.近战攻击);
-            PassiveTrigger(PassiveTriggerType.OnMeleeAttack);
+            PassiveTrigger(PassiveTriggerType.OnMeleeAttack,_curAttackPack, targets[0].transform.position);
         }
         else if (_curAtkType == ActionType.远程攻击)
         {
@@ -517,7 +517,7 @@ public class PieceController : MonoBehaviour
         {
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Attack, false, 1f);
             PlayAudio(ActionType.近战攻击);
-            PassiveTrigger(PassiveTriggerType.OnMeleeAttack);
+            PassiveTrigger(PassiveTriggerType.OnMeleeAttack,_curAttackPack, targets[0].transform.position);
         }
         else if (_curAtkType == ActionType.远程攻击)
         {
@@ -988,6 +988,9 @@ public class PieceController : MonoBehaviour
         foreach (var i in playerData.weaponSlots)
         {
             // 添加武器效果
+            var data = GM.Ins.DM.componentConfig.GetData(i);
+            if (data == null) continue;
+            availablePassives.Add(data.passiveType);
         }
     }
 
@@ -997,7 +1000,7 @@ public class PieceController : MonoBehaviour
     /// <param name="passiveTriggerType"></param>
     /// <param name="skillPack"></param>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
-    private void PassiveTrigger(PassiveTriggerType passiveTriggerType, SkillPack skillPack = null)
+    private void PassiveTrigger(PassiveTriggerType passiveTriggerType, SkillPack skillPack = null, Vector3 targetPos = default(Vector3))
     {
         switch (passiveTriggerType)
         {
@@ -1010,6 +1013,13 @@ public class PieceController : MonoBehaviour
                 if (availablePassives.Contains(PassiveType.Implosion))
                 {
                     // 造成扇形伤害
+                    SkillPack skill = GM.Ins.DM.skillPackListSO.GetSkillPack("内爆");
+                    List<PieceController> targets = BattleScene.Ins.BM.orderManager.IsInsideSector(transform.position
+                        , targetPos - transform.position, skill.rangeValue, skill.rangeAgle);
+                    Debug.Log($"内爆被动触发，造成扇形伤害，目标数量：{targets.Count}");
+                    BattleScene.Ins.BM.tipTextManager.ShowTip(transform, skill.skillName);
+                    targets.Remove(this);
+                    BattleScene.Ins.BM.PieceSkill(this,targets,skill);
                 }
 
                 break;

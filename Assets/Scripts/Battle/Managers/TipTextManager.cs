@@ -94,13 +94,14 @@ public class TipTextManager : MonoBehaviour
     /// </summary>
     /// <param name="target">世界场景物体的 Transform 变换组件</param>
     /// <param name="content">需要显示的具体文本内容</param>
-    private void SpawnTipAtTarget(Transform target, string content, Color textColor = default)
+    private void SpawnTipAtTarget(Transform target, string content, Color? textColor = null)
     {
         if (target == null) return;
 
         // 1. 从池中获取一个可用的 TipText
         TipText tipScript = GetOrCreateTip();
         if (tipScript == null) return;
+        Color finalColor = textColor ?? Color.white;
 
         GameObject tipGo = tipScript.gameObject;
 
@@ -125,7 +126,7 @@ public class TipTextManager : MonoBehaviour
         tipGo.SetActive(true);
 
         // 5. 调用接口播放动画
-        tipScript.ShowTip(content, textColor);
+        tipScript.ShowTip(content, finalColor);
     }
 
     #region 外部快捷调用接口

@@ -151,6 +151,34 @@ public class OrderManager : MonoBehaviour
         float angleToTarget = Vector2.Angle(state.facingDir, toTarget);
         return angleToTarget <= state.profile.sectorAngleDeg * 0.5f;*/
     }
+    public List<PieceController> IsInsideSector(Vector3 origin, Vector3 forward, float sectorAngleDeg, float sectorRadius)
+    {
+        // 1. 获取扇形参数
+        float halfAngle = sectorAngleDeg / 2f;
+        float range = sectorRadius;
+        forward.y = 0; // 忽略y轴
+        //Vector3 origin = start.transform.position;
+        //Vector3 forward = state.guard.rangeUI.fanRoot.transform.forward;
+        // 1. 首先圆形范围内进行射线判定
+        Collider[] colliders = Physics.OverlapSphere(origin, range);
+        List<PieceController> targetPieces = new List<PieceController>();
+
+        foreach (var collider1 in colliders)
+        {
+            PieceController piece = collider1.GetComponent<PieceController>();
+            if (piece == null) continue;
+            Vector3 dir = (collider1.transform.position - origin);
+            dir.y = 0; // 忽略y轴
+            //if (dir.magnitude > range || dir.magnitude < 1f) continue; // 超出半径
+            float angle = Vector3.Angle(forward, dir);
+            if (angle <= halfAngle)
+            {
+                targetPieces.Add(piece);
+            }
+        }
+
+        return targetPieces;
+    }
 
     /// <summary>
     /// 关闭所有警戒
