@@ -347,6 +347,8 @@ public class AIController : PlayerController
         BattleScene.Ins.BM.moveManager.ExecuteMove(aiPiece.gameObject
             , () => { aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle); });
         aiPiece.CheckFace(targetPos - currentPos);
+        
+        aiPiece.PlayAudio(ActionType.移动);
     }
 
     /// <summary>

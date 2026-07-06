@@ -1086,7 +1086,7 @@ public class PieceController : MonoBehaviour
         if (_pieceData.actionSounds.ContainsKey(actionType))
         {
             AudioClip clip = _pieceData.actionSounds[actionType];
-            AudioSource.PlayClipAtPoint(clip, Camera.main.transform.position);
+            GM.Ins.AM.PlayClip(clip);
         }
     }
 
@@ -1094,7 +1094,7 @@ public class PieceController : MonoBehaviour
     {
         if (skillPack.skillSound != null)
         {
-            AudioSource.PlayClipAtPoint(skillPack.skillSound, Camera.main.transform.position);
+            GM.Ins.AM.PlayClip(skillPack.skillSound);
         }
     }
 

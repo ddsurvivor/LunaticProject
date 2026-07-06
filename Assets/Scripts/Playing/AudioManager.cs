@@ -332,6 +332,11 @@ public class AudioManager : SerializedMonoBehaviour
                 return AudioType.UNKNOWN;
         }
     }
+
+    public void PlayClip(AudioClip clip)
+    {
+        AudioSource.PlayClipAtPoint(clip, Camera.main.transform.position, SE音量);
+    }
     
 }
 

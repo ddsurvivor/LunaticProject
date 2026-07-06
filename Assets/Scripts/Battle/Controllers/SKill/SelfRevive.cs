@@ -57,9 +57,8 @@ public class SelfRevive : MonoBehaviour
             {
                 // 如果是聚能杀死，则奖励玩家一个插件
                 GM.Ins.PLAYERPROFILE.AddComponentToInventory(compId);
-                ComponentData compData = GM.Ins.DM.componentConfig.GetData(compId);
-                // 显示提示
-                if (BattleScene.Ins != null) BattleScene.Ins.UM.ShowItemGet(compData);
+                
+                
             }
         }
 

@@ -334,6 +334,9 @@ public class PLAYERPROFILE
         }
         else
         {
+            // 显示提示
+            ComponentData compData = GM.Ins.DM.componentConfig.GetData(componentId);
+            if (BattleScene.Ins != null) BattleScene.Ins.UM.ShowItemGet(compData);
             Debug.LogWarning($"组件 {componentId} 已经在仓库中");
         }
     }
