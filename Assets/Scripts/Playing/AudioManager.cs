@@ -10,8 +10,8 @@ using UnityEngine.Networking;
 public class AudioManager : SerializedMonoBehaviour
 {
     //public static AudioManager instance;
-    public float BGM音量 => Options.Volume_BGM;
-    public float SE音量 => Options.Volume_SE; 
+    public float BGM音量 => GM.Ins.DM.settingsData.bgmVolume;//=> Options.Volume_BGM;
+    public float SE音量  => GM.Ins.DM.settingsData.sfxVolume;//=> Options.Volume_SE; 
     
     private AudioSource bgmAudioSource;  
     private GameObject seAudioSourcePool;
@@ -23,8 +23,8 @@ public class AudioManager : SerializedMonoBehaviour
 
     public AudioConfig audioConfig;
     public AudioMixer audioMixer;
-    public AudioMixerGroup bgmMixerGroup;// 背景音乐
-    public AudioMixerGroup sfxMixerGroup;// 音效
+    //public AudioMixerGroup bgmMixerGroup;// 背景音乐
+    //public AudioMixerGroup sfxMixerGroup;// 音效
 
     public void 初始化()
     {
