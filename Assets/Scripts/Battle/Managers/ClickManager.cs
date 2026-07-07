@@ -29,13 +29,18 @@ public class ClickManager : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             // 判定是否点击到UI
-            /*if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
             {
                 // 如果点击到的UI是RangUI，则不return
-                return;
-            }*/
-            if(BattleScene.Ins.UM.pieceActionListPanel.gameObject.activeInHierarchy)
-            {return;}
+                if (UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject !=
+                    null ){
+                    
+                    //Debug.LogWarning($"点击到了UI:{UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()}，return");
+                    return;
+                }
+            }
+            /*if(BattleScene.Ins.UM.pieceActionListPanel.gameObject.activeInHierarchy)
+            {return;}*/
             if(_selectedPiece!=null && _selectedPiece.IsUsingSkill) return;
 
             if (!_isDragging)

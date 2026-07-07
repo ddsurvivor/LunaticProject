@@ -119,11 +119,11 @@ public class PieceController : MonoBehaviour
             _pieceData = pieceData;
             availableSkills = pieceData?.skillPacks;
             unitAttrCenter.SetData(_pieceData, playerData);
-            if (isPlayerPiece && GM.Ins.pieceHPInherit)
+            if (isPlayerPiece)//&& GM.Ins.pieceHPInherit
             {
                 Player playerData = GM.Ins.PLAYERPROFILE.GetPlayer(pieceID - 1);
-                if (playerData.curHealth > 0)
-                {
+                if (playerData.curHealth < 0)
+                /*{
                     // 只有当玩家当前血量大于0时才继承血量，否则按照默认值初始化，避免玩家死亡后再次进入战斗时棋子带着异常血量
                     unitAttrCenter.SetValues(playerData.curHealth, playerData.curMana
                         , playerData.curAmmo);
@@ -132,7 +132,7 @@ public class PieceController : MonoBehaviour
                 {
                     // 默认初始化
                 }
-                else
+                else*/
                 {
                     playerData.deadCount++;
                     // 触发角色死亡惩罚初始化：上一场战斗中死亡，这一场战斗中变成负伤状态
@@ -920,8 +920,11 @@ public class PieceController : MonoBehaviour
         {
             // 主动释放技能直接进入技能释放流程
             SkillPack skillPack = GM.Ins.DM.skillPackListSO.GetSkillPack(itemData.skillPack);
-            StartItemAttack(skillPack);
-            return;
+            if (skillPack != null)
+            {
+                StartItemAttack(skillPack);
+                return;
+            }
         }
         switch (itemData.itemName)
         {

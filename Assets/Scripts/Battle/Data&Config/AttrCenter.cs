@@ -37,6 +37,17 @@ public class AttrCenter
         }
         return 0;
     }
+    public void SetArmor(DamageType damageType, int value)
+    {
+        if (_armorDic.ContainsKey(damageType))
+        {
+            _armorDic[damageType] = value;
+        }
+        else
+        {
+            _armorDic.Add(damageType, value);
+        }
+    }
 
     // public int GetRange(bool isNormalAtk)
     // {

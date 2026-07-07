@@ -12,6 +12,6 @@ public class SkillPackListSO : SerializedScriptableObject
 
     public SkillPack GetSkillPack(string skillName)
     {
-        return skillPacks.Find(sp => sp.skillName == skillName) ?? throw new InvalidOperationException($"No SkillPack found with name: {name}");
+        return skillPacks.Find(sp => sp.skillName == skillName);
     }
 }

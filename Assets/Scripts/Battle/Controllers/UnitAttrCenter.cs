@@ -102,7 +102,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         _moveRange = pieceData.moveRange;
         elementType = pieceData.elementType;
         _maxManaPoint = pieceData.maxMana;
-        _manaPoint = pieceData.initialMana;
+        //_manaPoint = pieceData.initialMana;
         critRate = pieceData.critRate;
         critDamageRate = pieceData.critDamageRate;
         if (playerData != null)
@@ -115,6 +115,18 @@ public class UnitAttrCenter : SerializedMonoBehaviour
             // 其他属性调整可以在这里添加
             critRate += (playerData.AccessAttribute(3, AttrOp.Get) + playerData.AccessAttribute(4, AttrOp.Get) ) * 2; // 技巧每点增加1%暴击率
         }
+        _curHealth = _maxHealth;
+        _manaPoint = _maxManaPoint;
+        
+        // 护甲值
+        if (pieceData._armorDic != null && pieceData._armorDic.Count > 0)
+        {
+            foreach (var pair in pieceData._armorDic)
+            {
+                _attr.SetArmor(pair.Key, pair.Value);
+            }
+        }
+        
         // 应用特殊修改数值
         if (pieceData.attrDic != null && pieceData.attrDic.Count > 0)
         {

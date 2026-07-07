@@ -28,5 +28,15 @@
 
             return pieceData;
         }
+
+        //[Button("测试修改数据")]
+        public void TestSetData()
+        {
+            // 把所有棋子数据的暴击倍率，改为130
+            foreach (var pieceData in pieceDataList)
+            {
+                pieceData.critDamageRate = 130;
+            }
+        }
     }
     
