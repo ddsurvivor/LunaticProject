@@ -173,6 +173,21 @@ public class AIController : PlayerController
                         // 如果在远程攻击范围的60%内则逃跑
                         EnemyMove(aiPiece, target.transform.position, rangedRange, true);
                     }
+                    else
+                    {
+                        // 判定弹药是否足够
+                        if (aiPiece.unitAttrCenter.AmmoCount <= 0)
+                        {
+                            // 重新装填
+                            aiPiece.ReloadAmmo();
+                        }
+                        else
+                        {
+                            // 远程攻击
+                            aiPiece.StartNormalAttack(true);
+                            aiPiece.CastAttackOnTarget(target);
+                        }
+                    }
                 }
             }
             else
@@ -345,7 +360,10 @@ public class AIController : PlayerController
         if(!canMove) return;
         aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
         BattleScene.Ins.BM.moveManager.ExecuteMove(aiPiece.gameObject
-            , () => { aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle); });
+            , () =>
+            {
+                aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
+            });
         aiPiece.CheckFace(targetPos - currentPos);
         
         aiPiece.PlayAudio(ActionType.移动);
@@ -367,8 +385,8 @@ public class AIController : PlayerController
             return;
         }
 
-        Debug.Log($"敌人{aiPiece.name}移动到梯子位置 {ladderArea.GetNearPos(aiPiece.transform.position)}");
-        EnemyMove(aiPiece, ladderArea.GetNearPos(aiPiece.transform.position), 0f);
+        Debug.Log($"敌人{aiPiece.name}移动到梯子位置 {targetPos}");
+        EnemyMove(aiPiece, targetPos, 0f);
     }
 
     /// <summary>

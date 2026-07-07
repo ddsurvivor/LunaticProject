@@ -50,7 +50,7 @@ public class PlayerController : SerializedMonoBehaviour
         // 所有棋子重置状态
         foreach (var piece in pieces)
         {
-            if (piece.gameObject.activeInHierarchy)
+            if (piece.gameObject.activeInHierarchy && !piece.isDead)
             {
                 piece.TurnStart();
                 BattleScene.Ins.BM.buffManager.ProcessBuffs(piece.unitAttrCenter);

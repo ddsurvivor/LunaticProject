@@ -63,12 +63,15 @@ public class LadderArea : InteractArea
 
     public Vector3 GetNearPos(Vector3 pos)
     {
+        // 随机的xz偏移量
+        Vector3 offset = new Vector3(Random.Range(-1.5f, 1.5f), 0, Random.Range(-1.5f, 1.5f));
+        
         if (Mathf.Abs(pos.y - upPos.position.y) < 1f)
         {
-            return upPos.position;
+            return upPos.position +offset;
         }
         
-        return downPos.position;
+        return downPos.position +offset;
     }
 
     // public void LeaveSlot(PieceController target)
