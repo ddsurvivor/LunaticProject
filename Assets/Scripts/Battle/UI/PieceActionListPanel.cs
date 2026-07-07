@@ -468,6 +468,6 @@ public class PieceActionListPanel : SerializedMonoBehaviour
 
     private void OnDisable()
     {
-        BattleScene.Ins.UM.skillTooltipUI.HideTooltip();
+        if(BattleScene.Ins!=null) BattleScene.Ins.UM.skillTooltipUI.HideTooltip();
     }
 }

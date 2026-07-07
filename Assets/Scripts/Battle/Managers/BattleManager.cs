@@ -1352,7 +1352,11 @@ public class BattleManager : MonoBehaviour
             }
             finally
             {
-                DOVirtual.DelayedCall(2f, () => { _isFlankAttacking = false; });
+                DOVirtual.DelayedCall(2f, () =>
+                {
+                    _isFlankAttacking = false; 
+                    tutorialManager.TriggerFirstTutorial(FirstTutorialType.FirstStrick); // 触发夹击教程
+                },false);
             }
         }
     }

@@ -35,6 +35,30 @@ public class TutorialDatabaseSO : ScriptableObject
         return data;
     }
 
+    public TutorialData GetTurorial(FirstTutorialType firstTutorialType)
+    {
+        if (firstTutorialType == FirstTutorialType.None) return null;
+
+        // 首次使用时构建字典缓存
+        if (_lookup == null)
+        {
+            _lookup = new Dictionary<string, TutorialData>(allTutorials.Count);
+            foreach (var tut in allTutorials)
+            {
+                if (!string.IsNullOrEmpty(tut.triggerLevelName))
+                    _lookup[tut.triggerLevelName] = tut;
+            }
+        }
+
+        foreach (var tut in allTutorials)
+        {
+            if (tut.firstTutorialType == firstTutorialType)
+                return tut;
+        }
+
+        return null;
+    }
+
     /// <summary>
     /// 可选接口：检查某个关卡是否有教程
     /// </summary>
@@ -49,6 +73,9 @@ public class TutorialData
 {
     [Header("触发关卡名称")]
     public string triggerLevelName;
+    
+    [LabelText("首次教程类型")]
+    public FirstTutorialType firstTutorialType = FirstTutorialType.None;
 
     [Header("教程页面列表")]
     public List<TutorialPage> pages = new List<TutorialPage>();
@@ -71,9 +98,9 @@ public class TutorialPage
 public enum FirstTutorialType
 {
     [LabelText("无")] None,
-    [LabelText("初次战斗")]FirstBattle,
-    [LabelText("初次聚能")]FirstBurst,
-    [LabelText("初次技能")]FirstSkill,
+    //[LabelText("初次战斗")]FirstBattle,
+    //[LabelText("初次聚能")]FirstBurst,
+    //[LabelText("初次技能")]FirstSkill,
     [LabelText("初次获得插件")]FirstComp,
     [LabelText("初次夹击")]FirstStrick,
 }
