@@ -100,6 +100,9 @@ public enum ItemType
     [LabelText("回血特效")]
     HEAL_EFFECT = 53, // 回血特效
     
+    [LabelText("打印机凝胶")]
+    PRINTER_GEL = 54, // 打印机凝胶
+    
     [LabelText("召唤无人机")]
     SUMMON_DRONE = 100, // 召唤无人机
 }
