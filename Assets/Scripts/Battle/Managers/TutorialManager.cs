@@ -32,6 +32,19 @@ public class TutorialManager : MonoBehaviour
         }
         return false;
     }
+    
+    public void TriggerFirstTutorial(FirstTutorialType type)
+    {
+        
+        TutorialData data = database.GetTurorial(type);
+        // 已看过则跳过
+        if (GM.Ins.PLAYERPROFILE.seenTutorials.Contains(data.triggerLevelName))
+            return;
+        if (data != null)
+        {
+            tutorialPanel.Show(data, data.triggerLevelName, false);
+        }
+    }
 
     
 }

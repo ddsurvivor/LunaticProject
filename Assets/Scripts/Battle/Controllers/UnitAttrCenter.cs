@@ -342,6 +342,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
             {
                 // 扣除道具
                 GM.Ins.PLAYERPROFILE.CostItem(item.itemName, item.itemNum);
+                BattleScene.Ins.BM.tipTextManager.ShowTip(transform, $"消耗道具{item.itemName}x{item.itemNum}");
                 Debug.Log($"{gameObject.name}消耗道具{item.itemName}，消耗数量{item.itemNum}");
                 return true;
             }
