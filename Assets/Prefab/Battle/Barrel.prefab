@@ -270,7 +270,7 @@ MonoBehaviour:
     isRotate: 0
     bulletVFXType: 0
     attackPacks:
-    - damage: 40
+    - damage: 25
       damageType: 2
       isCritical: 0
     atkTimes: 1
@@ -288,6 +288,7 @@ MonoBehaviour:
   highlightEffect: {fileID: 4526656481513676065}
   pieceController: {fileID: 3628677100636854144}
   needInit: 1
+  selfDestroy: 1
 --- !u!65 &3628677100636854150
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -554,17 +555,23 @@ MonoBehaviour:
     maxMana: 0
     dropItemList: []
     dropRate: 0
+    passiveSkillTypes: 
     weaponIcon: {fileID: 0}
+    orderProfiles: []
   playerData:
+    pieceId: 0
     curHealth: 0
     curAmmo: 0
     curMana: 0
+    deadCount: 0
     spriteName: 
     normalSlots: 000000000000000000000000
     weaponSlots: 0000000000000000
   pieceID: 0
   player: {fileID: 0}
   isPlayerPiece: 0
+  isUsingOrder: 0
+  isGrauding: 0
   _attackPack:
     damage: 0
     damageType: 0
@@ -601,6 +608,7 @@ MonoBehaviour:
   cantControl: 0
   ableMove: 1
   deadNotDelete: 0
+  ableStrick: 0
   OnInit:
     m_PersistentCalls:
       m_Calls: []
