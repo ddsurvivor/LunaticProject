@@ -12,7 +12,7 @@ public class SelfRevive : MonoBehaviour
     public EnemyController piece;
     [LabelText("复活恢复百分比")] [Range(0, 100)] public int revivePercent = 50; // 复活时恢复的生命百分比
     [ReadOnly] public bool isFakeDead = false; // 是否处于假死状态
-    [ReadOnly] public int reviveCount = 1; // 可复活次数，默认为1次
+    [ReadOnly] public int reviveCount = 5; // 可复活次数，默认为1次
 
     public List<Sprite> deadSpriteList; // 死亡时的图片列表
     public List<Sprite> reviveSpriteList; // 复活时的图片列表
@@ -57,8 +57,6 @@ public class SelfRevive : MonoBehaviour
             {
                 // 如果是聚能杀死，则奖励玩家一个插件
                 GM.Ins.PLAYERPROFILE.AddComponentToInventory(compId);
-                
-                
             }
         }
 
@@ -73,6 +71,6 @@ public class SelfRevive : MonoBehaviour
                     BattleScene.Ins.BM.PlayerCheckWin();
                 });
             });
-        });
+        },false);
     }
 }
