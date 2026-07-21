@@ -263,7 +263,21 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         }
     }
 
-    public bool CostMP(int costPoint = 1)
+    public bool CostMP(ActionType actionType)
+    {
+        int costPoint = GM.Ins.DM.gameConstSO.GetActionPointCost(actionType);
+        if (actionType == ActionType.待机)
+            costPoint = _curMovePoint;
+        if (_curMovePoint >= costPoint)
+        {
+            _curMovePoint -= costPoint;
+            Debug.Log($"{gameObject.name}执行{actionType}消耗行动力{costPoint}，剩余行动力{_curMovePoint}");
+            BattleScene.Ins.UM.OnPieceStateChance(pc);
+            return true;
+        }
+        return false;
+    }
+    public bool CostMP(int costPoint)
     {
         if (_curMovePoint >= costPoint)
         {
@@ -272,12 +286,12 @@ public class UnitAttrCenter : SerializedMonoBehaviour
             BattleScene.Ins.UM.OnPieceStateChance(pc);
             return true;
         }
-
         return false;
     }
 
-    public bool HasMP(int costPoint = 1)
+    public bool HasMP(ActionType actionType)
     {
+        int costPoint = GM.Ins.DM.gameConstSO.GetActionPointCost(actionType);
         return _curMovePoint >= costPoint;
     }
 
@@ -327,6 +341,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         if (_manaPoint > _maxManaPoint) _manaPoint = _maxManaPoint;
         Debug.Log($"恢复能量{manaAmount}");
         BattleScene.Ins.UM.OnPieceStateChance(pc);
+        ObjectPool.Ins.GenerateObject(ItemType.CHARGE_EFFECT, pc.transform.position+Vector3.up*2f, Quaternion.identity);
     }
 
     public bool CostItem(List<ItemPack> itemPacks)

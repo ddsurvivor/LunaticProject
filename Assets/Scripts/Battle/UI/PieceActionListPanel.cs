@@ -9,12 +9,13 @@ using UnityEngine.UI;
 
 public class PieceActionListPanel : SerializedMonoBehaviour
 {
-   [SerializeField] [ReadOnly]
-    private PieceController pc;
+    [SerializeField] [ReadOnly] private PieceController pc;
     public List<Button> actionButtons;
     private Dictionary<ActionType, Button> actionButtonDic = new();
     public GameObject skillListPanel;
+
     public List<Button> skillButtons;
+
     //public Dictionary<ActionType, UnityAction> actionDic = new();
     private Sequence showSequence;
 
@@ -31,7 +32,17 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 ActionType capturedActionType = actionType; // 捕获当前的actionType
                 actionButtonDic[actionType] = button;
                 button.onClick.AddListener(() => OnActionButtonClicked(capturedActionType));
-                button.GetComponentInChildren<Text>().text = actionType.ToString();
+                ActionBtn actionBtnComponent = button.GetComponent<ActionBtn>();
+                if (actionBtnComponent != null)
+                {
+                    button.GetComponent<ActionBtn>().actionNameText.text = actionType.ToString();
+                    button.GetComponent<ActionBtn>().costText.text =
+                        GM.Ins.DM.gameConstSO.GetActionPointCost(actionType) + "AP";
+                }
+                else
+                {
+                    button.GetComponentInChildren<Text>().text = actionType.ToString();
+                }
             }
         }
     }
@@ -76,14 +87,16 @@ public class PieceActionListPanel : SerializedMonoBehaviour
 
     public void Update()
     {
-        if (pc!= null)
+        if (pc != null)
         {
             // 计算棋子在屏幕中的位置，更新行动面板的位置
             Vector3 screenPos = Camera.main.WorldToScreenPoint(pc.transform.position);
             float offsetX = 150;
-            if (screenPos.x + 400f > 1920f) {
+            if (screenPos.x + 400f > 1920f)
+            {
                 offsetX = -220f;
             }
+
             transform.position = screenPos + new Vector3(offsetX, 100, 0);
         }
     }
@@ -105,7 +118,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
     //     }
     //     skillListPanel.SetActive(false);
     // }
-    
+
     /// <summary>
     /// 显示特定棋子的行动面板
     /// </summary>
@@ -154,13 +167,13 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 // 动态绑定事件
                 Button btn = actionButtonDic[interactArea.actionType];
                 btn.onClick.RemoveAllListeners();
-                
-                InteractArea currentArea = interactArea; 
+
+                InteractArea currentArea = interactArea;
                 btn.onClick.AddListener(() =>
                 {
-                    if (!pc.unitAttrCenter.CostMP()) return;
+                    if (!pc.unitAttrCenter.CostMP(ActionType.交互)) return;
                     currentArea.TriggerAction(pc);
-                    HidePanel(); 
+                    HidePanel();
                 });
             }
         }
@@ -205,13 +218,13 @@ public class PieceActionListPanel : SerializedMonoBehaviour
 
         // 基础时间配置
         float totalDuration = 0.5f;
-        float perBtnDuration = 0.25f; 
+        float perBtnDuration = 0.25f;
         float interval = count > 1 ? (totalDuration - perBtnDuration) / (count - 1) : 0f;
 
         for (int i = 0; i < count; i++)
         {
             Transform t = targets[i];
-            
+
             // 获取或添加 CanvasGroup 用于控制透明度
             CanvasGroup cg = t.GetComponent<CanvasGroup>();
             if (cg == null) cg = t.gameObject.AddComponent<CanvasGroup>();
@@ -286,7 +299,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
 
     private void OnActionButtonClicked(ActionType actionType)
     {
-        if(!pc.unitAttrCenter.HasMP())return;
+        if (!pc.unitAttrCenter.HasMP(actionType)) return;
         BattleScene.Ins.UM.pieceInfoPanel.StartMpIconsBlink();
         Debug.Log($"Action Button Clicked: {actionType}");
         // 在这里处理按钮点击事件
@@ -317,14 +330,14 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 pc.StartNormalAttack(true);
                 break;
             case ActionType.重新装填:
-                pc.unitAttrCenter.CostMP();
+                pc.unitAttrCenter.CostMP(ActionType.重新装填);
                 pc.ReloadAmmo();
                 break;
             case ActionType.道具:
                 //pc.PlayAudio(actionType);
                 // 打开道具二级菜单
                 OpenItemPanel();
-                 return;
+                return;
                 break;
             case ActionType.交互:
                 pc.PlayAudio(actionType);
@@ -337,9 +350,10 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 Debug.LogWarning($"{actionType} 未实现");
                 break;
         }
+
         gameObject.SetActive(false);
     }
-    
+
     private void OpenSkillListPanel()
     {
         skillListPanel.SetActive(true);
@@ -348,30 +362,45 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             skillButton.gameObject.SetActive(false);
             skillButton.onClick.RemoveAllListeners();
         }
+
         List<Transform> targetsToAnimate = new List<Transform>();
         for (int j = 0; j < pc.availableSkills.Count; j++)
         {
             // 更新所有技能按钮
-            if (j<skillButtons.Count)
+            if (j < skillButtons.Count)
             {
                 int capturedIndex = j; // 捕获当前索引
                 skillButtons[j].gameObject.SetActive(true);
                 targetsToAnimate.Add(skillButtons[j].transform); // 只塞入需要表现的组件
                 skillButtons[j].enabled = pc.SkillAvailable(pc.availableSkills[capturedIndex]);
-                skillButtons[j].GetComponentInChildren<Text>().text = pc.availableSkills[capturedIndex].skillName;
+                ActionBtn actionBtnComponent =  skillButtons[j].GetComponent<ActionBtn>();
+                if (actionBtnComponent != null)
+                {
+                    skillButtons[j].GetComponentInChildren<Text>().text =
+                        pc.availableSkills[capturedIndex].skillName;
+                    skillButtons[j].GetComponent<ActionBtn>().costText.text =
+                        GM.Ins.DM.gameConstSO.GetActionPointCost(ActionType.技能) + "AP";
+                }
+                else
+                {
+                    skillButtons[j].GetComponentInChildren<Text>().text =
+                        pc.availableSkills[capturedIndex].skillName;
+                }
                 skillButtons[j].onClick.RemoveAllListeners();
-                skillButtons[j].onClick.AddListener(() => {
+                skillButtons[j].onClick.AddListener(() =>
+                {
                     gameObject.SetActive(false);
                     pc.StartSkillAttack(pc.availableSkills[capturedIndex]);
                     BattleScene.Ins.UM.skillTooltipUI.HideTooltip();
                 });
-                
+
                 HoverScale hoverScale = skillButtons[j].GetComponent<HoverScale>();
                 hoverScale.onHoverEnter.RemoveAllListeners();
                 hoverScale.onHoverExit.RemoveAllListeners();
                 hoverScale.onHoverEnter.AddListener(() =>
                 {
-                    BattleScene.Ins.UM.skillTooltipUI.ShowTooltip(pc.availableSkills[capturedIndex]);
+                    BattleScene.Ins.UM.skillTooltipUI.ShowTooltip(
+                        pc.availableSkills[capturedIndex]);
                 });
                 hoverScale.onHoverExit.AddListener(() =>
                 {
@@ -379,7 +408,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 });
             }
         }
-        
+
         PlayShowAnimation(targetsToAnimate);
     }
 
@@ -395,6 +424,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             skillButton.gameObject.SetActive(false);
             skillButton.onClick.RemoveAllListeners();
         }
+
         List<Transform> targetsToAnimate = new List<Transform>();
         for (int j = 0; j < GM.Ins.PLAYERPROFILE.itemPacks.Count; j++)
         {
@@ -403,21 +433,33 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             ItemData itemData =
                 GM.Ins.marketSystem.marketItemListSO.GetData(GM.Ins.PLAYERPROFILE.itemPacks[j]
                     .itemName);
-            if (itemData!=null && itemData.equipType == EquipType.Consumable)
+            if (itemData != null && itemData.equipType == EquipType.Consumable)
             {
                 int capturedIndex = j; // 捕获当前索引
                 int num = GM.Ins.PLAYERPROFILE.itemPacks[j].itemNum;
                 skillButtons[j].gameObject.SetActive(true);
                 targetsToAnimate.Add(skillButtons[j].transform); // 只塞入需要表现的组件
                 skillButtons[j].enabled = pc.ItemAvailable(itemData);
-                skillButtons[j].GetComponentInChildren<Text>().text =
-                    itemData.itemName.ToString() + $" x{num}";
+                ActionBtn actionBtnComponent =  skillButtons[j].GetComponent<ActionBtn>();
+                if (actionBtnComponent != null)
+                {
+                    skillButtons[j].GetComponentInChildren<Text>().text =
+                        itemData.itemName.ToString() + $" x{num}";
+                    skillButtons[j].GetComponent<ActionBtn>().costText.text =
+                        GM.Ins.DM.gameConstSO.GetActionPointCost(ActionType.道具) + "AP";
+                }
+                else
+                {
+                    skillButtons[j].GetComponentInChildren<Text>().text =
+                        itemData.itemName.ToString() + $" x{num}";
+                }
                 skillButtons[j].onClick.RemoveAllListeners();
-                skillButtons[j].onClick.AddListener(() => {
+                skillButtons[j].onClick.AddListener(() =>
+                {
                     gameObject.SetActive(false);
                     pc.UseItem(itemData);
                 });
-                
+
                 HoverScale hoverScale = skillButtons[j].GetComponent<HoverScale>();
                 hoverScale.onHoverEnter.RemoveAllListeners();
                 hoverScale.onHoverExit.RemoveAllListeners();
@@ -431,7 +473,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 });
             }
         }
-        
+
         PlayShowAnimation(targetsToAnimate);
     }
 
@@ -444,30 +486,46 @@ public class PieceActionListPanel : SerializedMonoBehaviour
             skillButton.gameObject.SetActive(false);
             skillButton.onClick.RemoveAllListeners();
         }
+
         List<Transform> targetsToAnimate = new List<Transform>();
         for (int i = 0; i < pc.pieceData.orderProfiles.Count; i++)
         {
             int index = i;
             skillButtons[index].gameObject.SetActive(true);
-            skillButtons[index].GetComponentInChildren<Text>().text = 
-                pc.pieceData.orderProfiles[index].orderName;
+            targetsToAnimate.Add(skillButtons[index].transform); // 只塞入需要表现的组件
+            ActionBtn actionBtnComponent =  skillButtons[index].GetComponent<ActionBtn>();
+            if (actionBtnComponent != null)
+            {
+                skillButtons[index].GetComponentInChildren<Text>().text =
+                    pc.pieceData.orderProfiles[index].orderName;
+                skillButtons[index].GetComponent<ActionBtn>().costText.text =
+                    GM.Ins.DM.gameConstSO.GetActionPointCost(ActionType.警戒指令) + "AP";
+            }
+            else
+            {
+                skillButtons[index].GetComponentInChildren<Text>().text =
+                    pc.pieceData.orderProfiles[index].orderName;
+            }
+            
             skillButtons[index].enabled = true;
             skillButtons[index].onClick.RemoveAllListeners();
-            skillButtons[index].onClick.AddListener(() => {
+            skillButtons[index].onClick.AddListener(() =>
+            {
                 gameObject.SetActive(false);
                 // 进行警戒功能
                 pc.StartOrderGraud(pc.pieceData.orderProfiles[index]);
             });
-            
+
             HoverScale hoverScale = skillButtons[index].GetComponent<HoverScale>();
             hoverScale.onHoverEnter.RemoveAllListeners();
             hoverScale.onHoverExit.RemoveAllListeners();
         }
+
         PlayShowAnimation(targetsToAnimate);
     }
 
     private void OnDisable()
     {
-        if(BattleScene.Ins!=null) BattleScene.Ins.UM.skillTooltipUI.HideTooltip();
+        if (BattleScene.Ins != null) BattleScene.Ins.UM.skillTooltipUI.HideTooltip();
     }
 }

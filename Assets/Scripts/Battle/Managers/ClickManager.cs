@@ -324,7 +324,7 @@ public class ClickManager : MonoBehaviour
             Debug.Log("停止拖动棋子");
             _isDragging = false;
             BattleScene.Ins.BM.cameraController.SetFollow(_selectedPiece.transform);
-            _selectedPiece.unitAttrCenter.CostMP();
+            _selectedPiece.unitAttrCenter.CostMP(ActionType.移动);
             _selectedPiece.StopDrag();
             _rangeUI.CloseRange();
             //_selectedPiece = null;
@@ -338,7 +338,7 @@ public class ClickManager : MonoBehaviour
             Debug.Log("停止拖动棋子");
             _isDragging = false;
             BattleScene.Ins.BM.cameraController.SetFollow(_selectedPiece.transform);
-            _selectedPiece.unitAttrCenter.CostMP();
+            _selectedPiece.unitAttrCenter.CostMP(ActionType.移动);
             Vector3 targetPos = new Vector3(_rangeUI.moveIcon.transform.position.x,
                 _selectedPiece.transform.position.y,
                 _rangeUI.moveIcon.transform.position.z);

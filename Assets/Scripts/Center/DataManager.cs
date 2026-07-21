@@ -21,6 +21,7 @@ public class DataManager : SerializedMonoBehaviour
     public PieceDataListSO pieceDataListSO;
     public PassiveSkillConfigSO passiveSkillConfigSO;
     public SkillPackListSO skillPackListSO;
+    public GameConstSO gameConstSO;
     
     public void Init()
     {

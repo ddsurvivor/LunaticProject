@@ -569,7 +569,7 @@ public class PieceController : MonoBehaviour
         DOVirtual.DelayedCall(0.6f
             , () =>
             {
-                if (!unitAttrCenter.CostMP()) return;
+                if (!unitAttrCenter.CostMP(_curAtkType)) return;
                 BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack,
                     atkPos !=null ? atkPos.position : Vector3.zero
                     , _curAtkType);
@@ -797,7 +797,7 @@ public class PieceController : MonoBehaviour
         sequence.AppendCallback(
             () =>
             {
-                if (!unitAttrCenter.CostMP()) return;
+                if (!unitAttrCenter.CostMP(ActionType.技能)) return;
                 if (!unitAttrCenter.CostMana(_skillPack.mpCost))
                 {
                     Debug.LogError("能量值不足");
@@ -882,7 +882,7 @@ public class PieceController : MonoBehaviour
     public bool ItemAvailable(ItemData itemData)
     {
         if (itemData == null) return false;
-        if (!unitAttrCenter.HasMP()) return false;
+        if (!unitAttrCenter.HasMP(ActionType.道具)) return false;
         switch (itemData.useType)
         {
             case UseType.InBattle:
@@ -913,7 +913,7 @@ public class PieceController : MonoBehaviour
     {
         var items = new List<ItemPack>() { new ItemPack(itemData.itemName, 1) };
         if (!unitAttrCenter.HasItem(items)) return;
-        if (!unitAttrCenter.HasMP()) return;
+        if (!unitAttrCenter.HasMP(ActionType.道具)) return;
         //BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
         unitAttrCenter.CostItem(items);
         if (itemData.useType == UseType.ActiveInBattle)
@@ -956,7 +956,7 @@ public class PieceController : MonoBehaviour
                 throw new ArgumentOutOfRangeException();
         }
         
-        if (!unitAttrCenter.CostMP()) return;
+        if (!unitAttrCenter.CostMP(ActionType.道具)) return;
         //BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
     }
     
