@@ -409,16 +409,21 @@ MonoBehaviour:
     dropRate: 0
     passiveSkillTypes: 
     weaponIcon: {fileID: 0}
+    orderProfiles: []
   playerData:
+    pieceId: 0
     curHealth: 0
     curAmmo: 0
     curMana: 0
+    deadCount: 0
     spriteName: 
     normalSlots: 000000000000000000000000
     weaponSlots: 0000000000000000
   pieceID: 1
   player: {fileID: 0}
   isPlayerPiece: 1
+  isUsingOrder: 0
+  isGrauding: 0
   _attackPack:
     damage: 0
     damageType: 0
@@ -455,6 +460,7 @@ MonoBehaviour:
   cantControl: 0
   ableMove: 1
   deadNotDelete: 0
+  ableStrick: 0
   OnInit:
     m_PersistentCalls:
       m_Calls: []
@@ -799,6 +805,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 6675907814ded3d43af53b1c455bcc21, type: 3}
   - {fileID: 21300000, guid: 698236e4a46bbf84bbadb58ecc27c2d0, type: 3}
   meleeSprites:
+  - {fileID: 21300000, guid: dbe6f829ebe806f48b7f2e667d960c50, type: 3}
   - {fileID: 21300000, guid: 853864d11f94fce43b717cdc9c548da8, type: 3}
   - {fileID: 21300000, guid: ca2ff2df8e87be8459b0fed6aa5a6af1, type: 3}
   rangeSprites:
@@ -812,12 +819,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: fd2e4830f312c474d89c7206a3643a4f, type: 3}
   - {fileID: 21300000, guid: 73d1e7627983a6543ac25f1ae0b487cc, type: 3}
   - {fileID: 21300000, guid: 8d43e5631695146458ba6db836b2197e, type: 3}
-  idleBackSprite: {fileID: 21300000, guid: 78e9d6e99ed05774db9f4eb466b02694, type: 3}
-  moveBackSprite: {fileID: 0}
-  attackBackSprite: {fileID: 0}
-  shootBackSprite: {fileID: 0}
-  dodgeBackSprite: {fileID: 0}
-  hitBackSprite: {fileID: 0}
   path: "Assets/A\u7F8E\u672F/BattleSprites/\u9A6C\u8D5B\u6210\u5E74\u52A8\u4F5C"
   pieceName: PC03A
 --- !u!195 &647273712697752979

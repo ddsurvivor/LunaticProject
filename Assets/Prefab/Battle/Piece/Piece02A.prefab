@@ -452,7 +452,9 @@ MonoBehaviour:
     dropRate: 0
     passiveSkillTypes: 
     weaponIcon: {fileID: 0}
+    orderProfiles: []
   playerData:
+    pieceId: 0
     curHealth: 0
     curAmmo: 0
     curMana: 0
@@ -463,6 +465,8 @@ MonoBehaviour:
   pieceID: 102
   player: {fileID: 0}
   isPlayerPiece: 1
+  isUsingOrder: 0
+  isGrauding: 0
   _attackPack:
     damage: 0
     damageType: 0
@@ -499,6 +503,7 @@ MonoBehaviour:
   cantControl: 0
   ableMove: 1
   deadNotDelete: 0
+  ableStrick: 0
   OnInit:
     m_PersistentCalls:
       m_Calls: []
@@ -859,16 +864,18 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 39201879e065b274ab25a445f1c575a0, type: 3}
   - {fileID: 21300000, guid: 7b39a0617844bb8458791ff8b3dedf8c, type: 3}
   moveSprite:
-  - {fileID: 21300000, guid: 0c3d0fb3278d06148b10abda812e2012, type: 3}
-  - {fileID: 21300000, guid: 8c1521b56db4eef46a2e8d550179f217, type: 3}
-  - {fileID: 21300000, guid: 54f8fc1c84972714db45dbf7af62b38a, type: 3}
-  - {fileID: 21300000, guid: 19e830c9254538748bb3fab45cecfaa8, type: 3}
-  - {fileID: 21300000, guid: b021be59d0efb964da6d97e4698e615c, type: 3}
-  - {fileID: 21300000, guid: 4004343aec41aba4796b19c29e21ded8, type: 3}
-  - {fileID: 21300000, guid: e3768e8be95d47044904fd6703b35d97, type: 3}
-  - {fileID: 21300000, guid: 900a6dd1b5ed6944e8284ec2720f9180, type: 3}
+  - {fileID: 21300000, guid: c945dbeea22b2ee45887bb7aaef67a9d, type: 3}
+  - {fileID: 21300000, guid: 23de6521adf6c6845b8eba4c58eedf4b, type: 3}
+  - {fileID: 21300000, guid: 694f5795c07523c4793ae5763f232ecc, type: 3}
+  - {fileID: 21300000, guid: 51db6e266cbb4f849a01935179cdb681, type: 3}
+  - {fileID: 21300000, guid: 6ce3543ebbec2d54580c40e1b4c60357, type: 3}
+  - {fileID: 21300000, guid: 772499d64c0dd914bbfa0220e16cdad8, type: 3}
+  - {fileID: 21300000, guid: fb03c583b30977e47bf5cef1f6c6c652, type: 3}
+  - {fileID: 21300000, guid: 1740e6eaf5b8b1a4ea1b2dd11fc9d9f5, type: 3}
   meleeSprites:
+  - {fileID: 21300000, guid: 23de6521adf6c6845b8eba4c58eedf4b, type: 3}
   - {fileID: 21300000, guid: 5d711eba67d122045a483b5de7ff2ea7, type: 3}
+  - {fileID: 21300000, guid: 5ac94919e97f7e04089bf267a961bd65, type: 3}
   rangeSprites:
   - {fileID: 21300000, guid: c18c9ccdfa3c75d4a93025bd055237e8, type: 3}
   - {fileID: 21300000, guid: c817f78c467f83b47a20568524b9ce89, type: 3}
