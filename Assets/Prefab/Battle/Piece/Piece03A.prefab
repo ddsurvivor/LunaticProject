@@ -452,7 +452,9 @@ MonoBehaviour:
     dropRate: 0
     passiveSkillTypes: 
     weaponIcon: {fileID: 0}
+    orderProfiles: []
   playerData:
+    pieceId: 0
     curHealth: 0
     curAmmo: 0
     curMana: 0
@@ -463,6 +465,8 @@ MonoBehaviour:
   pieceID: 103
   player: {fileID: 0}
   isPlayerPiece: 1
+  isUsingOrder: 0
+  isGrauding: 0
   _attackPack:
     damage: 0
     damageType: 0
@@ -499,6 +503,7 @@ MonoBehaviour:
   cantControl: 0
   ableMove: 1
   deadNotDelete: 0
+  ableStrick: 0
   OnInit:
     m_PersistentCalls:
       m_Calls: []
@@ -888,6 +893,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: f1b63484092ded941a90aa88624bc2ae, type: 3}
   - {fileID: 21300000, guid: ff23bec6d95d24f45bbc3fb2c84b332e, type: 3}
   meleeSprites:
+  - {fileID: 21300000, guid: f1b63484092ded941a90aa88624bc2ae, type: 3}
+  - {fileID: 21300000, guid: 7fcc287c1de421e40851a3c3b242bb7f, type: 3}
   - {fileID: 21300000, guid: 80d99fe6a957636458acbbb7a8da447e, type: 3}
   rangeSprites:
   - {fileID: 21300000, guid: 470bd3952acb58d4f937bcb3580777a7, type: 3}
