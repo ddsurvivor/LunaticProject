@@ -109,11 +109,11 @@ public class BattleManager : MonoBehaviour
         {
             PlayerController.isInTurn = false;
             PlayerController.TurnEnd();
-            
+
             float delayTime = 1.5f;
-            if(summonPieces.Count > 0)
+            if (summonPieces.Count > 0)
             {
-                delayTime += summonPieces.Count*3f;
+                delayTime += summonPieces.Count * 3f;
             }
 
             StartCoroutine(SummonsActionPhaseRoutine());
@@ -212,7 +212,7 @@ public class BattleManager : MonoBehaviour
 
     public void PieceSkill(PieceController attacker, List<PieceController> targets
         , SkillPack skillPack, Vector3 targetPos = default, ActionType actionType = 0
-        , CheckResult checkResult = CheckResult.None)
+        , CheckResult checkResult = CheckResult.None, bool isFlank = false)
     {
         //BattleScene.Ins.UM.PopSkillName(skillPack.skillName);
         List<List<DamageInfo>> damageInfoList = new();
@@ -262,7 +262,8 @@ public class BattleManager : MonoBehaviour
                 isHit = true; // 聚能状态下必中
             }
             else if (skillPack.target is SkillTarget.EnemyAll
-                     or SkillTarget.All or SkillTarget.Self or SkillTarget.AllyBody or SkillTarget.Ally)
+                     or SkillTarget.All or SkillTarget.Self or SkillTarget.AllyBody
+                     or SkillTarget.Ally)
             {
                 isHit = true; // AOE必中
             }
@@ -360,9 +361,9 @@ public class BattleManager : MonoBehaviour
                                                BuffAttrType.MeleeArmorPercent] / 100f));
                 }
 
-                int rollDamage = 
-                 DamageCalculator.CalculateActualDamage(realDamage, armor
-                    , isCrit, attacker.unitAttrCenter.critDamageRate);
+                int rollDamage =
+                    DamageCalculator.CalculateActualDamage(realDamage, armor
+                        , isCrit, attacker.unitAttrCenter.critDamageRate);
                 realDamage = rollDamage;
                 // 减伤
                 realDamage = (int)(realDamage
@@ -376,6 +377,15 @@ public class BattleManager : MonoBehaviour
                 if (attacker.player != null && attacker.player.isBursting)
                 {
                     realDamage = attacker.player.AddBurstDamage(target, realDamage);
+                }
+
+                // 夹击修正
+                if (isFlank)
+                {
+                    // 根据夹击规则修改伤害值
+                    Debug.Log($"夹击规则生效，修改伤害值，原始值{realDamage}");
+                    realDamage = (int)(realDamage * GM.Ins.DM.gameConstSO.FlankDamageRate);
+                    Debug.Log($"夹击规则生效，修改伤害值，修改值{realDamage}");
                 }
 
                 if (realDamage < 0) realDamage = 0;
@@ -678,6 +688,7 @@ public class BattleManager : MonoBehaviour
                             summonEffect.ApplyEffect(targetPos, caster.player);
                         }
                     }
+
                     break;
                 default:
                     break;
@@ -1275,7 +1286,7 @@ public class BattleManager : MonoBehaviour
     {
         if (_isFlankAttacking) return;
         if (target == null || attacker == null || target.unitAttrCenter.CurHealth <= 0) return;
-        if(attacker.isPlayerPiece == target.isPlayerPiece) return;// 排除：攻击者与目标属于同一阵营
+        if (attacker.isPlayerPiece == target.isPlayerPiece) return; // 排除：攻击者与目标属于同一阵营
 
         // 获取攻击者的队友列表
         IEnumerable<PieceController> teammates = attacker.isPlayerPiece
@@ -1354,9 +1365,9 @@ public class BattleManager : MonoBehaviour
             {
                 DOVirtual.DelayedCall(2f, () =>
                 {
-                    _isFlankAttacking = false; 
+                    _isFlankAttacking = false;
                     tutorialManager.TriggerFirstTutorial(FirstTutorialType.FirstStrick); // 触发夹击教程
-                },false);
+                }, false);
             }
         }
     }
@@ -1395,9 +1406,9 @@ public class BattleManager : MonoBehaviour
         // 退出战斗，返回主界面
         GM.Ins.BattleEnd();
     }
-    
+
     // ==== 召唤物行动 ===== //
-    
+
     // 所有召唤物依次行动
     private IEnumerator SummonsActionPhaseRoutine()
     {
@@ -1411,9 +1422,8 @@ public class BattleManager : MonoBehaviour
                     Debug.Log($"召唤物 {summon.name} 开始行动！");
                     summonPiece.ExecuteAI();
                 }
-                    
             }
-            
+
             yield return new WaitForSeconds(3f);
         }
     }

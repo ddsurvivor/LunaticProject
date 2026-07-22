@@ -422,7 +422,7 @@ public class PieceController : MonoBehaviour
     /// </summary>
     /// <param name="pieceController"></param>
     /// <param name="range"></param>
-    public void CastNormalAttack(PieceController pieceController, bool range = false)
+    public void CastNormalAttack(PieceController pieceController, bool range = false, bool isOrder = false)
     {
         _curAttackPack = range? _pieceData.rangedAtk : _pieceData.meleeAtk;
         _curAtkType = range ? ActionType.远程攻击 : ActionType.近战攻击; 
@@ -494,8 +494,8 @@ public class PieceController : MonoBehaviour
             {
                 //if (!unitAttrCenter.CostMP()) return;
                 BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack,
-                    atkPos !=null ? atkPos.position : Vector3.zero
-                    , _curAtkType);
+                    atkPos != null ? atkPos.position : Vector3.zero
+                    , _curAtkType, isFlank: !isOrder);
                 rangeUI.CloseRange();
             }, false);
 

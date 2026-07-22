@@ -37,6 +37,12 @@ public class GameConstSO : SerializedScriptableObject
     private int enemySkillRate = 35;
     public int EnemySkillRate => enemySkillRate;
     #endregion
+    
+    // 夹击伤害倍率
+    [SerializeField, LabelText("夹击伤害倍率")]
+    private float flankDamageRate = 0.7f;
+    public float FlankDamageRate => flankDamageRate;
+    
 
     #region 行动常数
     [Header("行动常数")]

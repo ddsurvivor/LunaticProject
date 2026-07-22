@@ -86,13 +86,13 @@ public class OrderManager : MonoBehaviour
             //closestPartner.StartNormalAttack();
             if (state.profile.type == OrderType.Melee)
             {
-                state.guard.CastNormalAttack(target);
+                state.guard.CastNormalAttack(target, false, true);
                 BattleScene.Ins.BM.tipTextManager.ShowTip(state.guard.transform, "触发指令");
                 DisarmOrder(state);
             }
             else if (state.profile.type == OrderType.Ranged)
             {
-                state.guard.CastNormalAttack(target, true);
+                state.guard.CastNormalAttack(target, true, true);
                 DisarmOrder(state);
             }
         }
