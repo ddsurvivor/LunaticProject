@@ -46,6 +46,7 @@ public class AttrModRow : MonoBehaviour {
         valueText.text = baseValue.ToString();
         if(pendingAddText!=null) pendingAddText.text = pendingAdd > 0 ? "+" + pendingAdd : "0";
         progressBar.transform.localScale = new Vector3((float)baseValue / maxValue, 1, 1);
+        // 显示修改后的进度条
         modBar.transform.localScale = new Vector3((float)(baseValue + pendingAdd) / maxValue, 1, 1);
     }
 

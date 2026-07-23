@@ -58,6 +58,7 @@ public class Player
     
     /// <summary>
     /// 统一属性访问器
+    /// 0意志，1作战，2体能，3沟通，4模式识别
     /// </summary>
     /// <param name="index">属性编号</param>
     /// <param name="op">操作类型</param>

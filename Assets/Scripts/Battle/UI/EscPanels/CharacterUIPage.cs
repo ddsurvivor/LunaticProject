@@ -28,14 +28,14 @@ public class CharacterUIPage : UIPanel
     // 在 Inspector 里将背包区域预先放好的 N 个格子全部拖进来
     //public List<UIItemSlot> inventoryUISlots = new List<UIItemSlot>();
     [Header("预设格子")] [SerializeField] private ItemSlot[] itemSlots = new ItemSlot[30];
-    public List<UIItemSlot> plugsUISlots = new List<UIItemSlot>();
+    //public List<UIItemSlot> plugsUISlots = new List<UIItemSlot>();
 
     [SerializeField] private List<AttrModRow> rowList = new();
     [SerializeField] public List<DetailAttributeRow> battleRowList = new();
     public List<DetailAttributeRow> armorRowList = new();
 
-    public List<SkillGroup> passiveSkillGroupList = new List<SkillGroup>();
-    public List<SkillGroup> activeSkillGroupList = new List<SkillGroup>();
+    //public List<SkillGroup> passiveSkillGroupList = new List<SkillGroup>();
+    //public List<SkillGroup> activeSkillGroupList = new List<SkillGroup>();
 
 
     //public SkillPointPanel skillPointPanel;
@@ -193,8 +193,8 @@ public class CharacterUIPage : UIPanel
         if(pieceData == null) return;
 
         // 0生命，1能量，2攻击，3暴击，4对抗
-        battleRowList[0].UpdateInfo("生命", pieceData.maxHealth, 100);
-        battleRowList[1].UpdateInfo("能量", pieceData.maxMana, 100);
+        battleRowList[0].UpdateInfo("生命", pieceData.maxHealth + player.AccessAttribute(2, AttrOp.Get)*2, 200);
+        battleRowList[1].UpdateInfo("能量", pieceData.maxMana +(int)(player.AccessAttribute(0, AttrOp.Get)*2f), 100);
         //ATK += 
         //CON += (int)(playerData.AccessAttribute(4, AttrOp.Get) * 0.5f);
         battleRowList[2].UpdateInfo("攻击", (int)(player.AccessAttribute(1, AttrOp.Get) * 0.5f), 100);
@@ -230,12 +230,14 @@ public class CharacterUIPage : UIPanel
             {
                 row.ChangePending(1, ref tempPoints);
                 skillPointNumText.text = tempPoints.ToString();
+                PreviewAttrChange();
             });
             row.minusBtn.onClick.RemoveAllListeners();
             row.minusBtn.onClick.AddListener(() =>
             {
                 row.ChangePending(-1, ref tempPoints);
                 skillPointNumText.text = tempPoints.ToString();
+                PreviewAttrChange();
             });
 
             //rowList.Add(row);
@@ -245,15 +247,73 @@ public class CharacterUIPage : UIPanel
         resetBtn.SetActive(tempPoints > 0);
     }
 
-    
-
-    
-
-    public void OnClickSkillPoints()
+    private void PreviewAttrChange()
     {
-        // 打开技能点面板
-        //skillPointPanel.ShowPanel(player, unitID);
+        // 0意志，1作战，2体能，3沟通，4模式识别
+        int newWill = player.AccessAttribute(0, AttrOp.Get) + rowList[0].PendingAdd;
+        int newCombat = player.AccessAttribute(1, AttrOp.Get) + rowList[1].PendingAdd;
+        int newPhysique = player.AccessAttribute(2, AttrOp.Get) + rowList[2].PendingAdd;
+        int newCommunication = player.AccessAttribute(3, AttrOp.Get) + rowList[3].PendingAdd;
+        int newPatternRecognition = player.AccessAttribute(4, AttrOp.Get) + rowList[4].PendingAdd;
+
+        // 0生命，1能量，2攻击，3暴击，4对抗
+        if (rowList[2].PendingAdd > 0)
+        {
+            battleRowList[0].ShowPreview( pieceData.maxHealth + (int)(newPhysique*2f), 200);
+        }
+        else
+        {
+            battleRowList[0].ClosePreview();
+        }
+
+        if (rowList[0].PendingAdd > 0)
+        {
+            battleRowList[1].ShowPreview(pieceData.maxMana+ (int)(newWill*2f), 100);
+        }
+        else
+        {
+            battleRowList[1].ClosePreview();
+        }
+
+        if (rowList[1].PendingAdd > 0)
+        {
+            battleRowList[2].ShowPreview((int)(newCombat * 0.5f), 100);
+            
+        }
+        else
+        {
+            battleRowList[2].ClosePreview();
+        }
+
+        if (rowList[3].PendingAdd > 0 || rowList[4].PendingAdd > 0)
+        {
+            battleRowList[3].ShowPreview(
+             pieceData.critRate + (newCommunication+ newPatternRecognition) * 2, 100);
+        }
+        else
+        {
+            battleRowList[3].ClosePreview();
+        }
+
+        if ( rowList[4].PendingAdd > 0)
+        {
+            battleRowList[4].ShowPreview((int)(newPatternRecognition * 0.5f), 100);
+        }
+        else
+        {
+            battleRowList[4].ClosePreview();
+        }
     }
+
+    private void ClosePreview()
+    {
+        // 关闭所有正在预览的属性变化
+        foreach (var row in battleRowList)
+        {
+            row.ClosePreview();
+        }
+    }
+    
 
     public void ApplyPoints()
     {
@@ -281,6 +341,7 @@ public class CharacterUIPage : UIPanel
     {
         foreach (var row in rowList) row.ResetRow(ref tempPoints);
         skillPointNumText.text = tempPoints.ToString();
+        ClosePreview();
         //RefreshUI();
         //InitPanel();
     }

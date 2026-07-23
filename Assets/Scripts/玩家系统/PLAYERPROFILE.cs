@@ -97,9 +97,9 @@ public class PLAYERPROFILE
 
 
         // 技能点测试
-        /*player[0].SkillPoints = 5;
+        player[0].SkillPoints = 5;
         player[1].SkillPoints = 5;
-        player[2].SkillPoints = 5;*/
+        player[2].SkillPoints = 5;
 
         //componentInventory.AddRange(new List<int>(){5,13,3});
         // 道具
