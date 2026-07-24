@@ -47,6 +47,7 @@ public class MoveManager : MonoBehaviour
 
                     pathRenderer.gameObject.SetActive(false); // 隐藏路径渲染器
                     ResetPreviewState(); // 重置预览状态，准备下一次使用
+                    
                     BattleScene.Ins.BM.orderManager.OnUnityMoveEnd(
                         agent.GetComponent<PieceController>());
                 }
@@ -304,7 +305,7 @@ public class MoveManager : MonoBehaviour
         if (BattleScene.Ins == null || BattleScene.Ins.BM == null) return;
 
         // 传入 null 代表没有移动棋子，全场恢复默认
-        SetOtherAgentsAvoidance(null, true);
+        SetOtherAgentsAvoidance(null, false);
     }
 
 // 提取的辅助内部方法：用来批量开启/关闭其他棋子的避障
@@ -321,11 +322,12 @@ public class MoveManager : MonoBehaviour
                 var agent = piece.gameObject.GetComponent<NavMeshAgent>();
                 if (agent != null)
                 {
-                    // 如果不参与避障，直接设为 NoAvoidance，杜绝二人转；恢复时设为默认
+                    agent.enabled = enableAvoidance;
+                    /*// 如果不参与避障，直接设为 NoAvoidance，杜绝二人转；恢复时设为默认
                     agent.obstacleAvoidanceType = enableAvoidance
                         ? ObstacleAvoidanceType.LowQualityObstacleAvoidance
                         : ObstacleAvoidanceType.NoObstacleAvoidance;
-                    agent.avoidancePriority = enableAvoidance ? 50 : 0;
+                    agent.avoidancePriority = enableAvoidance ? 50 : 0;*/
                 }
             }
         }

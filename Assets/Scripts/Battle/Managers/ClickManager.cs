@@ -20,6 +20,10 @@ public class ClickManager : MonoBehaviour
 
     [LabelText("拖动方式移动")]
     public bool dragMove;
+    
+    // 记录上一次的移动位置
+    private PieceController lastMovePiece;
+    private Vector3 lastStartPos;
 
     private void Update()
     {
@@ -344,6 +348,8 @@ public class ClickManager : MonoBehaviour
                 _rangeUI.moveIcon.transform.position.z);
             _selectedPiece.CheckFace(targetPos - _dragStartPos);
             _selectedPiece.StartMove();
+            lastMovePiece = _selectedPiece;
+            lastStartPos = _dragStartPos;
             var piece = _selectedPiece;
             // piece.transform.DOMove(targetPos, 1.0f).OnComplete(() =>
             // {
@@ -355,6 +361,24 @@ public class ClickManager : MonoBehaviour
             // 确定开始移动
             BattleScene.Ins.BM.moveManager.ExecuteMove(_selectedPiece.gameObject, piece.StopMove);
             
+        }
+    }
+
+    /// <summary>
+    /// 撤回移动
+    /// </summary>
+    public void CancelMove()
+    {
+        if (lastMovePiece != null)
+        {
+            // 撤回上一次的移动
+            lastMovePiece.transform.position = lastStartPos;
+            lastMovePiece.StopMove();
+            lastMovePiece = null;
+            
+            // 撤回消耗的移动点数
+            int count = GM.Ins.DM.gameConstSO.GetActionPointCost(ActionType.移动);
+            lastMovePiece.unitAttrCenter.AddMP(count);
         }
     }
 }
