@@ -62,6 +62,8 @@ public class 剧本System : MonoBehaviour
     public CheckDicePanel checkDicePanel;
 
     public Color choiceColor;
+    public Color choiceSelectedColor = Color.gray;
+    private List<string> choiceList = new List<string>();//存储选项的列表
 
     public void 设置新剧本(string t)
     {
@@ -459,7 +461,10 @@ public class 剧本System : MonoBehaviour
                     GameObject go = 生成剧本预制体();
                     GameObject text = go.GetComponent<打字机>()._textComponent.gameObject;
                     text.AddComponent<Button>();
-                    text.GetComponent<Text>().color = choiceColor;
+                    // 查询选项id，如果存在，则显示灰色
+                    string curChoiceId = $"{curPartName}_{已阅读}";
+                    text.GetComponent<Text>().color = 
+                        choiceList.Contains(curChoiceId) ? choiceSelectedColor : choiceColor;
                     text.GetComponent<Text>().raycastTarget = true;
                     string 事件 = 当前事件;
                     text.GetComponent<Button>().onClick.AddListener(() =>
@@ -475,6 +480,9 @@ public class 剧本System : MonoBehaviour
 
                         text.GetComponent<Text>().color = Color.white;
                         go.GetComponent<打字机>().ShowSelect();
+                        // 记录选项id
+                        choiceList.Add(curChoiceId);
+                        Debug.Log($"<color=green>已选择选项</color>>>{curChoiceId}  当前选项总数：{choiceList.Count}");
                     });
                     选项按钮.Add(text);
                 }
