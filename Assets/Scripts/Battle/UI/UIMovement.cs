@@ -14,10 +14,16 @@ public class UIMovement : MonoBehaviour
     [ShowIf("@enableFloating == true")][SerializeField] private float floatDistance = 20f;   // 浮动上下位移像素
     [ShowIf("@enableFloating == true")][SerializeField] private float floatDuration = 2f;    // 循环周期（秒）
     [ShowIf("@enableFloating == true")] [SerializeField] private Ease floatEase = Ease.InOutQuad;
+    
+    [Header("闪烁设置")]
+    [SerializeField] private bool enableFlicker = false;
+    [SerializeField] private SpriteRenderer targetRenderer; // 需要闪烁的 SpriteRenderer
+    [ShowIf("@enableFlicker == true")][SerializeField] private float flickerDuration = 0.5f; // 闪烁周期
 
     // 缓存 Tween 引用以便销毁
     private Tween _rotateTween;
     private Tween _floatTween;
+    private Tween _flickerTween;
 
     private void OnEnable()
     {
@@ -45,6 +51,13 @@ public class UIMovement : MonoBehaviour
             // 基于当前的 localPosition 进行偏移
             _floatTween = transform.DOLocalMoveY(transform.localPosition.y + floatDistance, floatDuration)
                 .SetEase(floatEase)
+                .SetLoops(-1, LoopType.Yoyo);
+        }
+
+        if (enableFlicker)
+        {
+            _flickerTween = targetRenderer.DOFade(0f, flickerDuration)
+                .SetEase(Ease.InOutSine)
                 .SetLoops(-1, LoopType.Yoyo);
         }
     }

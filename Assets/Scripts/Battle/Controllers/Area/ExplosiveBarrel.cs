@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
@@ -94,5 +95,18 @@ public class ExplosiveBarrel : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, explosionRadius);
         highlightEffect.transform.localScale = explosionRadius*offset*Vector3.one;
+    }
+
+    private void OnMouseEnter()
+    {
+        if(highlightEffect!= null) highlightEffect.SetActive(true);
+    }
+
+    private void OnMouseExit()
+    {
+        if (highlightEffect!= null)
+        {
+            highlightEffect.SetActive(false);
+        }
     }
 }
