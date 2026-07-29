@@ -273,6 +273,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
             _curMovePoint -= costPoint;
             Debug.Log($"{gameObject.name}执行{actionType}消耗行动力{costPoint}，剩余行动力{_curMovePoint}");
             BattleScene.Ins.UM.OnPieceStateChance(pc);
+            BattleScene.Ins.UM.ShowUndoMoveButton(false);
             return true;
         }
         return false;
@@ -284,6 +285,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
             _curMovePoint -= costPoint;
             Debug.Log($"{gameObject.name}消耗行动力{costPoint}，剩余行动力{_curMovePoint}");
             BattleScene.Ins.UM.OnPieceStateChance(pc);
+            BattleScene.Ins.UM.ShowUndoMoveButton(false);
             return true;
         }
         return false;

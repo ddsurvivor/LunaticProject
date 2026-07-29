@@ -351,7 +351,8 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 break;
         }
 
-        gameObject.SetActive(false);
+        HidePanel();
+        //gameObject.SetActive(false);
     }
 
     private void OpenSkillListPanel()

@@ -40,7 +40,7 @@ public class UIManager : SerializedMonoBehaviour
     public Image checkSuccess;// 检定成功
     public Image checkFail;// 检定失败
     public NotificationManager notificationManager;
-    
+    [SerializeField] private Transform undoMoveBtn;
 
     public Dictionary<KeyCode, GameObject> keyPanelDic = new();
     
@@ -187,5 +187,10 @@ public class UIManager : SerializedMonoBehaviour
     public void ShowItemGet(ComponentData itemData)
     {
         notificationManager.PushNotification(itemData);
+    }
+    
+    public void ShowUndoMoveButton(bool show)
+    {
+        undoMoveBtn.gameObject.SetActive(show);
     }
 }

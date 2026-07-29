@@ -24,6 +24,7 @@ public class ClickManager : MonoBehaviour
     // 记录上一次的移动位置
     private PieceController lastMovePiece;
     private Vector3 lastStartPos;
+    
 
     private void Update()
     {
@@ -348,8 +349,10 @@ public class ClickManager : MonoBehaviour
                 _rangeUI.moveIcon.transform.position.z);
             _selectedPiece.CheckFace(targetPos - _dragStartPos);
             _selectedPiece.StartMove();
+            // 记录并显示撤回
             lastMovePiece = _selectedPiece;
             lastStartPos = _dragStartPos;
+            BattleScene.Ins.UM.ShowUndoMoveButton(true);
             var piece = _selectedPiece;
             // piece.transform.DOMove(targetPos, 1.0f).OnComplete(() =>
             // {
@@ -374,11 +377,12 @@ public class ClickManager : MonoBehaviour
             // 撤回上一次的移动
             lastMovePiece.transform.position = lastStartPos;
             lastMovePiece.StopMove();
-            lastMovePiece = null;
             
             // 撤回消耗的移动点数
             int count = GM.Ins.DM.gameConstSO.GetActionPointCost(ActionType.移动);
             lastMovePiece.unitAttrCenter.AddMP(count);
+            lastMovePiece = null;
+            BattleScene.Ins.UM.ShowUndoMoveButton(false);
         }
     }
 }
