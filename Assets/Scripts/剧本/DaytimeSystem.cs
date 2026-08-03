@@ -62,7 +62,7 @@ public class DaytimeSystem : SerializedMonoBehaviour
         if (daytimeSprites.ContainsKey(GM.Ins.PLAYERPROFILE.daytime))
         {
             CloseAllSprite();
-            daytimeSprites[GM.Ins.PLAYERPROFILE.daytime].SetActive(true);
+            daytimeSprites[GM.Ins.PLAYERPROFILE.daytime]?.SetActive(true);
         }
     }
     
@@ -70,7 +70,8 @@ public class DaytimeSystem : SerializedMonoBehaviour
     {
         foreach (var sprite in daytimeSprites.Values)
         {
-            sprite.SetActive(false);
+            if(sprite!=null)
+                sprite.SetActive(false);
         }
     }
 }
