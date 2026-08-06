@@ -110,7 +110,7 @@ public class BattleManager : MonoBehaviour
             PlayerController.isInTurn = false;
             PlayerController.TurnEnd();
 
-            float delayTime = 1.5f;
+            float delayTime = 0.5f;
             if (summonPieces.Count > 0)
             {
                 delayTime += summonPieces.Count * 3f;

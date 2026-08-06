@@ -266,7 +266,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     public bool CostMP(ActionType actionType)
     {
         int costPoint = GM.Ins.DM.gameConstSO.GetActionPointCost(actionType);
-        if (actionType == ActionType.待机)
+        if (actionType == ActionType.待机 && _curMovePoint > 0)
             costPoint = _curMovePoint;
         if (_curMovePoint >= costPoint)
         {

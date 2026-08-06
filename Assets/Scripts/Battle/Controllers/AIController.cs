@@ -105,18 +105,29 @@ public class AIController : PlayerController
     }
 
 
-    private ActionType EnemyAttack(EnemyController aiPiece, PieceController target)
+    /// <summary>
+    /// 根据敌人AI类型和目标位置，选择敌人的行动类型
+    /// </summary>
+    /// <param name="aiPiece"></param>
+    /// <param name="target"></param>
+    /// <returns></returns>
+    private bool EnemyActionSelect(EnemyController aiPiece, PieceController target)
     {
-        if (target == null) return ActionType.待机;
+        int moveCost = GM.Ins.DM.gameConstSO.GetActionPointCost(ActionType.移动);
+        int attackCost = GM.Ins.DM.gameConstSO.GetActionPointCost(ActionType.近战攻击);
+        int skillCost = GM.Ins.DM.gameConstSO.GetActionPointCost(ActionType.技能);
 
-        ActionType actionType = ActionType.待机;
+
+        if (target == null) aiPiece.unitAttrCenter.CostMP(ActionType.待机);
+        //ActionType actionType = ActionType.待机;
+        
         if (aiPiece.navigate) // 如果正在导航中，优先保持导航状态，不进行攻击
         {
             if (Mathf.Abs(target.transform.position.y - aiPiece.transform.position.y) > 1.0f)
             {
                 // 如果目标在不同高度，则优先移动到与目标相同高度的位置
+                if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动))return false;
                 EnemyMoveToLadder(aiPiece);
-                return ActionType.移动;
             }
         }
 
@@ -128,48 +139,28 @@ public class AIController : PlayerController
         Vector3 diff = target.transform.position - aiPiece.transform.position;
         diff.y = 0; // 忽略Y轴差异
         float distanceToTarget = diff.magnitude;
-
         EnemyAIType enemyAIType = aiPiece.enemyAIType;
 
-        if (enemyAIType == EnemyAIType.AttackNearest)
-        {
-            EnemyNormalAttack(aiPiece, target, distanceToTarget, meleeRange, rangedRange);
-            actionType = ActionType.近战攻击;
-        }
-        else if (enemyAIType == EnemyAIType.Melee)
-        {
-            if (distanceToTarget <= meleeRange)
-            {
-                // 近战攻击
-                aiPiece.StartNormalAttack();
-                aiPiece.CastAttackOnTarget(target);
-                actionType = ActionType.近战攻击;
-            }
-            else
-            {
-                EnemyMove(aiPiece, target.transform.position, meleeRange);
-                actionType = ActionType.移动;
-            }
-        }
-        else if (enemyAIType == EnemyAIType.Shoot)
+        if (enemyAIType == EnemyAIType.Shoot)
         {
             if (distanceToTarget <= rangedRange)
             {
-                if (aiPiece.unitAttrCenter.CurMovePoint >= 2)// 如果移动点数大于等于2，则优先远程攻击
+                if (aiPiece.unitAttrCenter.CurMovePoint >= moveCost+attackCost)// 如果移动点数大于等于2，则优先远程攻击
                 {
                     // 判定弹药是否足够
                     if (aiPiece.unitAttrCenter.AmmoCount <= 0)
                     {
                         // 重新装填
+                        if(!aiPiece.unitAttrCenter.CostMP(ActionType.重新装填)) return false;
+                        
                         aiPiece.ReloadAmmo();
-                        actionType = ActionType.重新装填;
                     }
                     else
                     {
                         // 远程攻击
+                        if(!aiPiece.unitAttrCenter.CostMP(ActionType.远程攻击))return false;
                         aiPiece.StartNormalAttack(true);
                         aiPiece.CastAttackOnTarget(target);
-                        actionType = ActionType.远程攻击;
                     }
                 }
                 else
@@ -177,8 +168,8 @@ public class AIController : PlayerController
                     if (distanceToTarget <= rangedRange * 0.6f)
                     {
                         // 如果在远程攻击范围的60%内则逃跑
+                        if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动))return false;
                         EnemyMove(aiPiece, target.transform.position, rangedRange, true);
-                        actionType = ActionType.移动;
                     }
                     else
                     {
@@ -186,23 +177,24 @@ public class AIController : PlayerController
                         if (aiPiece.unitAttrCenter.AmmoCount <= 0)
                         {
                             // 重新装填
+                            if(!aiPiece.unitAttrCenter.CostMP(ActionType.重新装填)) return false;
                             aiPiece.ReloadAmmo();
-                            actionType = ActionType.重新装填;
+                            //actionType = ActionType.重新装填;
                         }
                         else
                         {
                             // 远程攻击
+                            if(!aiPiece.unitAttrCenter.CostMP(ActionType.远程攻击))return false;
                             aiPiece.StartNormalAttack(true);
                             aiPiece.CastAttackOnTarget(target);
-                            actionType = ActionType.远程攻击;
                         }
                     }
                 }
             }
             else
             {
+                if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动))return false;
                 EnemyMove(aiPiece, target.transform.position, rangedRange);
-                actionType = ActionType.移动;
             }
         }
         else if (enemyAIType == EnemyAIType.SkillUser) // 技能型AI
@@ -210,10 +202,10 @@ public class AIController : PlayerController
             // 优先近战
             if (distanceToTarget <= meleeRange)
             {
+                if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
                 // 近战攻击
                 aiPiece.StartNormalAttack();
                 aiPiece.CastAttackOnTarget(target);
-                actionType = ActionType.近战攻击;
             }
 
             // 优先计算是否使用技能
@@ -229,49 +221,53 @@ public class AIController : PlayerController
                 if (distanceToTarget <= skillRange)
                 {
                     // 释放技能
+                    if(!aiPiece.unitAttrCenter.CostMP(ActionType.技能))return false;
                     aiPiece.StartSkillAttack(skillPack);
                     aiPiece.CastSkillOnTarget(target, skillPack);
                     //BattleScene.Ins.UM.PopSkillName(skillPack.skillName);
-                    actionType = ActionType.技能;
+                    
                 }
                 else
                 {
+                    if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动))return false;
                     EnemyMove(aiPiece, target.transform.position, skillRange);
-                    actionType = ActionType.移动;
                 }
             }
             else
             {
+                if(!aiPiece.unitAttrCenter.CostMP(ActionType.近战攻击))return false;
                 EnemyNormalAttack(aiPiece, target, distanceToTarget, meleeRange, rangedRange);
-                actionType = ActionType.近战攻击;
+                
             }
         }
         else if (enemyAIType == EnemyAIType.Combine) // 远程和近战混合型AI
         {
-            if (aiPiece.unitAttrCenter.CurMovePoint >= 2 &&
+            if (aiPiece.unitAttrCenter.CurMovePoint >= moveCost+attackCost &&
                 distanceToTarget <= (moveRange + meleeRange)) // 一步后可以近战的情况
             {
                 Debug.Log(
                     $"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动到近战范围攻击{distanceToTarget} <= {moveRange + meleeRange}");
+                if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动))return false;
                 EnemyMove(aiPiece, target.transform.position, meleeRange);
-                actionType = ActionType.移动;
+                
             }
-            else if (aiPiece.unitAttrCenter.CurMovePoint >= 2 &&
+            else if (aiPiece.unitAttrCenter.CurMovePoint >= moveCost+attackCost &&
                      distanceToTarget <= (moveRange + rangedRange)) // 一步后可以远程的情况
             {
                 Debug.Log(
                     $"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动到远程范围攻击{distanceToTarget} <= {moveRange + rangedRange}");
+                if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动))return false;
                 EnemyMove(aiPiece, target.transform.position, rangedRange);
-                actionType = ActionType.移动;
             }
             else if (distanceToTarget <= meleeRange)
             {
                 Debug.Log(
                     $"{aiPiece.enemyAIType}AI{aiPiece.name}选择近战攻击{distanceToTarget} <= {meleeRange}");
                 // 近战攻击
+                if(!aiPiece.unitAttrCenter.CostMP(ActionType.近战攻击))return false;
                 aiPiece.StartNormalAttack();
                 aiPiece.CastAttackOnTarget(target);
-                actionType = ActionType.近战攻击;
+                
             }
             else if (distanceToTarget <= rangedRange)
             {
@@ -279,24 +275,27 @@ public class AIController : PlayerController
                 if (aiPiece.unitAttrCenter.AmmoCount <= 0)
                 {
                     // 重新装填
+                    if(!aiPiece.unitAttrCenter.CostMP(ActionType.重新装填))return false;
                     aiPiece.ReloadAmmo();
-                    actionType = ActionType.重新装填;
+                    
                 }
                 else
                 {
                     Debug.Log(
                         $"{aiPiece.enemyAIType}AI{aiPiece.name}选择远程攻击{distanceToTarget} <= {rangedRange}, 目标在{target.name}");
                     // 远程攻击
+                    if(!aiPiece.unitAttrCenter.CostMP(ActionType.远程攻击))return false;
                     aiPiece.StartNormalAttack(true);
                     aiPiece.CastAttackOnTarget(target);
-                    actionType = ActionType.远程攻击;
+                    
                 }
             }
             else
             {
-                Debug.Log($"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动到{target.transform.position}");
+                Debug.Log($"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动从{aiPiece.transform.position}到目标{target.transform.position}");
+                if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动))return false;
                 EnemyMove(aiPiece, target.transform.position, rangedRange);
-                actionType = ActionType.移动;
+               
             }
         }
         else if (enemyAIType == EnemyAIType.Special)
@@ -307,14 +306,15 @@ public class AIController : PlayerController
             if (retreatWin != null)
             {
                 Debug.Log("移动到指定点");
+                if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动))return false;
                 Vector3 pos = retreatWin.targetPoint.position;
                 EnemyMove(aiPiece, pos, 0.5f);
                 DOVirtual.DelayedCall(1.0f, () => retreatWin.CheckTargetReached()); // 行动后判定胜利
-                return ActionType.移动;
+                
             }
         }
 
-        return actionType;
+        return true;
     }
 
     private void EnemyNormalAttack(EnemyController aiPiece, PieceController target
@@ -375,10 +375,14 @@ public class AIController : PlayerController
         //     BattleScene.Ins.BM.CalculateValidMovePos(currentPos, mainDir, testDistance
         //         , aiPiece.gameObject, true);
         // float originalDist = Vector3.Distance(currentPos, moveResult.FinalPosition);
-        bool canMove = BattleScene.Ins.BM.moveManager.PreviewAIMove(aiPiece.gameObject, idealAttackPos, moveRange);
+        bool canMove = BattleScene.Ins.BM.moveManager.PreviewAIMove(aiPiece.gameObject, idealAttackPos, moveRange+0.6f);
 
         // 5. 最终执行位移
-        if(!canMove) return;
+        if (!canMove)
+        {
+            Debug.LogWarning($"敌人{aiPiece.name}无法移动到目标位置{idealAttackPos}，当前坐标{currentPos}");
+            return;
+        }
         aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
         BattleScene.Ins.BM.moveManager.ExecuteMove(aiPiece.gameObject
             , () =>
@@ -418,72 +422,15 @@ public class AIController : PlayerController
         foreach (EnemyController aiPiece in pieces)
         {
             if (!aiPiece.isActived || aiPiece.isDead) continue;
-            
-            ActionType actionType = CheckEnemyAction(aiPiece);
-            if (!aiPiece.unitAttrCenter.CostMP(actionType)) continue;
-            
+            if (aiPiece.unitAttrCenter.CurMovePoint <= 0) continue;
+            PieceController target = CheckEnemyTarget(aiPiece);
+            if(!EnemyActionSelect(aiPiece, target))
+                continue;// 如果敌人没有行动，则继续下一个敌人
             BattleScene.Ins.BM.GetComponent<CameraController>().SetFollow(aiPiece.transform);
             return;
         }
 
         BattleScene.Ins.BM.ChangeTurn();
-    }
-
-    /// <summary>
-    /// 对于一个敌人棋子，检查其所有可能的行动，并选择威胁值最高的行动执行
-    /// </summary>
-    /// <param name="aiPiece"></param>
-    private ActionType CheckEnemyAction(EnemyController aiPiece)
-    {
-        // 计算所有目标棋子的威胁值
-        Dictionary<PieceController, int> threatValues = new();
-
-        PieceController nearTarget = null; // 距离最近的棋子
-        // 伤害最高的棋子
-        PieceController highDamageTarget = null;
-        float minDistance = float.MaxValue;
-        int maxDamage = -1;
-
-        foreach (var playerPiece in BattleScene.Ins.BM.PlayerController.pieces)
-        {
-            if (playerPiece.isDead) continue;
-            threatValues.Add(playerPiece, 0);
-
-            // 获取最近的玩家棋子
-            float distance =
-                Vector3.Distance(playerPiece.transform.position, aiPiece.transform.position);
-            if (distance < minDistance)
-            {
-                minDistance = distance;
-                nearTarget = playerPiece;
-            }
-
-            // 伤害最高的玩家棋子
-            if (aiPiece.damageDic.ContainsKey(playerPiece))
-            {
-                int damage = aiPiece.damageDic[playerPiece];
-                if (damage > maxDamage)
-                {
-                    maxDamage = damage;
-                    highDamageTarget = playerPiece;
-                }
-            }
-
-            // 计算嘲讽值
-            threatValues[playerPiece] += playerPiece.unitAttrCenter.TauntValue;
-        }
-
-        if (nearTarget != null) threatValues[nearTarget] += 1; // 距离最近的地方棋子威胁值+1
-        if (highDamageTarget != null)
-        {
-            threatValues[highDamageTarget] += 2; // 伤害最高的玩家棋子威胁值+2
-        }
-
-        if (threatValues.Count == 0) return ActionType.待机;
-        // 选择威胁值最高的目标进行攻击
-        PieceController target = threatValues.Aggregate((l, r)
-            => l.Value > r.Value ? l : r).Key;
-        return EnemyAttack(aiPiece, target);
     }
 
     public PieceController CheckEnemyTarget(EnemyController aiPiece)

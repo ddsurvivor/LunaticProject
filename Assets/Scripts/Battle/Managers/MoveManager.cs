@@ -93,7 +93,7 @@ public class MoveManager : MonoBehaviour
         }
     }*/
 
-    // ======= 请在 MoveManager 类顶部补充这个变量 =======
+    
     private Vector3 lastMousePreviewPosition; // 专门用于存储上一次鼠标的原始悬停位置（用于性能防抖）
 
 
@@ -158,17 +158,18 @@ public class MoveManager : MonoBehaviour
 
         NavMeshAgent agent = pawnObject.GetComponent<NavMeshAgent>();
         if (agent == null || !agent.gameObject.activeInHierarchy) return false;
+        SetupMovementPriorities(pawnObject);
 
         Vector3 startPosition = agent.transform.position;
         Vector3 safeTargetPosition = targetPosition;
 
         // 1. 边缘阻挡检测：从当前位置向目标点发射导航射线
         NavMeshHit hit;
-        if (NavMesh.Raycast(startPosition, targetPosition, out hit, NavMesh.AllAreas))
+        /*if (NavMesh.Raycast(startPosition, targetPosition, out hit, NavMesh.AllAreas))
         {
             // 射线被阻挡，说明目的地在网格外部或墙内，修正为撞墙的边缘临界点
             safeTargetPosition = hit.position;
-        }
+        }*/
 
         // 2. 严谨性兜底：将点垂直吸附到就近的网格表面
         if (!NavMesh.SamplePosition(safeTargetPosition, out hit, 5.0f, NavMesh.AllAreas))

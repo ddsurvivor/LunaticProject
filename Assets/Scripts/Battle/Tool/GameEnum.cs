@@ -190,21 +190,13 @@ public enum BattleItemType
 
 public enum EnemyAIType
 {
-    // 优先攻击最近的单位
-    [LabelText("攻击型")]
-    AttackNearest = 1,
     // 远离目标
     [LabelText("射击型")]
     Shoot = 2,
     [LabelText("技能型")]
     SkillUser = 3,
-    
-    [LabelText("近战型")]
-    Melee = 4,
-    
     [LabelText("混合型")]
-    Combine = 5,
-    
+    Combine = 5,// 根据当前距离选择近战还是远程，但优先近战
     [LabelText("特殊型")]
     Special = 6,// 特殊行为由关卡设计决定
 }
