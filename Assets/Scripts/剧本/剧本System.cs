@@ -129,6 +129,7 @@ public class 剧本System : MonoBehaviour
         进行指令(当前事件);
         生成剧本预制体();
         已阅读++;
+        进度条.normalizedPosition = new Vector2(0, -1f);
     }
 
     public void SkipNext()
