@@ -402,7 +402,15 @@ public class 剧本System : MonoBehaviour
             if (key.Contains(Center.Command_SpeakerSet))
             {
                 var prams = 指令切割(key);
-                LoadImage(prams[0], SPEAKERBG);
+                if(prams.Length < 1 || prams[0] == "")
+                {
+                    SPEAKERBG.gameObject.SetActive(false);
+                }
+                else
+                {
+                    SPEAKERBG.gameObject.SetActive(true);
+                    LoadImage(prams[0], SPEAKERBG);
+                }
             }
 
             if (key.Contains(Center.Command_Set))
