@@ -123,6 +123,8 @@ public class ChapterPanel : MonoBehaviour
             this.gameObject.SetActive(false);
             checkContinuePanel.SetActive(false);
             _canvasGroup.alpha = 1f; // 重置alpha值，以便下次显示时正常显示
+            GM.Ins.AM.停止音效("chapter-change");
+            GM.Ins.AM.停止音效("day-change");
         });
     }
 }

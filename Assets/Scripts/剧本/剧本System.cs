@@ -868,6 +868,7 @@ public class 剧本System : MonoBehaviour
                     float.TryParse(prams[1], out float fadeTime);
                     float.TryParse(prams[1], out float duration);
                     大地图System.instance.chapterPanel.ShowChapter(title, fadeTime, duration);
+                    GM.Ins.AM.播放音效("chapter-change",1);
                 }
             }
 
@@ -882,6 +883,7 @@ public class 剧本System : MonoBehaviour
                     float.TryParse(prams[1], out float fadeTime);
                     float.TryParse(prams[1], out float duration);
                     大地图System.instance.chapterPanel.ShowChapters(title, fadeTime, duration);
+                    GM.Ins.AM.播放音效("day-change",1);
                 }
             }
 
@@ -1009,7 +1011,11 @@ public class 剧本System : MonoBehaviour
         大地图System.instance.daytimeSystem.NextDay();
     }
 
-    
+    private void OnDisable()
+    {
+        GM.Ins.AM.StopAll();
+    }
+
 
     // ====== Test ======= //
     [Button("测试Log")]
