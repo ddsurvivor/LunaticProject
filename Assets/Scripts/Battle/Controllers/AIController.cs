@@ -26,6 +26,12 @@ public class AIController : PlayerController
     private float _timer;
     private float _actionInterval = 2.0f; // 每个动作之间的间隔时间
 
+    [SerializeField] private bool realTimeMode;
+    private int _lastActedIndex = -1;
+    private float _realTimeInterval = 0.8f;
+    [SerializeField]
+    private RealtimeActionManager RAM;
+
     public void OnScanFog(GameObject fog)
     {
         if (fogController == null)
@@ -89,17 +95,33 @@ public class AIController : PlayerController
     {
         if (isInTurn)
         {
-            if (_timer < _actionInterval)
+            if (realTimeMode)
             {
-                _timer += Time.deltaTime;
-                return;
+                if (_timer < _realTimeInterval)
+                {
+                    _timer += Time.deltaTime;
+                    return;
+                }
+
+                //EnemyAction_AttackRandom();
+                //EnemyAction_AttackNearestTarget();
+                if (TryExecuteEnemyAction())
+                    _timer = 0f;
             }
             else
             {
-                //EnemyAction_AttackRandom();
-                //EnemyAction_AttackNearestTarget();
-                EnemyAction_Calculate();
-                _timer = 0f;
+                if (_timer < _actionInterval)
+                {
+                    _timer += Time.deltaTime;
+                    return;
+                }
+                else
+                {
+                    //EnemyAction_AttackRandom();
+                    //EnemyAction_AttackNearestTarget();
+                    EnemyAction_Calculate();
+                    _timer = 0f;
+                }
             }
         }
     }
@@ -120,13 +142,13 @@ public class AIController : PlayerController
 
         if (target == null) aiPiece.unitAttrCenter.CostMP(ActionType.待机);
         //ActionType actionType = ActionType.待机;
-        
+
         if (aiPiece.navigate) // 如果正在导航中，优先保持导航状态，不进行攻击
         {
             if (Mathf.Abs(target.transform.position.y - aiPiece.transform.position.y) > 1.0f)
             {
                 // 如果目标在不同高度，则优先移动到与目标相同高度的位置
-                if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动))return false;
+                if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
                 EnemyMoveToLadder(aiPiece);
             }
         }
@@ -145,20 +167,21 @@ public class AIController : PlayerController
         {
             if (distanceToTarget <= rangedRange)
             {
-                if (aiPiece.unitAttrCenter.CurMovePoint >= moveCost+attackCost)// 如果移动点数大于等于2，则优先远程攻击
+                if (aiPiece.unitAttrCenter.CurMovePoint >=
+                    moveCost + attackCost) // 如果移动点数大于等于2，则优先远程攻击
                 {
                     // 判定弹药是否足够
                     if (aiPiece.unitAttrCenter.AmmoCount <= 0)
                     {
                         // 重新装填
-                        if(!aiPiece.unitAttrCenter.CostMP(ActionType.重新装填)) return false;
-                        
+                        if (!aiPiece.unitAttrCenter.CostMP(ActionType.重新装填)) return false;
+
                         aiPiece.ReloadAmmo();
                     }
                     else
                     {
                         // 远程攻击
-                        if(!aiPiece.unitAttrCenter.CostMP(ActionType.远程攻击))return false;
+                        if (!aiPiece.unitAttrCenter.CostMP(ActionType.远程攻击)) return false;
                         aiPiece.StartNormalAttack(true);
                         aiPiece.CastAttackOnTarget(target);
                     }
@@ -168,7 +191,7 @@ public class AIController : PlayerController
                     if (distanceToTarget <= rangedRange * 0.6f)
                     {
                         // 如果在远程攻击范围的60%内则逃跑
-                        if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动))return false;
+                        if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
                         EnemyMove(aiPiece, target.transform.position, rangedRange, true);
                     }
                     else
@@ -177,14 +200,14 @@ public class AIController : PlayerController
                         if (aiPiece.unitAttrCenter.AmmoCount <= 0)
                         {
                             // 重新装填
-                            if(!aiPiece.unitAttrCenter.CostMP(ActionType.重新装填)) return false;
+                            if (!aiPiece.unitAttrCenter.CostMP(ActionType.重新装填)) return false;
                             aiPiece.ReloadAmmo();
                             //actionType = ActionType.重新装填;
                         }
                         else
                         {
                             // 远程攻击
-                            if(!aiPiece.unitAttrCenter.CostMP(ActionType.远程攻击))return false;
+                            if (!aiPiece.unitAttrCenter.CostMP(ActionType.远程攻击)) return false;
                             aiPiece.StartNormalAttack(true);
                             aiPiece.CastAttackOnTarget(target);
                         }
@@ -193,7 +216,7 @@ public class AIController : PlayerController
             }
             else
             {
-                if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动))return false;
+                if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
                 EnemyMove(aiPiece, target.transform.position, rangedRange);
             }
         }
@@ -202,7 +225,7 @@ public class AIController : PlayerController
             // 优先近战
             if (distanceToTarget <= meleeRange)
             {
-                if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
+                if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
                 // 近战攻击
                 aiPiece.StartNormalAttack();
                 aiPiece.CastAttackOnTarget(target);
@@ -221,42 +244,39 @@ public class AIController : PlayerController
                 if (distanceToTarget <= skillRange)
                 {
                     // 释放技能
-                    if(!aiPiece.unitAttrCenter.CostMP(ActionType.技能))return false;
+                    if (!aiPiece.unitAttrCenter.CostMP(ActionType.技能)) return false;
                     aiPiece.StartSkillAttack(skillPack);
                     aiPiece.CastSkillOnTarget(target, skillPack);
                     //BattleScene.Ins.UM.PopSkillName(skillPack.skillName);
-                    
                 }
                 else
                 {
-                    if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动))return false;
+                    if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
                     EnemyMove(aiPiece, target.transform.position, skillRange);
                 }
             }
             else
             {
-                if(!aiPiece.unitAttrCenter.CostMP(ActionType.近战攻击))return false;
+                if (!aiPiece.unitAttrCenter.CostMP(ActionType.近战攻击)) return false;
                 EnemyNormalAttack(aiPiece, target, distanceToTarget, meleeRange, rangedRange);
-                
             }
         }
         else if (enemyAIType == EnemyAIType.Combine) // 远程和近战混合型AI
         {
-            if (aiPiece.unitAttrCenter.CurMovePoint >= moveCost+attackCost &&
+            if (aiPiece.unitAttrCenter.CurMovePoint >= moveCost + attackCost &&
                 distanceToTarget <= (moveRange + meleeRange)) // 一步后可以近战的情况
             {
                 Debug.Log(
                     $"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动到近战范围攻击{distanceToTarget} <= {moveRange + meleeRange}");
-                if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动))return false;
+                if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
                 EnemyMove(aiPiece, target.transform.position, meleeRange);
-                
             }
-            else if (aiPiece.unitAttrCenter.CurMovePoint >= moveCost+attackCost &&
+            else if (aiPiece.unitAttrCenter.CurMovePoint >= moveCost + attackCost &&
                      distanceToTarget <= (moveRange + rangedRange)) // 一步后可以远程的情况
             {
                 Debug.Log(
                     $"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动到远程范围攻击{distanceToTarget} <= {moveRange + rangedRange}");
-                if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动))return false;
+                if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
                 EnemyMove(aiPiece, target.transform.position, rangedRange);
             }
             else if (distanceToTarget <= meleeRange)
@@ -264,10 +284,9 @@ public class AIController : PlayerController
                 Debug.Log(
                     $"{aiPiece.enemyAIType}AI{aiPiece.name}选择近战攻击{distanceToTarget} <= {meleeRange}");
                 // 近战攻击
-                if(!aiPiece.unitAttrCenter.CostMP(ActionType.近战攻击))return false;
+                if (!aiPiece.unitAttrCenter.CostMP(ActionType.近战攻击)) return false;
                 aiPiece.StartNormalAttack();
                 aiPiece.CastAttackOnTarget(target);
-                
             }
             else if (distanceToTarget <= rangedRange)
             {
@@ -275,27 +294,25 @@ public class AIController : PlayerController
                 if (aiPiece.unitAttrCenter.AmmoCount <= 0)
                 {
                     // 重新装填
-                    if(!aiPiece.unitAttrCenter.CostMP(ActionType.重新装填))return false;
+                    if (!aiPiece.unitAttrCenter.CostMP(ActionType.重新装填)) return false;
                     aiPiece.ReloadAmmo();
-                    
                 }
                 else
                 {
                     Debug.Log(
                         $"{aiPiece.enemyAIType}AI{aiPiece.name}选择远程攻击{distanceToTarget} <= {rangedRange}, 目标在{target.name}");
                     // 远程攻击
-                    if(!aiPiece.unitAttrCenter.CostMP(ActionType.远程攻击))return false;
+                    if (!aiPiece.unitAttrCenter.CostMP(ActionType.远程攻击)) return false;
                     aiPiece.StartNormalAttack(true);
                     aiPiece.CastAttackOnTarget(target);
-                    
                 }
             }
             else
             {
-                Debug.Log($"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动从{aiPiece.transform.position}到目标{target.transform.position}");
-                if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动))return false;
+                Debug.Log(
+                    $"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动从{aiPiece.transform.position}到目标{target.transform.position}");
+                if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
                 EnemyMove(aiPiece, target.transform.position, rangedRange);
-               
             }
         }
         else if (enemyAIType == EnemyAIType.Special)
@@ -306,11 +323,10 @@ public class AIController : PlayerController
             if (retreatWin != null)
             {
                 Debug.Log("移动到指定点");
-                if(!aiPiece.unitAttrCenter.CostMP(ActionType.移动))return false;
+                if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
                 Vector3 pos = retreatWin.targetPoint.position;
                 EnemyMove(aiPiece, pos, 0.5f);
                 DOVirtual.DelayedCall(1.0f, () => retreatWin.CheckTargetReached()); // 行动后判定胜利
-                
             }
         }
 
@@ -375,7 +391,9 @@ public class AIController : PlayerController
         //     BattleScene.Ins.BM.CalculateValidMovePos(currentPos, mainDir, testDistance
         //         , aiPiece.gameObject, true);
         // float originalDist = Vector3.Distance(currentPos, moveResult.FinalPosition);
-        bool canMove = BattleScene.Ins.BM.moveManager.PreviewAIMove(aiPiece.gameObject, idealAttackPos, moveRange+0.6f);
+        bool canMove =
+            BattleScene.Ins.BM.moveManager.PreviewAIMove(aiPiece.gameObject, idealAttackPos
+                , moveRange + 0.6f);
 
         // 5. 最终执行位移
         if (!canMove)
@@ -383,14 +401,12 @@ public class AIController : PlayerController
             Debug.LogWarning($"敌人{aiPiece.name}无法移动到目标位置{idealAttackPos}，当前坐标{currentPos}");
             return;
         }
+
         aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
         BattleScene.Ins.BM.moveManager.ExecuteMove(aiPiece.gameObject
-            , () =>
-            {
-                aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
-            });
+            , () => { aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle); });
         aiPiece.CheckFace(targetPos - currentPos);
-        
+
         aiPiece.PlayAudio(ActionType.移动);
     }
 
@@ -424,13 +440,47 @@ public class AIController : PlayerController
             if (!aiPiece.isActived || aiPiece.isDead) continue;
             if (aiPiece.unitAttrCenter.CurMovePoint <= 0) continue;
             PieceController target = CheckEnemyTarget(aiPiece);
-            if(!EnemyActionSelect(aiPiece, target))
-                continue;// 如果敌人没有行动，则继续下一个敌人
+            if (!EnemyActionSelect(aiPiece, target))
+                continue; // 如果敌人没有行动，则继续下一个敌人
             BattleScene.Ins.BM.GetComponent<CameraController>().SetFollow(aiPiece.transform);
             return;
         }
 
         BattleScene.Ins.BM.ChangeTurn();
+    }
+
+    /// <summary>
+    /// 即时制下，轮询所有敌人并尝试让其中一个执行行动
+    /// </summary>
+    /// <returns>是否有敌人成功执行了行动</returns>
+    private bool TryExecuteEnemyAction()
+    {
+        int totalPieces = pieces.Count;
+        for (int i = 1; i <= totalPieces; i++)
+        {
+            int currentIndex = (_lastActedIndex + i) % totalPieces;
+            EnemyController aiPiece = pieces[currentIndex] as EnemyController;
+            if (!aiPiece.isActived || aiPiece.isDead) continue;
+
+            // 行动力判空（适配之前的行动力属性，若不够1点行动力直接跳过）
+            if (aiPiece.unitAttrCenter.CurMovePoint <= 0) continue;
+
+            PieceController target = CheckEnemyTarget(aiPiece);
+
+            // 尝试执行行动
+            if (EnemyActionSelect(aiPiece, target))
+            {
+                _lastActedIndex = currentIndex;
+                // 成功行动后跟随镜头（可根据需要保留或删减）
+                //BattleScene.Ins?.BM?.GetComponent<CameraController>()?.SetFollow(aiPiece.transform);
+
+                // 返回 true 触发全局 1 秒冷却，避免其他满足条件的敌人同时行动
+                return true;
+            }
+        }
+
+        // 即时制下，所有敌人均未行动时直接结束检测，不再调用 ChangeTurn()
+        return false;
     }
 
     public PieceController CheckEnemyTarget(EnemyController aiPiece)

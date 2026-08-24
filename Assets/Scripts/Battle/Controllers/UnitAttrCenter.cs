@@ -177,6 +177,11 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         _curMovePoint = _maxMovePoint;
     }
 
+    public void SetMovePoint(int num)
+    {
+        _curMovePoint = num <= _maxMovePoint ? num : _maxMovePoint;
+    }
+
     public void FullAmmo()
     {
         _ammoCount = _maxAmmoCount;
