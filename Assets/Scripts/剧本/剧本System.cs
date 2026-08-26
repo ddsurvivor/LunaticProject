@@ -762,7 +762,15 @@ public class 剧本System : MonoBehaviour
                 var prams = 指令切割(key);
                 float duration = 2;
                 float fadeTime = 1.5f;
-                if (prams.Length >= 3)
+                if (prams.Length >= 4)
+                {
+                    //自定义时长
+                    duration = float.Parse(prams[1]);
+                    fadeTime = float.Parse(prams[2]);
+                    string _str = prams[3];
+                    ShowText(_str, duration, fadeTime);
+                }
+                else if (prams.Length >= 3)
                 {
                     //自定义时长
                     duration = float.Parse(prams[1]);
@@ -1001,6 +1009,20 @@ public class 剧本System : MonoBehaviour
         }
 
         return command; // 如果完全没匹配到，安全起见返回原字符串
+    }
+
+    public Text logText;
+    public void ShowText(string str, float fadeDuration, float displayDuration)
+    {
+        logText.color = new Color(logText.color.r, logText.color.g, logText.color.b, 0f); // 初始透明度为0
+        logText.gameObject.SetActive(true);
+        logText.text = str;
+        Sequence fadeTweener = DOTween.Sequence();
+        //fadeTweener.AppendInterval(startDelay);
+        fadeTweener.Append(logText.DOFade(1f, fadeDuration).SetEase(Ease.Linear));
+        fadeTweener.AppendInterval(displayDuration);
+        fadeTweener.Append(logText.DOFade(0f, fadeDuration));
+        fadeTweener.AppendCallback(() => logText.gameObject.SetActive(true));
     }
 
     // 休息
