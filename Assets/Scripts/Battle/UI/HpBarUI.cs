@@ -19,6 +19,7 @@ public class HpBarUI : MonoBehaviour
     private float currentHpPercent = 1f; // 当前血量百分比
 
     private float shadowSpeed = 1.2f; // 拖影血条的动画速度
+    private float barSpeed = 0.3f; // 血条本体的动画速度
 
     private Tweener shadowTweener; // 拖影动画的 Tweener 对象
     private Tweener hpBarAlphaTweener; // 血条透明度动画
@@ -45,7 +46,7 @@ public class HpBarUI : MonoBehaviour
         currentHpPercent = precent;
 
         // 直接更新血条填充部分
-        hpBarFill.fillAmount = currentHpPercent;
+        hpBarFill.DOFillAmount(currentHpPercent, barSpeed);
 
         // 启动拖影动画Dotween
         shadowTweener = shadowFill.DOFillAmount(currentHpPercent, shadowSpeed).SetEase(Ease.OutQuad);

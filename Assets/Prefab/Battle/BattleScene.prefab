@@ -10294,6 +10294,7 @@ GameObject:
   - component: {fileID: 6173436885347656615}
   - component: {fileID: 6891228850527105862}
   - component: {fileID: 728612573008240354}
+  - component: {fileID: 8537592346715545695}
   m_Layer: 0
   m_Name: BattleScene
   m_TagString: Untagged
@@ -10375,6 +10376,7 @@ MonoBehaviour:
   finishExp: 100
   winTurnCondition: 999
   battleSetController: {fileID: 8860265404098101663}
+  pieceActionManager: {fileID: 8537592346715545695}
   moveWaitTime: 1
   gazeWaitTime: 0.5
   summonPieces: []
@@ -10526,6 +10528,8 @@ MonoBehaviour:
   fogController: {fileID: 0}
   waveController: {fileID: 0}
   mapController: {fileID: 0}
+  realTimeMode: 0
+  RAM: {fileID: 0}
 --- !u!114 &6793405397572969130
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10992,6 +10996,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa2261b3d046401fb4c2115d2700e4b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &8537592346715545695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6793405397572969121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cf3b789457e45940a45c787f06da375, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  configuredActions: 0100000002000000030000000b0000000f0000000a00000014000000
 --- !u!1 &6959800873591888449
 GameObject:
   m_ObjectHideFlags: 0

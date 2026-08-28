@@ -191,6 +191,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     {
         _curHealth = _maxHealth;
         if (hpBarFill != null) hpBarFill.localScale = new Vector3(1f, 1f, 1f);
+        UpdateHpBar();
     }
 
     public void SetHealth(float healthPercent)
@@ -261,7 +262,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     {
         float healthPercent = (float)_curHealth / _maxHealth;
         if (hpBarFill != null)
-            hpBarFill.localScale = new Vector3(healthPercent, 1f, 1f);
+            hpBarFill.DOScale( new Vector3(healthPercent, 1f, 1f), 0.5f);
         if (pc is EnemyController enemy)
         {
             enemy.UpdateHpBar(healthPercent);

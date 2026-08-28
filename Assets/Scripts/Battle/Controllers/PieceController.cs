@@ -100,7 +100,7 @@ public class PieceController : MonoBehaviour
         this.player = player;
         this.playerData = GM.Ins.PLAYERPROFILE.GetPlayer(pieceID - 1);
         //unitAttrCenter.Init();
-        if (isPlayerPiece)
+        /*if (isPlayerPiece)
         {
             availableActions.Add(ActionType.移动);
             availableActions.Add(ActionType.近战攻击);
@@ -110,7 +110,7 @@ public class PieceController : MonoBehaviour
             availableActions.Add(ActionType.技能); // 技能
             availableActions.Add(ActionType.道具);
             availableActions.Add(ActionType.警戒指令);
-        }
+        }*/
 
         //Debug.Log(_pieceDisplay.name);
         if(gameObject.activeInHierarchy) pieceDisplay?.ChangeDisplayState(PieceDisplayState.Idle);

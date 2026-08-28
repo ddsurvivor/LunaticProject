@@ -15217,6 +15217,7 @@ MonoBehaviour:
   finishExp: 100
   winTurnCondition: 999
   battleSetController: {fileID: 0}
+  pieceActionManager: {fileID: 0}
   moveWaitTime: 1
   gazeWaitTime: 0.5
   summonPieces: []
@@ -15304,6 +15305,8 @@ MonoBehaviour:
   fogController: {fileID: 0}
   waveController: {fileID: 0}
   mapController: {fileID: 0}
+  realTimeMode: 0
+  RAM: {fileID: 0}
 --- !u!114 &1713777228
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15377,6 +15380,7 @@ MonoBehaviour:
   checkSuccess: {fileID: 0}
   checkFail: {fileID: 0}
   notificationManager: {fileID: 0}
+  undoMoveBtn: {fileID: 0}
 --- !u!114 &1713777229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19958,6 +19962,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6891228850527105862, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 6891228850527105862, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
     - target: {fileID: 6915368942728177865, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -20233,6 +20241,22 @@ PrefabInstance:
     - target: {fileID: 8455713939983682778, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8537592346715545695, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: configuredActions.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8537592346715545695, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: configuredActions.Array.data[3]
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 8537592346715545695, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: configuredActions.Array.data[4]
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 8537592346715545695, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
+      propertyPath: configuredActions.Array.data[5]
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 8650936795375690168, guid: bca9029c086eb3c49a3dfb9838e32d40, type: 3}
       propertyPath: m_AnchorMax.y

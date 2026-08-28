@@ -7,7 +7,7 @@ public class SelfHeal : MonoBehaviour
     
     public void FullHp()
     {
-        var piece = GetComponent<PieceController>();
+        var piece = GetComponent<EnemyController>();
         if (piece != null)
         {
             piece.unitAttrCenter.FullHealth();

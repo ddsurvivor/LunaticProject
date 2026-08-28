@@ -36,7 +36,8 @@ public class BattleManager : MonoBehaviour
     [LabelText("战斗胜利经验值")] public int finishExp = 100;
     [LabelText("坚持回合胜利")] public int winTurnCondition = 999; // 胜利条件：在多少回合内获胜，999表示不限制
 
-    public BattleSetController battleSetController;
+    public BattleSetController battleSetController;// 战斗预设
+    public PieceActionManager pieceActionManager;
     public int TunrNumber => _turnNumber;
     private int _turnNumber = 0;
 
@@ -60,6 +61,7 @@ public class BattleManager : MonoBehaviour
         AIController.Init();
         ApplySetting(GM.Ins.battleSetting); // 在完成所有棋子初始化以后，更新预设
         _delaySkillPack = null;
+        if(pieceActionManager!=null) pieceActionManager.ApplySettingsToPieces(PlayerController.pieces);
         //StartBattle();
         //gray = Resources.Load<Material>("Materials/Gray");
         //grayEnemy = Resources.Load<Material>("Materials/GrayEnemy");
