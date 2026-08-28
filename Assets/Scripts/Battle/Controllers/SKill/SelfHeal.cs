@@ -11,6 +11,7 @@ public class SelfHeal : MonoBehaviour
         if (piece != null)
         {
             piece.unitAttrCenter.FullHealth();
+            GM.Ins.AM.PlayAudio(AudioCueType.Heal);
         }
     }
 }

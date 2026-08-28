@@ -18,7 +18,7 @@ public class CameraController : MonoBehaviour
     private Vector3 _lastMousePosition;
     [LabelText("拖动速度")] public float panSpeed = 20f;
 
-    Tweener shakeTweener;
+    Sequence shakeTweener;
 
     public Camera mainCam;
     public Camera colorCam;
@@ -96,28 +96,34 @@ public class CameraController : MonoBehaviour
     //public float shakeMagnitude;
     public Cinemachine.CinemachineImpulseSource impulse;
 
-    public void FocusTarget(Transform transform)
+    public void FocusTarget(Transform transform, Transform origin = null)
     {
         virtualCamera.Priority = 0;
         followVCam.Priority = 10;
         followVCam.Follow = transform;
+        DOVirtual.DelayedCall(1.6f, () =>
+        {
+            SetFollow(origin);
+        });
     }
-    public void FocusShake(Transform transform, float amplitude = 1f)
+    public void FocusShake(Transform transform, Transform origin = null, float amplitude = 1f)
     {
         virtualCamera.Priority = 0;
         followVCam.Priority = 10;
         followVCam.Follow = transform;
         //virtualCamera.m_Lens.OrthographicSize = minZoom;
         float currentSize = followVCam.m_Lens.OrthographicSize;
-        shakeTweener?.Kill();
-        shakeTweener.SetUpdate(UpdateType.Normal, false);
         float zoom = minZoom + (maxZoom - minZoom) * 0.2f;
-        shakeTweener = DOTween.To(
+        shakeTweener?.Kill();
+        shakeTweener = DOTween.Sequence();
+        shakeTweener.SetUpdate(UpdateType.Normal, false);
+        shakeTweener.Append(DOTween.To(
             () => followVCam.m_Lens.OrthographicSize,
             x => followVCam.m_Lens.OrthographicSize = x,
             zoom,
             shakeDelay/10f
-        ).OnComplete(() =>
+        ));
+        shakeTweener.AppendCallback(() =>
         {
             followVCam.Follow = null;
             // 调用impulse的方法让相机震动
@@ -127,26 +133,23 @@ public class CameraController : MonoBehaviour
                 impulse.GenerateImpulse();
                 //Debug.Log("相机震动");
             }
-
-            DOTween.To(
-                () => followVCam.m_Lens.OrthographicSize,
-                x => followVCam.m_Lens.OrthographicSize = x,
-                currentSize,
-                shakeDelay).SetDelay(0.8f).OnComplete(() =>
-            {
-                virtualCamera.Priority = 10;
-                followVCam.Priority = 0;
-            });
         });
-    }
-
-    public void ActiveBurstMode(bool option)
-    {
-        // 开启聚能模式镜头
-        // Color Grading 并将 Saturation 设置为 -100
-        //mainCam.gameObject.GetComponent<PostProcessVolume>().
-        //mainCam.cullingMask = option? LayerMask.GetMask("Player") : -1;// 只渲染玩家层
-        playerCam.gameObject.SetActive(option); // 开启玩家专用镜头
-        colorCam.gameObject.SetActive(option); // 开启聚能模式镜头
+        shakeTweener.AppendInterval(0.8f);
+        shakeTweener.Append(DOTween.To(
+            () => followVCam.m_Lens.OrthographicSize,
+            x => followVCam.m_Lens.OrthographicSize = x,
+            currentSize,
+            shakeDelay)
+        );
+        shakeTweener.AppendInterval(0.5f);
+        shakeTweener.OnComplete(() =>
+        {
+            virtualCamera.Priority = 10;
+            followVCam.Priority = 0;
+            if(origin!= null)
+                SetFollow(origin);
+            else
+                followVCam.Follow = null;
+        });
     }
 }

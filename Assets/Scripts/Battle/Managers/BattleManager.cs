@@ -129,18 +129,18 @@ public class BattleManager : MonoBehaviour
         }
         else
         {
-            PlayerStart();
+            PlayerStart(false);
         }
 
         //CheckAllLadderMove(PlayerController.isInTurn);
         //CheckAllArea();
     }
 
-    public void PlayerStart()
+    public void PlayerStart(bool firstTurn = true)
     {
         AIController.isInTurn = false;
         PlayerController.isInTurn = true;
-        AIController.TurnEnd();
+        if(!firstTurn) AIController.TurnEnd();
         PlayerController.TurnStart();
         BattleScene.Ins.UM.endTurnButton.enabled = true;
         BattleScene.Ins.UM.ShowTurnChange(true);
@@ -496,11 +496,11 @@ public class BattleManager : MonoBehaviour
         {
             if (isCrit)
             {
-                BattleScene.Ins.BM.cameraController.FocusShake(targets[0].transform);
+                BattleScene.Ins.BM.cameraController.FocusShake(targets[0].transform,attacker.transform);
             }
             else
             {
-                BattleScene.Ins.BM.cameraController.FocusTarget(targets[0].transform);
+                BattleScene.Ins.BM.cameraController.FocusTarget(targets[0].transform,attacker.transform);
             }
         }
 
