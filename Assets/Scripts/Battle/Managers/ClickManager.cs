@@ -194,7 +194,7 @@ public class ClickManager : MonoBehaviour
             if (piece == null) continue;
             if (!piece.isPlayerPiece)
             {
-                if (piece is EnemyController enemy)
+                if (piece is EnemyController enemy && enemy.isActived)
                 {
                     enemy.ShowTargetLine();
                 }

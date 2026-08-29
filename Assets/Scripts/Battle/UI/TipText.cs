@@ -2,11 +2,10 @@ using UnityEngine;
 using UnityEngine.UI; // 使用旧版 Text
 using DG.Tweening;
 
-[RequireComponent(typeof(Text))]
 public class TipText : MonoBehaviour
 {
     [Header("动画参数配置")]
-    [SerializeField] private float moveDistance = 60f;     
+     private float moveDistance = 2f;     
     [SerializeField] private float duration = 1.2f;        
     private Ease moveEase = Ease.OutQuad; 
 
@@ -42,7 +41,7 @@ public class TipText : MonoBehaviour
         _tipSequence = DOTween.Sequence();
 
         // 4. 并行播放：位移 + 淡出
-        _tipSequence.Join(transform.DOLocalMoveY(transform.localPosition.y + moveDistance, duration).SetEase(moveEase));
+        _tipSequence.Join(transform.DOMoveY(transform.position.y + moveDistance, duration).SetEase(moveEase));
         //_tipSequence.Join(_text.DOFade(0f, duration));
         _tipSequence.Insert(duration/2f, _text.DOFade(0f, duration/2f));
         // 5. 动画完成后【自动关闭自身】以供对象池回收

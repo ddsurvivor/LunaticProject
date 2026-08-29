@@ -44,10 +44,11 @@ public class TipTextManager : MonoBehaviour
 
     [Header("基础设施配置")]
     [SerializeField] private GameObject tipTextPrefab;     // TipText 预制体
-    [SerializeField] private RectTransform canvasRect;      // UI Canvas 的 RectTransform
-    [SerializeField] private Canvas targetCanvas;           // Canvas 组件
+    //[SerializeField] private RectTransform canvasRect;      // UI Canvas 的 RectTransform
+    //[SerializeField] private Canvas targetCanvas;           // Canvas 组件
     
     [Header("显示效果微调")]
+    [SerializeField] private Vector3 worldOffset = new Vector3(0f, 2f, 0f);
     [SerializeField] private Vector2 uiOffset = new Vector2(0f, 60f); // 弹出位置的纵向偏移
 
     // 内部简易对象池列表
@@ -75,9 +76,9 @@ public class TipTextManager : MonoBehaviour
         }
 
         // 2. 如果没找到未激活的，则说明池子满了，实例化一个全新的
-        if (tipTextPrefab == null || canvasRect == null) return null;
+        if (tipTextPrefab == null) return null;
 
-        GameObject tipGo = Instantiate(tipTextPrefab, canvasRect);
+        GameObject tipGo = Instantiate(tipTextPrefab);
         TipText tipScript = tipGo.GetComponent<TipText>();
 
         if (tipScript != null)
@@ -104,28 +105,13 @@ public class TipTextManager : MonoBehaviour
         Color finalColor = textColor ?? Color.white;
 
         GameObject tipGo = tipScript.gameObject;
-
-        // 2. 将 3D 世界坐标转换为屏幕像素坐标
-        Vector3 screenPos = Camera.main.WorldToScreenPoint(target.position);
-    
-        // 安全裁剪：如果目标物体在相机背面，则不处理（防止在屏幕反方向穿帮弹出提示）
-        if (screenPos.z < 0) return;
-
-        // 3. 核心修正：将屏幕像素坐标精准转换为 Canvas 的局部坐标
-        // 根据 Canvas 的 RenderMode 自动处理相机参数（Overlay 传 null，Camera 传主相机）
-        bool isOverlay = targetCanvas.renderMode == RenderMode.ScreenSpaceOverlay;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            canvasRect, 
-            screenPos, 
-            isOverlay ? null : Camera.main, 
-            out Vector2 localPos
-        );
-
-        // 4. 严格控制时序：【先修正局部坐标】，【再激活物体】，完美解决旧坐标闪烁问题
-        tipGo.transform.localPosition = localPos + uiOffset;
+        // 【核心修改】不再进行屏幕坐标转换，直接使用目标的世界坐标加上偏移量
+        tipGo.transform.position = target.position + worldOffset;
+        
+        // 激活物体[cite: 1]
         tipGo.SetActive(true);
 
-        // 5. 调用接口播放动画
+        // 调用接口播放动画[cite: 1]
         tipScript.ShowTip(content, finalColor);
     }
 
