@@ -18,6 +18,10 @@ public class 大地图System : SerializedMonoBehaviour
     [LabelText("调试模式显示所有关卡")]
     public bool isDebugMode;
 
+    [LabelText("第一章剧情节点ID")]
+    [SerializeField]
+    private string firstNode = "PR0";
+
     public static bool 是可以点击地图事件;
 
     #region 进入剧情视觉反馈
@@ -62,7 +66,7 @@ public class 大地图System : SerializedMonoBehaviour
         if (GM.Ins.PLAYERPROFILE.isNewGame)
         {
             Debug.Log("检测到新游戏,开始第一章剧情");
-            大地图System.instance.开始剧情("PR0");
+            大地图System.instance.开始剧情(firstNode);
             GM.Ins.PLAYERPROFILE.isNewGame = false;
             blackFront.SetActive(true);
             DOVirtual.DelayedCall(5.2f,()=>{
