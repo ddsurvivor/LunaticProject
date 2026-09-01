@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -65,6 +66,8 @@ public class 剧本System : MonoBehaviour
     public Color choiceSelectedColor = Color.gray;
     private List<string> choiceList = new List<string>();//存储选项的列表
 
+    private Vector3 origionPos;
+
     public void 设置新剧本(string t)
     {
         刷新();
@@ -83,6 +86,7 @@ public class 剧本System : MonoBehaviour
         }
 
         刷新();
+        origionPos = transform.position;
     }
 
     public void 刷新()
@@ -142,21 +146,22 @@ public class 剧本System : MonoBehaviour
         }
         if (当前说话内容.Contains(Center.Tag_notspawn))
         {
-            进行指令(当前事件);
-            已阅读++;
+            //进行指令(当前事件);
+            //已阅读++;
             return;
         }
         //当文本更新时?.Invoke();
         //AudioManager.instance.播放音效("Key");
         //Debug.Log($"跳过，当前为{已阅读}");
-        进行指令(当前事件);
-        生成剧本预制体();
+        //进行指令(当前事件);
+        //生成剧本预制体();
         已阅读++;
         
     }
 
     public void OnClickSkip(int num = 0)
     {
+        StopAutoPlay();//停止自动播放
         Debug.Log($"跳过{已储存剧本.Length - 已阅读}条剧本");
         GM.Ins.AM.播放音效("Key");
         int skipCount = 已储存剧本.Length - 已阅读 - num;
@@ -165,7 +170,9 @@ public class 剧本System : MonoBehaviour
             //Next();
             SkipNext();
         }
+        Next();
     }
+    
 
     public GameObject 生成剧本预制体()
     {
@@ -333,11 +340,13 @@ public class 剧本System : MonoBehaviour
         shakeTween?.Kill();
         if (震动目标 == null)
         {
+            transform.position = origionPos;
             Debug.LogWarning("震动目标未设置，请在Inspector中设置震动目标");
             shakeTween = transform.DOShakePosition(duration, strength, vibrato);
         }
         else
         {
+            震动目标.position = origionPos;
             shakeTween = 震动目标.DOShakePosition(duration, strength, vibrato);
         }
     }
@@ -346,6 +355,7 @@ public class 剧本System : MonoBehaviour
 
     public void 进行指令(string tar)
     {
+        if(tar == null || tar.Length <= 0) return;
         Debug.Log($"进行指令{tar}");
         var face = tar.Split(Center.Plot指令分隔符);
         foreach (var key in face)
@@ -1050,5 +1060,84 @@ public class 剧本System : MonoBehaviour
     public void TestCommand(string command)
     {
         进行指令(command);
+    }
+    
+    
+    // ===== 自动播放系统 ====== //
+    
+    // ==================== 状态变量 ====================
+    private bool isAutoPlay = false;       // 是否处于自动播放状态
+    private bool isFastForward = false;    // 是否处于快进状态
+    private Coroutine autoPlayCoroutine;   // 自动播放协程引用
+
+    [Header("配置参数")]
+    [SerializeField] private float normalDelay = 2.0f;     // 正常自动播放的停顿时间
+    [SerializeField] private float fastForwardDelay = 0.3f; // 快进时的停顿时间
+
+    /// <summary>
+    /// 切换自动播放状态（可绑定到 UI 的“自动”按钮）
+    /// </summary>
+    public void ToggleAutoPlay()
+    {
+        isAutoPlay = !isAutoPlay;
+
+        if (isAutoPlay)
+        {
+            // 开启自动播放
+            if (autoPlayCoroutine == null)
+            {
+                autoPlayCoroutine = StartCoroutine(AutoPlayRoutine());
+            }
+            Debug.Log("【剧情系统】已开启自动播放");
+        }
+        else
+        {
+            // 暂停/关闭自动播放
+            StopAutoPlay();
+            Debug.Log("【剧情系统】已暂停自动播放");
+        }
+    }
+
+    /// <summary>
+    /// 设置快进状态（可绑定到 UI 按钮的 Down/Up 事件或 Toggle）
+    /// </summary>
+    /// <param name="enable">是否开启快进</param>
+    public void ToggleFastForward()
+    {
+        isFastForward = !isFastForward;
+        Debug.Log($"【剧情系统】快进状态: {isFastForward}");
+    }
+
+    /// <summary>
+    /// 强制停止自动播放（例如玩家点击了选项、或者手动进行了某些打断操作）
+    /// </summary>
+    public void StopAutoPlay()
+    {
+        isAutoPlay = false;
+        isFastForward = false;
+        
+        if (autoPlayCoroutine != null)
+        {
+            StopCoroutine(autoPlayCoroutine);
+            autoPlayCoroutine = null;
+        }
+    }
+
+    /// <summary>
+    /// 自动播放核心协程
+    /// </summary>
+    private IEnumerator AutoPlayRoutine()
+    {
+        while (isAutoPlay)
+        {
+            // 根据是否快进动态决定等待时间
+            float currentWaitTime = isFastForward ? fastForwardDelay : normalDelay;
+            yield return new WaitForSeconds(currentWaitTime);
+
+            // 触发下一句剧情
+            Next();
+        }
+
+        autoPlayCoroutine = null;
     }
 }
