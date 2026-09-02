@@ -39,6 +39,7 @@ public class 剧本System : MonoBehaviour
     private string 当前事件 => 已储存剧本[已阅读][0];
     private string 当前说话人 => 已储存剧本[已阅读][1];
     private string 当前说话内容 => 已储存剧本[已阅读][2];
+    private string[][] 记录上段剧情;
 
     int 语言偏移
     {
@@ -58,7 +59,7 @@ public class 剧本System : MonoBehaviour
         }
     }
 
-    [SerializeField] [ReadOnly] private string curPartName;
+    [SerializeField] [ReadOnly] private string curPartName;// 当前剧本名
 
     public CheckDicePanel checkDicePanel;
 
@@ -67,6 +68,8 @@ public class 剧本System : MonoBehaviour
     private List<string> choiceList = new List<string>();//存储选项的列表
 
     private Vector3 origionPos;
+    
+    private string curBranchName = "";//当前分支名
 
     public void 设置新剧本(string t)
     {
@@ -351,7 +354,7 @@ public class 剧本System : MonoBehaviour
         }
     }
 
-    private string[][] 记录上段剧情;
+    
 
     public void 进行指令(string tar)
     {
@@ -472,6 +475,7 @@ public class 剧本System : MonoBehaviour
             if (key.Contains(Center.Command_Choice))
             {
                 选项按钮.Clear();
+                curBranchName = curPartName;// 遇到分支则存储一次
                 var prams = 指令切割(key);
                 int 选项长度 = Convert.ToInt32(prams[0]);
                 for (int i = 0; i < 选项长度; i++)
@@ -544,11 +548,19 @@ public class 剧本System : MonoBehaviour
 
             if (key.Contains(Center.Command_Gameover))
             {
-                大地图System.instance.失败();
+                //大地图System.instance.失败();// 打开失败页面
                 // 自动保存
                 //进度System.存档("读档");
-                已储存剧本 = 记录上段剧情;
-                刷新();
+                //已储存剧本 = 记录上段剧情;
+                
+                DOVirtual.DelayedCall(0.5f ,()=>
+                {
+                    // 退回到上一段剧情
+                    设置新剧本(curBranchName);
+                    Next();
+                    //刷新();
+                }, false);
+                大地图System.instance.失败();
             }
 
             if (key.Contains(Center.Command_If))

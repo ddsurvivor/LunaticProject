@@ -12,7 +12,7 @@ public class 大地图System : SerializedMonoBehaviour
     public 剧本System 剧情;
     public GameObject[] 地图;
     public GameObject 当前地图;
-    public GameObject 失败Obj;
+    public CanvasGroup gameoverPanel;
     public GameObject mapRoot;
 
     [LabelText("调试模式显示所有关卡")]
@@ -53,7 +53,9 @@ public class 大地图System : SerializedMonoBehaviour
     public GameObject blackFront;//黑幕
     public void 失败()
     {
-        失败Obj.SetActive(true);
+        gameoverPanel.gameObject.SetActive(true);
+        gameoverPanel.alpha = 0f;
+        gameoverPanel.DOFade(1f, 1f);
     }
 
     private void OnEnable()
