@@ -1,8 +1,11 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.AddressableAssets;
+using UnityEngine.Networking;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class AudioManager : SerializedMonoBehaviour
@@ -20,7 +23,7 @@ public class AudioManager : SerializedMonoBehaviour
     private GameObject seAudioSourcePool;
     
     // 【优化 1：Addressables 内存缓存】避免重复加载，解决 AudioClip 内存泄漏
-    private Dictionary<string, AsyncOperationHandle<AudioClip>> _audioCache = new Dictionary<string, AsyncOperationHandle<AudioClip>>();
+    private Dictionary<string, AudioClip> _audioCache = new Dictionary<string, AudioClip>();
 
     // 【优化 2：简单的对象池】彻底消除 new GameObject 和 Destroy 带来的 GC
     private List<AudioSource> _sePool = new List<AudioSource>();
@@ -164,6 +167,7 @@ public class AudioManager : SerializedMonoBehaviour
         LoadAudioClipAsync(audioName, onReadyToPlay);
     }
 
+    /*
     private void LoadAudioClipAsync(string audioName, System.Action<AudioClip> onComplete)
     {
         // 1. 检查缓存，如果已经加载过，直接返回结果，0 延迟
@@ -197,6 +201,7 @@ public class AudioManager : SerializedMonoBehaviour
             }
         };
     }
+    */
 
     #endregion
 
@@ -228,9 +233,9 @@ public class AudioManager : SerializedMonoBehaviour
         }
 
         // 2. 停止对象池中所有正在播放该音效的组件 (包括单次播放的)
-        if (_audioCache.TryGetValue(audioName, out var handle) && handle.IsDone)
+        if (_audioCache.TryGetValue(audioName, out var handle) && handle!=null)
         {
-            AudioClip targetClip = handle.Result;
+            AudioClip targetClip = handle;
             foreach (var source in _sePool)
             {
                 if (source.isPlaying && source.clip == targetClip)
@@ -273,12 +278,14 @@ public class AudioManager : SerializedMonoBehaviour
         // 释放 Addressables 内存
         foreach (var kvp in _audioCache)
         {
-            if (kvp.Value.IsValid())
+            if (kvp.Value!=null)
             {
                 Addressables.Release(kvp.Value);
             }
         }
         _audioCache.Clear();
+        _sePool.Clear();
+        循环音效字典.Clear();
     }
     
     
@@ -297,5 +304,64 @@ public class AudioManager : SerializedMonoBehaviour
         seSource.volume = SE音量;
         seSource.loop = false;
         seSource.Play();
+    }
+    
+    private void LoadAudioClipAsync(string audioName, System.Action<AudioClip> onComplete)
+    {
+        // 1. 检查内存缓存
+        if (_audioCache.TryGetValue(audioName, out AudioClip cachedClip) && cachedClip != null)
+        {
+            onComplete?.Invoke(cachedClip);
+            return;
+        }
+
+        // 2. 协程从 StreamingAssetsPath 加载
+        StartCoroutine(加载本地音频文件(audioName, (loadedClip) =>
+        {
+            if (loadedClip != null)
+            {
+                _audioCache[audioName] = loadedClip; // 存入缓存
+            }
+            onComplete?.Invoke(loadedClip);
+        }));
+    }
+
+    private IEnumerator 加载本地音频文件(string audioName, System.Action<AudioClip> callback)
+    {
+        string soundFolder = Path.Combine(Application.dataPath, "SOUND");
+        string[] extensions = { ".wav", ".mp3", ".ogg" };
+        
+        foreach (string ext in extensions)
+        {
+            string filePath = Path.Combine(soundFolder, audioName + ext);
+            if (File.Exists(filePath))
+            {
+                AudioType audioType = GetAudioType(ext);
+                using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip("file:///" + filePath, audioType))
+                {
+                    yield return www.SendWebRequest();
+
+                    if (www.result == UnityWebRequest.Result.Success)
+                    {
+                        AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
+                        callback?.Invoke(clip);
+                        yield break;
+                    }
+                }
+            }
+        }
+
+        Debug.LogError($"[AudioManager] 找不到音频文件: {audioName} (路径: {soundFolder})");
+        callback?.Invoke(null);
+    }
+    private AudioType GetAudioType(string extension)
+    {
+        switch (extension.ToLower())
+        {
+            case ".wav": return AudioType.WAV;
+            case ".mp3": return AudioType.MPEG;
+            case ".ogg": return AudioType.OGGVORBIS;
+            default: return AudioType.UNKNOWN;
+        }
     }
 }
