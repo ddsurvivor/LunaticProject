@@ -57,6 +57,8 @@ public class DataManager : SerializedMonoBehaviour
     public void SaveData(int index)
     {
         //playerprofiles[index] = GM.Ins.PLAYERPROFILE;
+        GM.Ins.PLAYERPROFILE.lastSaveTime = System.DateTime.Now;
+        GM.Ins.PLAYERPROFILE.currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         JsonTool.SaveJson(GM.Ins.PLAYERPROFILE,savePath + $"PlayerProfiles_{index}.json");
         playerprofiles[index] = JsonTool.LoadJson<PLAYERPROFILE>(savePath + $"PlayerProfiles_{index}.json");
     }

@@ -26,8 +26,9 @@ public class SaveCell : SavePanel
             Debug.Log("存档不存在");
             return;
         }
-        GM.Ins.PLAYERPROFILE = GM.Ins.DM.LoadData(index);
-        GM.Ins.LoadPlayingScene();
+
+        GM.Ins.PLAYERPROFILE = playerprofile;
+        GM.Ins.LoadPlayingScene(playerprofile.currentScene);
     }
 
     public void OnClickSave()
