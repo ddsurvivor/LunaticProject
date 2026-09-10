@@ -25,6 +25,7 @@ public class PLAYERPROFILE
     public int dateDay = 45;
     public Daytime daytime = Daytime.上午;
     public string currentMap = "TEST";
+    public string currentScene = "Playing";
     public int curSmallMapIndex = 0;
 
     [Header("道具存档")] public List<ItemPack> itemPacks = new();

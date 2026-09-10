@@ -106,21 +106,22 @@ using UnityEngine.SceneManagement;
             {
                 battleTransitionPanel.TransitionEndBattle("Playing", endLog);
             });*/
-            StartCoroutine(LoadSceneCoroutine());
+            StartCoroutine(LoadSceneCoroutine("Playing"));
         }
 
-        public void LoadPlayingScene()
+        public void LoadPlayingScene(string sceneName)
         {
             endLog = "";
             battleScene = "";
-            StartCoroutine(LoadSceneCoroutine());
+            if(sceneName== "") sceneName = "Playing";// 如果没有指定场景，则默认加载Playing场景
+            StartCoroutine(LoadSceneCoroutine(sceneName));
         }
         
         
-        IEnumerator LoadSceneCoroutine()
+        IEnumerator LoadSceneCoroutine(string sceneName)
         {
             // 异步加载场景
-            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("Playing");
+            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
         
             // 等待场景加载完成
             while (!asyncLoad.isDone)

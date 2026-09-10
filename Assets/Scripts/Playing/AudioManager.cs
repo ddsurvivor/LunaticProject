@@ -276,6 +276,7 @@ public class AudioManager : SerializedMonoBehaviour
     private void OnDestroy()
     {
         // 释放 Addressables 内存
+        #if !UNITY_EDITOR
         foreach (var kvp in _audioCache)
         {
             if (kvp.Value!=null)
@@ -283,6 +284,7 @@ public class AudioManager : SerializedMonoBehaviour
                 Addressables.Release(kvp.Value);
             }
         }
+        #endif
         _audioCache.Clear();
         _sePool.Clear();
         循环音效字典.Clear();
