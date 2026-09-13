@@ -475,17 +475,62 @@ public class 剧本System : MonoBehaviour
             if (key.Contains(Center.Command_Choice))
             {
                 选项按钮.Clear();
+                int choiceStartLine = 已阅读;// 【新增】记录当前 CHOICE 指令的行号，作为相对索引计算的基准
                 curBranchName = curPartName;// 遇到分支则存储一次
                 var prams = 指令切割(key);
                 int 选项长度 = Convert.ToInt32(prams[0]);
                 for (int i = 0; i < 选项长度; i++)
                 {
                     已阅读++;
+                    string curChoiceId = $"{curPartName}_{已阅读}";
+                    
+                    // ==================== 【新增：选项解锁条件解析】 ====================
+                    string 原始文本 = 当前说话内容;
+                    string 无标签文本 = 原始文本;
+                    bool 满足条件 = true;
+
+                    // 匹配格式如 <Req=1,2,3> （使用等号避免与你的原始代码拆分说话人的冒号冲突）
+                    var match = Regex.Match(原始文本, @"\[Req=([\d,]+)\]");
+                    if (match.Success)
+                    {
+                        Debug.Log("匹配成功");
+                        string[] reqs = match.Groups[1].Value.Split(',');
+                        foreach (var req in reqs)
+                        {
+                            if (int.TryParse(req, out int reqIndex))
+                            {
+                                // 将相对序号(1,2,3)转换为当前剧本表的绝对ID
+                                string requiredChoiceId = $"{curPartName}_{choiceStartLine + reqIndex}";
+                                if (!choiceList.Contains(requiredChoiceId))
+                                {
+                                    满足条件 = false;
+                                    break;
+                                }
+                            }
+                        }
+                        // 剔除标签字符串，避免显示在游戏中
+                        无标签文本 = 原始文本.Replace(match.Value, "").Trim();
+                    }
+
+                    // 如果前置选项还没被点过，则直接跳过该选项的生成
+                    if (!满足条件)
+                    {
+                        continue; 
+                    }
+                    // ====================================================================
+                    
+                    // 临时覆盖为无标签纯净文本，防止标签文字显示在 UI 上
+                    已储存剧本[已阅读][2] = 无标签文本;
+                    
                     GameObject go = 生成剧本预制体();
+                    
+                    // 预制体生成后，立刻恢复原始文本，确保玩家下次循环跳回这里时条件标签不丢失
+                    已储存剧本[已阅读][2] = 原始文本;
+
+                    if (go == null) continue; // 增加安全校验
                     GameObject text = go.GetComponent<打字机>()._textComponent.gameObject;
                     text.AddComponent<Button>();
                     // 查询选项id，如果存在，则显示灰色
-                    string curChoiceId = $"{curPartName}_{已阅读}";
                     text.GetComponent<Text>().color = 
                         choiceList.Contains(curChoiceId) ? choiceSelectedColor : choiceColor;
                     text.GetComponent<Text>().raycastTarget = true;
