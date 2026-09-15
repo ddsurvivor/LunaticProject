@@ -785,7 +785,7 @@ public class 剧本System : MonoBehaviour
                 if (prams.Length >= 1)
                 {
                     int.TryParse(prams[0], out int dayTimes);
-                    大地图System.instance.daytimeSystem.CostDaytime(dayTimes);
+                    大地图System.instance.GetDaytimeSystem()?.CostDaytime(dayTimes);
                 }
             }
 
@@ -984,6 +984,7 @@ public class 剧本System : MonoBehaviour
                 var prams = 指令切割(key);
                 if (prams.Length >= 1)
                 {
+                    GM.Ins.PLAYERPROFILE.daytime = Daytime.上午;// 进入地图重置为初始
                     大地图System.instance.打开地图(prams[0]);
                 }
             }
@@ -1025,7 +1026,7 @@ public class 剧本System : MonoBehaviour
                     GM.Ins.PLAYERPROFILE.dateMonth = 3;
                     GM.Ins.PLAYERPROFILE.daytime = Daytime.上午;
                     
-                    大地图System.instance.daytimeSystem.UpdateDaytimeImage();
+                    大地图System.instance.GetDaytimeSystem()?.UpdateDaytimeImage();
                     player.curHealth += 50;
                 }
             }
@@ -1092,12 +1093,13 @@ public class 剧本System : MonoBehaviour
         fadeTweener.AppendCallback(() => logText.gameObject.SetActive(true));
     }
 
-    // 休息
+    [Button("切换下一个差分")]
     public void OnClickRest()
     {
         // 重置状态
+        Debug.Log("进行差分切换");
         // 推进日期
-        大地图System.instance.daytimeSystem.NextDay();
+        大地图System.instance.GetDaytimeSystem()?.CostDaytime(1);
     }
 
     private void OnDisable()
