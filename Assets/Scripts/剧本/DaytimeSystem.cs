@@ -56,13 +56,14 @@ public class DaytimeSystem : SerializedMonoBehaviour
     public void UpdateDaytimeImage()
     {
         // 更新日期文本
-        dateText.text = $"{GM.Ins.PLAYERPROFILE.dateYear} / Q{GM.Ins.PLAYERPROFILE.dateMonth} / {GM.Ins.PLAYERPROFILE.dateDay}";
-        timeText.text = GM.Ins.PLAYERPROFILE.daytime == Daytime.轰炸 ? 
+        if(dateText!=null) dateText.text = $"{GM.Ins.PLAYERPROFILE.dateYear} / Q{GM.Ins.PLAYERPROFILE.dateMonth} / {GM.Ins.PLAYERPROFILE.dateDay}";
+        if(timeText!=null) timeText.text = GM.Ins.PLAYERPROFILE.daytime == Daytime.轰炸 ? 
             "夜晚" : GM.Ins.PLAYERPROFILE.daytime.ToString();
         if (daytimeSprites.ContainsKey(GM.Ins.PLAYERPROFILE.daytime))
         {
             CloseAllSprite();
             daytimeSprites[GM.Ins.PLAYERPROFILE.daytime]?.SetActive(true);
+            Debug.Log($"当前时间段: {GM.Ins.PLAYERPROFILE.daytime}, 显示对应的Sprite");
         }
     }
     

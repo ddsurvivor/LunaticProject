@@ -33,7 +33,8 @@ public class 大地图System : SerializedMonoBehaviour
     #endregion
 
     public 任务节点[] NodeList; //任务节点列表
-    public DaytimeSystem daytimeSystem;
+    [SerializeField]
+    private DaytimeSystem daytimeSystem;
 
     // 二级地图
     public Dictionary<int, GameObject> SmallMapDict = new Dictionary<int, GameObject>();
@@ -217,5 +218,12 @@ public class 大地图System : SerializedMonoBehaviour
                 blackFront.SetActive(false);
             });
         }
+    }
+    
+    public DaytimeSystem GetDaytimeSystem()
+    {
+        if (daytimeSystem == null)
+            daytimeSystem = 当前地图.GetComponent<DaytimeSystem>();
+        return daytimeSystem;
     }
 }
