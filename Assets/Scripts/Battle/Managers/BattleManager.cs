@@ -217,11 +217,13 @@ public class BattleManager : MonoBehaviour
         , CheckResult checkResult = CheckResult.None, bool isFlank = false)
     {
         //BattleScene.Ins.UM.PopSkillName(skillPack.skillName);
+        if (attacker == null || attacker.isDead) return;
         List<List<DamageInfo>> damageInfoList = new();
 
         bool isCrit = false;
-        foreach (var target in targets)
+        foreach (var target in targets.Distinct())
         {
+            if (target == null || !BuffManager.CanTarget(attacker, target)) continue;
             Debug.Log($"Skill Attack: Attacker={attacker.name}, Target={target.name}");
 
             // 楼层判定
@@ -236,6 +238,10 @@ public class BattleManager : MonoBehaviour
             }
 
             // --- [掩体判定开始] ---
+            bool hostileAttack = attacker.isPlayerPiece != target.isPlayerPiece;
+            if (hostileAttack) buffManager.OnAttacked(attacker, target);
+            bool barrierBlocked = hostileAttack &&
+                target.unitAttrCenter.GetBuffStacks(BuffType.SlowingField) != 0;
             CaverSlot activeCover = CheckCoverObstruction(attacker, target);
             int coverHitPenalty = 0;
             int coverDamageReduction = 0;
@@ -393,7 +399,11 @@ public class BattleManager : MonoBehaviour
                 if (realDamage < 0) realDamage = 0;
                 Debug.Log(
                     $"Skill Attack: BaseDamage={attackPack.damage}, AddAtk={addAtk}, Armor={armor},RollDamage={rollDamage}, RealDamage={realDamage}");
-                // TODO: 临时护盾功能
+                if (barrierBlocked)
+                {
+                    buffManager.AbsorbAttack(target.unitAttrCenter, realDamage);
+                    continue;
+                }
                 target.unitAttrCenter.TakeDamage(new AttackPack(realDamage, attackPack.damageType
                     , isCrit));
                 BattleScene.Ins.BM.characterSkillManager.NotifyTakeDamage(target.gameObject
@@ -420,6 +430,9 @@ public class BattleManager : MonoBehaviour
 
             damageInfoList.Add(damageInfos);
 
+            // 整次攻击（包括多段伤害和附带状态）均被屏障阻挡。
+            if (barrierBlocked) continue;
+
 
             // 处理buff
             foreach (var buffPack in skillPack.buffPacks)
@@ -429,7 +442,7 @@ public class BattleManager : MonoBehaviour
                     if (GameConst.CheckRate(buffPack.rate))
                     {
                         buffManager.AddBuff(attacker.unitAttrCenter, buffPack.buffType
-                            , buffPack.stacks);
+                            , buffPack.stacks, buffPack.barrierHealth, buffPack.retaliationTurns);
                     }
                 }
                 else if (buffPack.target == SkillTarget.All)
@@ -437,26 +450,26 @@ public class BattleManager : MonoBehaviour
                     if (GameConst.CheckRate(buffPack.rate))
                     {
                         buffManager.AddBuff(target.unitAttrCenter, buffPack.buffType
-                            , buffPack.stacks);
+                            , buffPack.stacks, buffPack.barrierHealth, buffPack.retaliationTurns);
                     }
                 }
                 else if (buffPack.target == SkillTarget.EnemyAll ||
                          buffPack.target == SkillTarget.Enemy)
                 {
-                    if (target.isPlayerPiece) continue; // 友军不受敌方buff影响
+                    if (target.isPlayerPiece == attacker.isPlayerPiece) continue;
                     if (GameConst.CheckRate(buffPack.rate))
                     {
                         buffManager.AddBuff(target.unitAttrCenter, buffPack.buffType
-                            , buffPack.stacks);
+                            , buffPack.stacks, buffPack.barrierHealth, buffPack.retaliationTurns);
                     }
                 }
                 else if (buffPack.target == SkillTarget.Ally)
                 {
-                    if (!target.isPlayerPiece) continue; // 敌军不受友方buff影响
+                    if (target.isPlayerPiece != attacker.isPlayerPiece) continue;
                     if (GameConst.CheckRate(buffPack.rate))
                     {
                         buffManager.AddBuff(target.unitAttrCenter, buffPack.buffType
-                            , buffPack.stacks);
+                            , buffPack.stacks, buffPack.barrierHealth, buffPack.retaliationTurns);
                     }
                 }
             }

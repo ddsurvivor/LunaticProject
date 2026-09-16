@@ -140,7 +140,7 @@ public class AIController : PlayerController
         int skillCost = GM.Ins.DM.gameConstSO.GetActionPointCost(ActionType.技能);
 
 
-        if (target == null) aiPiece.unitAttrCenter.CostMP(ActionType.待机);
+        if (target == null) return aiPiece.unitAttrCenter.CostMP(ActionType.待机);
         //ActionType actionType = ActionType.待机;
 
         if (aiPiece.navigate) // 如果正在导航中，优先保持导航状态，不进行攻击
@@ -496,7 +496,7 @@ public class AIController : PlayerController
 
         foreach (var playerPiece in BattleScene.Ins.BM.PlayerController.pieces)
         {
-            if (playerPiece.isDead) continue;
+            if (playerPiece.isDead || !BuffManager.CanTarget(aiPiece, playerPiece)) continue;
             threatValues.Add(playerPiece, 0);
 
             // 获取最近的玩家棋子

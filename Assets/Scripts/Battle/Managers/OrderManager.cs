@@ -79,6 +79,8 @@ public class OrderManager : MonoBehaviour
 
     private void TriggerOrderAttack(UnitOrderState state, PieceController target)
     {
+        if (!BuffManager.CanTarget(state.guard, target) ||
+            !BattleScene.Ins.BM.buffManager.OnAction(state.guard.unitAttrCenter)) return;
         // 1. 根据guard的orderState.profile.type区分近战/远程表现:
         // 触发协同普攻
         if (state.guard.isPlayerPiece)

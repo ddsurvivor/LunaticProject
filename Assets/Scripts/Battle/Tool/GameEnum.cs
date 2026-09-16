@@ -52,6 +52,12 @@ public static class EnumExtensions
             case BuffType.Bind: return "束缚";
             case BuffType.Burn: return "燃烧";
             case BuffType.Frail: return "脆弱";
+            case BuffType.CognitiveProtection: return "认知防护";
+            case BuffType.SlowingField: return "阻速场";
+            case BuffType.OffensiveCognitiveProtection: return "进攻性认知防护";
+            case BuffType.SpontaneousMemeticAttack: return "自发模因攻击";
+            case BuffType.MemeticRetaliation: return "认知反噬";
+            case BuffType.Stun: return "眩晕";
             default: return type.ToString();
         }
     }
@@ -147,6 +153,9 @@ public enum BuffType
     Shield = 3,
     [LabelText("隐蔽")]// 隐蔽
     Conceal = 4,
+    [LabelText("认知防护")] CognitiveProtection = 5,
+    [LabelText("阻速场")] SlowingField = 6,
+    [LabelText("进攻性认知防护")] OffensiveCognitiveProtection = 7,
     
     // 100以后为Debuff
     [LabelText("干扰")]// 干扰
@@ -159,6 +168,9 @@ public enum BuffType
     Burn = 104,
     [LabelText("脆弱")]
     Frail = 105,
+    [LabelText("自发模因攻击")] SpontaneousMemeticAttack = 106,
+    [LabelText("认知反噬")] MemeticRetaliation = 107,
+    [LabelText("眩晕")] Stun = 108,
 }
 
 /// <summary>

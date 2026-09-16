@@ -424,6 +424,7 @@ public class PieceController : MonoBehaviour
     /// <param name="range"></param>
     public void CastNormalAttack(PieceController pieceController, bool range = false, bool isOrder = false)
     {
+        if (isDead || !BuffManager.CanTarget(this, pieceController)) return;
         _curAttackPack = range? _pieceData.rangedAtk : _pieceData.meleeAtk;
         _curAtkType = range ? ActionType.远程攻击 : ActionType.近战攻击; 
         //if(!_isAttacking) return;
@@ -706,6 +707,7 @@ public class PieceController : MonoBehaviour
         Transform atkPos = rangeUI.GetSkillTransform();
         if (_skillPack.isDelaySkill) // 延时类技能跳过结算
         {
+            if (!unitAttrCenter.CostMP(ActionType.技能)) return;
             BattleScene.Ins.BM.RestoreDelaySkill(this, _skillPack, atkPos.position);
             _isUsingSkill = false;
             rangeUI.CloseRange();
@@ -1066,6 +1068,12 @@ public class PieceController : MonoBehaviour
     }
     public void CastOrder()
     {
+        if (!BattleScene.Ins.BM.buffManager.OnAction(unitAttrCenter))
+        {
+            isUsingOrder = false;
+            rangeUI.CloseRange();
+            return;
+        }
         Debug.Log($"确认指令:{_orderProfile.orderName}");
         BattleScene.Ins.BM.orderManager.ConfirmOrder(this, _orderProfile,rangeUI.fanRoot.transform.localRotation);
         isUsingOrder = false;

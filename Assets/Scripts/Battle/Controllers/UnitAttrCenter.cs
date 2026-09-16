@@ -271,12 +271,16 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
     public bool CostMP(ActionType actionType)
     {
+        if (pc.isDead || GetBuffStacks(BuffType.Stun) != 0) return false;
+        if ((actionType == ActionType.移动 || actionType == ActionType.攀爬) &&
+            GetBuffStacks(BuffType.Bind) != 0) return false;
         int costPoint = GM.Ins.DM.gameConstSO.GetActionPointCost(actionType);
-        if (actionType == ActionType.待机 && _curMovePoint > 0)
-            costPoint = _curMovePoint;
         if (_curMovePoint >= costPoint)
         {
             _curMovePoint -= costPoint;
+            if (!BattleScene.Ins.BM.buffManager.OnAction(this)) return false;
+            if ((actionType == ActionType.移动 || actionType == ActionType.攀爬) &&
+                GetBuffStacks(BuffType.Bind) != 0) return false;
             Debug.Log($"{gameObject.name}执行{actionType}消耗行动力{costPoint}，剩余行动力{_curMovePoint}");
             BattleScene.Ins.UM.OnPieceStateChance(pc);
             BattleScene.Ins.UM.ShowUndoMoveButton(false);
@@ -286,9 +290,11 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     }
     public bool CostMP(int costPoint)
     {
+        if (pc.isDead || GetBuffStacks(BuffType.Stun) != 0) return false;
         if (_curMovePoint >= costPoint)
         {
             _curMovePoint -= costPoint;
+            if (!BattleScene.Ins.BM.buffManager.OnAction(this)) return false;
             Debug.Log($"{gameObject.name}消耗行动力{costPoint}，剩余行动力{_curMovePoint}");
             BattleScene.Ins.UM.OnPieceStateChance(pc);
             BattleScene.Ins.UM.ShowUndoMoveButton(false);

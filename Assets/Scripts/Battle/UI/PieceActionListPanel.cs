@@ -37,7 +37,9 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 {
                     button.GetComponent<ActionBtn>().actionNameText.text = actionType.ToString();
                     button.GetComponent<ActionBtn>().costText.text =
-                        GM.Ins.DM.gameConstSO.GetActionPointCost(actionType) + "AP";
+                        actionType == ActionType.待机
+                            ? "全部AP"
+                            : GM.Ins.DM.gameConstSO.GetActionPointCost(actionType) + "AP";
                 }
                 else
                 {
@@ -171,7 +173,8 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 InteractArea currentArea = interactArea;
                 btn.onClick.AddListener(() =>
                 {
-                    if (!pc.unitAttrCenter.CostMP(ActionType.交互)) return;
+                    if (!pc.unitAttrCenter.CostMP(currentArea is LadderArea
+                        ? ActionType.攀爬 : ActionType.交互)) return;
                     currentArea.TriggerAction(pc);
                     HidePanel();
                 });
@@ -299,7 +302,11 @@ public class PieceActionListPanel : SerializedMonoBehaviour
 
     private void OnActionButtonClicked(ActionType actionType)
     {
-        if (!pc.unitAttrCenter.HasMP(actionType)) return;
+        if (actionType == ActionType.待机)
+        {
+            if (pc.unitAttrCenter.CurMovePoint <= 0) return;
+        }
+        else if (!pc.unitAttrCenter.HasMP(actionType)) return;
         BattleScene.Ins.UM.pieceInfoPanel.StartMpIconsBlink();
         Debug.Log($"Action Button Clicked: {actionType}");
         // 在这里处理按钮点击事件
@@ -316,12 +323,13 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 return;
                 break;
             case ActionType.待机:
+                // 待机没有固定行动力消耗，直接消耗当前全部剩余行动力。
+                if (!pc.unitAttrCenter.CostMP(pc.unitAttrCenter.CurMovePoint)) return;
                 pc.isIdle = true;
-                // 清除剩余行动力
-                pc.unitAttrCenter.CostMP(pc.unitAttrCenter.CurMovePoint);
                 pc.PlayAudio(actionType);
                 break;
             case ActionType.扫描:
+                if (!pc.unitAttrCenter.CostMP(ActionType.扫描)) return;
                 pc.PlayAudio(actionType);
                 break;
             case ActionType.攀爬:
@@ -330,7 +338,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 pc.StartNormalAttack(true);
                 break;
             case ActionType.重新装填:
-                pc.unitAttrCenter.CostMP(ActionType.重新装填);
+                if (!pc.unitAttrCenter.CostMP(ActionType.重新装填)) return;
                 pc.ReloadAmmo();
                 break;
             case ActionType.道具:

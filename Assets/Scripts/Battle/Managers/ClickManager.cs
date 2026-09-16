@@ -329,7 +329,11 @@ public class ClickManager : MonoBehaviour
             Debug.Log("停止拖动棋子");
             _isDragging = false;
             BattleScene.Ins.BM.cameraController.SetFollow(_selectedPiece.transform);
-            _selectedPiece.unitAttrCenter.CostMP(ActionType.移动);
+            if (!_selectedPiece.unitAttrCenter.CostMP(ActionType.移动))
+            {
+                _rangeUI.CloseRange();
+                return;
+            }
             _selectedPiece.StopDrag();
             _rangeUI.CloseRange();
             //_selectedPiece = null;
@@ -343,7 +347,11 @@ public class ClickManager : MonoBehaviour
             Debug.Log("停止拖动棋子");
             _isDragging = false;
             BattleScene.Ins.BM.cameraController.SetFollow(_selectedPiece.transform);
-            _selectedPiece.unitAttrCenter.CostMP(ActionType.移动);
+            if (!_selectedPiece.unitAttrCenter.CostMP(ActionType.移动))
+            {
+                _rangeUI.CloseRange();
+                return;
+            }
             Vector3 targetPos = new Vector3(_rangeUI.moveIcon.transform.position.x,
                 _selectedPiece.transform.position.y,
                 _rangeUI.moveIcon.transform.position.z);
@@ -352,7 +360,8 @@ public class ClickManager : MonoBehaviour
             // 记录并显示撤回
             lastMovePiece = _selectedPiece;
             lastStartPos = _dragStartPos;
-            BattleScene.Ins.UM.ShowUndoMoveButton(true);
+            BattleScene.Ins.UM.ShowUndoMoveButton(
+                _selectedPiece.unitAttrCenter.GetBuffStacks(BuffType.SpontaneousMemeticAttack) == 0);
             var piece = _selectedPiece;
             // piece.transform.DOMove(targetPos, 1.0f).OnComplete(() =>
             // {
@@ -372,6 +381,8 @@ public class ClickManager : MonoBehaviour
     /// </summary>
     public void CancelMove()
     {
+        if (lastMovePiece != null && (lastMovePiece.isDead ||
+            lastMovePiece.unitAttrCenter.GetBuffStacks(BuffType.SpontaneousMemeticAttack) != 0)) return;
         if (lastMovePiece != null)
         {
             // 撤回上一次的移动

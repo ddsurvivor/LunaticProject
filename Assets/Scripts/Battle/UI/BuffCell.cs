@@ -12,7 +12,12 @@ public class BuffCell : MonoBehaviour
     {
         // 加载图标
         icon.sprite = BattleScene.Ins.BM.spriteManager.GetBuffIcon(buffState.buffType);
-        if (buffState.stacks >= 1)
+        if (buffState.buffType == BuffType.SlowingField)
+        {
+            countText.text = buffState.barrierHealth.ToString();
+            countText.gameObject.SetActive(true);
+        }
+        else if (buffState.stacks >= 1)
         {
             countText.text = buffState.stacks.ToString();
             countText.gameObject.SetActive(true);

@@ -479,7 +479,7 @@ public class RangeUI : MonoBehaviour
         foreach (var collider in hitColliders)
         {
             PieceController piece = collider.transform.GetComponent<PieceController>();
-            if (piece == null) continue;
+            if (piece == null || !BuffManager.CanTarget(_owner, piece)) continue;
             if (_curSkillPack.target == SkillTarget.All)
             {
                 piece.ShowHighlight(true);
@@ -545,6 +545,7 @@ public class RangeUI : MonoBehaviour
         List<PieceController> newTargets = new();
         foreach (var piece in hitPieces)
         {
+            if (piece == null || !BuffManager.CanTarget(_owner, piece)) continue;
             if (_curSkillPack.target == SkillTarget.All)
             {
                 piece.ShowHighlight(true);

@@ -120,7 +120,7 @@ public class SkillManager : MonoBehaviour
         resultTargets = new();
         foreach (var piece in targets)
         {
-            if (piece == null) continue;
+            if (piece == null || !BuffManager.CanTarget(casterPc, piece)) continue;
             if (_curSkillPack.target == SkillTarget.All)
             {
                 piece.rangeUI?.ShowHighlight(true);

@@ -4,6 +4,8 @@ public class BuffState
 
     // 层数
     public int stacks;
+    public int barrierHealth;
+    public int retaliationTurns;
     public BuffState(BuffType buffType, int stacks)
     {
         this.buffType = buffType;

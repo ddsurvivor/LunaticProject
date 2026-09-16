@@ -27,6 +27,7 @@ public class EnemyController : PieceController
     public override void TurnStart()
     {
         base.TurnStart();
+        if (enemyCanvas != null) enemyCanvas.UpdateBuffs(unitAttrCenter.buffStates);
         if (!isActived) return;
         if (enemyCanvas != null) enemyCanvas.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
     }
@@ -73,7 +74,7 @@ public class EnemyController : PieceController
 
     public void CastSkillOnTarget(PieceController targetPc, SkillPack skill)
     {
-        if (skill == null || targetPc == null) return;
+        if (skill == null || targetPc == null || !BuffManager.CanTarget(this, targetPc)) return;
         Debug.Log($"{this.name} 对 {targetPc.name} 施放技能 {skill.skillName}");
 
         // 根据范围获取所有棋子
@@ -111,7 +112,7 @@ public class EnemyController : PieceController
 
     public void CastAttackOnTarget(PieceController targetPc)
     {
-        if (_curAttackPack == null || targetPc == null) return;
+        if (_curAttackPack == null || targetPc == null || !BuffManager.CanTarget(this, targetPc)) return;
         Debug.Log($"{this.name} 对 {targetPc.name} 施放攻击{_curAtkType} - {_curAttackPack.skillName}");
         //_curAtkType = range ? ActionType.远程攻击 : ActionType.近战攻击; 
         // 根据范围获取所有棋子
