@@ -12,11 +12,11 @@ public class SavePanel : UIPanel
             if (GM.Ins.DM.playerprofiles.ContainsKey(i))
             {
                 var playerprofile = GM.Ins.DM.playerprofiles[i];
-                saveCells[i].SetData(playerprofile.lastSaveTime.ToString("yyyy-MM-dd HH:mm:ss"));
+                saveCells[i].SetData(playerprofile);
             }
             else
             {
-                saveCells[i].SetData("空存档");
+                saveCells[i].SetData(null);
             }
         }
     }

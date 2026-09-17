@@ -6,11 +6,30 @@ using UnityEngine.UI;
 public class SaveCell : SavePanel
 {
     public Text timeText;
+    public Text chapterText;
+    public Text storyIdText;
     public int index;
 
-    public void SetData(string time)
+    public void SetData(PLAYERPROFILE profile)
     {
-        timeText.text = time;
+        timeText.text = profile == null ? "空存档" : profile.lastSaveTime.ToString("yyyy-MM-dd HH:mm:ss");
+
+        if (chapterText != null)
+        {
+            if (profile == null)
+                chapterText.text = "";
+            else if (string.IsNullOrWhiteSpace(profile.chapterTitle))
+                chapterText.text = "章节未知";
+            else
+                chapterText.text = profile.chapterNumber > 0
+                    ? $"第{profile.chapterNumber}章  {profile.chapterTitle}"
+                    : profile.chapterTitle;
+        }
+
+        if (storyIdText != null)
+            storyIdText.text = profile == null || string.IsNullOrWhiteSpace(profile.currentStoryId)
+                ? ""
+                : $"剧情 {profile.currentStoryId}";
     }
     public void OnClickLoad()
     {
@@ -33,7 +52,6 @@ public class SaveCell : SavePanel
 
     public void OnClickSave()
     {
-        GM.Ins.PLAYERPROFILE.lastSaveTime = System.DateTime.Now;
         // // 保存当前玩家数据到当前存档
         // if (GM.Ins.DM.playerprofiles.ContainsKey(index))
         // {
@@ -45,6 +63,6 @@ public class SaveCell : SavePanel
         // }
         // 同步保存到磁盘
         GM.Ins.DM.SaveData(index);
-        SetData(GM.Ins.PLAYERPROFILE.lastSaveTime.ToString("yyyy-MM-dd HH:mm:ss"));
+        SetData(GM.Ins.DM.playerprofiles[index]);
     }
 }

@@ -35,6 +35,9 @@ public class PLAYERPROFILE
 
     [Header("存档信息")] public DateTime lastSaveTime;
     public bool isNewGame = false;
+    public int chapterNumber;
+    public string chapterTitle;
+    public string currentStoryId;
 
     // 插件仓库
     public List<int> componentInventory = new List<int>();

@@ -250,6 +250,9 @@ public class 剧本System : MonoBehaviour
                     }
                 }
 
+                // Record the exact StreamingAssets script that was opened.
+                if (GM.Ins != null && GM.Ins.PLAYERPROFILE != null)
+                    GM.Ins.PLAYERPROFILE.currentStoryId = 文件名;
                 return 数据;
             }
             catch (IndexOutOfRangeException e)
@@ -939,6 +942,13 @@ public class 剧本System : MonoBehaviour
                 if (prams.Length >= 3)
                 {
                     string title = prams[0];
+                    GM.Ins.PLAYERPROFILE.chapterTitle = title;
+                    // Chapter maps use names such as CHAPTER-1.
+                    var chapterMatch = Regex.Match(GM.Ins.PLAYERPROFILE.currentMap ?? "", @"CHAPTER-(\d+)");
+                    if (chapterMatch.Success && int.TryParse(chapterMatch.Groups[1].Value, out int chapterNumber))
+                        GM.Ins.PLAYERPROFILE.chapterNumber = chapterNumber;
+                    else if (GM.Ins.PLAYERPROFILE.chapterNumber == 0)
+                        GM.Ins.PLAYERPROFILE.chapterNumber = 1;
                     //int.TryParse(prams[0], out int result);
                     float.TryParse(prams[1], out float fadeTime);
                     float.TryParse(prams[1], out float duration);
