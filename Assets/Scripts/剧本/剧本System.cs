@@ -249,10 +249,6 @@ public class 剧本System : MonoBehaviour
                         数据[i - 2][2] = 合并内容;
                     }
                 }
-
-                // Record the exact StreamingAssets script that was opened.
-                if (GM.Ins != null && GM.Ins.PLAYERPROFILE != null)
-                    GM.Ins.PLAYERPROFILE.currentStoryId = 文件名;
                 return 数据;
             }
             catch (IndexOutOfRangeException e)
@@ -1114,7 +1110,7 @@ public class 剧本System : MonoBehaviour
 
     private void OnDisable()
     {
-        GM.Ins.AM.StopAll();
+        GM.Ins?.AM.StopAll();
     }
 
 

@@ -72,6 +72,9 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     public void OnClickStart()
     {
         大地图System.instance.开始剧情 (name.Replace("(Clone)",""));
+        // Record the exact StreamingAssets script that was opened.
+        if (GM.Ins != null && GM.Ins.PLAYERPROFILE != null)
+            GM.Ins.PLAYERPROFILE.currentStoryId = titleText.text;
     }
 
     public void UpdateState()

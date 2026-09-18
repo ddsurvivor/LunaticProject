@@ -30,6 +30,9 @@ public class UITabController : MonoBehaviour
 
     private int currentSelectedIndex = -1;
 
+    [SerializeField]
+    private UIPanel _uiPanel;
+
     private void Awake()
     {
         InitTabs();
@@ -121,5 +124,12 @@ public class UITabController : MonoBehaviour
 
         // 3. 广播事件，通知可能存在的外部订阅者
         OnTabChanged?.Invoke(targetIndex);
+    }
+    
+    public void ShowTab(int index)
+    {
+        if (index < 0 || index >= tabs.Count) return;
+        _uiPanel.Open();
+        SwitchTab(index, false);
     }
 }

@@ -21,15 +21,16 @@ public class SaveCell : SavePanel
             else if (string.IsNullOrWhiteSpace(profile.chapterTitle))
                 chapterText.text = "章节未知";
             else
-                chapterText.text = profile.chapterNumber > 0
+                chapterText.text = profile.chapterTitle;
+                /*chapterText.text = profile.chapterNumber > 0
                     ? $"第{profile.chapterNumber}章  {profile.chapterTitle}"
-                    : profile.chapterTitle;
+                    : profile.chapterTitle;*/
         }
 
         if (storyIdText != null)
             storyIdText.text = profile == null || string.IsNullOrWhiteSpace(profile.currentStoryId)
                 ? ""
-                : $"剧情 {profile.currentStoryId}";
+                : $"{profile.currentStoryId}";
     }
     public void OnClickLoad()
     {
