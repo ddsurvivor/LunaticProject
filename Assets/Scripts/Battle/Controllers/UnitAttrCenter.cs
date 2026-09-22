@@ -94,6 +94,77 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         FullAmmo();
     }
 
+    // 保存场景/预制体的原始属性，重复初始化时不把上次等级或 Buff 当作基础值。
+    private AttrCenter enemyBaseAttributes;
+    private int enemyBaseAttack, enemyBaseConstitution, enemyBaseTaunt;
+
+    public void SetEnemyData(PieceData data, int level)
+    {
+        // 1. 首次保存原始值；以后每次都恢复基础值，再加载 SO。
+        if (enemyBaseAttributes == null)
+        {
+            enemyBaseAttributes = _attr.Copy();
+            enemyBaseAttack = ATK;
+            enemyBaseConstitution = CON;
+            enemyBaseTaunt = _tauntValue;
+        }
+        _attr = enemyBaseAttributes.Copy();
+        ATK = enemyBaseAttack;
+        CON = enemyBaseConstitution;
+        _tauntValue = enemyBaseTaunt;
+        buffStates.Clear();
+        SetData(data, null);
+
+        // 2. 在已经加载的基础属性上应用等级加成，不回写共享 SO。
+        if (data.levelGrowth != null)
+        {
+            foreach (var pair in data.levelGrowth)
+                ApplyEnemyGrowth(pair.Key, pair.Value, level);
+        }
+
+        // 3. 限制非法属性，并以最终上限初始化生命、行动力、能量和弹药。
+        _maxHealth = Mathf.Max(1, _maxHealth);
+        _maxMovePoint = Mathf.Max(0, _maxMovePoint);
+        _maxManaPoint = Mathf.Max(0, _maxManaPoint);
+        _maxAmmoCount = Mathf.Max(0, _maxAmmoCount);
+        _moveRange = Mathf.Max(0f, _moveRange);
+        critRate = Mathf.Clamp(critRate, 0, 100);
+        buffAttrDic[BuffAttrType.EvasionRate] = Mathf.Clamp(buffAttrDic[BuffAttrType.EvasionRate], 0f, 100f);
+        buffAttrDic[BuffAttrType.DamageReduction] = Mathf.Clamp(buffAttrDic[BuffAttrType.DamageReduction], 0f, 100f);
+        _curHealth = _maxHealth;
+        _curMovePoint = _maxMovePoint;
+        _manaPoint = _maxManaPoint;
+        _ammoCount = _maxAmmoCount;
+    }
+
+    private void ApplyEnemyGrowth(EnemyGrowthAttribute attribute, float growth, int level)
+    {
+        int Grow(float value) => EnemyLevelGrowth.Calculate(value, growth, level);
+        switch (attribute)
+        {
+            case EnemyGrowthAttribute.MaxHealth: _maxHealth = Grow(_maxHealth); break;
+            case EnemyGrowthAttribute.MaxActionPoints: _maxMovePoint = Grow(_maxMovePoint); break;
+            case EnemyGrowthAttribute.MoveRange: _moveRange = Grow(_moveRange); break;
+            case EnemyGrowthAttribute.MaxMana: _maxManaPoint = Grow(_maxManaPoint); break;
+            case EnemyGrowthAttribute.MaxAmmo: _maxAmmoCount = Grow(_maxAmmoCount); break;
+            case EnemyGrowthAttribute.Attack: ATK = Grow(ATK); break;
+            case EnemyGrowthAttribute.Constitution: CON = Grow(CON); break;
+            case EnemyGrowthAttribute.Taunt: _tauntValue = Grow(_tauntValue); break;
+            case EnemyGrowthAttribute.CriticalRate: critRate = Grow(critRate); break;
+            case EnemyGrowthAttribute.CriticalDamage: critDamageRate = Grow(critDamageRate); break;
+            case EnemyGrowthAttribute.KineticAttack: _attr.SetAtk(DamageType.Melee, Mathf.Max(0, Grow(_attr.GetAtk(DamageType.Melee)))); break;
+            case EnemyGrowthAttribute.ThermalAttack: _attr.SetAtk(DamageType.Ranged, Mathf.Max(0, Grow(_attr.GetAtk(DamageType.Ranged)))); break;
+            case EnemyGrowthAttribute.SparkAttack: _attr.SetAtk(DamageType.Electric, Mathf.Max(0, Grow(_attr.GetAtk(DamageType.Electric)))); break;
+            case EnemyGrowthAttribute.KineticArmor: _attr.SetArmor(DamageType.Melee, Mathf.Max(0, Grow(_attr.GetArmor(DamageType.Melee)))); break;
+            case EnemyGrowthAttribute.ThermalArmor: _attr.SetArmor(DamageType.Ranged, Mathf.Max(0, Grow(_attr.GetArmor(DamageType.Ranged)))); break;
+            case EnemyGrowthAttribute.SparkArmor: _attr.SetArmor(DamageType.Electric, Mathf.Max(0, Grow(_attr.GetArmor(DamageType.Electric)))); break;
+            case EnemyGrowthAttribute.HitRate: buffAttrDic[BuffAttrType.HitRate] = Grow(buffAttrDic[BuffAttrType.HitRate]); break;
+            case EnemyGrowthAttribute.EvasionRate: buffAttrDic[BuffAttrType.EvasionRate] = Grow(buffAttrDic[BuffAttrType.EvasionRate]); break;
+            case EnemyGrowthAttribute.DamageIncrease: buffAttrDic[BuffAttrType.DamageIncrease] = Grow(buffAttrDic[BuffAttrType.DamageIncrease]); break;
+            case EnemyGrowthAttribute.DamageReduction: buffAttrDic[BuffAttrType.DamageReduction] = Grow(buffAttrDic[BuffAttrType.DamageReduction]); break;
+        }
+    }
+
     public void SetData(PieceData pieceData, Player playerData = null)
     {
         _maxAmmoCount = pieceData.maxAmmoCount;
@@ -118,6 +189,10 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         _curHealth = _maxHealth;
         _manaPoint = _maxManaPoint;
         
+        // 显式配置的分类型攻击力覆盖场景基础值，缺省保留原有值。
+        if (pieceData.attackDic != null)
+            foreach (var pair in pieceData.attackDic) _attr.SetAtk(pair.Key, pair.Value);
+
         // 护甲值
         if (pieceData._armorDic != null && pieceData._armorDic.Count > 0)
         {

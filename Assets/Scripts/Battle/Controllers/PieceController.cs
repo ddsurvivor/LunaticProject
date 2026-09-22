@@ -98,7 +98,7 @@ public class PieceController : MonoBehaviour
     public void Init(PlayerController player, PieceData pieceData = null)
     {
         this.player = player;
-        this.playerData = GM.Ins.PLAYERPROFILE.GetPlayer(pieceID - 1);
+        this.playerData = isPlayerPiece ? GM.Ins.PLAYERPROFILE.GetPlayer(pieceID - 1) : null;
         //unitAttrCenter.Init();
         /*if (isPlayerPiece)
         {
@@ -118,7 +118,11 @@ public class PieceController : MonoBehaviour
         {
             _pieceData = pieceData;
             availableSkills = pieceData?.skillPacks;
-            unitAttrCenter.SetData(_pieceData, playerData);
+            // 敌人按场景等级加载成长，玩家保持原属性初始化流程。
+            if (this is EnemyController enemy)
+                unitAttrCenter.SetEnemyData(_pieceData, enemy.Level);
+            else
+                unitAttrCenter.SetData(_pieceData, playerData);
             if (isPlayerPiece)//&& GM.Ins.pieceHPInherit
             {
                 Player playerData = GM.Ins.PLAYERPROFILE.GetPlayer(pieceID - 1);

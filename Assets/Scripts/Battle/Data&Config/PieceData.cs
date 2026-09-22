@@ -11,6 +11,11 @@ using SkillSystem;
 /// </summary>
 public class PieceData
 {
+    [FoldoutGroup("敌人等级成长"), OdinSerialize]
+    [LabelText("每级成长"), DictionaryDrawerSettings(KeyLabel = "成长属性", ValueLabel = "每级增加")]
+    public Dictionary<EnemyGrowthAttribute, float> levelGrowth = new();
+    [OdinSerialize, LabelText("分类型基础攻击力")]
+    public Dictionary<DamageType, int> attackDic = new();
     [LabelText("棋子编号")]public int pieceId;
     [LabelText("棋子名称")]public string pieceName;
     [LabelText("生命值")]public int maxHealth;

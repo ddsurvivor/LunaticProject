@@ -20,6 +20,20 @@ public class AttrCenter
     [OdinSerialize]
     private Dictionary<PieceElementType, int> _elementAddDamage = new();// 元素克制加成伤害
 
+    public AttrCenter Copy()
+    {
+        return new AttrCenter
+        {
+            _atkDic = new Dictionary<DamageType, int>(_atkDic),
+            _armorDic = new Dictionary<DamageType, int>(_armorDic),
+            _elementAddDamage = new Dictionary<PieceElementType, int>(_elementAddDamage),
+            _meleeAtkRange = _meleeAtkRange,
+            _shootAtkRange = _shootAtkRange
+        };
+    }
+
+    public void SetAtk(DamageType damageType, int value) => _atkDic[damageType] = value;
+
     public int GetAtk(DamageType damageType)
     {
         if (_atkDic.ContainsKey(damageType))

@@ -7,6 +7,10 @@ using UnityEngine;
 /// </summary>
 public class EnemyController : PieceController
 {
+    [Sirenix.OdinInspector.LabelText("敌人等级"), Range(1, 100)]
+    public int level = 1;
+    public int Level => Mathf.Clamp(level, EnemyLevelGrowth.MinLevel, EnemyLevelGrowth.MaxLevel);
+
     public EnemyAIType enemyAIType;
     public bool isActived = false; // 是否被激活
 
