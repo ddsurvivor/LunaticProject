@@ -16,6 +16,8 @@ public class MoveManager : MonoBehaviour
     private NavMeshAgent agent;
     private UnityAction onReachDestination; // 存储外部传进来的回调函数
     private bool isTracking = false;
+    private float movementDeadline;
+    public bool IsMoving => isTracking;
 
     private void Awake()
     {
@@ -24,37 +26,31 @@ public class MoveManager : MonoBehaviour
 
     private void Update()
     {
-        if (!isTracking || agent == null) return;
-
-        // 核心到达判定条件：
-        // 1. !agent.pathPending : 路径已经计算完毕
-        // 2. remainingDistance <= stoppingDistance : 剩余距离小于等于停止距离
-        // 3. (!agent.hasPath || agent.velocity.sqrMagnitude == 0f) : 没有路径了或者速度已经降为 0
-        if (!agent.pathPending)
+        if (!isTracking) return;
+        // 死亡、导航失效或被阻挡超时都要释放行动锁，不能卡住整场 AI 回合。
+        if (agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh ||
+            Time.time >= movementDeadline)
         {
-            if (agent.remainingDistance <= agent.stoppingDestinationDistance())
-            {
-                // 双重保障：确保棋子真的停下来了
-                if (!agent.hasPath || agent.velocity.sqrMagnitude <= 2f)
-                {
-                    isTracking = false;
-
-                    // 执行外部传入的回调函数（如果存在的话）
-                    if (onReachDestination != null)
-                    {
-                        onReachDestination.Invoke();
-                    }
-
-                    pathRenderer.gameObject.SetActive(false); // 隐藏路径渲染器
-                    ResetPreviewState(); // 重置预览状态，准备下一次使用
-                    
-                    BattleScene.Ins.BM.orderManager.OnUnityMoveEnd(
-                        agent.GetComponent<PieceController>());
-                }
-            }
+            if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh) agent.ResetPath();
+            FinishMovement();
+            return;
         }
+        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDestinationDistance() &&
+            (!agent.hasPath || agent.velocity.sqrMagnitude <= 2f))
+            FinishMovement();
     }
 
+    private void FinishMovement()
+    {
+        var finishedPiece = agent != null ? agent.GetComponent<PieceController>() : null;
+        var callback = onReachDestination;
+        isTracking = false;
+        onReachDestination = null;
+        if (pathRenderer != null) pathRenderer.gameObject.SetActive(false);
+        ResetPreviewState();
+        if (finishedPiece != null) BattleScene.Ins.BM.orderManager.OnUnityMoveEnd(finishedPiece);
+        callback?.Invoke();
+    }
 
     /*/// <summary>
     /// 【新增公共接口】实时预览移动路径（带防抖与性能优化）
@@ -143,6 +139,50 @@ public class MoveManager : MonoBehaviour
                 lastValidPreviewPosition = croppedPoint;
             }
         }
+    }
+
+    /// <summary>只读 AI 寻路：返回实际落点和路程，不绘线、不切换 Agent、不覆盖玩家预览。</summary>
+    public bool TryGetAIMoveDestination(GameObject pawnObject, Vector3 desired, float maxDistance,
+        out Vector3 destination, out float pathLength, bool allowTruncate = true)
+    {
+        destination = default;
+        pathLength = 0f;
+        if (pawnObject == null || maxDistance <= 0f) return false;
+        var navigation = pawnObject.GetComponent<NavMeshAgent>();
+        if (navigation == null || !pawnObject.activeInHierarchy) return false;
+        var filter = new NavMeshQueryFilter { agentTypeID = navigation.agentTypeID, areaMask = navigation.areaMask };
+
+        // 1. 小范围吸附，防止把不可达点吸到很远或另一层楼。
+        if (!NavMesh.SamplePosition(desired, out var end, 0.75f, filter) ||
+            Mathf.Abs(end.position.y - desired.y) > 0.75f) return false;
+        if (!NavMesh.SamplePosition(pawnObject.transform.position, out var start, 0.75f, filter)) return false;
+        var path = new NavMeshPath();
+        if (!NavMesh.CalculatePath(start.position, end.position, filter, path) ||
+            path.status != NavMeshPathStatus.PathComplete || path.corners.Length < 2) return false;
+
+        // 2. 攻击规划要求完整路径在预算内；执行移动时可沿路径截取本次步长。
+        pathLength = CalculatePathLength(path);
+        if (!allowTruncate && pathLength > maxDistance + 0.01f) return false;
+        destination = end.position;
+        if (pathLength > maxDistance)
+        {
+            float remaining = maxDistance;
+            for (int i = 1; i < path.corners.Length; i++)
+            {
+                float segment = Vector3.Distance(path.corners[i - 1], path.corners[i]);
+                if (segment > remaining)
+                {
+                    destination = Vector3.Lerp(path.corners[i - 1], path.corners[i], remaining / segment);
+                    break;
+                }
+                remaining -= segment;
+            }
+            pathLength = maxDistance;
+        }
+
+        // 3. 原地或过短的移动不算可行行动，避免贴边时空耗行动力。
+        return Vector3.Distance(pawnObject.transform.position, destination) > 0.4f &&
+            pathLength > Mathf.Max(0.4f, navigation.stoppingDistance);
     }
 
     /// <summary>
@@ -386,38 +426,30 @@ public class MoveManager : MonoBehaviour
     public float ExecuteMove(GameObject pawnObject, UnityAction onMoveComplete = null
         , Vector3? customTargetPosition = null)
     {
-        if (pawnObject == null) return 0f;
+        if (pawnObject == null || isTracking) return 0f;
+        var movingAgent = pawnObject.GetComponent<NavMeshAgent>();
+        if (movingAgent == null) return 0f;
+        Vector3 target = customTargetPosition ?? lastValidPreviewPosition;
+        if (float.IsInfinity(target.x) || float.IsNaN(target.x)) return 0f;
 
-        NavMeshAgent agent = pawnObject.GetComponent<NavMeshAgent>();
-        if (agent == null) return 0f;
-
-        BattleScene.Ins.BM.orderManager.OnUnitMoveStart(pawnObject.GetComponent<PieceController>());
-
-        SetupMovementPriorities(pawnObject.gameObject); // 在正式移动前设置权重，确保避障行为正确
-        this.agent = agent;
-        this.onReachDestination = onMoveComplete;
-        isTracking = true;
-
-        // 确定最终目的地：如果传了自定义坐标就用自定义的，否则用玩家预览的坐标
-        Vector3 finalTarget = customTargetPosition ?? lastValidPreviewPosition;
-
-        // 容错防御：如果最终目的地依旧是无穷大（说明既没有AI指定，玩家也没预览过）
-        if (float.IsPositiveInfinity(finalTarget.x))
+        // 先确认完整路径，再切换导航状态，失败时不能留下“正在移动”的锁。
+        tempPath ??= new NavMeshPath();
+        var filter = new NavMeshQueryFilter { agentTypeID = movingAgent.agentTypeID, areaMask = movingAgent.areaMask };
+        if (!NavMesh.CalculatePath(movingAgent.transform.position, target, filter, tempPath) ||
+            tempPath.status != NavMeshPathStatus.PathComplete || tempPath.corners.Length < 2) return 0f;
+        float length = CalculatePathLength(tempPath);
+        SetupMovementPriorities(pawnObject);
+        if (!movingAgent.isOnNavMesh || !movingAgent.SetPath(tempPath))
         {
-            Debug.LogError($"[MoveManager] 试图移动到无效的目的地(Infinity)！已拦截。物体: {pawnObject.name}");
-            isTracking = false;
+            ResetPreviewState();
             return 0f;
         }
-
-        // 正式计算并设置路径
-        if (NavMesh.CalculatePath(agent.transform.position, finalTarget, NavMesh.AllAreas
-                , tempPath))
-        {
-            agent.SetPath(tempPath);
-            return CalculatePathLength(tempPath);
-        }
-
-        return 0f;
+        agent = movingAgent;
+        onReachDestination = onMoveComplete;
+        isTracking = true;
+        movementDeadline = Time.time + Mathf.Max(3f, length / Mathf.Max(0.1f, agent.speed) * 3f + 2f);
+        BattleScene.Ins.BM.orderManager.OnUnitMoveStart(pawnObject.GetComponent<PieceController>());
+        return length;
     }
 
     /*/// <summary>
