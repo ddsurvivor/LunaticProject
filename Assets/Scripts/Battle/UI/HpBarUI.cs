@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,11 +8,11 @@ using UnityEngine.UI;
 /// </summary>
 public class HpBarUI : MonoBehaviour
 {
-    public Image hpBarFill; // 血条填充部分的 Transform
-    public Image shadowFill; // 拖影血条
-    public Image preDamageFill; // 伤害显示血条(红色)
-    public Image preDamageFillYellow; // 预伤害黄色血条
-    public Image hpBarRenderer; // 血条的 Image 组件，用于调整透明度
+    public UnityEngine.UI.Image hpBarFill; // 血条填充部分的 Transform
+    public UnityEngine.UI.Image shadowFill; // 拖影血条
+    public UnityEngine.UI.Image preDamageFill; // 伤害显示血条(红色)
+    public UnityEngine.UI.Image preDamageFillYellow; // 预伤害黄色血条
+    public UnityEngine.UI.Image hpBarRenderer; // 血条的 Image 组件，用于调整透明度
     public List<GameObject> mpIcons;
 
 
@@ -34,6 +34,7 @@ public class HpBarUI : MonoBehaviour
         hpBarFill.gameObject.SetActive(false);
         shadowFill.gameObject.SetActive(false);
         preDamageFill.gameObject.SetActive(false);
+        if (preDamageFillYellow != null) preDamageFillYellow.gameObject.SetActive(false);
     }
     public void UpdateHpBar(float precent)
     {
@@ -51,11 +52,13 @@ public class HpBarUI : MonoBehaviour
         // 启动拖影动画Dotween
         shadowTweener = shadowFill.DOFillAmount(currentHpPercent, shadowSpeed).SetEase(Ease.OutQuad);
         preDamageFill.gameObject.SetActive(false);
+        if (preDamageFillYellow != null) preDamageFillYellow.gameObject.SetActive(false);
     }
 
     public void ShowPreDamage(float damagePercent)
     {
         gameObject.SetActive(true);
+        if (preDamageFillYellow != null) preDamageFillYellow.gameObject.SetActive(false);
         float afterDamagePercent = Mathf.Clamp01(currentHpPercent - damagePercent);
 
         // 立即显示预伤害血条
@@ -70,16 +73,30 @@ public class HpBarUI : MonoBehaviour
             .SetEase(Ease.InOutSine);;
     }
 
-    public void ShowPreDamage(DamagePreviewResult damagePreviewResult)
+    public void ShowPreDamage(DamagePreviewResult preview, int maxHealth)
     {
-        
+        // 1. 统一用最大生命值将伤害换算为血条比例。
+        if (maxHealth <= 0)
+        {
+            ClosePreDamage();
+            return;
+        }
+        ShowPreDamage((float)preview.MaxDamage / maxHealth);
+
+        // 2. 红色显示最大伤害后的血量，黄色显示最小伤害后的血量。
+        if (preDamageFillYellow != null)
+        {
+            preDamageFillYellow.fillAmount = Mathf.Clamp01(currentHpPercent - (float)preview.MinDamage / maxHealth);
+            preDamageFillYellow.gameObject.SetActive(preview.MinDamage != preview.MaxDamage);
+        }
     }
-    
+
     public void ClosePreDamage()
     {
         hpBarAlphaTweener?.Kill();
         SetHpBarAlpha(1f);
         preDamageFill.gameObject.SetActive(false);
+        if (preDamageFillYellow != null) preDamageFillYellow.gameObject.SetActive(false);
         if(currentHpPercent > 0.99f)
             gameObject.SetActive(false);
     }

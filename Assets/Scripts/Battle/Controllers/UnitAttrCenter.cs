@@ -204,9 +204,10 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     public void TakeDamage(AttackPack attackPack)
     {
         if (pc.isDead) return;
-        if (attackPack.damage <= 0) return;
+        // 1. 负数不作为伤害处理；零伤害命中仍继续播放受击反馈。
+        if (attackPack.damage < 0) return;
         _curHealth -= attackPack.damage;
-        // 伤害跳字
+        // 2. 所有有效命中都显示伤害跳字，包括 0。
         DamageText damageText = ObjectPool.Ins.GenerateObject(
             ItemType.DAMAGE_TEXT,
             transform.position, transform.rotation
@@ -232,7 +233,9 @@ public class UnitAttrCenter : SerializedMonoBehaviour
             
             pc.Hurt();
             
-            BattleScene.Ins.BM.characterSkillManager.NotifyHpChanged(pc.gameObject,_curHealth, _maxHealth);
+            // 3. 零伤害保留受击动画和特效，但不发送生命值变化通知。
+            if (attackPack.damage > 0)
+                BattleScene.Ins.BM.characterSkillManager.NotifyHpChanged(pc.gameObject,_curHealth, _maxHealth);
             ObjectPool.Ins.GenerateObject(
                 attackPack.damageType == DamageType.Melee
                     ? ItemType.KINETIC_ATTACK

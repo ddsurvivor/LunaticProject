@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.AI;
 
 /// <summary>
 /// 关卡ai敌人总管理器
@@ -52,6 +53,10 @@ public class AIController : PlayerController
 
     public override void TurnStart()
     {
+        pendingAttacks.Clear();
+        retreatAfterShot.Clear();
+        previousPositions.Clear();
+        _timer = 0f;
         base.TurnStart();
 
         if (fogController != null)
@@ -93,7 +98,7 @@ public class AIController : PlayerController
 
     public void Update()
     {
-        if (isInTurn)
+        if (isInTurn && !BattleScene.Ins.BM.moveManager.IsMoving)
         {
             if (realTimeMode)
             {
@@ -127,307 +132,365 @@ public class AIController : PlayerController
     }
 
 
-    /// <summary>
-    /// 根据敌人AI类型和目标位置，选择敌人的行动类型
-    /// </summary>
-    /// <param name="aiPiece"></param>
-    /// <param name="target"></param>
-    /// <returns></returns>
+    private sealed class AttackPlan
+    {
+        public PieceController Target;
+        public SkillPack Skill;
+        public ActionType Action;
+    }
+
+    private struct MoveCandidate
+    {
+        public Vector3 Position;
+        public float PathLength;
+        public float Score;
+    }
+
+    private readonly Dictionary<EnemyController, AttackPlan> pendingAttacks = new();
+    private readonly HashSet<EnemyController> retreatAfterShot = new();
+    private readonly Dictionary<EnemyController, Vector3> previousPositions = new();
+    private bool actionAttempted;
+    private const int PositionSamples = 24;
+    private const float MinimumMove = 0.4f;
+
+    /// <summary>每次只执行一个动作；移动中的棋子完成导航后再继续攻击计划。</summary>
     private bool EnemyActionSelect(EnemyController aiPiece, PieceController target)
     {
-        int moveCost = GM.Ins.DM.gameConstSO.GetActionPointCost(ActionType.移动);
-        int attackCost = GM.Ins.DM.gameConstSO.GetActionPointCost(ActionType.近战攻击);
-        int skillCost = GM.Ins.DM.gameConstSO.GetActionPointCost(ActionType.技能);
+        actionAttempted = false;
+        if (aiPiece == null || aiPiece.isDead || !aiPiece.isActived ||
+            aiPiece.unitAttrCenter.GetBuffStacks(BuffType.Stun) != 0) return false;
 
-
-        if (target == null) return aiPiece.unitAttrCenter.CostMP(ActionType.待机);
-        //ActionType actionType = ActionType.待机;
-
-        if (aiPiece.navigate) // 如果正在导航中，优先保持导航状态，不进行攻击
+        // 1. 保留关卡专用撤退和跨层梯子逻辑。
+        if (aiPiece.enemyAIType == EnemyAIType.Special)
         {
-            if (Mathf.Abs(target.transform.position.y - aiPiece.transform.position.y) > 1.0f)
+            var retreat = aiPiece.GetComponent<RetreatWin>();
+            if (retreat == null || retreat.targetPoint == null) return false;
+            if (TryApproach(aiPiece, retreat.targetPoint.position, 0.5f))
             {
-                // 如果目标在不同高度，则优先移动到与目标相同高度的位置
-                if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
-                EnemyMoveToLadder(aiPiece);
+                DOVirtual.DelayedCall(1f, () => { if (retreat != null) retreat.CheckTargetReached(); });
+                return true;
             }
+            retreat.CheckTargetReached();
+            return actionAttempted;
+        }
+        if (!IsValidTarget(aiPiece, target)) return false;
+        if (aiPiece.navigate && Mathf.Abs(target.transform.position.y - aiPiece.transform.position.y) > 1f)
+            return EnemyMoveToLadder(aiPiece);
+
+        // 2. 优先完成已承诺的“移动 + 攻击”，避免每移动一步就切换模式。
+        if (pendingAttacks.TryGetValue(aiPiece, out var pending))
+        {
+            pendingAttacks.Remove(aiPiece);
+            if (IsValidTarget(aiPiece, pending.Target) &&
+                (TryAttackPlan(aiPiece, pending) || actionAttempted)) return true;
         }
 
-        float meleeRange = aiPiece.GetRange(true); // 近战攻击范围
-        float rangedRange = aiPiece.GetRange(false); // 远程攻击范围
-        float moveRange = aiPiece.unitAttrCenter.MoveRange; // 移动范围
-
-        // 计算忽略Y轴的距离（仅XZ平面）
-        Vector3 diff = target.transform.position - aiPiece.transform.position;
-        diff.y = 0; // 忽略Y轴差异
-        float distanceToTarget = diff.magnitude;
-        EnemyAIType enemyAIType = aiPiece.enemyAIType;
-
-        if (enemyAIType == EnemyAIType.Shoot)
+        // 3. 射击型先开火，再寻找安全的侧向/斜向撤离点。
+        if (aiPiece.enemyAIType == EnemyAIType.Shoot)
         {
-            if (distanceToTarget <= rangedRange)
-            {
-                if (aiPiece.unitAttrCenter.CurMovePoint >=
-                    moveCost + attackCost) // 如果移动点数大于等于2，则优先远程攻击
-                {
-                    // 判定弹药是否足够
-                    if (aiPiece.unitAttrCenter.AmmoCount <= 0)
-                    {
-                        // 重新装填
-                        if (!aiPiece.unitAttrCenter.CostMP(ActionType.重新装填)) return false;
+            if (retreatAfterShot.Remove(aiPiece) &&
+                (TryRetreat(aiPiece, target.transform.position, aiPiece.GetRange(false)) || actionAttempted))
+                return true;
+            if (TryAttackPlan(aiPiece, NormalPlan(aiPiece, target, true)) || actionAttempted) return true;
+            return TryApproach(aiPiece, target.transform.position, aiPiece.GetRange(false));
+        }
 
-                        aiPiece.ReloadAmmo();
-                    }
-                    else
-                    {
-                        // 远程攻击
-                        if (!aiPiece.unitAttrCenter.CostMP(ActionType.远程攻击)) return false;
-                        aiPiece.StartNormalAttack(true);
-                        aiPiece.CastAttackOnTarget(target);
-                    }
+        // 4. 技能型优先本回合可施放的技能；无可用技能时按混合型处理。
+        if (aiPiece.enemyAIType == EnemyAIType.SkillUser &&
+            (TrySkillPlan(aiPiece, target) || actionAttempted)) return true;
+
+        // 5. 混合型优先本回合能完成的近战，再考虑射击，最后接近目标。
+        if (TryAttackPlan(aiPiece, NormalPlan(aiPiece, target, false)) || actionAttempted) return true;
+        if (TryAttackPlan(aiPiece, NormalPlan(aiPiece, target, true)) || actionAttempted) return true;
+        return TryApproach(aiPiece, target.transform.position, aiPiece.GetRange(true));
+    }
+
+    private static AttackPlan NormalPlan(EnemyController piece, PieceController target, bool ranged)
+    {
+        return new AttackPlan
+        {
+            Target = target,
+            Skill = ranged ? piece.pieceData.rangedAtk : piece.pieceData.meleeAtk,
+            Action = ranged ? ActionType.远程攻击 : ActionType.近战攻击
+        };
+    }
+
+    private bool TrySkillPlan(EnemyController piece, PieceController target)
+    {
+        if (piece.availableSkills == null) return false;
+        // 先找原地可用技能，再找需要移动的技能；不再用概率跳过可用技能。
+        for (int pass = 0; pass < 2; pass++)
+        {
+            foreach (var skill in piece.availableSkills)
+            {
+                if (!IsOffensiveSkill(skill) || !piece.unitAttrCenter.HasMana(skill.mpCost)) continue;
+                if (pass == 0 && !CanAttackFrom(piece.transform.position, target, skill)) continue;
+                var plan = new AttackPlan { Target = target, Skill = skill, Action = ActionType.技能 };
+                if (TryAttackPlan(piece, plan) || actionAttempted) return true;
+            }
+        }
+        return false;
+    }
+
+    private bool TryAttackPlan(EnemyController piece, AttackPlan plan)
+    {
+        if (plan.Skill == null) return false;
+        if (plan.Action == ActionType.技能 && !piece.unitAttrCenter.HasMana(plan.Skill.mpCost)) return false;
+        bool needsReload = plan.Action == ActionType.远程攻击 && piece.unitAttrCenter.AmmoCount <= 0;
+        if (needsReload && piece.unitAttrCenter.MaxAmmoCount <= 0) return false;
+
+        // 1. 已在范围内就直接行动，不浪费移动点。
+        if (CanAttackFrom(piece.transform.position, plan.Target, plan.Skill))
+        {
+            if (needsReload)
+                return SpendAction(piece, ActionType.重新装填, () => piece.ReloadAmmo());
+            return SpendAction(piece, plan.Action, () =>
+            {
+                if (plan.Action == ActionType.技能)
+                {
+                    if (!piece.unitAttrCenter.HasMana(plan.Skill.mpCost)) return;
+                    piece.StartSkillAttack(plan.Skill);
+                    if (!piece.unitAttrCenter.CostMana(plan.Skill.mpCost)) return;
+                    piece.CastSkillOnTarget(plan.Target, plan.Skill);
                 }
                 else
                 {
-                    if (distanceToTarget <= rangedRange * 0.6f)
-                    {
-                        // 如果在远程攻击范围的60%内则逃跑
-                        if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
-                        EnemyMove(aiPiece, target.transform.position, rangedRange, true);
-                    }
-                    else
-                    {
-                        // 判定弹药是否足够
-                        if (aiPiece.unitAttrCenter.AmmoCount <= 0)
-                        {
-                            // 重新装填
-                            if (!aiPiece.unitAttrCenter.CostMP(ActionType.重新装填)) return false;
-                            aiPiece.ReloadAmmo();
-                            //actionType = ActionType.重新装填;
-                        }
-                        else
-                        {
-                            // 远程攻击
-                            if (!aiPiece.unitAttrCenter.CostMP(ActionType.远程攻击)) return false;
-                            aiPiece.StartNormalAttack(true);
-                            aiPiece.CastAttackOnTarget(target);
-                        }
-                    }
+                    piece.StartNormalAttack(plan.Action == ActionType.远程攻击);
+                    piece.CastAttackOnTarget(plan.Target);
+                    if (piece.enemyAIType == EnemyAIType.Shoot && plan.Action == ActionType.远程攻击)
+                        retreatAfterShot.Add(piece);
                 }
-            }
-            else
-            {
-                if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
-                EnemyMove(aiPiece, target.transform.position, rangedRange);
-            }
+            });
         }
-        else if (enemyAIType == EnemyAIType.SkillUser) // 技能型AI
+
+        // 2. 预留攻击和必要装填的行动力，再用实际路径长度判断本回合能否打到。
+        if (!CanAfford(piece, plan.Action) || !CanMove(piece)) return false;
+        int reserved = ActionCost(plan.Action) + (needsReload ? ActionCost(ActionType.重新装填) : 0);
+        int moves = (piece.unitAttrCenter.CurMovePoint - reserved) / Mathf.Max(1, ActionCost(ActionType.移动));
+        if (moves <= 0) return false;
+        var candidates = FindPositions(piece, plan.Target.transform.position, plan.Skill.rangeValue,
+            moves * piece.unitAttrCenter.MoveRange, p => CanAttackFrom(p, plan.Target, plan.Skill));
+        if (candidates.Count == 0) return false;
+
+        // 3. 从所需移动次数最少的合法点中随机选择，移动后保留攻击计划。
+        float moveRange = piece.unitAttrCenter.MoveRange;
+        int fewestMoves = candidates.Min(c => Mathf.CeilToInt(c.PathLength / moveRange));
+        candidates.RemoveAll(c => Mathf.CeilToInt(c.PathLength / moveRange) != fewestMoves);
+        Shuffle(candidates);
+        foreach (var candidate in candidates)
         {
-            // 优先近战
-            if (distanceToTarget <= meleeRange)
-            {
-                if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
-                // 近战攻击
-                aiPiece.StartNormalAttack();
-                aiPiece.CastAttackOnTarget(target);
-            }
-
-            // 优先计算是否使用技能
-            int skillRoll = UnityEngine.Random.Range(1, 101);
-            if (aiPiece.availableSkills.Count > 0 && skillRoll <= GameConst.enemySkillRate)
-            {
-                // 随机选择一个技能
-                int randomIndex = UnityEngine.Random.Range(0, aiPiece.availableSkills.Count);
-                SkillPack skillPack = aiPiece.availableSkills[randomIndex];
-
-                float skillRange = skillPack.rangeValue;
-
-                if (distanceToTarget <= skillRange)
-                {
-                    // 释放技能
-                    if (!aiPiece.unitAttrCenter.CostMP(ActionType.技能)) return false;
-                    aiPiece.StartSkillAttack(skillPack);
-                    aiPiece.CastSkillOnTarget(target, skillPack);
-                    //BattleScene.Ins.UM.PopSkillName(skillPack.skillName);
-                }
-                else
-                {
-                    if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
-                    EnemyMove(aiPiece, target.transform.position, skillRange);
-                }
-            }
-            else
-            {
-                if (!aiPiece.unitAttrCenter.CostMP(ActionType.近战攻击)) return false;
-                EnemyNormalAttack(aiPiece, target, distanceToTarget, meleeRange, rangedRange);
-            }
+            if (!TryMoveTo(piece, candidate.Position)) continue;
+            if (!piece.isDead) pendingAttacks[piece] = plan;
+            return true;
         }
-        else if (enemyAIType == EnemyAIType.Combine) // 远程和近战混合型AI
-        {
-            if (aiPiece.unitAttrCenter.CurMovePoint >= moveCost + attackCost &&
-                distanceToTarget <= (moveRange + meleeRange)) // 一步后可以近战的情况
-            {
-                Debug.Log(
-                    $"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动到近战范围攻击{distanceToTarget} <= {moveRange + meleeRange}");
-                if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
-                EnemyMove(aiPiece, target.transform.position, meleeRange);
-            }
-            else if (aiPiece.unitAttrCenter.CurMovePoint >= moveCost + attackCost &&
-                     distanceToTarget <= (moveRange + rangedRange)) // 一步后可以远程的情况
-            {
-                Debug.Log(
-                    $"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动到远程范围攻击{distanceToTarget} <= {moveRange + rangedRange}");
-                if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
-                EnemyMove(aiPiece, target.transform.position, rangedRange);
-            }
-            else if (distanceToTarget <= meleeRange)
-            {
-                Debug.Log(
-                    $"{aiPiece.enemyAIType}AI{aiPiece.name}选择近战攻击{distanceToTarget} <= {meleeRange}");
-                // 近战攻击
-                if (!aiPiece.unitAttrCenter.CostMP(ActionType.近战攻击)) return false;
-                aiPiece.StartNormalAttack();
-                aiPiece.CastAttackOnTarget(target);
-            }
-            else if (distanceToTarget <= rangedRange)
-            {
-                // 判定弹药是否足够
-                if (aiPiece.unitAttrCenter.AmmoCount <= 0)
-                {
-                    // 重新装填
-                    if (!aiPiece.unitAttrCenter.CostMP(ActionType.重新装填)) return false;
-                    aiPiece.ReloadAmmo();
-                }
-                else
-                {
-                    Debug.Log(
-                        $"{aiPiece.enemyAIType}AI{aiPiece.name}选择远程攻击{distanceToTarget} <= {rangedRange}, 目标在{target.name}");
-                    // 远程攻击
-                    if (!aiPiece.unitAttrCenter.CostMP(ActionType.远程攻击)) return false;
-                    aiPiece.StartNormalAttack(true);
-                    aiPiece.CastAttackOnTarget(target);
-                }
-            }
-            else
-            {
-                Debug.Log(
-                    $"{aiPiece.enemyAIType}AI{aiPiece.name}选择移动从{aiPiece.transform.position}到目标{target.transform.position}");
-                if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
-                EnemyMove(aiPiece, target.transform.position, rangedRange);
-            }
-        }
-        else if (enemyAIType == EnemyAIType.Special)
-        {
-            // 特殊行为由关卡设计决定，这里暂时不实现具体逻辑
-            // 撤退到指定点时胜利
-            RetreatWin retreatWin = aiPiece.GetComponent<RetreatWin>();
-            if (retreatWin != null)
-            {
-                Debug.Log("移动到指定点");
-                if (!aiPiece.unitAttrCenter.CostMP(ActionType.移动)) return false;
-                Vector3 pos = retreatWin.targetPoint.position;
-                EnemyMove(aiPiece, pos, 0.5f);
-                DOVirtual.DelayedCall(1.0f, () => retreatWin.CheckTargetReached()); // 行动后判定胜利
-            }
-        }
+        return false;
+    }
 
+    private static bool IsOffensiveSkill(SkillPack skill)
+    {
+        return skill != null && skill.rangeValue > 0 &&
+            skill.target is SkillTarget.Enemy or SkillTarget.EnemyAll or SkillTarget.All or SkillTarget.FarthestEnemy;
+    }
+
+    private static bool CanAttackFrom(Vector3 position, PieceController target, SkillPack skill)
+    {
+        if (target == null || skill == null) return false;
+        if (skill.layerSkill && Mathf.Abs(position.y - target.transform.position.y) > 0.1f) return false;
+        float distance = Vector3.Distance(position, target.transform.position);
+        return distance <= skill.rangeValue && (skill.rangeType != RangeType.Fan || distance >= 1f);
+    }
+
+    private static bool IsValidTarget(EnemyController piece, PieceController target)
+    {
+        return target != null && !target.isDead && target.gameObject.activeInHierarchy &&
+            BuffManager.CanTarget(piece, target);
+    }
+
+    private static int ActionCost(ActionType action) => GM.Ins.DM.gameConstSO.GetActionPointCost(action);
+    private static bool CanAfford(EnemyController piece, ActionType action) =>
+        piece.unitAttrCenter.CurMovePoint >= ActionCost(action);
+
+    private static bool CanMove(EnemyController piece)
+    {
+        return CanAfford(piece, ActionType.移动) && piece.unitAttrCenter.MoveRange > MinimumMove &&
+            piece.unitAttrCenter.GetBuffStacks(BuffType.Bind) == 0;
+    }
+
+    private bool SpendAction(EnemyController piece, ActionType action, Action execute)
+    {
+        if (!CanAfford(piece, action)) return false;
+        actionAttempted = true;
+        // 行动触发的异常状态可能中止动作；本次仍已尝试行动，不继续执行第二个动作。
+        if (piece.unitAttrCenter.CostMP(action)) execute();
         return true;
     }
 
-    private void EnemyNormalAttack(EnemyController aiPiece, PieceController target
-        , float distanceToTarget, float meleeRange, float rangedRange)
+    private List<MoveCandidate> FindPositions(EnemyController piece, Vector3 target, float range,
+        float pathBudget, Func<Vector3, bool> accepts)
     {
-        if (distanceToTarget <= meleeRange)
+        var result = new List<MoveCandidate>();
+        var agent = piece.GetComponent<NavMeshAgent>();
+        if (agent == null) return result;
+        float margin = Mathf.Max(0.4f, agent.stoppingDistance + 0.1f);
+        float radius = Mathf.Max(0f, range - margin);
+        Vector3 facing = piece.transform.position - target;
+        facing.y = 0;
+        if (facing.sqrMagnitude < 0.01f) facing = Vector3.forward;
+        facing.Normalize();
+
+        // 环绕目标采样，验证真实路径、落点占用和攻击条件；不修改全局移动预览。
+        for (int ring = 0; ring < 2; ring++)
         {
-            //Debug.LogError($"敌人近战攻击，实际距离{distanceToTarget}, 近战范围{meleeRange}");
-            // 近战攻击
-            aiPiece.StartNormalAttack();
-            aiPiece.CastAttackOnTarget(target);
-        }
-        else if (distanceToTarget <= rangedRange)
-        {
-            // 判定弹药是否足够
-            if (aiPiece.unitAttrCenter.AmmoCount <= 0)
+            for (int i = 0; i < PositionSamples; i++)
             {
-                // 重新装填
-                aiPiece.ReloadAmmo();
-            }
-            else
-            {
-                // 远程攻击
-                aiPiece.StartNormalAttack(true);
-                aiPiece.CastAttackOnTarget(target);
+                Vector3 point = target + Quaternion.Euler(0, i * 360f / PositionSamples, 0) *
+                    facing * radius * (ring == 0 ? 1f : 0.65f);
+                if (!BattleScene.Ins.BM.moveManager.TryGetAIMoveDestination(piece.gameObject, point,
+                    pathBudget, out var destination, out float length, false)) continue;
+                if (!accepts(destination) || IsOccupied(piece, destination)) continue;
+                if (result.Any(c => Vector3.SqrMagnitude(c.Position - destination) < 0.04f)) continue;
+                result.Add(new MoveCandidate { Position = destination, PathLength = length });
             }
         }
-        else
+        return result;
+    }
+
+    private bool TryApproach(EnemyController piece, Vector3 target, float range)
+    {
+        if (!CanMove(piece)) return false;
+        var candidates = FindPositions(piece, target, range, float.PositiveInfinity, _ => true);
+        if (candidates.Count == 0) return false;
+        // 即使本回合打不到，也沿完整导航路径接近，允许绕墙时暂时远离目标。
+        float shortest = candidates.Min(c => c.PathLength);
+        candidates.RemoveAll(c => c.PathLength > shortest + piece.unitAttrCenter.MoveRange * 0.2f);
+        Shuffle(candidates);
+        foreach (var candidate in candidates)
+            if (TryMoveTo(piece, candidate.Position)) return true;
+        return false;
+    }
+
+    private bool TryRetreat(EnemyController piece, Vector3 threat, float range)
+    {
+        if (!CanMove(piece)) return false;
+        var candidates = new List<MoveCandidate>();
+        var edgeEscapes = new List<MoveCandidate>();
+        var agent = piece.GetComponent<NavMeshAgent>();
+        if (agent == null) return false;
+        Vector3 origin = piece.transform.position;
+        float moveRange = piece.unitAttrCenter.MoveRange;
+        float initialSafety = ChaseSafety(origin);
+        float initialEdge = NavMesh.FindClosestEdge(origin, out var originEdge, agent.areaMask) ? originEdge.distance : 0f;
+        float phase = UnityEngine.Random.Range(0f, 360f / PositionSamples);
+        for (int ring = 1; ring <= 3; ring++)
         {
-            EnemyMove(aiPiece, target.transform.position, rangedRange);
+            for (int i = 0; i < PositionSamples; i++)
+            {
+                Vector3 point = origin + Quaternion.Euler(0, phase + i * 360f / PositionSamples, 0) *
+                    Vector3.forward * moveRange * ring / 3f;
+                if (!BattleScene.Ins.BM.moveManager.TryGetAIMoveDestination(piece.gameObject, point,
+                    moveRange, out var destination, out float length, false) || IsOccupied(piece, destination)) continue;
+                float safety = ChaseSafety(destination);
+                // 不往更危险的位置撤退；允许沿侧方移动或从贴边位置向开阔处转移。
+                bool safer = safety >= Mathf.Min(initialSafety, 0f) - 0.25f;
+                float edgeSpace = NavMesh.FindClosestEdge(destination, out var edge, agent.areaMask) ? edge.distance : 0f;
+                float distance = Vector3.Distance(destination, threat);
+                float score = Mathf.Clamp(safety, -moveRange, moveRange * 0.5f)
+                    + Mathf.Min(edgeSpace, 3f) * 1.5f
+                    - Mathf.Max(0f, distance - range * 0.9f);
+                if (previousPositions.TryGetValue(piece, out var previous) &&
+                    Vector3.Distance(previous, destination) < 1f) score -= 2f;
+                var candidate = new MoveCandidate { Position = destination, PathLength = length, Score = score };
+                if (safer) candidates.Add(candidate);
+                else if (edgeSpace > initialEdge + 0.5f && safety >= initialSafety - moveRange * 0.6f)
+                    edgeEscapes.Add(candidate);
+            }
+        }
+        // 被逼到角落时允许适度缩短距离以离开边缘，避免只能原地站住。
+        if (candidates.Count == 0) candidates = edgeEscapes;
+        if (candidates.Count == 0) return false;
+        // 安全性相近的候选点随机选，不固定向玩家反方向走。
+        float bestScore = candidates.Max(c => c.Score);
+        candidates.RemoveAll(c => c.Score < bestScore - 0.75f);
+        Shuffle(candidates);
+        foreach (var candidate in candidates)
+            if (TryMoveTo(piece, candidate.Position)) return true;
+        return false;
+    }
+
+    private float ChaseSafety(Vector3 point)
+    {
+        float safety = float.PositiveInfinity;
+        foreach (var player in BattleScene.Ins.BM.PlayerController.pieces)
+        {
+            if (player == null || player.isDead || !player.gameObject.activeInHierarchy) continue;
+            float meleeRange = player.pieceData.meleeAtk != null ? player.pieceData.meleeAtk.rangeValue : 0f;
+            float chase = player.unitAttrCenter.GetBuffStacks(BuffType.Bind) != 0 ? 0f : player.unitAttrCenter.MoveRange;
+            safety = Mathf.Min(safety, Vector3.Distance(point, player.transform.position) - chase - meleeRange);
+        }
+        return float.IsPositiveInfinity(safety) ? 0f : safety;
+    }
+
+    private bool IsOccupied(EnemyController movingPiece, Vector3 position)
+    {
+        var agent = movingPiece.GetComponent<NavMeshAgent>();
+        float radius = agent != null ? agent.radius : 0.5f;
+        foreach (var other in pieces.Concat(BattleScene.Ins.BM.PlayerController.pieces))
+        {
+            if (other == null || other == movingPiece || other.isDead || !other.gameObject.activeInHierarchy) continue;
+            if (Mathf.Abs(other.transform.position.y - position.y) > 1f) continue;
+            var otherAgent = other.GetComponent<NavMeshAgent>();
+            float clearance = radius + (otherAgent != null ? otherAgent.radius : 0.5f);
+            Vector3 diff = other.transform.position - position;
+            diff.y = 0;
+            if (diff.sqrMagnitude < clearance * clearance) return true;
+        }
+        return false;
+    }
+
+    private static void Shuffle(List<MoveCandidate> candidates)
+    {
+        for (int i = candidates.Count - 1; i > 0; i--)
+        {
+            int index = UnityEngine.Random.Range(0, i + 1);
+            (candidates[i], candidates[index]) = (candidates[index], candidates[i]);
         }
     }
 
-
-    public void EnemyMove(EnemyController aiPiece, Vector3 targetPos, float range
-        , bool leave = false)
+    private bool TryMoveTo(EnemyController piece, Vector3 goal)
     {
-        float moveRange = aiPiece.unitAttrCenter.MoveRange;
-        Vector3 currentPos = aiPiece.transform.position;
-
-        // 1. 计算基础方向向量
-        Vector3 direction = (targetPos - currentPos);
-        direction.y = 0;
-        direction.Normalize();
-
-        // 最终要探测的方向（处理远离逻辑）
-        Vector3 mainDir = leave ? -direction : direction;
-
-        // 2. 确定逻辑目标点距离
-        Vector3 idealAttackPos = leave
-            ? (currentPos + mainDir * moveRange)
-            : (targetPos - direction * (range - 0.5f));
-        float distanceToIdeal = Vector3.Distance(currentPos, idealAttackPos);
-        float testDistance = Mathf.Min(distanceToIdeal, moveRange);
-
-        // 3. 第一次尝试移动
-        // var moveResult =
-        //     BattleScene.Ins.BM.CalculateValidMovePos(currentPos, mainDir, testDistance
-        //         , aiPiece.gameObject, true);
-        // float originalDist = Vector3.Distance(currentPos, moveResult.FinalPosition);
-        bool canMove =
-            BattleScene.Ins.BM.moveManager.PreviewAIMove(aiPiece.gameObject, idealAttackPos
-                , moveRange + 0.6f);
-
-        // 5. 最终执行位移
-        if (!canMove)
+        if (!CanMove(piece)) return false;
+        var movement = BattleScene.Ins.BM.moveManager;
+        if (!movement.TryGetAIMoveDestination(piece.gameObject, goal, piece.unitAttrCenter.MoveRange,
+            out var destination, out _, true) || IsOccupied(piece, destination)) return false;
+        return SpendAction(piece, ActionType.移动, () =>
         {
-            Debug.LogWarning($"敌人{aiPiece.name}无法移动到目标位置{idealAttackPos}，当前坐标{currentPos}");
-            return;
-        }
-
-        aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
-        BattleScene.Ins.BM.moveManager.ExecuteMove(aiPiece.gameObject
-            , () => { aiPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle); });
-        aiPiece.CheckFace(targetPos - currentPos);
-
-        aiPiece.PlayAudio(ActionType.移动);
+            Vector3 origin = piece.transform.position;
+            float length = movement.ExecuteMove(piece.gameObject,
+                () => { if (piece != null && !piece.isDead) piece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle); },
+                destination);
+            if (length <= 0f) return;
+            previousPositions[piece] = origin;
+            piece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
+            piece.CheckFace(destination - origin);
+            piece.PlayAudio(ActionType.移动);
+        });
     }
 
-    /// <summary>
-    /// 敌人移动到梯子位置的函数
-    /// </summary>
-    /// <param name="aiPiece"></param>
-    private void EnemyMoveToLadder(EnemyController aiPiece)
+    // 保留原调用入口，所有 AI 移动都先选合法点，再扣行动力。
+    public void EnemyMove(EnemyController aiPiece, Vector3 targetPos, float range, bool leave = false)
     {
-        LadderArea ladderArea = mapController?.GetLadder(aiPiece.transform.position);
-        if (ladderArea == null) return;
-        Vector3 targetPos = ladderArea.GetNearPos(aiPiece.transform.position);
-        if ((targetPos - aiPiece.transform.position).magnitude < 2f)
-        {
-            // 如果已经在梯子附近，则直接触发梯子交互
-            ladderArea.TriggerAction(aiPiece);
-            return;
-        }
+        if (leave) TryRetreat(aiPiece, targetPos, range);
+        else TryApproach(aiPiece, targetPos, range);
+    }
 
-        Debug.Log($"敌人{aiPiece.name}移动到梯子位置 {targetPos}");
-        EnemyMove(aiPiece, targetPos, 0f);
+    private bool EnemyMoveToLadder(EnemyController aiPiece)
+    {
+        LadderArea ladder = mapController?.GetLadder(aiPiece.transform.position);
+        if (ladder == null || !CanMove(aiPiece)) return false;
+        Vector3 target = ladder.GetNearPos(aiPiece.transform.position);
+        if (Vector3.Distance(target, aiPiece.transform.position) < 2f)
+            return SpendAction(aiPiece, ActionType.攀爬, () => ladder.TriggerAction(aiPiece));
+        return TryApproach(aiPiece, target, 0f);
     }
 
     /// <summary>
@@ -437,12 +500,12 @@ public class AIController : PlayerController
     {
         foreach (EnemyController aiPiece in pieces)
         {
-            if (!aiPiece.isActived || aiPiece.isDead) continue;
+            if (aiPiece == null || !aiPiece.isActived || aiPiece.isDead) continue;
             if (aiPiece.unitAttrCenter.CurMovePoint <= 0) continue;
             PieceController target = CheckEnemyTarget(aiPiece);
             if (!EnemyActionSelect(aiPiece, target))
                 continue; // 如果敌人没有行动，则继续下一个敌人
-            BattleScene.Ins.BM.GetComponent<CameraController>().SetFollow(aiPiece.transform);
+            BattleScene.Ins.BM.cameraController.SetFollow(aiPiece.transform);
             return;
         }
 
@@ -460,7 +523,7 @@ public class AIController : PlayerController
         {
             int currentIndex = (_lastActedIndex + i) % totalPieces;
             EnemyController aiPiece = pieces[currentIndex] as EnemyController;
-            if (!aiPiece.isActived || aiPiece.isDead) continue;
+            if (aiPiece == null || !aiPiece.isActived || aiPiece.isDead) continue;
 
             // 行动力判空（适配之前的行动力属性，若不够1点行动力直接跳过）
             if (aiPiece.unitAttrCenter.CurMovePoint <= 0) continue;
@@ -496,7 +559,8 @@ public class AIController : PlayerController
 
         foreach (var playerPiece in BattleScene.Ins.BM.PlayerController.pieces)
         {
-            if (playerPiece.isDead || !BuffManager.CanTarget(aiPiece, playerPiece)) continue;
+            if (playerPiece == null || playerPiece.isDead || !playerPiece.gameObject.activeInHierarchy ||
+                !BuffManager.CanTarget(aiPiece, playerPiece)) continue;
             threatValues.Add(playerPiece, 0);
 
             // 获取最近的玩家棋子

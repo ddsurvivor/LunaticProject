@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +27,10 @@ public class BattleManager : MonoBehaviour
     public BattleDialogueManager battleDialogueManager;
     public CharacterSkillManager characterSkillManager;
     public OrderManager orderManager;
+
+    // 伤害管理器随本场战斗持有，自动创建，无需给场景或预制体补挂组件。
+    private DamageManager _damageManager;
+    public DamageManager damageManager => _damageManager ??= new DamageManager(this);
 
     public PieceDataListSO pieceDataListSO;
 
@@ -157,282 +161,24 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    /*public void PieceAttack(PieceController attacker, PieceController defender
-        , AttackPack attackPack)
-    {
-        // 命中判定
-        bool isHit = false;
-        if (attacker.player.isBursting)
-        {
-            isHit = true; // 聚能状态下必中
-        }
-        else
-        {
-            // 命中率计算公式，D100 <= (攻击方.命中率 - 防御方.闪避率)
-            float hitRate = attacker.unitAttrCenter.buffAttrDic[BuffAttrType.HitRate];
-            float evade = defender.unitAttrCenter.buffAttrDic[BuffAttrType.EvasionRate];
-            int hitRoll = Random.Range(1, 101);
-            if (hitRoll <= hitRate - evade)
-            {
-                isHit = true;
-            }
-        }
-
-        if (isHit == false)
-        {
-            // 未命中
-            defender.pieceDisplay.ChangeDisplayState(PieceDisplayState.Dodge, false, 0.5f);
-            //BattleScene.Ins.BM.camera.FocusShake(defender.transform);
-            return;
-        }
-
-
-        // 伤害计算公式
-        int addAtk = attacker.unitAttrCenter.attr.GetAddDamage(defender.unitAttrCenter.elementType);
-        int realDamage = attackPack.damage + addAtk;
-        int armor = defender.unitAttrCenter.attr.GetArmor(attackPack.damageType);
-        if (attackPack.damageType == DamageType.Melee)
-        {
-            armor = (int)(armor*(1f - defender.unitAttrCenter.buffAttrDic[BuffAttrType.MeleeArmorPercent]/100f));
-        }
-        realDamage -= armor;
-        // 减伤
-        realDamage = (int)(realDamage
-            * (100 - attacker.unitAttrCenter.buffAttrDic[
-                BuffAttrType.DamageIncrease]) / 100f * // 伤害增加
-            (100 - defender.unitAttrCenter.buffAttrDic[
-                BuffAttrType.DamageReduction]) / 100f);// 伤害减免
-        if (realDamage < 0) realDamage = 0;
-        // TODO: 临时护盾功能
-        defender.unitAttrCenter.TakeDamage(new AttackPack(realDamage, attackPack.damageType));
-        
-        if (defender is EnemyController enemy)
-        {
-            enemy.AddDamageRecord(attacker, realDamage);
-        }
-    }*/
-
     public void PieceSkill(PieceController attacker, List<PieceController> targets
         , SkillPack skillPack, Vector3 targetPos = default, ActionType actionType = 0
         , CheckResult checkResult = CheckResult.None, bool isFlank = false)
     {
-        //BattleScene.Ins.UM.PopSkillName(skillPack.skillName);
-        if (attacker == null || attacker.isDead) return;
+        if (attacker == null || attacker.isDead || skillPack == null || targets == null) return;
         List<List<DamageInfo>> damageInfoList = new();
-
+        var validTargets = targets.Where(t => t != null).Distinct().ToList();
         bool isCrit = false;
-        foreach (var target in targets.Distinct())
+        foreach (var target in validTargets)
         {
-            if (target == null || !BuffManager.CanTarget(attacker, target)) continue;
-            Debug.Log($"Skill Attack: Attacker={attacker.name}, Target={target.name}");
-
-            // 楼层判定
-            if (skillPack.layerSkill)
-            {
-                // 攻击者和被攻击者不在同一个y值则不受伤害
-                if (Mathf.Abs(attacker.transform.position.y - target.transform.position.y) > 0.1f)
-                {
-                    Debug.Log("Skill Attack: Target is on a different layer, no damage applied");
-                    return;
-                }
-            }
-
-            // --- [掩体判定开始] ---
-            bool hostileAttack = attacker.isPlayerPiece != target.isPlayerPiece;
-            if (hostileAttack) buffManager.OnAttacked(attacker, target);
-            bool barrierBlocked = hostileAttack &&
-                target.unitAttrCenter.GetBuffStacks(BuffType.SlowingField) != 0;
-            CaverSlot activeCover = CheckCoverObstruction(attacker, target);
-            int coverHitPenalty = 0;
-            int coverDamageReduction = 0;
-
-            if (activeCover != null)
-            {
-                // TODO: 在此处根据 activeCover.coverConfig.attribute 提取命中率和伤害修正数值
-                coverHitPenalty = activeCover.evadeChance; // 示例：直接使用掩体的闪避率作为命中率惩罚
-                coverDamageReduction = activeCover.damageReduction;
-                Debug.Log($"掩体生效！命中率惩罚={coverHitPenalty}%，伤害减免={coverDamageReduction}%");
-                SpriteEffectPlayer shieldEffect
-                    = ObjectPool.Ins.GenerateObject(ItemType.SHIELD, target.transform.position
-                            , Quaternion.identity)
-                        .GetComponent<SpriteEffectPlayer>();
-            }
-            else
-            {
-                //Debug.Log("没有掩体，正常攻击");
-            }
-            // --- [掩体判定结束] ---
-
-            // 命中判定
-            bool isHit = false;
-            if (attacker.player != null && attacker.player.isBursting)
-            {
-                isHit = true; // 聚能状态下必中
-            }
-            else if (skillPack.target is SkillTarget.EnemyAll
-                     or SkillTarget.All or SkillTarget.Self or SkillTarget.AllyBody
-                     or SkillTarget.Ally)
-            {
-                isHit = true; // AOE必中
-            }
-            else
-            {
-                // 命中率计算公式，D100 <= (攻击方.命中率 - 防御方.闪避率)
-                float hitRate = attacker.unitAttrCenter.buffAttrDic[BuffAttrType.HitRate];
-                float evade = target.unitAttrCenter.buffAttrDic[BuffAttrType.EvasionRate];
-                int hitRoll = Random.Range(1, 101);
-                if (hitRoll <= (hitRate - evade - coverHitPenalty))
-                {
-                    isHit = true;
-                }
-                //Debug.Log($"Skill Attack: HitRoll={hitRoll}, HitRate={hitRate}, Evade={evade}, IsHit={isHit}");
-            }
-
-            if (isHit == false)
-            {
-                // 未命中
-                target.pieceDisplay.ChangeDisplayState(PieceDisplayState.Dodge, false, 0.5f);
-                BattleScene.Ins.BM.tipTextManager.ShowMiss(target.transform);
-                //BattleScene.Ins.BM.camera.FocusShake(defender.transform);
-                Debug.Log("Skill Attack: Missed");
-                return;
-            }
-
-            // 暴击判定
-            if (Random.Range(1, 101) <= attacker.unitAttrCenter.critRate)
-            {
-                isCrit = true;
-            }
-
-            // 模式识别判定
-            float damageModifier = 1f;
-            if (skillPack.isRecognitionCheck)
-            {
-                switch (checkResult)
-                {
-                    case CheckResult.DamageReduced:
-                        damageModifier = 0.4f;
-                        break;
-                    case CheckResult.DamageIncreased:
-                        damageModifier = 1.3f;
-                        break;
-                    case CheckResult.MustCrit:
-                        damageModifier = 1.3f;
-                        isCrit = true;
-                        break;
-                    case CheckResult.None:
-                        damageModifier = 1f;
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                Debug.Log($"模式识别检定结果: {checkResult}, 伤害修正={damageModifier}, 必定暴击={isCrit}");
-            }
-
-
-            int addAtk =
-                attacker.unitAttrCenter.attr.GetAddDamage(target.unitAttrCenter.elementType) +
-                attacker.unitAttrCenter.ATK;
-            List<DamageInfo> damageInfos = new();
-            foreach (var attackPack in skillPack.attackPacks)
-            {
-                Debug.Log($"依次计算伤害");
-
-                /*
-                 // 旧伤害函数：伤害 = 基础伤害 - 护甲
-                 int realDamage = attackPack.damage;
-                
-                if (coverDamageReduction > 0)
-                    realDamage = (int)(realDamage * (100 - coverDamageReduction) / 100f); // 掩体伤害减免
-                if (isCrit)
-                    realDamage =
-                        (int)(realDamage *
-                              (attacker.unitAttrCenter.critDamageRate / 100f)); // 暴击伤害增加
-                int armor = target.unitAttrCenter.attr.GetArmor(attackPack.damageType);
-                if (attackPack.damageType == DamageType.Melee)
-                {
-                    armor = (int)(armor * (1f -
-                                           target.unitAttrCenter.buffAttrDic[
-                                               BuffAttrType.MeleeArmorPercent] / 100f));
-                }
-
-                realDamage -= armor;*/
-                int realDamage = attackPack.damage + addAtk;
-                if (coverDamageReduction > 0)
-                    realDamage = (int)(realDamage * (100 - coverDamageReduction) / 100f); // 掩体伤害减免
-                int armor = target.unitAttrCenter.attr.GetArmor(attackPack.damageType);
-                if (attackPack.damageType == DamageType.Melee)
-                {
-                    armor = (int)(armor * (1f -
-                                           target.unitAttrCenter.buffAttrDic[
-                                               BuffAttrType.MeleeArmorPercent] / 100f));
-                }
-
-                int rollDamage =
-                    DamageCalculator.CalculateActualDamage(realDamage, armor
-                        , isCrit, attacker.unitAttrCenter.critDamageRate);
-                realDamage = rollDamage;
-                // 减伤
-                realDamage = (int)(realDamage
-                                   * (100 + attacker.unitAttrCenter.buffAttrDic[
-                                       BuffAttrType.DamageIncrease]) / 100f * // 伤害增加
-                                   (100 - target.unitAttrCenter.buffAttrDic[
-                                       BuffAttrType.DamageReduction]) / 100f // 伤害减免
-                                   * damageModifier);
-
-                // 聚能伤害
-                if (attacker.player != null && attacker.player.isBursting)
-                {
-                    realDamage = attacker.player.AddBurstDamage(target, realDamage);
-                }
-
-                // 夹击修正
-                if (isFlank)
-                {
-                    // 根据夹击规则修改伤害值
-                    Debug.Log($"夹击规则生效，修改伤害值，原始值{realDamage}");
-                    realDamage = (int)(realDamage * GM.Ins.DM.gameConstSO.FlankDamageRate);
-                    Debug.Log($"夹击规则生效，修改伤害值，修改值{realDamage}");
-                }
-
-                if (realDamage < 0) realDamage = 0;
-                Debug.Log(
-                    $"Skill Attack: BaseDamage={attackPack.damage}, AddAtk={addAtk}, Armor={armor},RollDamage={rollDamage}, RealDamage={realDamage}");
-                if (barrierBlocked)
-                {
-                    buffManager.AbsorbAttack(target.unitAttrCenter, realDamage);
-                    continue;
-                }
-                target.unitAttrCenter.TakeDamage(new AttackPack(realDamage, attackPack.damageType
-                    , isCrit));
-                BattleScene.Ins.BM.characterSkillManager.NotifyTakeDamage(target.gameObject
-                    , attacker.gameObject);
-
-                if (target.unitAttrCenter.CurHealth <= 0)
-                {
-                    // 触发击杀
-                    BattleScene.Ins.BM.characterSkillManager.NotifyKillEnemy(attacker.gameObject
-                        , target.gameObject);
-                }
-
-                if (target is EnemyController enemy)
-                {
-                    enemy.AddDamageRecord(attacker, realDamage);
-                }
-
-                if (realDamage > 0)
-                {
-                    damageInfos.Add(new DamageInfo(realDamage, attackPack.damageType.ToChinese()
-                        , isCrit));
-                }
-            }
-
+            // 1. 伤害管理器统一处理目标校验、命中、暴击与各段扣血。
+            var settlement = damageManager.ResolveSkillTarget(attacker, target, skillPack, checkResult, isFlank);
+            var damageInfos = settlement.DamageInfos;
             damageInfoList.Add(damageInfos);
+            isCrit |= settlement.IsCritical;
 
-            // 整次攻击（包括多段伤害和附带状态）均被屏障阻挡。
-            if (barrierBlocked) continue;
-
+            // 2. 无效目标、未命中或屏障阻挡时，只跳过当前目标的附加效果。
+            if (!settlement.CanApplyEffects) continue;
 
             // 处理buff
             foreach (var buffPack in skillPack.buffPacks)
@@ -502,18 +248,18 @@ public class BattleManager : MonoBehaviour
         // 操作记录系统
         BattleScene.Ins.UM.logPanel.PlayerLogAttack(attacker.pieceData.pieceName,
             actionType == 0 ? skillPack.skillName : actionType.ToString(),
-            targets.Select(t => t.pieceData.pieceName).ToList(),
+            validTargets.Select(t => t.pieceData.pieceName).ToList(),
             damageInfoList
         );
-        if (targets.Count > 0)
+        if (validTargets.Count > 0)
         {
             if (isCrit)
             {
-                BattleScene.Ins.BM.cameraController.FocusShake(targets[0].transform,attacker.transform);
+                BattleScene.Ins.BM.cameraController.FocusShake(validTargets[0].transform,attacker.transform);
             }
             else
             {
-                BattleScene.Ins.BM.cameraController.FocusTarget(targets[0].transform,attacker.transform);
+                BattleScene.Ins.BM.cameraController.FocusTarget(validTargets[0].transform,attacker.transform);
             }
         }
 
@@ -530,7 +276,7 @@ public class BattleManager : MonoBehaviour
         // 处理附加效果
         ApplySKillEffectOnce(skillPack, attacker, targetPos);
 
-        //BattleScene.Ins.BM.camera.FocusShake(targets[0].transform);
+        //BattleScene.Ins.BM.camera.FocusShake(validTargets[0].transform);
     }
 
     public void PlayerCheckWin()
