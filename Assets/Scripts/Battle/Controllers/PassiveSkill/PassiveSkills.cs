@@ -7,41 +7,42 @@ namespace SkillSystem
     // ==========================================
     public class SkillSuccessor : BasePassiveSkill
     {
-        // 逻辑变量本地化定义
-        private const float HP_THRESHOLD = 0.3f;       // 触发血线 30%
-        private const float ATTRIBUTE_BONUS = 0.2f;    // 属性提升 20%
+        private const float HP_THRESHOLD = 0.3f;
+        private const float ATTRIBUTE_BONUS = 0.2f;
         private const float MOVE_RANGE_ADD = 10f;
-        
-        private bool _isTriggered = false;
+        private bool active;
+        private int attackBonus;
 
         public override void OnHpChanged(GameObject instigator, float currentHp, float maxHp)
         {
-            if (instigator != owner) return;
-
-            float hpRatio = currentHp / maxHp;
-
-            if (hpRatio < HP_THRESHOLD && !_isTriggered)
-            {
-                BattleScene.Ins.BM.tipTextManager.ShowTip(instigator.transform
-                    , $"{data.skillName}");
-                ObjectPool.Ins.GenerateObject(ItemType.SPECIALTY_ACTIVATE, instigator.transform.position, Quaternion.identity);
-                _isTriggered = true;
-                Debug.Log($"[被动触发] {owner.name} 触发【继承者】：自身HP低于 {HP_THRESHOLD:P0}，防御力、攻击力和行动范围提升 {ATTRIBUTE_BONUS:P0}！");
-                UnitAttrCenter unitAttrCenter = instigator.GetComponent<UnitAttrCenter>();
-                unitAttrCenter.ModifyAttribute(UnitAttrType.MoveRange, MOVE_RANGE_ADD);
-                unitAttrCenter.ModifyAttribute(UnitAttrType.ATK, unitAttrCenter.ATK*ATTRIBUTE_BONUS);
-                // 防御力提升，利用减伤buff实现
-                
-            }
-            else if (hpRatio >= HP_THRESHOLD && _isTriggered)
-            {
-                _isTriggered = false;
-                Debug.Log($"[状态解除] {owner.name} 的【继承者】效果因自身血线回升而解除。");
-                // 重置属性值，清除buff
-            }
+            if (instigator != owner || maxHp <= 0) return;
+            bool shouldActivate = currentHp > 0 && currentHp / maxHp < HP_THRESHOLD;
+            if (!shouldActivate) { RemoveBonus(); return; }
+            if (active) return;
+            var unit = owner.GetComponent<UnitAttrCenter>();
+            active = true;
+            // 保存实际加值，撤销时不按已经变化的攻击力重新计算。
+            attackBonus = Mathf.RoundToInt(unit.ATK * ATTRIBUTE_BONUS);
+            unit.ModifyAttribute(UnitAttrType.ATK, attackBonus);
+            unit.ModifyAttribute(UnitAttrType.MoveRange, MOVE_RANGE_ADD);
+            BattleScene.Ins.BM.tipTextManager.ShowTip(owner.transform, data.skillName);
+            ObjectPool.Ins.GenerateObject(ItemType.SPECIALTY_ACTIVATE, owner.transform.position, Quaternion.identity);
         }
-    }
 
+        private void RemoveBonus()
+        {
+            if (!active) return;
+            active = false;
+            if (owner == null) return;
+            var unit = owner.GetComponent<UnitAttrCenter>();
+            if (unit == null) return;
+            unit.ModifyAttribute(UnitAttrType.ATK, -attackBonus);
+            unit.ModifyAttribute(UnitAttrType.MoveRange, -MOVE_RANGE_ADD);
+            attackBonus = 0;
+        }
+
+        public override void OnSkillUnequipped() => RemoveBonus();
+    }
     // ==========================================
     // 2. 鼓舞
     // ==========================================
@@ -96,7 +97,7 @@ namespace SkillSystem
     // ==========================================
     public class SkillReflectiveECM : BasePassiveSkill
     {
-        private const float TRIGGER_CHANCE = 0.90f;    // 触发概率 20%
+        private const float TRIGGER_CHANCE = 0.90f;    // 保留现有 90% 配置
         private const int OVERLOAD_LAYERS = 2;         // 过载层数 2层
 
         public override void OnTakeDamage(GameObject instigator, GameObject attacker)
@@ -131,6 +132,8 @@ namespace SkillSystem
         
         private bool _nextAttackEmpowered = false;
 
+        public override float PreviewDamageMultiplier(GameObject target) => _nextAttackEmpowered ? DAMAGE_MULTIPLIER : 1f;
+
         public override void OnBeforeAttack(GameObject instigator, GameObject target, ref float damageMultiplier)
         {
             if (instigator != owner) return;
@@ -149,17 +152,18 @@ namespace SkillSystem
             {
                 Debug.Log($"[被动判定] {owner.name} 攻击时触发【进攻分析】，正在进行自身的 [模式识别检定]...");
                 
-                bool isCheckPassed = true; // 模拟检定成功
+                var caster = owner.GetComponent<PieceController>();
+                var defender = target != null ? target.GetComponent<PieceController>() : null;
+                bool isCheckPassed = caster != null && defender != null &&
+                    BattleScene.Ins.BM.diceCheckManager.ModeRecognitionCheck(caster, defender) is
+                        CheckResult.DamageIncreased or CheckResult.MustCrit;
                 
                 if (isCheckPassed)
                 {
                     Debug.Log($"[被动检定成功] {owner.name} 通过了模式识别检定！下一次攻击将被强化。");
                     _nextAttackEmpowered = true;
 
-                    if (manager != null)
-                    {
-                        manager.NotifyPatternRecognitionPassed(owner);
-                    }
+
                 }
             }
         }
@@ -249,7 +253,7 @@ namespace SkillSystem
             {
                 BattleScene.Ins.BM.tipTextManager.ShowTip(instigator.transform
                     , $"{data.skillName}");
-                UnitAttrCenter targetUnitAttrCenter = attacker.GetComponent<UnitAttrCenter>();
+                UnitAttrCenter targetUnitAttrCenter = instigator.GetComponent<UnitAttrCenter>();
                 BattleScene.Ins.BM.buffManager.AddBuff(targetUnitAttrCenter, BuffType.AutoHeal
                     , HEAL_LAYERS);
                 Debug.Log($"[被动触发] {owner.name} 遭受攻击，触发【微机械损害管制】：为自身施加 {HEAL_LAYERS} 层 [自动治疗]！");

@@ -189,7 +189,7 @@ public enum BuffAttrType
     DamageIncrease = 4,
     // 移动范围百分比
     MoveRangePercent = 5,
-    // 动能护甲百分比
+    // 动能护甲剩余倍率，100 为完整护甲，70 为剩余 70%
     MeleeArmorPercent = 6,
 }
 

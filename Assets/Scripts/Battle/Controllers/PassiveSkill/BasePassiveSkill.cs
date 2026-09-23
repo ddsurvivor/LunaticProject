@@ -10,11 +10,11 @@ namespace SkillSystem
         protected GameObject owner; // 技能的宿主（谁拥有这个技能）
         protected CharacterSkillManager manager;
 
-        public virtual void Initialize(PassiveSkillData data, GameObject owner)
+        public virtual void Initialize(PassiveSkillData data, GameObject owner, CharacterSkillManager manager = null)
         {
             this.data = data;
             this.owner = owner;
-            this.manager = owner.GetComponent<CharacterSkillManager>();
+            this.manager = manager ?? owner.GetComponent<CharacterSkillManager>();
             OnSkillEquipped();
         }
 
@@ -35,6 +35,9 @@ namespace SkillSystem
         public virtual void OnTakeDamage(GameObject instigator, GameObject attacker) { }
         
         // instigator: 谁在发起攻击
+        // 只读预览，不掷骰、不消费下一击状态。
+        public virtual float PreviewDamageMultiplier(GameObject target) => 1f;
+
         public virtual void OnBeforeAttack(GameObject instigator, GameObject target, ref float damageMultiplier) { }
         
         // instigator: 谁通过了模式识别

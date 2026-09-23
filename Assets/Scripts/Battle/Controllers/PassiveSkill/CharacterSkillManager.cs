@@ -24,6 +24,8 @@ namespace SkillSystem
         /// 主动触发：洗牌并初始化全场所有棋子的技能绑定
         /// </summary>
         /// <param name="piecesOnField">当前战场上存在的全量棋子 GameObject 列表</param>
+        public bool IsInitialized { get; private set; }
+
         public void Init(List<PieceController> piecesOnField)
         {
             if (skillConfigSO == null)
@@ -33,7 +35,8 @@ namespace SkillSystem
             }
 
             // 1. 清理上一局或旧状态的残留数据
-            //ClearAllRegistry();
+            ClearAllRegistry();
+            IsInitialized = true;
             Debug.Log($"[技能系统] 开始主动触发全场技能绑定，当前共计 {piecesOnField.Count} 个棋子。");
 
             // 2. 主动遍历传入的棋子，提取技能并注册
@@ -76,7 +79,7 @@ namespace SkillSystem
 
             List<BasePassiveSkill> pieceRuntimeSkills = new List<BasePassiveSkill>();
 
-            foreach (PassiveSkillType type in skillTypes)
+            foreach (PassiveSkillType type in new HashSet<PassiveSkillType>(skillTypes ?? new List<PassiveSkillType>()))
             {
                 PassiveSkillData data = skillConfigSO.GetSkillData(type);
                 if (data == null) continue;
@@ -89,7 +92,7 @@ namespace SkillSystem
                     // 动态实例化技能逻辑类
                     BasePassiveSkill skillInstance = System.Activator.CreateInstance(classType) as BasePassiveSkill;
                     // 初始化技能，建立 技能 -> 棋子 的双向绑定
-                    skillInstance.Initialize(data, piece); 
+                    skillInstance.Initialize(data, piece, this); 
                     pieceRuntimeSkills.Add(skillInstance);
                 }
                 else
@@ -100,6 +103,8 @@ namespace SkillSystem
 
             // 将棋子和其技能列表配对存入运行时字典
             _runtimeRegistry.Add(piece, pieceRuntimeSkills);
+            var unit = piece.GetComponent<UnitAttrCenter>();
+            if (unit != null) NotifyHpChanged(piece, unit.CurHealth, unit.MaxHealth);
             Debug.Log($"[技能系统] 棋子 【{piece.name}】 成功注册了 {pieceRuntimeSkills.Count} 个被动技能。");
         }
 
@@ -110,9 +115,9 @@ namespace SkillSystem
         {
             if (piece == null) return;
 
-            if (_runtimeRegistry.TryGetValue(piece, out var skills))
+            if (piece != null && _runtimeRegistry.TryGetValue(piece, out var skills))
             {
-                foreach (var skill in skills)
+                foreach (var skill in skills.ToArray())
                 {
                     skill.OnSkillUnequipped(); // 触发卸载逻辑
                 }
@@ -125,47 +130,64 @@ namespace SkillSystem
         // ⚔️ 精准业务通知接口（利用 Dictionary 瞬间定位棋子，杜绝串味）
         // ========================================================
 
+        public float PreviewDamageMultiplier(GameObject instigator, GameObject target)
+        {
+            float multiplier = 1f;
+            if (instigator != null && _runtimeRegistry.TryGetValue(instigator, out var skills))
+                foreach (var skill in skills) multiplier *= skill.PreviewDamageMultiplier(target);
+            return multiplier;
+        }
+
+        public void ClearAllRegistry()
+        {
+            foreach (var entry in _runtimeRegistry)
+                foreach (var skill in entry.Value) skill.OnSkillUnequipped();
+            _runtimeRegistry.Clear();
+            IsInitialized = false;
+        }
+
+        private void OnDestroy() => ClearAllRegistry();
         public void NotifyHpChanged(GameObject instigator, float current, float max)
         {
             // 通过 instigator 瞬间找到这个棋子自己的技能，绝不影响别人
-            if (_runtimeRegistry.TryGetValue(instigator, out var skills))
+            if (instigator != null && _runtimeRegistry.TryGetValue(instigator, out var skills))
             {
                 //Debug.Log($"[技能系统] 通知棋子 【{instigator.name}】 的技能：HP 变化了！当前 HP: {current}/{max}");
-                foreach (var skill in skills) skill.OnHpChanged(instigator, current, max);
+                foreach (var skill in skills.ToArray()) skill.OnHpChanged(instigator, current, max);
             }
         }
 
         public void NotifyKillEnemy(GameObject instigator, GameObject victim)
         {
-            if (_runtimeRegistry.TryGetValue(instigator, out var skills))
+            if (instigator != null && _runtimeRegistry.TryGetValue(instigator, out var skills))
             {
-                foreach (var skill in skills) skill.OnKillEnemy(instigator, victim);
+                foreach (var skill in skills.ToArray()) skill.OnKillEnemy(instigator, victim);
             }
         }
 
         public void NotifyTakeDamage(GameObject instigator, GameObject attacker)
         {
             // 注意：这里的 instigator 指的是“挨打的棋子”
-            Debug.Log($"[技能系统] 通知棋子 【{instigator.name}】 的技能：挨打了！攻击者: {attacker.name}");
-            if (_runtimeRegistry.TryGetValue(instigator, out var skills))
+
+            if (instigator != null && _runtimeRegistry.TryGetValue(instigator, out var skills))
             {
-                foreach (var skill in skills) skill.OnTakeDamage(instigator, attacker);
+                foreach (var skill in skills.ToArray()) skill.OnTakeDamage(instigator, attacker);
             }
         }
 
         public void NotifyCastActiveSkill(GameObject instigator)
         {
-            if (_runtimeRegistry.TryGetValue(instigator, out var skills))
+            if (instigator != null && _runtimeRegistry.TryGetValue(instigator, out var skills))
             {
-                foreach (var skill in skills) skill.OnCastActiveSkill(instigator);
+                foreach (var skill in skills.ToArray()) skill.OnCastActiveSkill(instigator);
             }
         }
 
         public void EvaluateCheckSystem(GameObject instigator, string checkType, ref int extraAttempts, ref int valueModifier)
         {
-            if (_runtimeRegistry.TryGetValue(instigator, out var skills))
+            if (instigator != null && _runtimeRegistry.TryGetValue(instigator, out var skills))
             {
-                foreach (var skill in skills) 
+                foreach (var skill in skills.ToArray()) 
                     skill.OnCheckInitiated(instigator, checkType, ref extraAttempts, ref valueModifier);
             }
         }
@@ -173,9 +195,9 @@ namespace SkillSystem
         public float EvaluateDamageMultiplier(GameObject instigator, GameObject target)
         {
             float multiplier = 1.0f;
-            if (_runtimeRegistry.TryGetValue(instigator, out var skills))
+            if (instigator != null && _runtimeRegistry.TryGetValue(instigator, out var skills))
             {
-                foreach (var skill in skills) 
+                foreach (var skill in skills.ToArray()) 
                     skill.OnBeforeAttack(instigator, target, ref multiplier);
             }
             return multiplier;
@@ -183,9 +205,9 @@ namespace SkillSystem
 
         public void NotifyPatternRecognitionPassed(GameObject instigator)
         {
-            if (_runtimeRegistry.TryGetValue(instigator, out var skills))
+            if (instigator != null && _runtimeRegistry.TryGetValue(instigator, out var skills))
             {
-                foreach (var skill in skills) 
+                foreach (var skill in skills.ToArray()) 
                     skill.OnPatternRecognitionPassed(instigator);
             }
         }
@@ -195,9 +217,9 @@ namespace SkillSystem
         /// </summary>
         public void NotifyTurnEnd(GameObject piece)
         {
-            if (_runtimeRegistry.TryGetValue(piece, out var skills))
+            if (piece != null && _runtimeRegistry.TryGetValue(piece, out var skills))
             {
-                foreach (var skill in skills) skill.OnTurnEnd();
+                foreach (var skill in skills.ToArray()) skill.OnTurnEnd();
             }
         }
     }

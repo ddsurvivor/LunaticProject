@@ -84,6 +84,8 @@ public class EnemyController : PieceController
         // 根据范围获取所有棋子
         List<PieceController> targets = BattleScene.Ins.BM.skillManager
             .GetTargets(this, targetPc.transform, skill);
+        if (targets.Count == 0) return;
+        NotifySkillUsed(skill);
         Transform atkPos = targetPc.transform;
         if (atkPos != null && skill.skillVFXType != 0)
         {
