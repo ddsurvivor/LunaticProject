@@ -12,7 +12,7 @@ public class BuffManager : MonoBehaviour
 
     public static bool CanTarget(PieceController attacker, PieceController target)
     {
-        return target != null && (attacker.isPlayerPiece == target.isPlayerPiece ||
+        return attacker != null && target != null && (attacker.isPlayerPiece == target.isPlayerPiece ||
             target.unitAttrCenter.GetBuffStacks(BuffType.CognitiveProtection) == 0);
     }
 

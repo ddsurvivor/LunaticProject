@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>由 BattleManager 持有，统一技能伤害结算与只读预览。</summary>
@@ -27,7 +27,7 @@ public sealed class DamageManager
         public CaverSlot Cover;
         public int HitRate;
         public bool BarrierBlocked, IsBursting, IsFlank, MustCrit;
-        public float RecognitionModifier;
+        public float RecognitionModifier, PassiveMultiplier;
     }
 
     private struct BurstState
@@ -37,13 +37,14 @@ public sealed class DamageManager
     }
 
     public Settlement ResolveSkillTarget(PieceController attacker, PieceController target,
-        SkillPack skill, CheckResult checkResult = CheckResult.None, bool isFlank = false)
+        SkillPack skill, CheckResult checkResult = CheckResult.None, bool isFlank = false, float passiveMultiplier = 1f)
     {
         var result = new Settlement();
         // 1. 校验目标，读取掩体、屏障与命中规则。
         if (!CanAffect(attacker, target, skill)) return result;
         if (attacker.isPlayerPiece != target.isPlayerPiece) battle.buffManager.OnAttacked(attacker, target);
         Context context = CreateContext(attacker, target, skill, checkResult, isFlank);
+        context.PassiveMultiplier = passiveMultiplier;
         if (context.Cover != null)
             ObjectPool.Ins.GenerateObject(ItemType.SHIELD, target.transform.position, Quaternion.identity);
 
@@ -59,6 +60,8 @@ public sealed class DamageManager
         // 3. 各段使用统一公式；实战才提交聚能累计、扣血和受击事件。
         foreach (var pack in skill.attackPacks)
         {
+            // 致死后不再结算后续段，也不重复发送受击或击杀事件。
+            if (target.isDead || attacker.isDead) break;
             BurstState burst = CaptureBurst();
             int dice = result.IsCritical ? DamageCalculator.MinDice : DamageCalculator.Roll4D6();
             int damage = CalculateDamage(context, pack, result.IsCritical, dice, ref burst);
@@ -69,8 +72,9 @@ public sealed class DamageManager
                 continue;
             }
             target.unitAttrCenter.TakeDamage(new AttackPack(damage, pack.damageType, result.IsCritical));
+            bool killed = target.isDead;
             battle.characterSkillManager.NotifyTakeDamage(target.gameObject, attacker.gameObject);
-            if (target.unitAttrCenter.CurHealth <= 0)
+            if (killed && attacker.isPlayerPiece != target.isPlayerPiece)
                 battle.characterSkillManager.NotifyKillEnemy(attacker.gameObject, target.gameObject);
             if (target is EnemyController enemy) enemy.AddDamageRecord(attacker, damage);
             if (damage > 0) result.DamageInfos.Add(new DamageInfo(damage, pack.damageType.ToChinese(), result.IsCritical));
@@ -94,6 +98,7 @@ public sealed class DamageManager
         // 1. 和实战共用目标与命中规则；屏障不会产生生命伤害。
         if (!CanAffect(attacker, target, skill)) return preview;
         Context context = CreateContext(attacker, target, skill, checkResult ?? CheckResult.None, isFlank);
+        context.PassiveMultiplier = battle.characterSkillManager.PreviewDamageMultiplier(attacker.gameObject, target.gameObject);
         preview.HitRate = context.HitRate;
         if (context.BarrierBlocked) return preview;
 
@@ -139,9 +144,7 @@ public sealed class DamageManager
 
     private static bool CanAffect(PieceController attacker, PieceController target, SkillPack skill)
     {
-        return attacker != null && !attacker.isDead && target != null && skill != null
-            && BuffManager.CanTarget(attacker, target)
-            && (!skill.layerSkill || Mathf.Abs(attacker.transform.position.y - target.transform.position.y) <= 0.1f);
+        return SkillTargeting.IsValid(attacker, target, skill);
     }
 
     private Context CreateContext(PieceController attacker, PieceController target, SkillPack skill,
@@ -149,7 +152,7 @@ public sealed class DamageManager
     {
         var context = new Context
         {
-            Attacker = attacker, Target = target, Cover = battle.CheckCoverObstruction(attacker, target),
+            Attacker = attacker, Target = target, PassiveMultiplier = 1f, Cover = battle.CheckCoverObstruction(attacker, target),
             IsBursting = attacker.player != null && attacker.player.isBursting, IsFlank = isFlank,
             BarrierBlocked = attacker.isPlayerPiece != target.isPlayerPiece
                 && target.unitAttrCenter.GetBuffStacks(BuffType.SlowingField) != 0
@@ -186,12 +189,12 @@ public sealed class DamageManager
             damage = (int)(damage * (100 - context.Cover.damageReduction) / 100f);
         int armor = target.attr.GetArmor(pack.damageType);
         if (pack.damageType == DamageType.Melee)
-            armor = (int)(armor * (1f - target.buffAttrDic[BuffAttrType.MeleeArmorPercent] / 100f));
+            armor = (int)(armor * Mathf.Max(0f, target.buffAttrDic[BuffAttrType.MeleeArmorPercent]) / 100f);
 
         // 2. 统一暗骰/暴击公式，按原顺序应用增减伤、识别修正并取整。
         damage = DamageCalculator.CalculateDamage(damage, armor, isCrit, attacker.critDamageRate, dice);
         damage = (int)(damage * (100 + attacker.buffAttrDic[BuffAttrType.DamageIncrease]) / 100f
-            * (100 - target.buffAttrDic[BuffAttrType.DamageReduction]) / 100f * context.RecognitionModifier);
+            * (100 - target.buffAttrDic[BuffAttrType.DamageReduction]) / 100f * context.RecognitionModifier * context.PassiveMultiplier);
 
         // 3. 聚能先累计，再应用夹击倍率；预览只修改传入的状态副本。
         if (context.IsBursting) damage = ApplyBurst(context.Target, damage, ref burst);

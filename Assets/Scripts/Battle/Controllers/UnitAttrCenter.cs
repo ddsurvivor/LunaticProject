@@ -264,23 +264,33 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
     public void FullHealth()
     {
+        int previousHealth = _curHealth;
         _curHealth = _maxHealth;
         if (hpBarFill != null) hpBarFill.localScale = new Vector3(1f, 1f, 1f);
         UpdateHpBar();
+        NotifyHealthChanged(previousHealth);
     }
 
     public void SetHealth(float healthPercent)
     {
-        _curHealth = Mathf.CeilToInt(_maxHealth * healthPercent / 100f);
-        if (hpBarFill != null)
-            hpBarFill.localScale = new Vector3((float)_curHealth / _maxHealth, 1f, 1f);
+        int previousHealth = _curHealth;
+        _curHealth = Mathf.CeilToInt(_maxHealth * Mathf.Clamp(healthPercent, 0f, 100f) / 100f);
+        UpdateHpBar();
+        NotifyHealthChanged(previousHealth);
     }
 
+    private void NotifyHealthChanged(int previousHealth, int previousMaxHealth = -1)
+    {
+        if (pc == null || (previousHealth == _curHealth &&
+            (previousMaxHealth < 0 || previousMaxHealth == _maxHealth))) return;
+        BattleScene.Ins?.BM?.characterSkillManager?.NotifyHpChanged(pc.gameObject, _curHealth, _maxHealth);
+    }
     public void TakeDamage(AttackPack attackPack)
     {
         if (pc.isDead) return;
         // 1. 负数不作为伤害处理；零伤害命中仍继续播放受击反馈。
         if (attackPack.damage < 0) return;
+        int previousHealth = _curHealth;
         _curHealth -= attackPack.damage;
         // 2. 所有有效命中都显示伤害跳字，包括 0。
         DamageText damageText = ObjectPool.Ins.GenerateObject(
@@ -290,6 +300,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         damageText.JumpOutNum(attackPack.damage);
         if (_curHealth <= 0) _curHealth = 0;
         UpdateHpBar();
+        NotifyHealthChanged(previousHealth);
         if (_curHealth <= 0)
         {
             if (pc != null)
@@ -309,8 +320,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
             pc.Hurt();
             
             // 3. 零伤害保留受击动画和特效，但不发送生命值变化通知。
-            if (attackPack.damage > 0)
-                BattleScene.Ins.BM.characterSkillManager.NotifyHpChanged(pc.gameObject,_curHealth, _maxHealth);
+
             ObjectPool.Ins.GenerateObject(
                 attackPack.damageType == DamageType.Melee
                     ? ItemType.KINETIC_ATTACK
@@ -326,9 +336,11 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     public void Heal(int healAmount)
     {
         if (healAmount <= 0) return;
+        int previousHealth = _curHealth;
         _curHealth += healAmount;
         if (_curHealth > _maxHealth) _curHealth = _maxHealth;
         UpdateHpBar();
+        NotifyHealthChanged(previousHealth);
         Debug.Log($"恢复生命{healAmount}");
         BattleScene.Ins.UM.OnPieceStateChance(pc);
         BattleScene.Ins.BM.tipTextManager.ShowHeal(pc.transform,healAmount);
@@ -410,6 +422,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
     public bool CostMana(int costPoint)
     {
+        if (costPoint < 0) return false;
         if (_manaPoint >= costPoint)
         {
             _manaPoint -= costPoint;
@@ -423,7 +436,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
     public bool HasMana(int costPoint = 1)
     {
-        return _manaPoint >= costPoint;
+        return costPoint >= 0 && _manaPoint >= costPoint;
     }
 
     public void AddMana(int manaAmount)
@@ -438,48 +451,65 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
     public bool CostItem(List<ItemPack> itemPacks)
     {
-        if (itemPacks == null || itemPacks.Count == 0)
-        {
-            return true;
-        }
-
-        foreach (var item in itemPacks)
-        {
-            if (GM.Ins.PLAYERPROFILE.GetItemNum(item.itemName) >= item.itemNum)
-            {
-                // 扣除道具
-                GM.Ins.PLAYERPROFILE.CostItem(item.itemName, item.itemNum);
-                BattleScene.Ins.BM.tipTextManager.ShowTip(transform, $"消耗道具{item.itemName}x{item.itemNum}");
-                Debug.Log($"{gameObject.name}消耗道具{item.itemName}，消耗数量{item.itemNum}");
-                return true;
-            }
-            else
-            {
-                Debug.LogWarning($"{gameObject.name}道具{item.itemName}数量不足，无法消耗！");
-                return false;
-            }
-        }
-
-        return false;
+        if (!TryGetItemCosts(itemPacks, out var costs) || !HasItemCosts(costs)) return false;
+        CommitItemCosts(costs);
+        return true;
     }
 
     public bool HasItem(List<ItemPack> itemPacks)
     {
-        if (itemPacks == null || itemPacks.Count == 0)
-        {
-            return true;
-        }
+        return TryGetItemCosts(itemPacks, out var costs) && HasItemCosts(costs);
+    }
 
-        foreach (var item in itemPacks)
+    /// <summary>普通及延迟技能共用：资源不足不扣费；行动异常中断只消耗行动点。</summary>
+    public bool TryCostSkill(SkillPack skill)
+    {
+        if (skill == null || !HasMana(skill.mpCost) ||
+            !TryGetItemCosts(skill.consumeItems, out var costs) || !HasItemCosts(costs)) return false;
+        // CostMP 内部处理死亡、眩晕、行动点校验以及行动触发的 Buff。
+        if (!CostMP(ActionType.技能)) return false;
+        _manaPoint -= skill.mpCost;
+        CommitItemCosts(costs);
+        BattleScene.Ins.UM.OnPieceStateChance(pc);
+        return true;
+    }
+
+    private static bool TryGetItemCosts(List<ItemPack> items, out Dictionary<ItemName, int> costs)
+    {
+        costs = new Dictionary<ItemName, int>();
+        if (items == null) return true;
+        foreach (var item in items)
         {
-            if (GM.Ins.PLAYERPROFILE.GetItemNum(item.itemName) < item.itemNum)
+            if (item == null || item.itemNum < 0) return false;
+            if (item.itemNum == 0) continue;
+            costs.TryGetValue(item.itemName, out int previous);
+            // 同一种材料可出现多次，必须按合计数量校验。
+            if (previous > int.MaxValue - item.itemNum) return false;
+            costs[item.itemName] = previous + item.itemNum;
+        }
+        return true;
+    }
+
+    private static bool HasItemCosts(Dictionary<ItemName, int> costs)
+    {
+        foreach (var cost in costs)
+        {
+            if (GM.Ins.PLAYERPROFILE.GetItemNum(cost.Key) < cost.Value)
             {
-                Debug.LogWarning($"{gameObject.name}道具{item.itemName}数量不足！");
+                Debug.LogWarning($"道具{cost.Key}数量不足！");
                 return false;
             }
         }
-
         return true;
+    }
+
+    private void CommitItemCosts(Dictionary<ItemName, int> costs)
+    {
+        foreach (var cost in costs)
+            GM.Ins.PLAYERPROFILE.CostItem(cost.Key, cost.Value);
+        // 全部扣除后再发布表现，避免只扣除了列表中的第一项。
+        foreach (var cost in costs)
+            BattleScene.Ins.BM.tipTextManager.ShowTip(transform, $"消耗道具{cost.Key}x{cost.Value}");
     }
 
     public int GetBuffStacks(BuffType buffType)
@@ -497,6 +527,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
     public void SetValues(int health, int mana, int ammo)
     {
+        int previousHealth = _curHealth;
         _curHealth = health;
         if (_curHealth > _maxHealth)
         {
@@ -504,14 +535,17 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         }
         _manaPoint = mana;
         _ammoCount = _maxAmmoCount;// 弹药数量直接设置为满
+        NotifyHealthChanged(previousHealth);
     }
     
     public void SetHurtState()
     {
+        int previousHealth = _curHealth;
         Debug.Log($"{gameObject.name} 进入受伤状态，生命值和能量都设置为30%");
         // 生命值和能量都设置为30%
         _curHealth = Mathf.RoundToInt(_maxHealth * 0.3f);
         _manaPoint = Mathf.RoundToInt(_maxManaPoint * 0.3f);
+        NotifyHealthChanged(previousHealth);
     }
     
     /// <summary>
@@ -521,6 +555,8 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     /// <param name="value">修改的增量（可以是负数）</param>
     public void ModifyAttribute(UnitAttrType type, float value)
     {
+        int previousHealth = _curHealth;
+        int previousMaxHealth = _maxHealth;
         // 将 float 转换为 int 供整数属性使用
         int intValue = Mathf.RoundToInt(value);
 
@@ -575,6 +611,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
                 break;
         }
 
+        NotifyHealthChanged(previousHealth, previousMaxHealth);
         // 每次修改属性后，同步战斗管理器的状态
         if (BattleScene.Ins != null && BattleScene.Ins.UM != null)
         {

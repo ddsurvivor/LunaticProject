@@ -95,8 +95,14 @@ public class PieceController : MonoBehaviour
     [FoldoutGroup("事件")] public UnityEvent OnDead;
 
 
+    private SkillSystem.CharacterSkillManager passiveManager;
+
+    private void OnDestroy() => passiveManager?.UnregisterPiece(gameObject);
+
     public void Init(PlayerController player, PieceData pieceData = null)
     {
+        passiveManager = BattleScene.Ins?.BM?.characterSkillManager;
+        passiveManager?.UnregisterPiece(gameObject);
         this.player = player;
         this.playerData = isPlayerPiece ? GM.Ins.PLAYERPROFILE.GetPlayer(pieceID - 1) : null;
         //unitAttrCenter.Init();
@@ -153,6 +159,8 @@ public class PieceController : MonoBehaviour
         //if (_actionListPanel != null) _actionListPanel.Init(this);
         isIdle = true;
         OnInit?.Invoke();
+        if (passiveManager != null && passiveManager.IsInitialized && _pieceData != null)
+            passiveManager.RegisterPiece(gameObject, _pieceData.passiveSkillTypes);
     }
 
     private void OnEnable()
@@ -235,6 +243,8 @@ public class PieceController : MonoBehaviour
 
         isIdle = true;
         OnTurnEnd?.Invoke();
+        if (!isDead && gameObject.activeInHierarchy)
+            BattleScene.Ins.BM.characterSkillManager.NotifyTurnEnd(gameObject);
     }
 
     // public void ShowActionList()
@@ -705,14 +715,15 @@ public class PieceController : MonoBehaviour
     /// </summary>
     public virtual void CastSkill()
     {
-        if (_skillPack == null) return;
+        var skill = _skillPack;
+        if (skill == null) return;
         if(!_isUsingSkill) return;
-        Sequence sequence = DOTween.Sequence();
         Transform atkPos = rangeUI.GetSkillTransform();
-        if (_skillPack.isDelaySkill) // 延时类技能跳过结算
+        if (skill.isDelaySkill) // 延时类技能跳过结算
         {
-            if (!unitAttrCenter.CostMP(ActionType.技能)) return;
-            BattleScene.Ins.BM.RestoreDelaySkill(this, _skillPack, atkPos.position);
+            if (atkPos == null || !unitAttrCenter.TryCostSkill(skill)) return;
+            NotifySkillUsed(skill);
+            BattleScene.Ins.BM.RestoreDelaySkill(this, skill, atkPos.position);
             _isUsingSkill = false;
             rangeUI.CloseRange();
             Debug.Log("延迟类技能");
@@ -720,18 +731,21 @@ public class PieceController : MonoBehaviour
         }
 
         // 根据范围获取所有棋子
-        List<PieceController> targets = rangeUI.GetCurTargets;
-        if (targets.Count < 1 && (_skillPack.target != SkillTarget.Area &&
-                                  _skillPack.target != SkillTarget.Self))
+        List<PieceController> targets = new List<PieceController>(rangeUI.GetCurTargets);
+        if (targets.Count < 1 && (skill.target != SkillTarget.Area &&
+                                  skill.target != SkillTarget.Self))
         {
             Debug.Log("未选中任何目标，无法发动技能");
             return;
         }
 
+        if (!unitAttrCenter.TryCostSkill(skill)) return;
+        NotifySkillUsed(skill);
         _isUsingSkill = false;
+        Sequence sequence = DOTween.Sequence();
         
         CheckResult checkResult = CheckResult.None;
-        if (_skillPack.isRecognitionCheck && targets.Count > 0)
+        if (skill.isRecognitionCheck && targets.Count > 0)
         {
             checkResult =
                 BattleScene.Ins.BM.diceCheckManager.ModeRecognitionCheck(this, targets[0]);
@@ -751,42 +765,42 @@ public class PieceController : MonoBehaviour
                 CheckFace(targets[0].transform.position - transform.position);
             }
 
-            Debug.Log($"{this.name}发动技能攻击{_skillPack.skillName}，targets数量：{targets.Count}");
+            Debug.Log($"{this.name}发动技能攻击{skill.skillName}，targets数量：{targets.Count}");
 
 
             // 播放技能动画
             pieceDisplay.ChangeDisplayState(PieceDisplayState.Skill, false, 1f,
-                null, _skillPack.animationIndex);
+                null, skill.animationIndex);
 
 
-            PlayAudio(_skillPack);
+            PlayAudio(skill);
             
             // 生成特效
             //Transform atkPos = rangeUI.GetSkillTransform();
-            if (atkPos != null && _skillPack.skillVFXType != 0)
+            if (atkPos != null && skill.skillVFXType != 0)
             {
                 GameObject fx  = ObjectPool.Ins.GenerateObject(
-                    _skillPack.skillVFXType,
+                    skill.skillVFXType,
                     atkPos.position + Vector3.up * 0.1f,
                     atkPos.localRotation);
-                if (_skillPack.isRotate)
+                if (skill.isRotate)
                 {
                     // fx沿 z轴 旋转，方向为从transfrom指向atkPos
                     Vector3 dir = (atkPos.position - transform.position).normalized;
                     dir.y = 0;
                     float angle = Mathf.Atan2(dir.z, dir.x) * Mathf.Rad2Deg;
                     fx.transform.rotation = Quaternion.Euler(45,  -45, angle + 90f);
-                    Debug.Log($"生成技能特效{_skillPack.skillVFXType},{dir}旋转角度{angle}");
+                    Debug.Log($"生成技能特效{skill.skillVFXType},{dir}旋转角度{angle}");
                 }
 
             }
-            else if (_skillPack.skillVFXType != 0)
+            else if (skill.skillVFXType != 0)
             {
                 Vector3 pos = targets.Count > 0
                     ? targets[0].transform.position
                     : transform.position;
                 ObjectPool.Ins.GenerateObject(
-                    _skillPack.skillVFXType,
+                    skill.skillVFXType,
                     pos + Vector3.up * 0.1f,
                     Quaternion.identity);
             }
@@ -796,24 +810,15 @@ public class PieceController : MonoBehaviour
         {
             if (targets.Count > 0)
             {
-                ShootBolt(targets[0].transform.position, _skillPack.bulletVFXType);
+                ShootBolt(targets[0].transform.position, skill.bulletVFXType);
             }
         });
         // 延迟0.3f
         sequence.AppendCallback(
             () =>
             {
-                if (!unitAttrCenter.CostMP(ActionType.技能)) return;
-                if (!unitAttrCenter.CostMana(_skillPack.mpCost))
-                {
-                    Debug.LogError("能量值不足");
-                    return;
-                }
-
-                if (!unitAttrCenter.CostItem(_skillPack.consumeItems)) return;
-                PassiveTrigger(PassiveTriggerType.OnSkillUse, _skillPack);
-                Vector3 skillPos = atkPos != null ? atkPos.position : transform.position;
-                BattleScene.Ins.BM.PieceSkill(this, targets, _skillPack, skillPos, ActionType.技能
+                Vector3 skillPos = atkPosValue;
+                BattleScene.Ins.BM.PieceSkill(this, targets, skill, skillPos, ActionType.技能
                     , checkResult);
 
                 //Debug.Log("关闭显示范围");
@@ -826,6 +831,11 @@ public class PieceController : MonoBehaviour
 
 
     // 更新朝向
+    protected void NotifySkillUsed(SkillPack skill)
+    {
+        PassiveTrigger(PassiveTriggerType.OnSkillUse, skill);
+        BattleScene.Ins.BM.characterSkillManager.NotifyCastActiveSkill(gameObject);
+    }
     public void CheckFace(Vector3 direction)
     {
         // 如果targetPos在当前棋子左侧，则朝向左侧，否则朝向右侧，更新piece display

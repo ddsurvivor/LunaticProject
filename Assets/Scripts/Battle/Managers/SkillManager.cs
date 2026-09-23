@@ -1,157 +1,102 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>技能范围查询，不修改高亮或保留上一次查询结果。</summary>
 public class SkillManager : MonoBehaviour
 {
     public PieceController casterPc;
-    private SkillPack _curSkillPack;
-    private List<PieceController> resultTargets = new();
 
-    public List<PieceController> GetTargets(PieceController caster, Transform target
-        , SkillPack skill)
-    {
-        CheckRange(caster, target, skill);
-        return resultTargets;
-    }
-
-    /// <summary>
-    /// 根据范围类型检测目标
-    /// </summary>
-    /// <param name="caster"></param>
-    /// <param name="target"></param>
-    /// <param name="skill"></param>
-    private void CheckRange(PieceController caster, Transform target, SkillPack skill)
+    public List<PieceController> GetTargets(PieceController caster, Transform target, SkillPack skill)
     {
         casterPc = caster;
-        _curSkillPack = skill;
-        Collider[] hitColliders = null;
-        List<PieceController> newTargets = new();
-        if (skill.rangeType == RangeType.Circle) // 单体敌人锁定
+        if (caster == null || target == null || skill == null) return new List<PieceController>();
+        if (skill.target == SkillTarget.Self)
+            return SkillTargeting.Filter(caster, new[] { caster }, skill, caster.transform.position);
+        var candidates = new List<PieceController>();
+        Vector3 origin = caster.transform.position;
+        Vector3 center = target.position;
+        float radius;
+        switch (skill.rangeType)
         {
-            // 检测球体范围内的所有敌人
-            hitColliders = Physics.OverlapSphere(target.transform.position, 1f);
+            case RangeType.Circle: radius = 1f; break;
+            case RangeType.Grenade: radius = skill.explodeRadius; break;
+            case RangeType.Fan: center = origin; radius = skill.rangeValue; break;
+            case RangeType.Nova:
+                center = origin;
+                radius = skill.explodeRadius > 0 ? skill.explodeRadius : skill.rangeValue;
+                break;
+            default: return candidates;
         }
-        else if (skill.rangeType == RangeType.Grenade) // 爆炸范围锁定
+        Vector3 forward = target.position - origin;
+        forward.y = 0;
+        foreach (var collider in Physics.OverlapSphere(center, Mathf.Max(0f, radius)))
         {
-            float explodeRadius = skill.explodeRadius;
-            // 检测球体范围内的所有敌人
-            hitColliders =
-                Physics.OverlapSphere(target.transform.position, explodeRadius);
-        }
-        else if (skill.rangeType == RangeType.Fan)
-        {
-            // 扇形范围
-            // 1. 获取扇形参数
-            float halfAngle = _curSkillPack.rangeAgle / 2f;
-            float range = _curSkillPack.rangeValue;
-            Vector3 origin = caster.transform.position;
-            Vector3 forward = target.transform.position - caster.transform.position;
-
-            // 2. 获取范围内所有碰撞体
-            Collider[] colliders = Physics.OverlapSphere(origin, range);
-
-            //HashSet<PieceController> hitPieces = new HashSet<PieceController>();
-            foreach (var collider in colliders)
+            var piece = collider.GetComponentInParent<PieceController>();
+            if (piece == null) continue;
+            if (skill.rangeType == RangeType.Fan)
             {
-                PieceController piece = collider.GetComponent<PieceController>();
-                if (piece == null) continue;
-
-                // 3. 判断是否在扇形角度范围内
-                Vector3 dir = (piece.transform.position - origin);
-                dir.y = 0; // 忽略y轴
-                if (dir.magnitude > range || dir.magnitude < 1f) continue; // 超出半径
-
-                float angle = Vector3.Angle(forward, dir);
-                if (angle <= halfAngle)
-                {
-                    if (piece != null && !newTargets.Contains(piece))
-                    {
-                        newTargets.Add(piece);
-                    }
-                }
+                Vector3 dir = piece.transform.position - origin;
+                dir.y = 0;
+                if (dir.sqrMagnitude < 1f || dir.sqrMagnitude > radius * radius ||
+                    Vector3.Angle(forward, dir) > skill.rangeAgle / 2f) continue;
             }
-            Debug.Log($"扇形范围检测到 {newTargets.Count} 个目标");
-            /*// 进行扇形有限距离的穿透射线检测
-            // 根据扇形角度，等间距的发射多根射线进行检测，结果需要去掉重复
-            float halfAngle = _curSkillPack.rangeAgle / 2f;
-            if(halfAngle <= 0f) halfAngle = 5f; // 最小5度
-            int rayCount = Mathf.CeilToInt(_curSkillPack.rangeAgle / 5f); // 每5度发射一根射线
-            //HashSet<PieceController> hitPieces = new HashSet<PieceController>();
-            for (int i = 0; i <= rayCount; i++)
-            {
-                float angle = -halfAngle + i * (_curSkillPack.rangeAgle / rayCount);
-                Vector3 targetDir = target.position - caster.transform.position;
-                Vector3 direction = Quaternion.Euler(0, angle, 0) * targetDir;
-                Ray ray = new Ray(caster.transform.position, direction);
-                if (Physics.Raycast(ray, out RaycastHit hitInfo, _curSkillPack.rangeValue))
-                {
-                    PieceController piece = hitInfo.collider.GetComponent<PieceController>();
-                    if (piece != null && !newTargets.Contains(piece))
-                    {
-                        newTargets.Add(piece);
-                    }
-                }
-            }*/
+            candidates.Add(piece);
         }
+        return SkillTargeting.Filter(caster, candidates, skill, target.position);
+    }
+}
 
-
-        if (hitColliders != null)
+/// <summary>玩家预览、AI 查询和最终结算共享的目标规则；几何范围由调用方提供。</summary>
+public static class SkillTargeting
+{
+    public static bool IsValid(PieceController caster, PieceController target, SkillPack skill)
+    {
+        if (caster == null || caster.isDead || target == null || skill == null ||
+            !target.gameObject.activeInHierarchy || !BuffManager.CanTarget(caster, target)) return false;
+        if (skill.layerSkill && Mathf.Abs(caster.transform.position.y - target.transform.position.y) > 0.1f) return false;
+        bool ally = caster.isPlayerPiece == target.isPlayerPiece;
+        if (skill.target == SkillTarget.AllyBody) return ally && target.isDead;
+        if (target.isDead) return false;
+        switch (skill.target)
         {
-            foreach (var hitCollider in hitColliders)
-            {
-                PieceController pc = hitCollider.GetComponent<PieceController>();
-                if (pc != null)
-                {
-                    newTargets.Add(pc);
-                }
-            }
+            case SkillTarget.Enemy:
+            case SkillTarget.EnemyAll:
+            case SkillTarget.FarthestEnemy: return !ally;
+            case SkillTarget.Ally: return ally;
+            case SkillTarget.Self: return caster == target;
+            case SkillTarget.All: return true;
+            // Area 只提供地面位置，效果由 ApplySkillEffectOnce 负责。
+            default: return false;
         }
-
-        CheckTarget(newTargets);
     }
 
-    /// <summary>
-    /// 根据目标类别筛选
-    /// </summary>
-    /// <param name="newTargets"></param>
-    private void CheckTarget(List<PieceController> targets)
+    public static List<PieceController> Filter(PieceController caster, IEnumerable<PieceController> candidates,
+        SkillPack skill, Vector3 selectionPosition)
     {
-        resultTargets = new();
-        foreach (var piece in targets)
+        var result = new List<PieceController>();
+        if (caster == null || skill == null) return result;
+        if (skill.target == SkillTarget.Self)
         {
-            if (piece == null || !BuffManager.CanTarget(casterPc, piece)) continue;
-            if (_curSkillPack.target == SkillTarget.All)
-            {
-                piece.rangeUI?.ShowHighlight(true);
-                resultTargets.Add(piece);
-            }
-            else if (_curSkillPack.target == SkillTarget.EnemyAll || _curSkillPack.target == SkillTarget.FarthestEnemy)
-            {
-                if (piece.isPlayerPiece != casterPc.isPlayerPiece)
-                {
-                    piece.rangeUI?.ShowHighlight(true);
-                    resultTargets.Add(piece);
-                }
-            }
-            else if (_curSkillPack.target == SkillTarget.Enemy)
-            {
-                if (piece.isPlayerPiece != casterPc.isPlayerPiece)
-                {
-                    piece.rangeUI?.ShowHighlight(true);
-                    resultTargets.Add(piece);
-                    return;
-                }
-            }
-            else if (_curSkillPack.target == SkillTarget.Ally)
-            {
-                if (piece.isPlayerPiece != casterPc.isPlayerPiece)
-                {
-                    piece.rangeUI?.ShowHighlight(true);
-                    resultTargets.Add(piece);
-                    return;
-                }
-            }
+            if (IsValid(caster, caster, skill)) result.Add(caster);
+            return result;
         }
+        if (candidates == null) return result;
+        var seen = new HashSet<PieceController>();
+        foreach (var candidate in candidates)
+            if (IsValid(caster, candidate, skill) && seen.Add(candidate)) result.Add(candidate);
+        bool farthest = skill.target == SkillTarget.FarthestEnemy;
+        bool single = skill.target is SkillTarget.Enemy or SkillTarget.Ally or SkillTarget.AllyBody || farthest;
+        if (single && result.Count > 1)
+        {
+            Vector3 origin = farthest ? caster.transform.position : selectionPosition;
+            result.Sort((a, b) =>
+            {
+                int order = (a.transform.position - origin).sqrMagnitude.CompareTo((b.transform.position - origin).sqrMagnitude);
+                if (farthest) order = -order;
+                return order != 0 ? order : a.GetInstanceID().CompareTo(b.GetInstanceID());
+            });
+            result.RemoveRange(1, result.Count - 1);
+        }
+        return result;
     }
 }

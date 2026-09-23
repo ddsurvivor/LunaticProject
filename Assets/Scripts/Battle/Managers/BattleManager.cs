@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -61,6 +61,7 @@ public class BattleManager : MonoBehaviour
     {
         inBattle = true;
         _turnNumber = 0;
+        characterSkillManager.ClearAllRegistry();
         PlayerController.Init();
         AIController.Init();
         ApplySetting(GM.Ins.battleSetting); // 在完成所有棋子初始化以后，更新预设
@@ -75,7 +76,7 @@ public class BattleManager : MonoBehaviour
     {
         Debug.Log("战斗开始");
         // 初始化角色技能系统
-        characterSkillManager.Init(PlayerController.pieces);
+        characterSkillManager.Init(PlayerController.pieces.Concat(AIController.pieces).Concat(summonPieces).Distinct().ToList());
 
         startSequence?.Kill();
         startSequence = DOTween.Sequence();
@@ -167,12 +168,16 @@ public class BattleManager : MonoBehaviour
     {
         if (attacker == null || attacker.isDead || skillPack == null || targets == null) return;
         List<List<DamageInfo>> damageInfoList = new();
-        var validTargets = targets.Where(t => t != null).Distinct().ToList();
+        var validTargets = SkillTargeting.Filter(attacker, targets, skillPack, targetPos);
+        // 每次施法只消费一次攻击被动，全部目标与伤害段共享本次倍率。
+        var hostileTarget = validTargets.FirstOrDefault(t => !t.isDead && t.isPlayerPiece != attacker.isPlayerPiece);
+        float passiveMultiplier = skillPack.attackPacks.Count > 0 && hostileTarget != null
+            ? characterSkillManager.EvaluateDamageMultiplier(attacker.gameObject, hostileTarget.gameObject) : 1f;
         bool isCrit = false;
         foreach (var target in validTargets)
         {
             // 1. 伤害管理器统一处理目标校验、命中、暴击与各段扣血。
-            var settlement = damageManager.ResolveSkillTarget(attacker, target, skillPack, checkResult, isFlank);
+            var settlement = damageManager.ResolveSkillTarget(attacker, target, skillPack, checkResult, isFlank, passiveMultiplier);
             var damageInfos = settlement.DamageInfos;
             damageInfoList.Add(damageInfos);
             isCrit |= settlement.IsCritical;

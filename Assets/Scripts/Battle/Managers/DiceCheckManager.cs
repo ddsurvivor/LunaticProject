@@ -14,7 +14,7 @@
         {
             // 假设属性名为 ModeRecognition 和 CounterAttribute
             // 攻击方模式识别属性加成
-            int modeRecognition = attacker.playerData.RECOGNITION;
+            // 当前规则使用纯 3D6，不读取玩家专属属性；敌方也可执行检定。
             // 敌人对抗
             int counterAttr = defender.unitAttrCenter.CON;
 
@@ -30,7 +30,9 @@
             // 这里以骰子和大于等于10为成功示例
             bool isSuccess = diceSum >= counterAttr;
 
-            checkDicePanel.ShowResult(3, diceResult, isSuccess);
+            checkDicePanel?.ShowResult(3, diceResult, isSuccess);
+            if (isSuccess)
+                BattleScene.Ins.BM.characterSkillManager.NotifyPatternRecognitionPassed(attacker.gameObject);
 
             //float total = modeRecognition + diceSum;// 方案1：属性加成 + 骰子
             float total = diceSum; // 方案2：只计算骰子

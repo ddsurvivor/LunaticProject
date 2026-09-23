@@ -93,6 +93,7 @@ public class RangeUI : MonoBehaviour
 
     public void ShowSkillRange(SkillPack skillPack)
     {
+        CloseRange();
         _curSkillPack = skillPack;
         if (skillPack.rangeType == RangeType.Circle)
         {
@@ -182,6 +183,7 @@ public class RangeUI : MonoBehaviour
     {
         foreach (var piece in _curTargets)
         {
+            if (piece == null) continue;
             piece.rangeUI?.ShowHighlight(false);
             if (piece is EnemyController enemy)
             {
@@ -345,6 +347,17 @@ public class RangeUI : MonoBehaviour
 
     private void HighlightTarget()
     {
+        if (_curSkillPack == null || _owner == null) return;
+        if (_curSkillPack.target == SkillTarget.Self)
+        {
+            CheckTarget(new[] { _owner });
+            return;
+        }
+        if (_curSkillPack.rangeType == RangeType.Nova)
+        {
+            CheckTarget(Physics.OverlapSphere(_owner.transform.position, _curRange));
+            return;
+        }
         if (skillIcon != null && skillIcon.activeInHierarchy) // 单体敌人锁定
         {
             // 检测球体范围内的所有敌人
@@ -375,7 +388,7 @@ public class RangeUI : MonoBehaviour
             HashSet<PieceController> hitPieces = new HashSet<PieceController>();
             foreach (var collider in colliders)
             {
-                PieceController piece = collider.GetComponent<PieceController>();
+                PieceController piece = collider.GetComponentInParent<PieceController>();
                 if (piece == null) continue;
 
                 // 3. 判断是否在扇形角度范围内
@@ -406,7 +419,7 @@ public class RangeUI : MonoBehaviour
                 Ray ray = new Ray(fanRoot.transform.position, direction);
                 if (Physics.Raycast(ray, out RaycastHit hitInfo, _curSkillPack.rangeValue))
                 {
-                    PieceController piece = hitInfo.collider.GetComponent<PieceController>();
+                    PieceController piece = hitInfo.collider.GetComponentInParent<PieceController>();
                     if (piece != null)
                     {
                         hitPieces.Add(piece);
@@ -433,20 +446,17 @@ public class RangeUI : MonoBehaviour
             Vector3 centerPos = arcOuter.transform.position;
             // --- 2. 物理粗筛 (Broad-phase) ---
             // 以 arcRoot 为圆心，外圆半径为范围，找出所有潜在碰撞体
-            int count = Physics.OverlapSphereNonAlloc(
-                centerPos,
-                outerR,
-                _overlapResults
-            );
+            Collider[] overlapResults = Physics.OverlapSphere(centerPos, outerR);
+            int count = overlapResults.Length;
 
             Vector3 forward = arcRoot.transform.forward;
 
             // --- 3. 几何精筛 (Narrow-phase) ---
             for (int i = 0; i < count; i++)
             {
-                Collider col = _overlapResults[i];
+                Collider col = overlapResults[i];
                 // 通过所有检查，记录目标
-                PieceController piece = col.GetComponent<PieceController>();
+                PieceController piece = col.GetComponentInParent<PieceController>();
                 if (piece == null) continue;
 
                 Vector3 targetPos = col.transform.position;
@@ -470,150 +480,33 @@ public class RangeUI : MonoBehaviour
         }
     }
 
-    private Collider[] _overlapResults = new Collider[20]; // 预分配数组提升性能
+
 
     private void CheckTarget(Collider[] hitColliders)
     {
-        List<PieceController> newTargets = new();
-        if (hitColliders.Length <= 0) return;
+        var candidates = new List<PieceController>();
         foreach (var collider in hitColliders)
-        {
-            PieceController piece = collider.transform.GetComponent<PieceController>();
-            if (piece == null || !BuffManager.CanTarget(_owner, piece)) continue;
-            if (_curSkillPack.target == SkillTarget.All)
-            {
-                piece.ShowHighlight(true);
-                newTargets.Add(piece);
-            }
-            else if (_curSkillPack.target == SkillTarget.EnemyAll)
-            {
-                if (!piece.isPlayerPiece)
-                {
-                    piece.ShowHighlight(true);
-                    newTargets.Add(piece);
-                }
-            }
-            else if (_curSkillPack.target == SkillTarget.Enemy)
-            {
-                if (!piece.isPlayerPiece)
-                {
-                    piece.ShowHighlight(true);
-                    newTargets.Add(piece);
-                }
-            }
-            else if (_curSkillPack.target == SkillTarget.Ally)
-            {
-                if (piece.isPlayerPiece)
-                {
-                    piece.ShowHighlight(true);
-                    newTargets.Add(piece);
-                }
-            }
-            else if (_curSkillPack.target == SkillTarget.AllyBody)
-            {
-                if (piece.isPlayerPiece && piece.isDead)
-                {
-                    piece.ShowHighlight(true);
-                    newTargets.Add(piece);
-                }
-            }
-        }
-
-        foreach (var piece in _curTargets)
-        {
-            if (newTargets.Contains(piece))
-            {
-                continue;
-            }
-
-            piece.ShowHighlight(false);
-        }
-
-        foreach (var target in newTargets)
-        {
-            if (_curTargets.Contains(target)) continue;
-            // 显示命中率、伤害等
-            target.OnBeTarget(_owner, _curSkillPack);
-        }
-
-        _curTargets = newTargets;
+            if (collider != null) candidates.Add(collider.GetComponentInParent<PieceController>());
+        CheckTarget(candidates);
     }
 
-    private void CheckTarget(HashSet<PieceController> hitPieces)
+    private void CheckTarget(IEnumerable<PieceController> candidates)
     {
-        //Debug.Log("Hit Pieces Count: " + hitPieces.Count);
-        List<PieceController> newTargets = new();
-        foreach (var piece in hitPieces)
+        Transform selection = GetSkillTransform();
+        var newTargets = SkillTargeting.Filter(_owner, candidates, _curSkillPack,
+            selection != null ? selection.position : transform.position);
+        var previous = new HashSet<PieceController>(_curTargets);
+        var current = new HashSet<PieceController>(newTargets);
+        foreach (var piece in previous)
+            if (piece != null && !current.Contains(piece)) piece.ShowHighlight(false);
+        foreach (var piece in newTargets)
         {
-            if (piece == null || !BuffManager.CanTarget(_owner, piece)) continue;
-            if (_curSkillPack.target == SkillTarget.All)
-            {
-                piece.ShowHighlight(true);
-                newTargets.Add(piece);
-            }
-            else if (_curSkillPack.target == SkillTarget.EnemyAll)
-            {
-                if (!piece.isPlayerPiece)
-                {
-                    piece.ShowHighlight(true);
-                    newTargets.Add(piece);
-                }
-            }
-            else if (_curSkillPack.target == SkillTarget.Enemy)
-            {
-                if (!piece.isPlayerPiece)
-                {
-                    piece.ShowHighlight(true);
-                    newTargets.Add(piece);
-                }
-            }
-            else if (_curSkillPack.target == SkillTarget.Ally)
-            {
-                if (piece.isPlayerPiece)
-                {
-                    piece.ShowHighlight(true);
-                    newTargets.Add(piece);
-                }
-            }
-            else if (_curSkillPack.target == SkillTarget.Self)
-            {
-                if (piece == _owner)
-                {
-                    piece.ShowHighlight(true);
-                    newTargets.Add(piece);
-                }
-            }
-            else if (_curSkillPack.target == SkillTarget.AllyBody)
-            {
-                if (piece.isPlayerPiece && piece.isDead)
-                {
-                    piece.ShowHighlight(true);
-                    newTargets.Add(piece);
-                }
-            }
+            piece.ShowHighlight(true);
+            if (!previous.Contains(piece)) piece.OnBeTarget(_owner, _curSkillPack);
         }
-
-        foreach (var piece in _curTargets)
-        {
-            if (newTargets.Contains(piece))
-            {
-                continue;
-            }
-
-            piece.ShowHighlight(false);
-        }
-
-        foreach (var target in newTargets)
-        {
-            if (_curTargets.Contains(target)) continue;
-            // 显示命中率、伤害等
-            target.OnBeTarget(_owner, _curSkillPack);
-        }
-
+        // 包含空结果：鼠标移到空地必须清掉上一次目标。
         _curTargets = newTargets;
     }
-
-
     public void ShowHighlight(bool option)
     {
         highlightCircle.SetActive(option);
