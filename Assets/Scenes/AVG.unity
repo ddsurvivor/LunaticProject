@@ -251,7 +251,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &54650413
 RectTransform:
   m_ObjectHideFlags: 0
@@ -287,6 +287,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0939a749027b9ac45947ff01a821d450, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  "\u5730\u56FE\u5E95\u56FE": {fileID: 0}
+  "\u542F\u7528\u6EDA\u8F6E\u7F29\u653E": 1
+  "\u6EDA\u8F6E\u7F29\u653E\u901F\u5EA6": 0.15
+  "\u6700\u5C0F\u7F29\u653E": 1
+  "\u6700\u5927\u7F29\u653E": 2
 --- !u!222 &54650415
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4731,6 +4736,7 @@ MonoBehaviour:
   "\u5730\u56FE":
   - {fileID: 54650412}
   - {fileID: 1113224865}
+  - {fileID: 2054247683}
   "\u5F53\u524D\u5730\u56FE": {fileID: 54650412}
   gameoverPanel: {fileID: 679623659}
   mapRoot: {fileID: 641958119}
@@ -9680,13 +9686,14 @@ GameObject:
   m_Component:
   - component: {fileID: 1113224866}
   - component: {fileID: 1113224867}
+  - component: {fileID: 1113224868}
   m_Layer: 5
   m_Name: StealthPlatform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1113224866
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9708,7 +9715,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 2783.4778, y: 1467.8496}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1113224867
 MonoBehaviour:
@@ -9799,6 +9806,23 @@ MonoBehaviour:
   dateText: {fileID: 0}
   timeText: {fileID: 0}
   dateImage: {fileID: 0}
+--- !u!114 &1113224868
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1113224865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0939a749027b9ac45947ff01a821d450, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  "\u5730\u56FE\u5E95\u56FE": {fileID: 690154589}
+  "\u542F\u7528\u6EDA\u8F6E\u7F29\u653E": 1
+  "\u6EDA\u8F6E\u7F29\u653E\u901F\u5EA6": 0.15
+  "\u6700\u5C0F\u7F29\u653E": 1
+  "\u6700\u5927\u7F29\u653E": 1.5
 --- !u!1 &1115516437
 GameObject:
   m_ObjectHideFlags: 0
@@ -16221,8 +16245,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 102.60425, y: 65}
-  m_SizeDelta: {x: 3052.751, y: 1365.3906}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 2940, y: 1296}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2054247685
 MonoBehaviour:
@@ -16236,6 +16260,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0939a749027b9ac45947ff01a821d450, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  "\u5730\u56FE\u5E95\u56FE": {fileID: 2004119527}
+  "\u542F\u7528\u6EDA\u8F6E\u7F29\u653E": 1
+  "\u6EDA\u8F6E\u7F29\u653E\u901F\u5EA6": 0.15
+  "\u6700\u5C0F\u7F29\u653E": 1
+  "\u6700\u5927\u7F29\u653E": 2
 --- !u!222 &2054247686
 CanvasRenderer:
   m_ObjectHideFlags: 0
