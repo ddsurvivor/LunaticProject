@@ -12,7 +12,7 @@ using Sirenix.OdinInspector;
 using Sirenix.Utilities;
 
 
-public class 剧本System : MonoBehaviour
+public partial class 剧本System : MonoBehaviour
 {
     public static 剧本System instance;
     public List<GameObject> 已生成文本 = new List<GameObject>();
@@ -363,7 +363,36 @@ public class 剧本System : MonoBehaviour
         var face = tar.Split(Center.Plot指令分隔符);
         foreach (var key in face)
         {
-            string command = GetCommand(key);
+            string command = GetCommand(key.Trim());
+            // ACH 单独处理并退出本条指令，避免成就名中的
+            // CHAPTER、GAMEOVER 等字样被下方旧版 Contains 判断误识别为指令。
+            if (command == Center.Command_Achievement)
+            {
+                var prams = 指令切割(key);
+                if (prams == null || prams.Length != 1 || string.IsNullOrWhiteSpace(prams[0]))
+                {
+                    Debug.LogError($"ACH 指令格式错误：{key}，应为 ACH(成就API名)");
+                    continue;
+                }
+
+                SteamAchievements.Unlock(prams[0]);
+                continue;
+            }
+
+            if (command == Center.Command_End)
+            {
+                var prams = 指令切割(key);
+                if (prams == null || prams.Length < 2 ||
+                    string.IsNullOrWhiteSpace(prams[0]) || !int.TryParse(prams[1], out int result))
+                {
+                    Debug.LogError($"END 指令格式错误：{key}，应为 END(任务名,进度)");
+                    continue;
+                }
+
+                GM.Ins.PLAYERPROFILE.保存任务进度(prams[0], result);
+                大地图System.instance.剧情结束();
+                continue;
+            }
             //Debug.Log($"进行命令{command}");
             if (key.Contains(Center.Command_Modify))
             {
@@ -599,7 +628,7 @@ public class 剧本System : MonoBehaviour
                 Next();
             }
 
-            if (key.Contains(Center.Command_Gameover))
+            if (command == Center.Command_Gameover)
             {
                 //大地图System.instance.失败();// 打开失败页面
                 // 自动保存
@@ -655,17 +684,6 @@ public class 剧本System : MonoBehaviour
             {
                 已阅读++;
                 Next();
-            }
-
-            if (key.Contains(Center.Command_End))
-            {
-                var prams = 指令切割(key);
-                int.TryParse(prams[1], out int result);
-                GM.Ins.PLAYERPROFILE.保存任务进度(prams[0], result);
-                // 重新刷新任务节点
-                大地图System.instance.剧情结束();
-                //大地图System.instance.RefreshAllNodes();
-                //大地图System.instance.剧情结束();
             }
 
             if (key.Contains(Center.Command_Jump))
@@ -1122,19 +1140,7 @@ public class 剧本System : MonoBehaviour
         大地图System.instance.GetDaytimeSystem()?.CostDaytime(1);
     }
 
-    private void OnEnable()
-    {
-        autoPlayElapsed = 0f;
-        SyncAutoPlayButton();
-    }
-
-    private void OnDisable()
-    {
-        // 隐藏剧情只暂停推进；玩家选择的自动模式保留到下一段剧本。
-        autoPlayElapsed = 0f;
-        isFastForward = false;
-        GM.Ins?.AM.StopAll();
-    }
+    
 
 
     // ====== Test ======= //
@@ -1151,96 +1157,5 @@ public class 剧本System : MonoBehaviour
     }
     
     
-    // ===== 自动播放系统 ====== //
-
-    private bool isAutoPlay = false;       // 玩家选择的自动模式，不因等待选项或关闭面板而清除
-    private bool isFastForward = false;
-    private bool isWaitingForChoice = false;
-    private float autoPlayElapsed;
-
-    public bool IsAutoPlay => isAutoPlay;
-    public bool IsWaitingForChoice => isWaitingForChoice;
-
-    [Header("自动播放")]
-    [Tooltip("自动按钮；留空时查找子物体中已绑定 ToggleAutoPlay 的按钮")]
-    [SerializeField] private CustomAdvancedButton autoPlayButton;
-    [SerializeField] private float normalDelay = 2.0f;
-    [SerializeField] private float fastForwardDelay = 0.3f;
-
-    public void ToggleAutoPlay()
-    {
-        isAutoPlay = !isAutoPlay;
-        autoPlayElapsed = 0f;
-        if (!isAutoPlay) isFastForward = false;
-        SyncAutoPlayButton();
-        Debug.Log(isAutoPlay ? "【剧情系统】已开启自动播放" : "【剧情系统】已关闭自动播放");
-    }
-
-    public void ToggleFastForward()
-    {
-        isFastForward = !isFastForward;
-        Debug.Log($"【剧情系统】快进状态: {isFastForward}");
-    }
-
-    /// <summary>玩家主动关闭自动模式，同时同步按钮状态。</summary>
-    public void StopAutoPlay()
-    {
-        isAutoPlay = false;
-        isFastForward = false;
-        autoPlayElapsed = 0f;
-        SyncAutoPlayButton();
-    }
-
-    private void SyncAutoPlayButton()
-    {
-        if (autoPlayButton == null)
-        {
-            foreach (var button in GetComponentsInChildren<CustomAdvancedButton>(true))
-            {
-                if (CallsToggleAutoPlay(button.onClickEvent) ||
-                    (button.TryGetComponent<UnityEngine.UI.Button>(out var uiButton) &&
-                     CallsToggleAutoPlay(uiButton.onClick)))
-                {
-                    autoPlayButton = button;
-                    break;
-                }
-            }
-        }
-
-        if (autoPlayButton != null)
-        {
-            autoPlayButton.SetToggleMode(true);
-            autoPlayButton.SetIsOn(isAutoPlay);
-        }
-    }
-
-    private bool CallsToggleAutoPlay(UnityEngine.Events.UnityEvent clickEvent)
-    {
-        if (clickEvent == null) return false;
-        for (int i = 0; i < clickEvent.GetPersistentEventCount(); i++)
-        {
-            if (clickEvent.GetPersistentTarget(i) == this &&
-                clickEvent.GetPersistentMethodName(i) == nameof(ToggleAutoPlay))
-                return true;
-        }
-        return false;
-    }
-
-    private void Update()
-    {
-        // 使用随组件启停的计时，避免面板隐藏后残留已被 Unity 停止的协程引用。
-        if (!isAutoPlay || isWaitingForChoice || 已储存剧本 == null || 已阅读 >= 已储存剧本.Length)
-        {
-            autoPlayElapsed = 0f;
-            return;
-        }
-
-        autoPlayElapsed += Time.deltaTime;
-        float delay = Mathf.Max(0f, isFastForward ? fastForwardDelay : normalDelay);
-        if (autoPlayElapsed >= delay)
-        {
-            autoPlayElapsed = 0f;
-            Next();
-        }
-    }
+    
 }

@@ -46,10 +46,13 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     /// </summary>
     public void SetIsOn(bool value)
     {
+        if (enableToggle && isOn && !value && isHovered)
+            suppressHoverFill = true;
+        if (value) suppressHoverFill = false;
         isOn = value;
         if (fillImage != null)
         {
-            fillImage.fillAmount = IsOn || isHovered ? 1f : 0f;
+            fillImage.fillAmount = enableToggle ? (IsOn ? 1f : 0f) : (isHovered ? 1f : 0f);
         }
     }
 
@@ -64,6 +67,7 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     [Header("Interaction Events")]
     [SerializeField] public UnityEvent onClickEvent;   // 核心触发自定义事件
 
+    private bool suppressHoverFill; // 关闭 Toggle 后，鼠标重新进入前保持空填充
     private bool isHovered = false;
     private bool isPressed = false;       // 记录鼠标是否按下
     private Vector3 originalScale;        // 记录物体的初始尺寸
@@ -165,6 +169,13 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
             return;
         }
 
+        // 关闭后不能被仍停留在按钮上的鼠标或本轮已触发的按键立即填满。
+        if (enableToggle && (suppressHoverFill || keyTriggered))
+        {
+            fillImage.fillAmount = 0f;
+            return;
+        }
+
         // 如果开启了键盘绑定且玩家正在长按蓄力，填充进度由长按时间百分比绝对控制
         if (enableKeyBinding && isKeyHolding)
         {
@@ -216,6 +227,7 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     public void OnPointerEnter(PointerEventData eventData)
     {
         isHovered = true;
+        suppressHoverFill = false;
         GM.Ins.AM.PlayAudio(mouseOnSound);
     }
 
@@ -223,6 +235,7 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     public void OnPointerExit(PointerEventData eventData)
     {
         isHovered = false;
+        suppressHoverFill = false;
     }
 
     // 鼠标按下
@@ -271,6 +284,7 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     {
         if (fillImage != null) fillImage.fillAmount = IsOn ? 1f : 0f;
         isHovered = false;
+        suppressHoverFill = false;
         isPressed = false;
         isKeyHolding = false;
         currentKeyHoldTime = 0f;

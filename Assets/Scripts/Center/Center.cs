@@ -38,7 +38,8 @@ public class Center : MonoBehaviour
     public static string Command_Setspace="SETSPACE";//设置空格
     public static string Command_Next="NEXT";//下一段
     public static string Command_If="IF";//检查分支
-    public static string Command_End = "END";//结束 （保存任务进度）
+    public static string Command_End = "END";//END(任务名,进度)，保存任务进度并结束剧情
+    public static string Command_Achievement = "ACH";//ACH(Steam成就API名)，解锁指定成就
     public static string Command_Skip="SKIP";//跳过本行
     public static string Command_Jump="JUMPTO";//跳转到行
     public static string Command_Gameover="GAMEOVER";//失败
