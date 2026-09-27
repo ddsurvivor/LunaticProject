@@ -1047,6 +1047,11 @@ public class 剧本System : MonoBehaviour
                     UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
                 }
             }
+
+            if (key.Contains(Center.Command_Finish))
+            {
+                大地图System.instance.endingCreditsPlayer.Play();
+            }
         }
     }
 

@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.Events;
 
 /// <summary>
-/// 自定义高级交互按钮（支持动态缩放扩展与键盘长按蓄力触发）
+/// 自定义高级交互按钮（支持动态缩放、键盘长按蓄力与 Toggle 模式）
 /// </summary>
 public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
 {
@@ -24,6 +24,26 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     [SerializeField] private float pressedScale = 1.05f;
     [Tooltip("缩放动画的变化速度")]
     [SerializeField] private float scaleSpeed = 12f;
+
+    [Header("Toggle Settings")]
+    [Tooltip("开启后，每次点击切换选中状态；选中时保持满填充")]
+    [SerializeField] private bool enableToggle = false;
+    [Tooltip("Toggle 模式的初始选中状态")]
+    [SerializeField] private bool isOn = false;
+
+    public bool IsOn => enableToggle && isOn;
+
+    /// <summary>
+    /// 同步 Toggle 状态，不触发点击事件。
+    /// </summary>
+    public void SetIsOn(bool value)
+    {
+        isOn = value;
+        if (fillImage != null)
+        {
+            fillImage.fillAmount = IsOn || isHovered ? 1f : 0f;
+        }
+    }
 
     [Header("Keyboard Binding Settings (New)")]
     [Tooltip("是否开启键盘按键映射触发")]
@@ -70,7 +90,7 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     {
         if (fillImage != null)
         {
-            fillImage.fillAmount = 0f;
+            fillImage.fillAmount = IsOn ? 1f : 0f;
         }
 
         if (pressedImage != null)
@@ -130,6 +150,13 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     {
         if (fillImage == null) return;
 
+        // 选中状态优先于悬停和键盘蓄力，直到下次触发才解除满填充。
+        if (IsOn)
+        {
+            fillImage.fillAmount = 1f;
+            return;
+        }
+
         // 如果开启了键盘绑定且玩家正在长按蓄力，填充进度由长按时间百分比绝对控制
         if (enableKeyBinding && isKeyHolding)
         {
@@ -163,6 +190,11 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     /// </summary>
     private void TriggerButtonClick()
     {
+        if (enableToggle)
+        {
+            SetIsOn(!isOn);
+        }
+
         GM.Ins.AM.PlayAudio(clickSound);
         if (onClickEvent != null)
         {
@@ -225,11 +257,11 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     }
 
     /// <summary>
-    /// 当UI激活、隐藏时，安全重置所有交互状态，防止逻辑卡死
+    /// 当UI激活、隐藏时，重置临时交互状态，保留 Toggle 选中状态
     /// </summary>
     private void ResetAllStates()
     {
-        if (fillImage != null) fillImage.fillAmount = 0f;
+        if (fillImage != null) fillImage.fillAmount = IsOn ? 1f : 0f;
         isHovered = false;
         isPressed = false;
         isKeyHolding = false;

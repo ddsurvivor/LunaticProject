@@ -50,6 +50,7 @@ public class 大地图System : SerializedMonoBehaviour
     public MessagePanel messagePanel;
     public BattleStartUIPanel battleStartUIPanel;
     public NotificationManager notificationManager;
+    public EndingCreditsPlayer endingCreditsPlayer;
 
     public GameObject blackFront;//黑幕
     public void 失败()
