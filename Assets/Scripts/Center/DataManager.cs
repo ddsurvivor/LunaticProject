@@ -56,7 +56,8 @@ public class DataManager : SerializedMonoBehaviour
 
     public void SaveData(int index)
     {
-        //playerprofiles[index] = GM.Ins.PLAYERPROFILE;
+        if (大地图System.instance != null)
+            大地图System.instance.CaptureMapState();
         GM.Ins.PLAYERPROFILE.lastSaveTime = System.DateTime.Now;
         GM.Ins.PLAYERPROFILE.currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
         JsonTool.SaveJson(GM.Ins.PLAYERPROFILE,savePath + $"PlayerProfiles_{index}.json");
@@ -65,7 +66,7 @@ public class DataManager : SerializedMonoBehaviour
     [Button("测试保存")]
     public void TestSave(int index)
     {
-        JsonTool.SaveJson(GM.Ins.PLAYERPROFILE,savePath + $"PlayerProfiles_{index}.json");
+        SaveData(index);
     }
     // [Button("ES3测试保存")]
     // public void ES3SaveDate(int index)

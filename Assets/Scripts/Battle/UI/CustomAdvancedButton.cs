@@ -33,6 +33,14 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
 
     public bool IsOn => enableToggle && isOn;
 
+    /// <summary>由业务系统启用或关闭 Toggle 表现，不触发点击事件。</summary>
+    public void SetToggleMode(bool enabled)
+    {
+        enableToggle = enabled;
+        SetIsOn(isOn);
+    }
+
+
     /// <summary>
     /// 同步 Toggle 状态，不触发点击事件。
     /// </summary>

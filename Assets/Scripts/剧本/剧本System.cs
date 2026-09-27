@@ -95,6 +95,9 @@ public class 剧本System : MonoBehaviour
     public void 刷新()
     {
         已阅读 = 0;
+        isWaitingForChoice = false;
+        autoPlayElapsed = 0f;
+        选项按钮.Clear();
         清空文本();
     }
 
@@ -118,13 +121,17 @@ public class 剧本System : MonoBehaviour
     [ContextMenu("下一句")]
     public void Next()
     {
+        if (isWaitingForChoice || 已储存剧本 == null) return;
+        autoPlayElapsed = 0f;
         进度条.normalizedPosition = new Vector2(0, -1f);
         if (已阅读 >= 已储存剧本.Length)
         {
             return;
         }
 
-        if (当前说话内容.Contains(Center.Tag_notspawn))
+        // CHOICE 会生成选项并自行推进游标，不能再生成后续正文或额外推进一行。
+        if (当前说话内容.Contains(Center.Tag_notspawn) ||
+            (!string.IsNullOrEmpty(当前事件) && 当前事件.Contains(Center.Command_Choice)))
         {
             进行指令(当前事件);
             return;
@@ -141,41 +148,35 @@ public class 剧本System : MonoBehaviour
 
     public void SkipNext()
     {
-        //Debug.Log($"跳过前，当前为{已阅读}/共{已储存剧本.Length}");
-        进度条.normalizedPosition = new Vector2(0, -1f);
-        if (已阅读 >= 已储存剧本.Length-1)
-        {
+        if (isWaitingForChoice || 已储存剧本 == null || 已阅读 >= 已储存剧本.Length - 1)
             return;
-        }
-        if (当前说话内容.Contains(Center.Tag_notspawn))
-        {
-            //进行指令(当前事件);
-            //已阅读++;
+
+        // 保留指令行，由 OnClickSkip 退出循环后通过 Next 正常执行并显示选项。
+        if (当前说话内容.Contains(Center.Tag_notspawn) ||
+            (!string.IsNullOrEmpty(当前事件) && 当前事件.Contains(Center.Command_Choice)))
             return;
-        }
-        //当文本更新时?.Invoke();
-        //AudioManager.instance.播放音效("Key");
-        //Debug.Log($"跳过，当前为{已阅读}");
-        //进行指令(当前事件);
-        //生成剧本预制体();
+
         已阅读++;
-        
     }
 
     public void OnClickSkip(int num = 0)
     {
+        if (isWaitingForChoice || 已储存剧本 == null || 已阅读 >= 已储存剧本.Length) return;
         StopAutoPlay();//停止自动播放
-        Debug.Log($"跳过{已储存剧本.Length - 已阅读}条剧本");
+        Debug.Log($"跳过{已储存剧本.Length - 已阅读}条剧本，遇到选项时停止");
         GM.Ins.AM.播放音效("Key");
         int skipCount = 已储存剧本.Length - 已阅读 - num;
         for (int i = 0; i < skipCount; i++)
         {
-            //Next();
+            int previousLine = 已阅读;
             SkipNext();
+            if (已阅读 == previousLine) break;
         }
+
+        // 只执行一次停止处的内容；CHOICE 会进入等待选择状态，不再跳过选项行。
         Next();
     }
-    
+
 
     public GameObject 生成剧本预制体()
     {
@@ -473,6 +474,8 @@ public class 剧本System : MonoBehaviour
 
             if (key.Contains(Center.Command_Choice))
             {
+                isWaitingForChoice = true;
+                autoPlayElapsed = 0f;
                 选项按钮.Clear();
                 int choiceStartLine = 已阅读;// 【新增】记录当前 CHOICE 指令的行号，作为相对索引计算的基准
                 curBranchName = curPartName;// 遇到分支则存储一次
@@ -536,8 +539,8 @@ public class 剧本System : MonoBehaviour
                     string 事件 = 当前事件;
                     text.GetComponent<Button>().onClick.AddListener(() =>
                     {
+                        if (!isWaitingForChoice) return;
                         GM.Ins.AM.播放音效("Key");
-                        if (事件 != null) 进行指令(事件);
 
                         foreach (var VARIABLE in 选项按钮)
                         {
@@ -550,6 +553,12 @@ public class 剧本System : MonoBehaviour
                         // 记录选项id
                         choiceList.Add(curChoiceId);
                         Debug.Log($"<color=green>已选择选项</color>>>{curChoiceId}  当前选项总数：{choiceList.Count}");
+
+                        // 先完成旧选项的清理，再执行分支，避免覆盖分支中新生成的选项状态。
+                        选项按钮.Clear();
+                        isWaitingForChoice = false;
+                        autoPlayElapsed = 0f;
+                        if (事件 != null) 进行指令(事件);
                     });
                     选项按钮.Add(text);
                 }
@@ -1113,8 +1122,17 @@ public class 剧本System : MonoBehaviour
         大地图System.instance.GetDaytimeSystem()?.CostDaytime(1);
     }
 
+    private void OnEnable()
+    {
+        autoPlayElapsed = 0f;
+        SyncAutoPlayButton();
+    }
+
     private void OnDisable()
     {
+        // 隐藏剧情只暂停推进；玩家选择的自动模式保留到下一段剧本。
+        autoPlayElapsed = 0f;
+        isFastForward = false;
         GM.Ins?.AM.StopAll();
     }
 
@@ -1134,80 +1152,95 @@ public class 剧本System : MonoBehaviour
     
     
     // ===== 自动播放系统 ====== //
-    
-    // ==================== 状态变量 ====================
-    private bool isAutoPlay = false;       // 是否处于自动播放状态
-    private bool isFastForward = false;    // 是否处于快进状态
-    private Coroutine autoPlayCoroutine;   // 自动播放协程引用
 
-    [Header("配置参数")]
-    [SerializeField] private float normalDelay = 2.0f;     // 正常自动播放的停顿时间
-    [SerializeField] private float fastForwardDelay = 0.3f; // 快进时的停顿时间
+    private bool isAutoPlay = false;       // 玩家选择的自动模式，不因等待选项或关闭面板而清除
+    private bool isFastForward = false;
+    private bool isWaitingForChoice = false;
+    private float autoPlayElapsed;
 
-    /// <summary>
-    /// 切换自动播放状态（可绑定到 UI 的“自动”按钮）
-    /// </summary>
+    public bool IsAutoPlay => isAutoPlay;
+    public bool IsWaitingForChoice => isWaitingForChoice;
+
+    [Header("自动播放")]
+    [Tooltip("自动按钮；留空时查找子物体中已绑定 ToggleAutoPlay 的按钮")]
+    [SerializeField] private CustomAdvancedButton autoPlayButton;
+    [SerializeField] private float normalDelay = 2.0f;
+    [SerializeField] private float fastForwardDelay = 0.3f;
+
     public void ToggleAutoPlay()
     {
         isAutoPlay = !isAutoPlay;
-
-        if (isAutoPlay)
-        {
-            // 开启自动播放
-            if (autoPlayCoroutine == null)
-            {
-                autoPlayCoroutine = StartCoroutine(AutoPlayRoutine());
-            }
-            Debug.Log("【剧情系统】已开启自动播放");
-        }
-        else
-        {
-            // 暂停/关闭自动播放
-            StopAutoPlay();
-            Debug.Log("【剧情系统】已暂停自动播放");
-        }
+        autoPlayElapsed = 0f;
+        if (!isAutoPlay) isFastForward = false;
+        SyncAutoPlayButton();
+        Debug.Log(isAutoPlay ? "【剧情系统】已开启自动播放" : "【剧情系统】已关闭自动播放");
     }
 
-    /// <summary>
-    /// 设置快进状态（可绑定到 UI 按钮的 Down/Up 事件或 Toggle）
-    /// </summary>
-    /// <param name="enable">是否开启快进</param>
     public void ToggleFastForward()
     {
         isFastForward = !isFastForward;
         Debug.Log($"【剧情系统】快进状态: {isFastForward}");
     }
 
-    /// <summary>
-    /// 强制停止自动播放（例如玩家点击了选项、或者手动进行了某些打断操作）
-    /// </summary>
+    /// <summary>玩家主动关闭自动模式，同时同步按钮状态。</summary>
     public void StopAutoPlay()
     {
         isAutoPlay = false;
         isFastForward = false;
-        
-        if (autoPlayCoroutine != null)
+        autoPlayElapsed = 0f;
+        SyncAutoPlayButton();
+    }
+
+    private void SyncAutoPlayButton()
+    {
+        if (autoPlayButton == null)
         {
-            StopCoroutine(autoPlayCoroutine);
-            autoPlayCoroutine = null;
+            foreach (var button in GetComponentsInChildren<CustomAdvancedButton>(true))
+            {
+                if (CallsToggleAutoPlay(button.onClickEvent) ||
+                    (button.TryGetComponent<UnityEngine.UI.Button>(out var uiButton) &&
+                     CallsToggleAutoPlay(uiButton.onClick)))
+                {
+                    autoPlayButton = button;
+                    break;
+                }
+            }
+        }
+
+        if (autoPlayButton != null)
+        {
+            autoPlayButton.SetToggleMode(true);
+            autoPlayButton.SetIsOn(isAutoPlay);
         }
     }
 
-    /// <summary>
-    /// 自动播放核心协程
-    /// </summary>
-    private IEnumerator AutoPlayRoutine()
+    private bool CallsToggleAutoPlay(UnityEngine.Events.UnityEvent clickEvent)
     {
-        while (isAutoPlay)
+        if (clickEvent == null) return false;
+        for (int i = 0; i < clickEvent.GetPersistentEventCount(); i++)
         {
-            // 根据是否快进动态决定等待时间
-            float currentWaitTime = isFastForward ? fastForwardDelay : normalDelay;
-            yield return new WaitForSeconds(currentWaitTime);
+            if (clickEvent.GetPersistentTarget(i) == this &&
+                clickEvent.GetPersistentMethodName(i) == nameof(ToggleAutoPlay))
+                return true;
+        }
+        return false;
+    }
 
-            // 触发下一句剧情
-            Next();
+    private void Update()
+    {
+        // 使用随组件启停的计时，避免面板隐藏后残留已被 Unity 停止的协程引用。
+        if (!isAutoPlay || isWaitingForChoice || 已储存剧本 == null || 已阅读 >= 已储存剧本.Length)
+        {
+            autoPlayElapsed = 0f;
+            return;
         }
 
-        autoPlayCoroutine = null;
+        autoPlayElapsed += Time.deltaTime;
+        float delay = Mathf.Max(0f, isFastForward ? fastForwardDelay : normalDelay);
+        if (autoPlayElapsed >= delay)
+        {
+            autoPlayElapsed = 0f;
+            Next();
+        }
     }
 }

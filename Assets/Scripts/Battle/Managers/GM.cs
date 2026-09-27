@@ -33,6 +33,8 @@ using UnityEngine.SceneManagement;
         protected  void Awake()
         {
             base.Awake();
+            // 重复 GM 已由基类销毁，不能继续初始化并影响正在使用的存档。
+            if (Ins != this) return;
             DontDestroyOnLoad(this);
             DM.Init();
             AM.初始化();
@@ -134,13 +136,19 @@ using UnityEngine.SceneManagement;
         
             // 场景加载完成后执行
             // 执行黑屏加载动画
-            大地图System.instance.BlackSceneChapter(endLog);
-            大地图System.instance.打开地图(PLAYERPROFILE.currentMap);
+            if (大地图System.instance != null)
+            {
+                大地图System.instance.InitializeMap();
+                大地图System.instance.BlackSceneChapter(endLog);
+            }
         }
         public void BackToMainMapFinish()
         {
             //大地图System.instance.blackFront.SetActive(true);
-            大地图System.instance.BlackSceneChapter(endLog);
-            大地图System.instance.打开地图(PLAYERPROFILE.currentMap);
+            if (大地图System.instance != null)
+            {
+                大地图System.instance.InitializeMap();
+                大地图System.instance.BlackSceneChapter(endLog);
+            }
         }
     }

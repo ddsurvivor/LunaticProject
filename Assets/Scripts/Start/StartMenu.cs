@@ -24,7 +24,10 @@ public class StartMenu : MonoBehaviour
 
     public void OnClickStart()
     {
-        SceneManager.LoadSceneAsync(startLevelName);
+        // 返回标题后再开始游戏也必须创建全新档案，不能沿用上一次读档的数据。
+        GM.Ins.PLAYERPROFILE = new PLAYERPROFILE();
+        GM.Ins.PLAYERPROFILE.新游戏初始化数值();
+        GM.Ins.LoadPlayingScene(startLevelName);
     }
 
     public void OnClickSet()
