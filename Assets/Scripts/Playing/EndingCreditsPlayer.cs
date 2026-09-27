@@ -59,10 +59,10 @@ public class EndingCreditsPlayer : MonoBehaviour
         if (playOnEnable && !starting) Play();
     }
 
-    /// <summary>从头播放，也可绑定到 UnityEvent。隐藏的面板会自动显示。</summary>
+    /// <summary>空闲时从头播放；正在播放时忽略重复调用。隐藏的面板会自动显示。</summary>
     public void Play()
     {
-        if (starting) return;
+        if (starting || IsPlaying) return;
         starting = true;
         gameObject.SetActive(true);
         starting = false;
