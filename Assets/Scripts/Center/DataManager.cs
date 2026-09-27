@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using SkillSystem;
@@ -11,8 +12,9 @@ public class DataManager : SerializedMonoBehaviour
 {
     [OdinSerialize]
     public Dictionary<int, PLAYERPROFILE> playerprofiles = new();
-    private string savePath = Application.streamingAssetsPath + "/Datas/";
-    // 发布时改为 Application.persistentDataPath + "/Datas/";
+    // 在主线程实际读写时获取路径，避免在 MonoBehaviour 字段初始化阶段调用 Unity API。
+    public string SaveDirectory => Path.Combine(Application.persistentDataPath, "Datas");
+    private bool saveDirectoryInitialized;
     private int saveSlotCount = 10;
     public PlayerSettingsData settingsData;// 游戏设置数据，全局公用
     
@@ -25,9 +27,54 @@ public class DataManager : SerializedMonoBehaviour
     
     public void Init()
     {
-        // 测试加载
-        //PLAYERPROFILE playerprofile = JsonTool.LoadJson<PLAYERPROFILE>(savePath + "PlayerProfiles_0.json");
         LoadData();
+    }
+
+    private string GetSaveFilePath(string fileName)
+    {
+        string directory = SaveDirectory;
+        // 首次启动、直接新建存档以及运行中目录被移除时，都确保目录存在。
+        Directory.CreateDirectory(directory);
+        if (!saveDirectoryInitialized)
+        {
+            MigrateLegacySaves(directory);
+            saveDirectoryInitialized = true;
+            Debug.Log($"[DM] 存档目录：{directory}");
+        }
+        return Path.Combine(directory, fileName);
+    }
+
+    private void MigrateLegacySaves(string directory)
+    {
+        string marker = Path.Combine(directory, ".streamingassets_migrated");
+        if (File.Exists(marker)) return;
+
+        try
+        {
+            string legacyDirectory = Path.Combine(Application.streamingAssetsPath, "Datas");
+            if (Directory.Exists(legacyDirectory))
+            {
+                for (int i = 0; i < saveSlotCount; i++)
+                    CopyLegacySave(legacyDirectory, directory, $"PlayerProfiles_{i}.json");
+                CopyLegacySave(legacyDirectory, directory, "PlayerSettingsData.json");
+            }
+
+            // 防止以后删除的存档在下次启动时再次从旧目录导入。
+            File.WriteAllText(marker, "Legacy save import completed.");
+        }
+        catch (Exception e) when (e is IOException || e is UnauthorizedAccessException)
+        {
+            // 迁移失败不能阻止玩家创建新档；下次运行可再次尝试，已有目标文件不会被覆盖。
+            Debug.LogWarning($"[DM] 旧存档迁移未完成，原文件已保留：{e.Message}");
+        }
+    }
+
+    private static void CopyLegacySave(string sourceDirectory, string targetDirectory, string fileName)
+    {
+        string source = Path.Combine(sourceDirectory, fileName);
+        string target = Path.Combine(targetDirectory, fileName);
+        if (File.Exists(source) && !File.Exists(target))
+            File.Copy(source, target, false);
     }
 
     public void LoadData()
@@ -36,11 +83,11 @@ public class DataManager : SerializedMonoBehaviour
         for (int i = 0; i < saveSlotCount; i++)
         {
             int j = i;
-            PLAYERPROFILE playerprofile = JsonTool.LoadJson<PLAYERPROFILE>(savePath + $"PlayerProfiles_{j}.json");
+            PLAYERPROFILE playerprofile = JsonTool.LoadJson<PLAYERPROFILE>(GetSaveFilePath($"PlayerProfiles_{j}.json"));
             if(playerprofile == null) continue;
             playerprofiles.Add(j,playerprofile);
         }
-        settingsData = JsonTool.LoadJson<PlayerSettingsData>(savePath + "PlayerSettingsData.json");
+        settingsData = JsonTool.LoadJson<PlayerSettingsData>(GetSaveFilePath("PlayerSettingsData.json"));
         if (settingsData == null)
         {
             InitSettings();
@@ -50,7 +97,7 @@ public class DataManager : SerializedMonoBehaviour
 
     public PLAYERPROFILE LoadData(int index)
     {
-        PLAYERPROFILE playerprofile = JsonTool.LoadJson<PLAYERPROFILE>(savePath + $"PlayerProfiles_{index}.json");
+        PLAYERPROFILE playerprofile = JsonTool.LoadJson<PLAYERPROFILE>(GetSaveFilePath($"PlayerProfiles_{index}.json"));
         return playerprofile;
     }
 
@@ -60,20 +107,15 @@ public class DataManager : SerializedMonoBehaviour
             大地图System.instance.CaptureMapState();
         GM.Ins.PLAYERPROFILE.lastSaveTime = System.DateTime.Now;
         GM.Ins.PLAYERPROFILE.currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-        JsonTool.SaveJson(GM.Ins.PLAYERPROFILE,savePath + $"PlayerProfiles_{index}.json");
-        playerprofiles[index] = JsonTool.LoadJson<PLAYERPROFILE>(savePath + $"PlayerProfiles_{index}.json");
+        string path = GetSaveFilePath($"PlayerProfiles_{index}.json");
+        JsonTool.SaveJson(GM.Ins.PLAYERPROFILE, path);
+        playerprofiles[index] = JsonTool.LoadJson<PLAYERPROFILE>(path);
     }
     [Button("测试保存")]
     public void TestSave(int index)
     {
         SaveData(index);
     }
-    // [Button("ES3测试保存")]
-    // public void ES3SaveDate(int index)
-    // {
-    //     string path = savePath + $"PlayerProfiles_{index}.json";
-    //     ES3.Save("PlayerProfile", GM.Ins.PLAYERPROFILE, path);
-    // }
 
 
 
@@ -85,7 +127,7 @@ public class DataManager : SerializedMonoBehaviour
     public void InitSettings()
     {
         settingsData = new PlayerSettingsData();
-        JsonTool.SaveJson(settingsData, savePath + "PlayerSettingsData.json");
+        JsonTool.SaveJson(settingsData, GetSaveFilePath("PlayerSettingsData.json"));
     }
     /*public void ApplySettings(PlayerSettingsData settingsData)
     {
@@ -97,7 +139,7 @@ public class DataManager : SerializedMonoBehaviour
         AudioListener.volume = settingsData.masterVolume;
         
         Debug.Log("设置已应用到引擎");
-        JsonTool.SaveJson(settingsData,savePath + "PlayerSettingsData.json");
+        JsonTool.SaveJson(settingsData, GetSaveFilePath("PlayerSettingsData.json"));
     }*/
     
     
@@ -187,7 +229,7 @@ public class DataManager : SerializedMonoBehaviour
         // ==========================================
         try
         {
-            JsonTool.SaveJson(settingsData,savePath + "PlayerSettingsData.json");
+            JsonTool.SaveJson(settingsData, GetSaveFilePath("PlayerSettingsData.json"));
         }
         catch (Exception e)
         {

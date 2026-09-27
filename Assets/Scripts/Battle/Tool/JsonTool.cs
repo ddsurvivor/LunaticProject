@@ -7,6 +7,9 @@ public static class JsonTool
     public static void SaveJson<T>(T data, string filepath)
     {
         string json = JsonConvert.SerializeObject(data, Formatting.Indented);
+        string directory = Path.GetDirectoryName(filepath);
+        if (!string.IsNullOrEmpty(directory))
+            Directory.CreateDirectory(directory);
         
         using (StreamWriter sw = new StreamWriter(filepath))
         {

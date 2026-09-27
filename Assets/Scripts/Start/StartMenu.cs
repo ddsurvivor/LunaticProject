@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -10,16 +11,23 @@ public class StartMenu : MonoBehaviour
     public SavePanel savePanel;
 
     public UIPanel settingPanel;
-    // Start is called before the first frame update
-    void Start()
+
+    [Header("开始菜单 CG")]
+    [Tooltip("未通关时显示的第一张 CG 图片物体")]
+    [SerializeField] private GameObject normalCG;
+    [Tooltip("本地记录已触发 GAMEFINISH 后显示的第二张 CG 图片物体")]
+    [SerializeField] private GameObject finishedCG;
+
+    private void OnEnable()
     {
-        
+        RefreshCG();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void RefreshCG()
     {
-        
+        bool finished = LocalGameProgress.HasFinishedGame;
+        if (normalCG != null) normalCG.SetActive(!finished);
+        if (finishedCG != null) finishedCG.SetActive(finished);
     }
 
     public void OnClickStart()
@@ -47,5 +55,12 @@ public class StartMenu : MonoBehaviour
     public void OnClickContinue()
     {
         savePanel.gameObject.SetActive(true);
+    }
+
+    [Button("清除通关标记")]
+    private void ClearMark()
+    {
+        PlayerPrefs.DeleteKey("LunaticProject.GameFinished");
+        PlayerPrefs.Save();
     }
 }

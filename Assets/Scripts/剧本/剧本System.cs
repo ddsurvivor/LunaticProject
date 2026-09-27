@@ -1077,6 +1077,7 @@ public partial class 剧本System : MonoBehaviour
 
             if (key.Contains(Center.Command_Finish))
             {
+                LocalGameProgress.MarkGameFinished();
                 大地图System.instance.endingCreditsPlayer.Play();
             }
         }
