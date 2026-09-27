@@ -129,7 +129,8 @@ public class UITabController : MonoBehaviour
     public void ShowTab(int index)
     {
         if (index < 0 || index >= tabs.Count) return;
+        //gameObject.SetActive(true);
         _uiPanel.Open();
-        SwitchTab(index, false);
+        SwitchTab(index, true);
     }
 }

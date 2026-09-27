@@ -1,18 +1,20 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Audio;
+#if UNITY_EDITOR
+using UnityEditor;
+using System.IO;
+#else
 using UnityEngine.AddressableAssets;
-using UnityEngine.Networking;
 using UnityEngine.ResourceManagement.AsyncOperations;
+#endif
 
 public class AudioManager : SerializedMonoBehaviour
 {
     public float BGM音量 => GM.Ins.DM.settingsData.bgmVolume;
     public float SE音量  => GM.Ins.DM.settingsData.sfxVolume;
-    
+
     [Title("核心配置")]
     public AudioConfig audioConfig;
     public AudioMixer audioMixer;
@@ -21,9 +23,13 @@ public class AudioManager : SerializedMonoBehaviour
     [ShowInInspector, ReadOnly]
     private AudioSource bgmAudioSource;
     private GameObject seAudioSourcePool;
-    
-    // 【优化 1：Addressables 内存缓存】避免重复加载，解决 AudioClip 内存泄漏
+
+    // 两种加载方式共用音频缓存，供播放和停止接口使用。
     private Dictionary<string, AudioClip> _audioCache = new Dictionary<string, AudioClip>();
+#if !UNITY_EDITOR
+    private Dictionary<string, AsyncOperationHandle<AudioClip>> _audioHandles = new Dictionary<string, AsyncOperationHandle<AudioClip>>();
+#endif
+    private bool _isDestroyed;
 
     // 【优化 2：简单的对象池】彻底消除 new GameObject 和 Destroy 带来的 GC
     private List<AudioSource> _sePool = new List<AudioSource>();
@@ -163,45 +169,82 @@ public class AudioManager : SerializedMonoBehaviour
             }
         };
 
-        // 执行 Addressables 加载
+        // 编辑器按路径加载，Build 使用 Addressables。
         LoadAudioClipAsync(audioName, onReadyToPlay);
     }
 
-    /*
+
     private void LoadAudioClipAsync(string audioName, System.Action<AudioClip> onComplete)
     {
-        // 1. 检查缓存，如果已经加载过，直接返回结果，0 延迟
-        if (_audioCache.TryGetValue(audioName, out var handle))
+        if (_isDestroyed) return;
+
+        if (_audioCache.TryGetValue(audioName, out AudioClip cachedClip) && cachedClip != null)
         {
-            if (handle.IsDone && handle.Status == AsyncOperationStatus.Succeeded)
-            {
-                onComplete?.Invoke(handle.Result);
-            }
-            else // 正在加载中，追加回调
-            {
-                handle.Completed += h => { if (h.Status == AsyncOperationStatus.Succeeded) onComplete?.Invoke(h.Result); };
-            }
+            onComplete?.Invoke(cachedClip);
             return;
         }
 
-        // 2. 首次加载
+#if UNITY_EDITOR
+        string assetPath = audioName.Replace('\\', '/');
+        if (!assetPath.StartsWith("Assets/", System.StringComparison.OrdinalIgnoreCase))
+            assetPath = "Assets/SOUND/" + assetPath;
+
+        AudioClip clip = null;
+        if (Path.HasExtension(assetPath))
+        {
+            clip = AssetDatabase.LoadAssetAtPath<AudioClip>(assetPath);
+        }
+        else
+        {
+            foreach (string extension in new[] { ".wav", ".mp3", ".ogg" })
+            {
+                clip = AssetDatabase.LoadAssetAtPath<AudioClip>(assetPath + extension);
+                if (clip != null) break;
+            }
+        }
+
+        if (clip == null)
+        {
+            Debug.LogWarning($"[AudioManager] 无法通过资源路径加载音频: {assetPath}");
+            return;
+        }
+
+        _audioCache[audioName] = clip;
+        onComplete?.Invoke(clip);
+#else
+        // 同一音频加载期间复用句柄，避免重复增加 Addressables 引用计数。
+        if (_audioHandles.TryGetValue(audioName, out var handle))
+        {
+            handle.Completed += h =>
+            {
+                if (!_isDestroyed && h.Status == AsyncOperationStatus.Succeeded)
+                    onComplete?.Invoke(h.Result);
+            };
+            return;
+        }
+
         var newHandle = Addressables.LoadAssetAsync<AudioClip>(audioName);
-        _audioCache[audioName] = newHandle;
+        _audioHandles[audioName] = newHandle;
         
         newHandle.Completed += h =>
         {
+            if (_isDestroyed) return;
+
             if (h.Status == AsyncOperationStatus.Succeeded)
             {
+                _audioCache[audioName] = h.Result;
                 onComplete?.Invoke(h.Result);
             }
             else
             {
                 Debug.LogWarning($"[AudioManager] 无法通过 Addressables 加载音效: {audioName}");
-                _audioCache.Remove(audioName);
+                _audioHandles.Remove(audioName);
+                Addressables.Release(h);
             }
         };
+#endif
     }
-    */
+
 
     #endregion
 
@@ -233,9 +276,8 @@ public class AudioManager : SerializedMonoBehaviour
         }
 
         // 2. 停止对象池中所有正在播放该音效的组件 (包括单次播放的)
-        if (_audioCache.TryGetValue(audioName, out var handle) && handle!=null)
+        if (_audioCache.TryGetValue(audioName, out AudioClip targetClip) && targetClip != null)
         {
-            AudioClip targetClip = handle;
             foreach (var source in _sePool)
             {
                 if (source.isPlaying && source.clip == targetClip)
@@ -262,7 +304,7 @@ public class AudioManager : SerializedMonoBehaviour
         }
         循环音效字典.Clear();
     }
-    
+
     public void 停止音乐()
     {
         if (bgmAudioSource != null && bgmAudioSource.isPlaying)
@@ -275,22 +317,24 @@ public class AudioManager : SerializedMonoBehaviour
 
     private void OnDestroy()
     {
-        // 释放 Addressables 内存
+        _isDestroyed = true;
+        // 包括尚未完成的加载，每个句柄只释放一次。
         #if !UNITY_EDITOR
-        foreach (var kvp in _audioCache)
+        foreach (var kvp in _audioHandles)
         {
-            if (kvp.Value!=null)
+            if (kvp.Value.IsValid())
             {
                 Addressables.Release(kvp.Value);
             }
         }
+        _audioHandles.Clear();
         #endif
         _audioCache.Clear();
         _sePool.Clear();
         循环音效字典.Clear();
     }
-    
-    
+
+
     /// <summary>
     /// 直接传入 AudioClip 播放音效 (已整合进对象池，0 GC)
     /// </summary>
@@ -306,64 +350,5 @@ public class AudioManager : SerializedMonoBehaviour
         seSource.volume = SE音量;
         seSource.loop = false;
         seSource.Play();
-    }
-    
-    private void LoadAudioClipAsync(string audioName, System.Action<AudioClip> onComplete)
-    {
-        // 1. 检查内存缓存
-        if (_audioCache.TryGetValue(audioName, out AudioClip cachedClip) && cachedClip != null)
-        {
-            onComplete?.Invoke(cachedClip);
-            return;
-        }
-
-        // 2. 协程从 StreamingAssetsPath 加载
-        StartCoroutine(加载本地音频文件(audioName, (loadedClip) =>
-        {
-            if (loadedClip != null)
-            {
-                _audioCache[audioName] = loadedClip; // 存入缓存
-            }
-            onComplete?.Invoke(loadedClip);
-        }));
-    }
-
-    private IEnumerator 加载本地音频文件(string audioName, System.Action<AudioClip> callback)
-    {
-        string soundFolder = Path.Combine(Application.dataPath, "SOUND");
-        string[] extensions = { ".wav", ".mp3", ".ogg" };
-        
-        foreach (string ext in extensions)
-        {
-            string filePath = Path.Combine(soundFolder, audioName + ext);
-            if (File.Exists(filePath))
-            {
-                AudioType audioType = GetAudioType(ext);
-                using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip("file:///" + filePath, audioType))
-                {
-                    yield return www.SendWebRequest();
-
-                    if (www.result == UnityWebRequest.Result.Success)
-                    {
-                        AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
-                        callback?.Invoke(clip);
-                        yield break;
-                    }
-                }
-            }
-        }
-
-        Debug.LogError($"[AudioManager] 找不到音频文件: {audioName} (路径: {soundFolder})");
-        callback?.Invoke(null);
-    }
-    private AudioType GetAudioType(string extension)
-    {
-        switch (extension.ToLower())
-        {
-            case ".wav": return AudioType.WAV;
-            case ".mp3": return AudioType.MPEG;
-            case ".ogg": return AudioType.OGGVORBIS;
-            default: return AudioType.UNKNOWN;
-        }
     }
 }

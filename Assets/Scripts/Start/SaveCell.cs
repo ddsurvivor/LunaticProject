@@ -19,7 +19,7 @@ public class SaveCell : SavePanel
             if (profile == null)
                 chapterText.text = "";
             else if (string.IsNullOrWhiteSpace(profile.chapterTitle))
-                chapterText.text = "章节未知";
+                chapterText.text = "前传";
             else
                 chapterText.text = profile.chapterTitle;
                 /*chapterText.text = profile.chapterNumber > 0
