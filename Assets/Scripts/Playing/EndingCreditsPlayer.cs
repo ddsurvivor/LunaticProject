@@ -20,6 +20,12 @@ public class EndingCreditsPlayer : MonoBehaviour
     [Min(0f)] [SerializeField] private float edgePadding = 40f;
     [SerializeField] private bool playOnEnable = true;
 
+    [Header("页面淡入")]
+    [Tooltip("整体淡入时长（秒），设为 0 则立即显示")]
+    [Min(0f)] [SerializeField] private float fadeInDuration = 1f;
+    [Tooltip("控制整个片尾页面的 CanvasGroup；留空时在当前物体上自动获取或添加")]
+    [SerializeField] private CanvasGroup fadeGroup;
+
     [Header("加速")]
     [SerializeField] private bool enableFastForward = true;
     [SerializeField] private KeyCode fastForwardKey = KeyCode.LeftShift;
@@ -94,6 +100,13 @@ public class EndingCreditsPlayer : MonoBehaviour
         position.y = -edgePadding;
         textRect.anchoredPosition = position;
 
+        if (fadeGroup == null)
+        {
+            fadeGroup = GetComponent<CanvasGroup>();
+            if (fadeGroup == null) fadeGroup = gameObject.AddComponent<CanvasGroup>();
+        }
+        fadeGroup.alpha = fadeInDuration > 0f ? 0f : 1f;
+
         IsPlaying = true;
         StartBackground();
     }
@@ -107,6 +120,14 @@ public class EndingCreditsPlayer : MonoBehaviour
         {
             Skip();
             return;
+        }
+
+        // 与字幕一致使用非缩放时间，游戏暂停时也能完成淡入。
+        if (fadeGroup != null && fadeGroup.alpha < 1f)
+        {
+            fadeGroup.alpha = fadeInDuration > 0f
+                ? Mathf.MoveTowards(fadeGroup.alpha, 1f, Time.unscaledDeltaTime / fadeInDuration)
+                : 1f;
         }
 
         // 重新计算高度以适配分辨率或 Canvas 布局变化。
@@ -152,6 +173,7 @@ public class EndingCreditsPlayer : MonoBehaviour
     {
         IsPlaying = false;
         fastForwardRequested = false;
+        if (fadeGroup != null) fadeGroup.alpha = 1f;
         StopBackground();
     }
 

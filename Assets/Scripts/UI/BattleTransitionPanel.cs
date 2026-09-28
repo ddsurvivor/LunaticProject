@@ -1,193 +1,161 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI; // 使用旧版 UI 组件
-using UnityEngine.SceneManagement;
 
- public class BattleTransitionPanel : MonoBehaviour
+/// <summary>转场表现由此组件提供，所有加载协程统一由常驻 GM 执行。</summary>
+public class BattleTransitionPanel : MonoBehaviour
 {
-    //public static BattleTransitionManager Instance { get; private set; }
-
-    [Header("UI 元素引用")] 
-    [SerializeField]
-    private Image backgroundImage;
-    [SerializeField]private List<Sprite> images = new();
-    [Tooltip("用于控制黑屏渐变的面版，建议挂载 CanvasGroup 组件")]
+    [Header("UI 元素引用")]
+    [SerializeField] private UnityEngine.UI.Image backgroundImage;
+    [SerializeField] private List<Sprite> images = new List<Sprite>();
     [SerializeField] private CanvasGroup fadeCanvasGroup;
-    [Tooltip("整个加载界面的根节点 GameObject")]
     [SerializeField] private GameObject loadingPanel;
-    [Tooltip("进度条图片，Image Type 需设置为 Filled")]
-    [SerializeField] private Image progressBar;
+    [SerializeField] private UnityEngine.UI.Image progressBar;
+    [SerializeField] private UnityEngine.UI.Image progressBar2;
+    [SerializeField] private UnityEngine.UI.Text progressText;
 
-    [SerializeField]
-    private Image progressBar2;
-
-    [Tooltip("提示文本或百分比文本（使用旧版 Text）")]
-    [SerializeField] private Text progressText;
-
-    [Header("转场配置")]
-    [Tooltip("黑屏渐入/渐出的持续时间（秒）")]
-    [SerializeField] private float fadeDuration = 1.0f;
-    [Tooltip("手动的假加载持续时间（秒）")]
-    [SerializeField] private float fakeLoadingDuration = 2.0f;
-    
-    
+    [Header("战斗转场配置")]
+    [Min(0f)] [SerializeField] private float fadeDuration = 1f;
+    [Min(0f)] [SerializeField] private float fakeLoadingDuration = 2f;
 
     private void Awake()
     {
-        InitUIState();
+        Hide();
     }
 
-    /// <summary>
-    /// 初始化UI状态
-    /// </summary>
-    private void InitUIState()
+    // 保留已有 Inspector / 代码绑定，转交 GM 防止并行加载。
+    public void TransitionToBattle(string sceneName)
     {
-        if (fadeCanvasGroup != null) fadeCanvasGroup.alpha = 0f;
-        if (loadingPanel != null) loadingPanel.SetActive(false);
+        GM.Ins.StartBattle(sceneName);
     }
 
-    /// <summary>
-    /// 外部调用的主入口：开始转场去战斗场景
-    /// </summary>
-    /// <param name="battleSceneName">目标战斗场景的名称</param>
-    public void TransitionToBattle(string battleSceneName)
+    public void TransitionEndBattle(string sceneName, string endLog)
     {
-        if(images.Count>0) backgroundImage.sprite = images[Random.Range(0, images.Count)];// 随机选择一张背景图
-        StartCoroutine(TransitionRoutine(battleSceneName));
-    }
-    public void TransitionEndBattle(string battleSceneName, string endLog)
-    {
-        StartCoroutine(TransitionRoutine(battleSceneName, true, endLog));
+        GM.Ins.ReturnFromBattle(sceneName, endLog);
     }
 
-    private IEnumerator TransitionRoutine(string battleSceneName, bool isQuitBattle = false, string endLog = "")
+    public IEnumerator RunTransition(string sceneName, bool showLoading, float normalFadeDuration, Action onLoaded)
     {
+        EnsureFadeUI();
         fadeCanvasGroup.gameObject.SetActive(true);
-        // ==========================================
-        // 1. 黑色背景渐入 (Fade In)
-        // ==========================================
-        yield return StartCoroutine(Fade(1f));
-
-        // ==========================================
-        // 2. 显示加载界面并重置进度条
-        // ==========================================
-        if (loadingPanel != null) loadingPanel.SetActive(true);
-        if (progressBar != null) progressBar.fillAmount = 0f;
-        if (progressBar2 != null)progressBar2.fillAmount = 0f;
-        if (progressText != null) progressText.text = "0%";
-
-        // ==========================================
-        // 3. 异步加载战斗场景（先不激活）
-        // ==========================================
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(battleSceneName);
-        if (asyncLoad == null)
-        {
-            Debug.LogError($"[BattleTransition] 无法加载场景: {battleSceneName}，请检查 Build Settings。");
-            yield break;
-        }
-        // 当此项为 false 时，场景加载到 90% (0.9) 就会暂停，等待手动激活
-        asyncLoad.allowSceneActivation = false;
-
-        // ==========================================
-        // 4. 手动控制时长的假进度条逻辑
-        // ==========================================
-        float elapsed = 0f;
-        while (elapsed < fakeLoadingDuration || asyncLoad.progress < 0.9f)
-        {
-            elapsed += Time.deltaTime;
-            
-            // 计算时间带来的“假进度” (0 ~ 1)
-            float timeProgress = elapsed / fakeLoadingDuration;
-            // 实际的加载进度 (asyncLoad.progress 最大为 0.9，所以映射到 0 ~ 1)
-            float realProgress = asyncLoad.progress / 0.9f; 
-            
-            // 取两者的较小值，确保即使实际加载完了，也会等足手动设置的时长
-            float currentProgress = Mathf.Min(timeProgress, realProgress, 1f);
-
-            // 更新 UI
-            if (progressBar != null) progressBar.fillAmount = currentProgress;
-            if (progressBar2 != null)progressBar2.fillAmount = currentProgress;
-            if (progressText != null) progressText.text = $"{(currentProgress * 100f):F0}%";
-
-            yield return null;
-        }
-
-        // 强行平滑到 100% 并稍微停顿，视觉体验更佳
-        if (progressBar != null) progressBar.fillAmount = 1f;
-        if (progressBar2 != null)progressBar2.fillAmount = 1f;
-        if (progressText != null) progressText.text = "100%";
-        yield return new WaitForSeconds(0.1f);
-
-        // ==========================================
-        // 5. 允许激活新场景并等待加载完成
-        // ==========================================
-        asyncLoad.allowSceneActivation = true;
-        while (!asyncLoad.isDone)
-        {
-            yield return null;
-        }
-
-        // ==========================================
-        // 6. 关闭加载界面
-        // ==========================================
+        fadeCanvasGroup.blocksRaycasts = true;
+        fadeCanvasGroup.alpha = 0f;
         if (loadingPanel != null) loadingPanel.SetActive(false);
-
-        if (isQuitBattle)
+        float duration = showLoading ? fadeDuration : normalFadeDuration;
+        AsyncOperation operation = null;
+        try
         {
-            GM.Ins.BackToMainMapFinish();
+            yield return Fade(1f, duration);
+            if (showLoading)
+            {
+                if (backgroundImage != null && images != null && images.Count > 0)
+                    backgroundImage.sprite = images[UnityEngine.Random.Range(0, images.Count)];
+                if (loadingPanel != null) loadingPanel.SetActive(true);
+                SetProgress(0f);
+            }
+
+            operation = TryLoadScene(sceneName);
+            if (operation == null)
+            {
+                yield return Fade(0f, duration);
+                yield break;
+            }
+
+            operation.allowSceneActivation = false;
+            float elapsed = 0f;
+            float minimumDuration = showLoading ? Mathf.Max(0f, fakeLoadingDuration) : 0f;
+            while (elapsed < minimumDuration || operation.progress < 0.9f)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                if (showLoading)
+                {
+                    float timeProgress = minimumDuration > 0f ? elapsed / minimumDuration : 1f;
+                    SetProgress(Mathf.Min(timeProgress, operation.progress / 0.9f, 1f));
+                }
+                yield return null;
+            }
+
+            if (showLoading)
+            {
+                SetProgress(1f);
+                yield return new WaitForSecondsRealtime(0.1f);
+            }
+            operation.allowSceneActivation = true;
+            while (!operation.isDone) yield return null;
+            // 让新场景 Start 完成，再初始化地图和剧情；全程仍有黑幕遮挡。
+            yield return null;
+            if (loadingPanel != null) loadingPanel.SetActive(false);
+            onLoaded?.Invoke();
+            yield return Fade(0f, duration);
         }
-        // ==========================================
-        // 7. 黑色背景淡出 (Fade Out)
-        // ==========================================
-        yield return StartCoroutine(Fade(0f));
-
-        // ==========================================
-        // 8. 场景完全加载并恢复后，通知战斗管理器
-        // ==========================================
-        
-        if (!isQuitBattle)
+        finally
         {
-            NotifyBattleManager();
+            if (operation != null && !operation.isDone) operation.allowSceneActivation = true;
+            Hide();
         }
     }
 
-    /// <summary>
-    /// 控制 CanvasGroup 变暗或变透明的通用协程
-    /// </summary>
-    private IEnumerator Fade(float targetAlpha)
+    private AsyncOperation TryLoadScene(string sceneName)
     {
-        if (fadeCanvasGroup == null) yield break;
-
-        float startAlpha = fadeCanvasGroup.alpha;
-        float elapsed = 0f;
-
-        while (elapsed < fadeDuration)
+        try
         {
-            elapsed += Time.deltaTime;
-            fadeCanvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsed / fadeDuration);
+            return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneName);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError($"无法加载场景 {sceneName}：{exception.Message}", this);
+            return null;
+        }
+    }
+
+    private void SetProgress(float value)
+    {
+        if (progressBar != null) progressBar.fillAmount = value;
+        if (progressBar2 != null) progressBar2.fillAmount = value;
+        if (progressText != null) progressText.text = $"{value * 100f:F0}%";
+    }
+
+    private IEnumerator Fade(float target, float duration)
+    {
+        float start = fadeCanvasGroup.alpha;
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            fadeCanvasGroup.alpha = Mathf.Lerp(start, target, elapsed / duration);
             yield return null;
         }
-
-        fadeCanvasGroup.alpha = targetAlpha;
+        fadeCanvasGroup.alpha = target;
     }
 
-    /// <summary>
-    /// 寻找新场景中的 BattleManager 并发送转场结束通知
-    /// </summary>
-    private void NotifyBattleManager()
+    private void EnsureFadeUI()
     {
-        // 此处假设新场景中存在带有特定命名或单例的 BattleManager
-        // 采用 FindObjectOfType 进行解耦查找（也可以替换为你项目中的全局事件系统）
-        BattleManager battleManager = FindObjectOfType<BattleManager>();
-        if (battleManager != null)
+        if (fadeCanvasGroup != null) return;
+        // 没有预设战斗面板的场景也能使用普通黑屏转场。
+        var canvasObject = new GameObject("SceneTransitionCanvas", typeof(RectTransform),
+            typeof(Canvas), typeof(UnityEngine.UI.GraphicRaycaster));
+        canvasObject.transform.SetParent(transform, false);
+        var canvas = canvasObject.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = short.MaxValue;
+        var black = new GameObject("Black", typeof(RectTransform), typeof(UnityEngine.UI.Image), typeof(CanvasGroup));
+        black.transform.SetParent(canvasObject.transform, false);
+        var rect = black.GetComponent<RectTransform>();
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = rect.offsetMax = Vector2.zero;
+        black.GetComponent<UnityEngine.UI.Image>().color = Color.black;
+        fadeCanvasGroup = black.GetComponent<CanvasGroup>();
+    }
+
+    private void Hide()
+    {
+        if (loadingPanel != null) loadingPanel.SetActive(false);
+        if (fadeCanvasGroup != null)
         {
-            battleManager.StartBattle();
+            fadeCanvasGroup.alpha = 0f;
+            fadeCanvasGroup.blocksRaycasts = false;
         }
-        else
-        {
-            Debug.LogWarning("[BattleTransition] 转场已完成，但在新场景中未找到 BattleManager。");
-        }
-        fadeCanvasGroup.gameObject.SetActive(false);
     }
 }

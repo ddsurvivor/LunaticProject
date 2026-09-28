@@ -122,14 +122,13 @@ public class UIManager : SerializedMonoBehaviour
     public void OnClickRestartButton()
     {
         // 重新加载当前场景
-        UnityEngine.SceneManagement.SceneManager
-            .LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+        GM.Ins.ReloadCurrentScene();
     }
 
     public void OnClickQuit()
     {
         // 加载开始场景
-        UnityEngine.SceneManagement.SceneManager.LoadScene("StartScene");
+        GM.Ins.LoadScene("StartScene");
     }
 
     /// <summary>

@@ -54,97 +54,120 @@ using UnityEngine.SceneManagement;
             }
         }
 
-        // public void StartBattle(string battleScene, string endLog)
-        // {
-        //     this.battleScene = battleScene;
-        //     this.endLog = endLog;
-        //     SceneManager.LoadScene(battleScene);
-        //     PlayingSystem.特殊剧情 = "";
-        // }
-        
-        public void StartBattle(string battleScene, string endLog, int setting = 0)
+        /// <summary>统一普通切场景入口，可直接绑定 UnityEvent(string)。</summary>
+        public void LoadScene(string sceneName)
         {
-            this.battleScene = battleScene;
-            this.endLog = endLog;
-            this.battleSetting = setting;
-            GM.Ins.AM.StopAll();
-            大地图System.instance.battleStartUIPanel.PlayBattleStartAnimation(1f);
-            DOVirtual.DelayedCall(0.7f, () =>
-            {
-                battleTransitionPanel.TransitionToBattle(battleScene);
-            });
-            // 场景加载完成后执行
-            PlayingSystem.特殊剧情 = "";
-            //StartCoroutine(StartBattleCoroutine(battleScene));
+            LoadPlayingScene(sceneName);
         }
 
-        private IEnumerator StartBattleCoroutine(string sceneName, Action onComplete = null)
-        {
-            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
+        public bool IsTransitioning { get; private set; }
 
-            while (!asyncLoad.isDone)
+        [Header("普通场景过渡")]
+        [Min(0f)] [SerializeField] private float sceneFadeDuration = 0.5f;
+
+        public bool CanLoadScene(string sceneName)
+        {
+            if (IsTransitioning) return false;
+            if (string.IsNullOrWhiteSpace(sceneName) || !Application.CanStreamedLevelBeLoaded(sceneName))
             {
-                // 可选：显示加载进度
-                float progress = Mathf.Clamp01(asyncLoad.progress / 0.9f);
-                Debug.Log($"加载进度: {progress * 100}%");
-                yield return null;
+                Debug.LogError($"场景“{sceneName}”不可加载，请检查 Build Settings。", this);
+                return false;
             }
-
-            // 场景加载完成后执行
-            PlayingSystem.特殊剧情 = "";
-            onComplete?.Invoke();
+            return true;
         }
 
-        public void StartBattle(string battleScene)
+        public void StartBattle(string sceneName, string storyAfterBattle, int setting = 0)
         {
-            this.battleScene = battleScene;
-            this.endLog = "";
-            SceneManager.LoadScene(battleScene);
+            if (!CanLoadScene(sceneName)) return;
+            battleScene = sceneName;
+            endLog = storyAfterBattle;
+            battleSetting = setting;
+            AM.StopAll();
             PlayingSystem.特殊剧情 = "";
+            bool hasIntro = 大地图System.instance != null && 大地图System.instance.battleStartUIPanel != null;
+            // 在播放入场动画前锁定，防止延迟期间反复点击创建多个切换请求。
+            IsTransitioning = true;
+            if (hasIntro) 大地图System.instance.battleStartUIPanel.PlayBattleStartAnimation(1f);
+            StartCoroutine(TransitionRoutine(sceneName, true, "", hasIntro ? 0.7f : 0f));
         }
-        public  void BattleEnd()
+
+        public void StartBattle(string sceneName)
         {
-            /*DOVirtual.DelayedCall(0.7f, () =>
-            {
-                battleTransitionPanel.TransitionEndBattle("Playing", endLog);
-            });*/
-            StartCoroutine(LoadSceneCoroutine("Playing"));
+            StartBattle(sceneName, "", 0);
+        }
+
+        public void BattleEnd()
+        {
+            ReturnFromBattle("Playing", endLog);
+        }
+
+        public void ReturnFromBattle(string sceneName, string storyAfterBattle)
+        {
+            if (!CanLoadScene(sceneName)) return;
+            IsTransitioning = true;
+            StartCoroutine(TransitionRoutine(sceneName, false, storyAfterBattle));
         }
 
         public void LoadPlayingScene(string sceneName)
         {
+            if (string.IsNullOrWhiteSpace(sceneName)) sceneName = "Playing";
+            if (!CanLoadScene(sceneName)) return;
             endLog = "";
             battleScene = "";
-            if(sceneName== "") sceneName = "Playing";// 如果没有指定场景，则默认加载Playing场景
-            StartCoroutine(LoadSceneCoroutine(sceneName));
+            IsTransitioning = true;
+            bool isBattle = sceneName.IndexOf("BATTLE", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            sceneName.IndexOf("Boss", StringComparison.OrdinalIgnoreCase) >= 0;
+            StartCoroutine(TransitionRoutine(sceneName, isBattle, ""));
         }
-        
-        
-        IEnumerator LoadSceneCoroutine(string sceneName)
+
+        public void ReloadCurrentScene()
         {
-            // 异步加载场景
-            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
-        
-            // 等待场景加载完成
-            while (!asyncLoad.isDone)
+            string sceneName = SceneManager.GetActiveScene().name;
+            if (!CanLoadScene(sceneName)) return;
+            IsTransitioning = true;
+            StartCoroutine(TransitionRoutine(sceneName, FindObjectOfType<BattleManager>() != null, ""));
+        }
+
+        private IEnumerator TransitionRoutine(string sceneName, bool showLoading, string storyAfterBattle, float delay = 0f)
+        {
+            try
             {
-                // 可以在这里显示加载进度
-                float progress = Mathf.Clamp01(asyncLoad.progress / 0.9f);
-                Debug.Log($"加载进度: {progress * 100}%");
-                yield return null;
+                if (delay > 0f) yield return new WaitForSecondsRealtime(delay);
+                if (battleTransitionPanel == null)
+                    battleTransitionPanel = gameObject.AddComponent<BattleTransitionPanel>();
+                // 已有转场 UI 应随 GM 常驻，保留它的 Canvas 层级。
+                if (!battleTransitionPanel.transform.IsChildOf(transform))
+                {
+                    var root = battleTransitionPanel.transform.root.gameObject;
+                    DontDestroyOnLoad(root);
+                }
+
+                bool loaded = false;
+                yield return battleTransitionPanel.RunTransition(sceneName, showLoading, sceneFadeDuration, () =>
+                {
+                    loaded = true;
+                    // 暂停/慢速状态属于上一场景；淡出前恢复新场景的正常时间。
+                    Time.timeScale = 1f;
+                    if (大地图System.instance != null)
+                    {
+                        大地图System.instance.InitializeMap();
+                        大地图System.instance.BlackSceneChapter(storyAfterBattle);
+                    }
+                });
+                if (loaded)
+                {
+                    var manager = FindObjectOfType<BattleManager>();
+                    if (manager != null) manager.StartBattle();
+                }
             }
-        
-            // 场景加载完成后执行
-            // 执行黑屏加载动画
-            if (大地图System.instance != null)
+            finally
             {
-                大地图System.instance.InitializeMap();
-                大地图System.instance.BlackSceneChapter(endLog);
+                IsTransitioning = false;
             }
         }
+
         public void BackToMainMapFinish()
         {
-            //大地图System.instance.blackFront.SetActive(true);
             if (大地图System.instance != null)
             {
                 大地图System.instance.InitializeMap();

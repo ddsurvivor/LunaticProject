@@ -259,7 +259,7 @@ public class 大地图System : SerializedMonoBehaviour
     public void OnClickQuit()
     {
         // 加载开始场景
-        UnityEngine.SceneManagement.SceneManager.LoadScene("StartScene");
+        GM.Ins.LoadScene("StartScene");
     }
 
     public void BlackSceneChapter(string endLog)

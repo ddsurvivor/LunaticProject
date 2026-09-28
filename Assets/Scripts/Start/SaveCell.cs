@@ -47,6 +47,7 @@ public class SaveCell : SavePanel
             return;
         }
 
+        if (!GM.Ins.CanLoadScene(string.IsNullOrWhiteSpace(playerprofile.currentScene) ? "Playing" : playerprofile.currentScene)) return;
         GM.Ins.PLAYERPROFILE = playerprofile;
         GM.Ins.LoadPlayingScene(playerprofile.currentScene);
     }
