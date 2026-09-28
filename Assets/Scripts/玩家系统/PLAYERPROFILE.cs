@@ -39,6 +39,49 @@ public class PLAYERPROFILE
     public string chapterTitle;
     public string currentStoryId;
 
+    // 实际读取的表格文件名，与用于显示的剧情标题分开保存。
+    public string currentScriptFile;
+
+    public static int GetChapterNumberFromScript(string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName)) return 0;
+        string name = System.IO.Path.GetFileName(fileName.Replace('\\', '/'));
+        var match = System.Text.RegularExpressions.Regex.Match(name, @"^EXC([1-4])",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        return match.Success ? match.Groups[1].Value[0] - '0' : 0;
+    }
+
+    private static string GetChapterName(int number)
+    {
+        switch (number)
+        {
+            case 1: return "第一章";
+            case 2: return "第二章";
+            case 3: return "第三章";
+            case 4: return "第四章";
+            default: return "";
+        }
+    }
+
+    public void RecordScriptChapter(string fileName)
+    {
+        currentScriptFile = fileName;
+        int number = GetChapterNumberFromScript(fileName);
+        if (number == 0) return; // 非 EXC 支线保留已知章节。
+        chapterNumber = number;
+        chapterTitle = GetChapterName(number);
+    }
+
+    public string GetSaveChapterTitle()
+    {
+        int number = GetChapterNumberFromScript(currentScriptFile);
+        // 兼容旧存档：剧情标识中确实存了 EXC 文件名时，也能推断章节。
+        if (number == 0) number = GetChapterNumberFromScript(currentStoryId);
+        if (number != 0) return GetChapterName(number);
+        return string.IsNullOrWhiteSpace(chapterTitle) ? GetChapterName(chapterNumber) : chapterTitle;
+    }
+
+
     // 插件仓库
     public List<int> componentInventory = new List<int>();
     // private void Awake()
