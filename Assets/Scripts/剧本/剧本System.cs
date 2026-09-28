@@ -1071,7 +1071,7 @@ public partial class 剧本System : MonoBehaviour
                 if (prams.Length >= 1)
                 {
                     string sceneName = prams[0];
-                    UnityEngine.SceneManagement.SceneManager.LoadScene(sceneName);
+                    GM.Ins.LoadScene(sceneName);
                 }
             }
 

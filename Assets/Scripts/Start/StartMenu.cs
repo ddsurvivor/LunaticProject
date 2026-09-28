@@ -32,6 +32,7 @@ public class StartMenu : MonoBehaviour
 
     public void OnClickStart()
     {
+        if (!GM.Ins.CanLoadScene(string.IsNullOrWhiteSpace(startLevelName) ? "Playing" : startLevelName)) return;
         // 返回标题后再开始游戏也必须创建全新档案，不能沿用上一次读档的数据。
         GM.Ins.PLAYERPROFILE = new PLAYERPROFILE();
         GM.Ins.PLAYERPROFILE.新游戏初始化数值();

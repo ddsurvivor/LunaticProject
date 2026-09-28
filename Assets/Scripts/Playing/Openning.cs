@@ -74,7 +74,7 @@ public class Openning : MonoBehaviour
         yield return textOutSeq.WaitForCompletion();
 
         // 6. 跳转场景
-        SceneManager.LoadScene(nextSceneName);
+        GM.Ins.LoadScene(nextSceneName);
     }
     IEnumerator PlaySequence()
     {
@@ -106,7 +106,7 @@ public class Openning : MonoBehaviour
         yield return textOutSeq.WaitForCompletion();
 
         // 6. 跳转场景
-        SceneManager.LoadScene(nextSceneName);
+        GM.Ins.LoadScene(nextSceneName);
     }
 
     IEnumerator FadeImage(Image img, float from, float to, float duration)

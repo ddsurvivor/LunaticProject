@@ -28,7 +28,7 @@ public class 进度System : MonoBehaviour
     背包系统.当前背包=ES3.Load<Dictionary<string, int>>("Bag",位置);
     if (重载)
     {
-      SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+      GM.Ins.ReloadCurrentScene();
     }
 
   }
