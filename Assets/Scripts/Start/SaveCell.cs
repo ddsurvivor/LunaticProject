@@ -15,17 +15,7 @@ public class SaveCell : SavePanel
         timeText.text = profile == null ? "空存档" : profile.lastSaveTime.ToString("yyyy-MM-dd HH:mm:ss");
 
         if (chapterText != null)
-        {
-            if (profile == null)
-                chapterText.text = "";
-            else if (string.IsNullOrWhiteSpace(profile.chapterTitle))
-                chapterText.text = "前传";
-            else
-                chapterText.text = profile.chapterTitle;
-                /*chapterText.text = profile.chapterNumber > 0
-                    ? $"第{profile.chapterNumber}章  {profile.chapterTitle}"
-                    : profile.chapterTitle;*/
-        }
+            chapterText.text = profile == null ? "" : profile.GetSaveChapterTitle();
 
         if (storyIdText != null)
             storyIdText.text = profile == null || string.IsNullOrWhiteSpace(profile.currentStoryId)

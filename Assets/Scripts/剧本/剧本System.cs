@@ -250,6 +250,8 @@ public partial class 剧本System : MonoBehaviour
                         数据[i - 2][2] = 合并内容;
                     }
                 }
+                if (GM.Ins != null && GM.Ins.PLAYERPROFILE != null)
+                    GM.Ins.PLAYERPROFILE.RecordScriptChapter(文件名);
                 return 数据;
             }
             catch (IndexOutOfRangeException e)
@@ -965,13 +967,17 @@ public partial class 剧本System : MonoBehaviour
                 if (prams.Length >= 3)
                 {
                     string title = prams[0];
-                    GM.Ins.PLAYERPROFILE.chapterTitle = title;
-                    // Chapter maps use names such as CHAPTER-1.
-                    var chapterMatch = Regex.Match(GM.Ins.PLAYERPROFILE.currentMap ?? "", @"CHAPTER-(\d+)");
-                    if (chapterMatch.Success && int.TryParse(chapterMatch.Groups[1].Value, out int chapterNumber))
-                        GM.Ins.PLAYERPROFILE.chapterNumber = chapterNumber;
-                    else if (GM.Ins.PLAYERPROFILE.chapterNumber == 0)
-                        GM.Ins.PLAYERPROFILE.chapterNumber = 1;
+                    // EXC 文件名确定的章节优先；其它剧本仍使用原来的章节指令。
+                    if (PLAYERPROFILE.GetChapterNumberFromScript(GM.Ins.PLAYERPROFILE.currentScriptFile) == 0)
+                    {
+                        GM.Ins.PLAYERPROFILE.chapterTitle = title;
+                        // Chapter maps use names such as CHAPTER-1.
+                        var chapterMatch = Regex.Match(GM.Ins.PLAYERPROFILE.currentMap ?? "", @"CHAPTER-(\d+)");
+                        if (chapterMatch.Success && int.TryParse(chapterMatch.Groups[1].Value, out int chapterNumber))
+                            GM.Ins.PLAYERPROFILE.chapterNumber = chapterNumber;
+                        else if (GM.Ins.PLAYERPROFILE.chapterNumber == 0)
+                            GM.Ins.PLAYERPROFILE.chapterNumber = 1;
+                    }
                     //int.TryParse(prams[0], out int result);
                     float.TryParse(prams[1], out float fadeTime);
                     float.TryParse(prams[1], out float duration);
