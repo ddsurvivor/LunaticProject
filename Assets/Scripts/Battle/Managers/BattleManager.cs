@@ -190,11 +190,8 @@ public class BattleManager : MonoBehaviour
             {
                 if (buffPack.target == SkillTarget.Self)
                 {
-                    if (GameConst.CheckRate(buffPack.rate))
-                    {
-                        buffManager.AddBuff(attacker.unitAttrCenter, buffPack.buffType
-                            , buffPack.stacks, buffPack.barrierHealth, buffPack.retaliationTurns);
-                    }
+                    // 施法者状态在目标循环外只结算一次。
+                    continue;
                 }
                 else if (buffPack.target == SkillTarget.All)
                 {
@@ -205,7 +202,7 @@ public class BattleManager : MonoBehaviour
                     }
                 }
                 else if (buffPack.target == SkillTarget.EnemyAll ||
-                         buffPack.target == SkillTarget.Enemy)
+                         buffPack.target == SkillTarget.Enemy || buffPack.target == SkillTarget.FarthestEnemy)
                 {
                     if (target.isPlayerPiece == attacker.isPlayerPiece) continue;
                     if (GameConst.CheckRate(buffPack.rate))
@@ -214,7 +211,7 @@ public class BattleManager : MonoBehaviour
                             , buffPack.stacks, buffPack.barrierHealth, buffPack.retaliationTurns);
                     }
                 }
-                else if (buffPack.target == SkillTarget.Ally)
+                else if (buffPack.target == SkillTarget.Ally || buffPack.target == SkillTarget.AllyBody)
                 {
                     if (target.isPlayerPiece != attacker.isPlayerPiece) continue;
                     if (GameConst.CheckRate(buffPack.rate))
@@ -248,6 +245,13 @@ public class BattleManager : MonoBehaviour
 
             // 判定夹击
             CheckFlankAttack(attacker, target);
+        }
+
+        foreach (var buffPack in skillPack.buffPacks)
+        {
+            if (buffPack.target == SkillTarget.Self && GameConst.CheckRate(buffPack.rate))
+                buffManager.AddBuff(attacker.unitAttrCenter, buffPack.buffType,
+                    buffPack.stacks, buffPack.barrierHealth, buffPack.retaliationTurns);
         }
 
         // 操作记录系统

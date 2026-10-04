@@ -24,6 +24,16 @@ public class SelfExploreSummonPiece : MonoBehaviour
     public void ExecuteAI()
     {
         isActionFinished = false;
+        if (pieceController == null || pieceController.isDead) return;
+        var unit = pieceController.unitAttrCenter;
+        var buffs = BattleScene.Ins.BM.buffManager;
+        buffs.ProcessBuffs(unit);
+        if (unit.pc.isDead || unit.GetBuffStacks(BuffType.Stun) != 0 ||
+            unit.GetBuffStacks(BuffType.Bind) != 0)
+        {
+            FinishAction();
+            return;
+        }
 
         // 1. 搜寻最近的敌人棋子
         GameObject targetEnemy = FindNearestEnemy();
@@ -35,13 +45,19 @@ public class SelfExploreSummonPiece : MonoBehaviour
             return;
         }
 
+        if (!buffs.OnAction(unit) || unit.GetBuffStacks(BuffType.Bind) != 0)
+        {
+            FinishAction();
+            return;
+        }
+
         // 2. 计算朝向敌人的移动目标点（受最大移动范围限制）
         Vector3 targetPosition = CalculateMovementTarget(targetEnemy.transform.position);
         
-        bool canMove = BattleScene.Ins.BM.moveManager.PreviewAIMove(this.gameObject, targetPosition, moveRange);
+        bool canMove = BattleScene.Ins.BM.moveManager.PreviewAIMove(this.gameObject, targetPosition, EffectiveMoveRange);
 
         // 5. 最终执行位移
-        if(!canMove) return;
+        if (!canMove) { FinishAction(); return; }
         
         // 3. 【动画控制】开始移动，激活跑步/移动动画
         if (animator != null)
@@ -86,7 +102,9 @@ public class SelfExploreSummonPiece : MonoBehaviour
         foreach (var piece in BattleScene.Ins.BM.AIController.pieces)
         {
             // 过滤掉已被销毁的、或者和自己同阵营（玩家阵营）的棋子
-            if (piece == null || piece.isPlayerPiece) continue;
+            if (piece == null || piece.isDead || !piece.gameObject.activeInHierarchy ||
+                piece.isPlayerPiece == pieceController.isPlayerPiece ||
+                !BuffManager.CanTarget(pieceController, piece)) continue;
 
             float distance = Vector3.Distance(transform.position, piece.transform.position);
             if (distance < minDistance)
@@ -123,7 +141,7 @@ public class SelfExploreSummonPiece : MonoBehaviour
         // 4. 取【最大可移动距离】和【自身移动范围】的最小值，作为本次实际移动的距离
         // 如果移动范围是 3 米，最大可走 4 米 -> 只走 3 米（被行动力限制）
         // 如果移动范围是 3 米，最大可走 1 米 -> 只走 1 米（被停止距离限制，刚好停在敌人面前）
-        float actualMoveDistance = Mathf.Min(moveRange, maxMovableDistance);
+        float actualMoveDistance = Mathf.Min(EffectiveMoveRange, maxMovableDistance);
 
         // 5. 计算出最终坐标
         return currentPos + direction * actualMoveDistance;
@@ -183,5 +201,10 @@ public class SelfExploreSummonPiece : MonoBehaviour
     private void FinishAction()
     {
         isActionFinished = true;
+        if (pieceController != null)
+            BattleScene.Ins.BM.buffManager.ProcessBuffDurations(pieceController.unitAttrCenter);
     }
+
+    private float EffectiveMoveRange => moveRange * Mathf.Max(0f,
+        pieceController.unitAttrCenter.buffAttrDic[BuffAttrType.MoveRangePercent]) / 100f;
 }

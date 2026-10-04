@@ -65,7 +65,8 @@ public class BuffManager : MonoBehaviour
     public void AddBuff(UnitAttrCenter unit, BuffType buff, int stack = 1,
         int barrierHealth = 0, int retaliationTurns = 0)
     {
-        if (stack == 0 || stack < -1) return;
+        if (unit == null || unit.pc == null || unit.pc.isDead || stack == 0 || stack < -1 ||
+            !Enum.IsDefined(typeof(BuffType), buff)) return;
         var existingBuff = unit.buffStates.Find(b => b.buffType == buff);
         if (existingBuff != null)
         {
@@ -95,6 +96,7 @@ public class BuffManager : MonoBehaviour
     // 移除buff
     public void RemoveBuff(UnitAttrCenter unit, BuffType buff, int stack = 1)
     {
+        if (unit == null || stack == 0 || stack < -1) return;
         var existingBuff = unit.buffStates.Find(b => b.buffType == buff);
         if (existingBuff != null)
         {
@@ -104,14 +106,38 @@ public class BuffManager : MonoBehaviour
             }
 
 
-            existingBuff.stacks = stack == -1 ? 0 : existingBuff.stacks - stack;
-            if (existingBuff.stacks <= 0)
+            existingBuff.stacks = stack == -1 ? 0 : Mathf.Max(0, existingBuff.stacks - stack);
+            if (existingBuff.stacks == 0 && existingBuff.sources.Count == 0)
             {
                 unit.buffStates.Remove(existingBuff);
                 ApplyBuff(buff, unit, false);
             }
             RefreshEnemyBuffs(unit);
         }
+    }
+
+    // 掩体等来源独立持有状态，离开来源时保留技能施加的持续层数。
+    public void AddBuffSource(UnitAttrCenter unit, BuffType buff, object source)
+    {
+        if (unit == null || unit.pc == null || source == null || unit.pc.isDead ||
+            !Enum.IsDefined(typeof(BuffType), buff)) return;
+        var state = unit.buffStates.Find(b => b.buffType == buff);
+        if (state == null)
+        {
+            state = new BuffState(buff, 0);
+            unit.buffStates.Add(state);
+            ApplyBuff(buff, unit);
+        }
+        state.sources.Add(source);
+        RefreshEnemyBuffs(unit);
+    }
+
+    public void RemoveBuffSource(UnitAttrCenter unit, BuffType buff, object source)
+    {
+        var state = unit?.buffStates.Find(b => b.buffType == buff);
+        if (state == null || !state.sources.Remove(source)) return;
+        if (state.stacks == 0) RemoveBuff(unit, buff, -1);
+        RefreshEnemyBuffs(unit);
     }
 
     private static void RefreshEnemyBuffs(UnitAttrCenter unit)
@@ -160,8 +186,7 @@ public class BuffManager : MonoBehaviour
     }
 
 
-    // 回合结束时调用，处理一个单位身上所有的buff效果
-    // 改为回合开始时结算
+    // 回合开始结算持续伤害/治疗，普通持续状态保留到本回合结束。
     public void ProcessBuffs(UnitAttrCenter unit)
     {
         var snapshot = unit.buffStates.ToArray();
@@ -170,6 +195,8 @@ public class BuffManager : MonoBehaviour
             if (unit.pc.isDead) break;
             var buff = snapshot[i];
             if (!unit.buffStates.Contains(buff)) continue;
+            buff.durationPending = buff.stacks > 0 && buff.buffType != BuffType.Burn &&
+                buff.buffType != BuffType.SlowingField;
             switch (buff.buffType)
             {
                 case BuffType.SlowingField:
@@ -187,7 +214,7 @@ public class BuffManager : MonoBehaviour
                     break;
                 case BuffType.Burn:
                     // 持续掉血
-                    int burnDamage = unit.GetBuffStacks(BuffType.Burn);
+                    int burnDamage = Mathf.Max(1, unit.GetBuffStacks(BuffType.Burn));
                     unit.TakeDamage(new AttackPack(burnDamage, DamageType.Electric));
                     RemoveBuff(unit, BuffType.Burn, 3); // 每回合减少3层燃烧效果
                     continue;
@@ -195,7 +222,16 @@ public class BuffManager : MonoBehaviour
                     break;
             }
 
-            RemoveBuff(unit, buff.buffType, 1);
+        }
+    }
+
+    public void ProcessBuffDurations(UnitAttrCenter unit)
+    {
+        foreach (var buff in unit.buffStates.ToArray())
+        {
+            if (!buff.durationPending) continue;
+            buff.durationPending = false;
+            RemoveBuff(unit, buff.buffType);
         }
     }
 }

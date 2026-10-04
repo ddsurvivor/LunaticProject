@@ -244,7 +244,10 @@ public class PieceController : MonoBehaviour
         isIdle = true;
         OnTurnEnd?.Invoke();
         if (!isDead && gameObject.activeInHierarchy)
+        {
             BattleScene.Ins.BM.characterSkillManager.NotifyTurnEnd(gameObject);
+            BattleScene.Ins.BM.buffManager.ProcessBuffDurations(unitAttrCenter);
+        }
     }
 
     // public void ShowActionList()

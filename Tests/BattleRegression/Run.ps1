@@ -20,7 +20,8 @@ $sources = @(
     'Assets/Scripts/玩家系统/交易/ItemPack.cs',
     'Tests/BattleRegression/Stubs.cs',
     'Tests/BattleRegression/Program.cs',
-    'Tests/BattleRegression/Batch2.cs'
+    'Tests/BattleRegression/Batch2.cs',
+    'Tests/BattleRegression/BuffRegression.cs'
 )
 $includes = $sources | ForEach-Object { '<Compile Include="' + [System.Security.SecurityElement]::Escape((Join-Path $repo $_)) + '" />' }
 $project = '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><EnableDefaultCompileItems>false</EnableDefaultCompileItems><NoWarn>0162;0169;0414;0649</NoWarn></PropertyGroup><ItemGroup>' + ($includes -join "`n") + '</ItemGroup></Project>'

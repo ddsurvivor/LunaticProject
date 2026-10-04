@@ -43,7 +43,9 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     private int _tempShield;
 
     [SerializeField] [ReadOnly] private float _moveRange;
-    public float MoveRange => _moveRange;
+    public float MoveRange => Mathf.Max(0f, _moveRange) *
+        (buffAttrDic.TryGetValue(BuffAttrType.MoveRangePercent, out float percent)
+            ? Mathf.Max(0f, percent) / 100f : 1f);
 
     [SerializeField] [ReadOnly]
     // 嘲讽值
@@ -88,6 +90,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
     public void Init()
     {
+        buffStates.Clear();
         _curHealth = _maxHealth;
         //_manaPoint = _maxManaPoint;
         InitBuffAttrDic();
@@ -249,12 +252,12 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
     public void FullMovePoint()
     {
-        _curMovePoint = _maxMovePoint;
+        SetMovePoint(_maxMovePoint);
     }
 
     public void SetMovePoint(int num)
     {
-        _curMovePoint = num <= _maxMovePoint ? num : _maxMovePoint;
+        _curMovePoint = GetBuffStacks(BuffType.Stun) != 0 ? 0 : Mathf.Clamp(num, 0, _maxMovePoint);
     }
 
     public void FullAmmo()
@@ -401,7 +404,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
     public void AddMP(int mpAmount)
     {
-        if (mpAmount <= 0) return;
+        if (mpAmount <= 0 || GetBuffStacks(BuffType.Stun) != 0) return;
         _curMovePoint += mpAmount;
         if (_curMovePoint > _maxMovePoint) _curMovePoint = _maxMovePoint;
         Debug.Log($"恢复行动力{mpAmount}");
@@ -518,7 +521,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         {
             if (buff.buffType == buffType)
             {
-                return buff.stacks;
+                return buff.sources.Count > 0 ? -1 : buff.stacks;
             }
         }
 

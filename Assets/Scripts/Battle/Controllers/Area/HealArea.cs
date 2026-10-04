@@ -27,7 +27,7 @@ public class HealArea : MonoBehaviour
                 if (GameConst.CheckRate(buffPack.rate))
                 {
                     BattleScene.Ins.BM.buffManager.AddBuff(pc.unitAttrCenter, buffPack.buffType
-                        , buffPack.stacks);
+                        , buffPack.stacks, buffPack.barrierHealth, buffPack.retaliationTurns);
                 }
             }
         }
@@ -39,7 +39,7 @@ public class HealArea : MonoBehaviour
             if (GameConst.CheckRate(buffPack.rate))
             {
                 BattleScene.Ins.BM.buffManager.AddBuff(pc.unitAttrCenter, buffPack.buffType
-                    , buffPack.stacks);
+                    , buffPack.stacks, buffPack.barrierHealth, buffPack.retaliationTurns);
             }
         }
     }
@@ -57,7 +57,7 @@ public class HealArea : MonoBehaviour
                 if (GameConst.CheckRate(buffPack.rate))// 给范围内的友方单位添加治疗buff
                 {
                     BattleScene.Ins.BM.buffManager.AddBuff(pc.unitAttrCenter, buffPack.buffType
-                        , buffPack.stacks);
+                        , buffPack.stacks, buffPack.barrierHealth, buffPack.retaliationTurns);
                 }
             }
         }

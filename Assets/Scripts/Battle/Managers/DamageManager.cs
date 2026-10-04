@@ -42,7 +42,8 @@ public sealed class DamageManager
         var result = new Settlement();
         // 1. 校验目标，读取掩体、屏障与命中规则。
         if (!CanAffect(attacker, target, skill)) return result;
-        if (attacker.isPlayerPiece != target.isPlayerPiece) battle.buffManager.OnAttacked(attacker, target);
+        if (skill.attackPacks.Count > 0 && attacker.isPlayerPiece != target.isPlayerPiece)
+            battle.buffManager.OnAttacked(attacker, target);
         Context context = CreateContext(attacker, target, skill, checkResult, isFlank);
         context.PassiveMultiplier = passiveMultiplier;
         if (context.Cover != null)
