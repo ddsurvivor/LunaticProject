@@ -33,6 +33,18 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
 
     public bool IsOn => enableToggle && isOn;
 
+    public bool Interactable { get; private set; } = true;
+
+    /// <summary>禁用鼠标和键盘交互，清除悬停、按下及蓄力表现。</summary>
+    public void SetInteractable(bool value)
+    {
+        if (Interactable == value) return;
+        Interactable = value;
+        ResetAllStates();
+        if (!value && fillImage != null) fillImage.fillAmount = 0f;
+        if (pressedImage != null) pressedImage.gameObject.SetActive(false);
+    }
+
     /// <summary>由业务系统启用或关闭 Toggle 表现，不触发点击事件。</summary>
     public void SetToggleMode(bool enabled)
     {
@@ -116,7 +128,7 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     /// </summary>
     private void HandleKeyboardInput()
     {
-        if (!enableKeyBinding) return;
+        if (!Interactable || !enableKeyBinding) return;
 
         // 当玩家按住绑定按键时
         if (Input.GetKey(activationKey))
@@ -161,6 +173,12 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     private void HandleFillAnimation()
     {
         if (fillImage == null) return;
+
+        if (!Interactable)
+        {
+            fillImage.fillAmount = 0f;
+            return;
+        }
 
         // 选中状态优先于悬停和键盘蓄力，直到下次触发才解除满填充。
         if (IsOn)
@@ -209,6 +227,7 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     /// </summary>
     private void TriggerButtonClick()
     {
+        if (!Interactable) return;
         if (enableToggle)
         {
             SetIsOn(!isOn);
@@ -226,6 +245,7 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     // 鼠标进入
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (!Interactable) return;
         isHovered = true;
         suppressHoverFill = false;
         GM.Ins.AM.PlayAudio(mouseOnSound);
@@ -241,6 +261,7 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     // 鼠标按下
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (!Interactable) return;
         isPressed = true;
 
         if (pressedImage != null)
@@ -252,6 +273,7 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
     // 鼠标抬起
     public void OnPointerUp(PointerEventData eventData)
     {
+        if (!Interactable) return;
         isPressed = false;
 
         // 如果此时键盘也没有在长按，才关闭按下贴图

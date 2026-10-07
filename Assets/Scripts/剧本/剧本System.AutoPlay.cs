@@ -42,6 +42,7 @@ public partial class 剧本System
 
     public void ToggleFastForward()
     {
+        if (!isAutoPlay) return;
         isFastForward = !isFastForward;
         autoPlayElapsed = 0f;
         SyncPlaybackButtons();
@@ -58,8 +59,15 @@ public partial class 剧本System
 
     private void SyncPlaybackButtons()
     {
+        if (!isAutoPlay) isFastForward = false;
         SyncPlaybackButton(ref autoPlayButton, nameof(ToggleAutoPlay), isAutoPlay);
         SyncPlaybackButton(ref fastForwardButton, nameof(ToggleFastForward), isFastForward);
+        if (fastForwardButton != null)
+        {
+            fastForwardButton.SetInteractable(isAutoPlay);
+            if (fastForwardButton.TryGetComponent<Button>(out var uiButton))
+                uiButton.interactable = isAutoPlay;
+        }
     }
 
     private void SyncPlaybackButton(ref CustomAdvancedButton target, string methodName, bool isOn)
@@ -125,6 +133,7 @@ public partial class 剧本System
 
     private void OnDisable()
     {
+        StopReaderShake();
         // 隐藏剧情只暂停推进；玩家选择的自动和快进模式保留到下一段剧本。
         autoPlayElapsed = 0f;
         GM.Ins?.AM.StopAll();
