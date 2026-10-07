@@ -21,6 +21,12 @@ public class PieceStatePanel : UIPanel
     public float upRootScaleFactor = 50f; // upRoot随相机缩放的调整系数
     //public Text manaText;
 
+    public UnityEngine.UI.Image healthShadowBar;
+
+    private readonly HealthBarFillAnimation healthAnimation = new();
+
+    private void OnDisable() => healthAnimation.Reset();
+
     public void Update()
     {
         if (pc != null)
@@ -51,7 +57,8 @@ public class PieceStatePanel : UIPanel
             //nameText.text = pc.pieceData.pieceName;
             //healthText.text = $"{pc.unitAttrCenter.CurHealth}/{pc.unitAttrCenter.MaxHealth}";
             //mpText.text = $"{pc.unitAttrCenter.CurMovePoint}/{pc.unitAttrCenter.MaxMovePoint}";
-            healthBar.fillAmount = (float)pc.unitAttrCenter.CurHealth / pc.unitAttrCenter.MaxHealth;
+            healthAnimation.Update(healthBar, healthShadowBar, pc.unitAttrCenter.MaxHealth > 0
+                ? (float)pc.unitAttrCenter.CurHealth / pc.unitAttrCenter.MaxHealth : 0f, pc);
             //mpBar.fillAmount = (float)pc.unitAttrCenter.CurMovePoint / pc.unitAttrCenter.MaxMovePoint;
             ammoText.text =  $"{pc.unitAttrCenter.AmmoCount}/{pc.unitAttrCenter.MaxAmmoCount}";
             mpText.text = $"{pc.unitAttrCenter.CurMovePoint}/{pc.unitAttrCenter.MaxMovePoint}";

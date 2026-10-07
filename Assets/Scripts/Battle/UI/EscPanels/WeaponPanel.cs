@@ -30,14 +30,14 @@ public class WeaponPanel : UIPanel
         // 1. 刷新普通装备槽
         for (int i = 0; i < normalUISlots.Count; i++)
         {
-            int id = (i < player.normalSlots.Length) ? player.normalSlots[i] : 0;
+            int id = (i < (player.normalSlots?.Length ?? 0)) ? player.normalSlots[i] : 0;
             normalUISlots[i].Init(id, this);
         }
 
         // 2. 刷新武器装备槽
         for (int i = 0; i < weaponUISlots.Count; i++)
         {
-            int id = (i < player.weaponSlots.Length) ? player.weaponSlots[i] : 0;
+            int id = (i < (player.weaponSlots?.Length ?? 0)) ? player.weaponSlots[i] : 0;
             weaponUISlots[i].Init(id, this);
         }
 
@@ -70,12 +70,6 @@ public class WeaponPanel : UIPanel
     }
     public bool CheckIsEquipped(int id)
     {
-        foreach (int i in charactorPanel.player.normalSlots)
-            if (i == id)
-                return true;
-        foreach (int i in charactorPanel.player.weaponSlots)
-            if (i == id)
-                return true;
-        return false;
+        return charactorPanel.player != null && charactorPanel.player.IsEquipped(id);
     }
 }

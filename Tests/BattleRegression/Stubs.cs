@@ -5,9 +5,23 @@ using UnityEngine;
 // Presentation and scene dependencies only. Combat rules are linked from Assets by Run.ps1.
 namespace UnityEngine
 {
+    public class ScriptableObject { }
+    public class Sprite { }
+    public class TextAreaAttribute : Attribute { }
+    public class CreateAssetMenuAttribute : Attribute { public string fileName, menuName; }
     public class SerializeField : Attribute { }
     public class HeaderAttribute : Attribute { public HeaderAttribute(string s) {} }
-    public class MinAttribute : Attribute { public MinAttribute(int n) {} }
+    public class MinAttribute : Attribute { public MinAttribute(float n) {} }
+    public class TooltipAttribute : Attribute { public TooltipAttribute(string s) {} }
+    public static class Time { public static float deltaTime; }
+    public enum HorizontalWrapMode { Wrap, Overflow }
+    public enum VerticalWrapMode { Truncate, Overflow }
+    public struct Color
+    {
+        public float r,g,b,a;
+        public Color(float r,float g,float b,float a=1f) { this.r=r;this.g=g;this.b=b;this.a=a; }
+        public static Color white=>new(1,1,1); public static Color red=>new(1,0,0); public static Color green=>new(0,1,0);
+    }
     public class Component
     {
         public GameObject gameObject;
@@ -15,18 +29,38 @@ namespace UnityEngine
         public Transform transform => gameObject?.transform ?? fallback;
         public string name => gameObject?.name ?? "test"; public int GetInstanceID()=>GetHashCode(); public T GetComponentInParent<T>() where T:class=>GetComponent<T>();
         public T GetComponent<T>() where T : class => gameObject.GetComponent<T>();
+        public T GetComponentInChildren<T>(bool includeInactive) where T:class => GetComponent<T>();
     }
-    public class MonoBehaviour : Component { }
+    public class MonoBehaviour : Component
+    {
+        public bool isActiveAndEnabled=true;
+        protected static GameObject Instantiate(GameObject original)
+        {
+            var go=new GameObject();
+            var text=original.GetComponent<UnityEngine.UI.Text>();
+            if(text!=null) go.Add(new UnityEngine.UI.Text { fontSize=text.fontSize });
+            if(original.GetComponent<TipText>()!=null) go.Add(new TipText());
+            return go;
+        }
+        protected static void Destroy(GameObject go) { go.SetActive(false); }
+    }
     public class GameObject
     {
         public string name = "test";
-        public Transform transform = new Transform();
+        public Transform transform;
+        public GameObject() { transform=new Transform { gameObject=this }; }
         private readonly Dictionary<Type, object> components = new();
         public T Add<T>(T value) where T : Component { components[typeof(T)] = value; value.gameObject = this; return value; }
         public T GetComponent<T>() where T : class { foreach(var value in components.Values) if(value is T match) return match; return null; }
         public bool activeInHierarchy = true; public void SetActive(bool active) { activeInHierarchy=active; }
     }
-    public class Transform { public Vector3 position, localScale; public Quaternion rotation; }
+    public class Transform
+    {
+        public GameObject gameObject; public Transform parent;
+        public Vector3 position, localScale; public Quaternion rotation;
+        public int GetInstanceID()=>GetHashCode();
+        public T GetComponentInParent<T>() where T:class => gameObject?.GetComponent<T>() ?? parent?.GetComponentInParent<T>();
+    }
     public struct Vector3
     {
         public float x, y, z;
@@ -46,18 +80,31 @@ namespace UnityEngine
         public static int Clamp(int v,int a,int b)=>Math.Clamp(v,a,b); public static float Clamp(float v,float a,float b)=>Math.Clamp(v,a,b);
         public static int FloorToInt(float v)=>(int)Math.Floor(v); public static int CeilToInt(float v)=>(int)Math.Ceiling(v);
         public static int RoundToInt(float v)=>(int)Math.Round(v);
+        public static float Log10(float v)=>(float)Math.Log10(v); public static float Clamp01(float v)=>Math.Clamp(v,0,1);
     }
     public static class Random { public static float value=0f; public static int NextValue=1; public static int Range(int a,int b)=>Math.Clamp(NextValue,a,b-1); }
     public static class Debug { public static void Log(object o){} public static void LogWarning(object o){} public static void LogError(object o){} }
     public class Collider : Component { }
     public static class Physics { public static Collider[] Results=Array.Empty<Collider>(); public static Collider[] OverlapSphere(Vector3 p,float r)=>Results; }
 }
+namespace UnityEngine.UI
+{
+    public class Text : UnityEngine.Component
+    {
+        public string text; public int fontSize=100; public bool resizeTextForBestFit,raycastTarget;
+        public UnityEngine.Color color; public UnityEngine.HorizontalWrapMode horizontalOverflow;
+        public UnityEngine.VerticalWrapMode verticalOverflow;
+    }
+}
 namespace UnityEngine.Events { public class UnityEvent { } }
+namespace UnityEngine.Serialization { public class FormerlySerializedAsAttribute : Attribute { public FormerlySerializedAsAttribute(string name) {} } }
 namespace Sirenix.OdinInspector
 {
     public class SerializedMonoBehaviour : MonoBehaviour { }
     public class ReadOnlyAttribute : Attribute { }
     public class LabelTextAttribute : Attribute { public LabelTextAttribute(string s) {} }
+    public class ShowInInspectorAttribute : Attribute { }
+    public class ShowIfAttribute : Attribute { public ShowIfAttribute(string s) {} }
 }
 namespace Sirenix.Serialization { public class OdinSerializeAttribute : Attribute { } }
 namespace DG.Tweening { public static class TweenExtensions { public static void DOScale(this Transform t,Vector3 v,float f){} } }
@@ -65,13 +112,12 @@ public enum ItemName { A, B }
 public enum ItemTag { All, Consumables, Plugins, Materials }
 public enum UseType { InBattle, OutOfBattle, WhenEnergyNotFull, WhenHpNotFull, WhenStaminaNotFull, ActiveInBattle }
 public enum ItemType { SHIELD, DAMAGE_TEXT, KINETIC_ATTACK, ENERGY_ATTACK, HEAL_EFFECT, CHARGE_EFFECT, SPECIALTY_ACTIVATE }
-public enum AudioCueType { Heal }
+public enum AudioCueType { Heal, Equip, Cancel }
 public class CheckDicePanel { public void ShowResult(int n,int[] dice,bool success) {} }
 public enum PieceDisplayState { Dodge }
-public enum AttrOp { Get }
-public class Player { public int AccessAttribute(int i, AttrOp op)=>0; }
 public class SkillPack
 {
+    public string skillName;
     public int mpCost; public bool layerSkill, isRecognitionCheck, isDelaySkill;
     public SkillTarget target=SkillTarget.EnemyAll; public RangeType rangeType=RangeType.Circle; public float explodeRadius,rangeValue=10,rangeAgle=90;
     public List<ItemPack> consumeItems=new(); public List<AttackPack> attackPacks=new();
@@ -87,6 +133,10 @@ public class PieceData
 }
 public class PieceController : MonoBehaviour
 {
+    public Player playerData;
+    public List<PassiveType> availablePassives = new();
+    public int ComponentRefreshes;
+    public void RefreshComponents() { ComponentRefreshes++; }
     public UnitAttrCenter unitAttrCenter; public PieceData pieceData=new();
     public bool isDead=>unitAttrCenter.CurHealth<=0;
     public bool isPlayerPiece;
@@ -115,27 +165,29 @@ public class CaverSlot { public int evadeChance, damageReduction; }
 public class DamageInfo { public int damageValue; public DamageInfo(int d,string type,bool crit){ damageValue=d; } }
 public static class GameConst { public const float burstDamageRate=1.2f, burstAddDamageRate=0.2f; }
 public class GameConstSO { public float FlankDamageRate=0.5f; public int GetActionPointCost(ActionType action)=>1; }
-public class DataManager { public GameConstSO gameConstSO=new(); }
+public class LevelUpConfig { public int GetRequiredExpForLevel(int level)=>100; public int GetReward(int level)=>1; }
+public class SkillPackListSO { public SkillPack Skill; public SkillPack GetSkillPack(string name)=>Skill; }
+public class DataManager { public GameConstSO gameConstSO=new(); public ComponentConfig componentConfig=new(); public LevelUpConfig levelUpConfig=new(); public SkillPackListSO skillPackListSO=new(); }
 public class AudioManager { public void PlayAudio(AudioCueType t){} }
 public class Profile
 {
+    public List<int> componentInventory = new();
     public Dictionary<ItemName,int> Inventory=new();
     public int GetItemNum(ItemName name)=>Inventory.GetValueOrDefault(name);
     public void CostItem(ItemName name,int n){ Inventory[name]-=n; }
 }
 public class GM { public static GM Ins=new(); public Profile PLAYERPROFILE=new(); public DataManager DM=new(); public AudioManager AM=new(); }
 public class UIManager { public void OnPieceStateChance(PieceController p){} public void ShowUndoMoveButton(bool b){} }
-public class TipTextManager
-{
-    public void ShowMiss(Transform t){} public void ShowTip(Transform t,string s){}
-    public void ShowHeal(Transform t,int n){} public void ShowBuffAdded(Transform t,string s,int n){}
-}
 public class BattleManager
 {
     public BuffManager buffManager=new(); public TipTextManager tipTextManager=new(); public DiceCheckManager diceCheckManager=new();
     public SkillSystem.CharacterSkillManager characterSkillManager=new(); public PlayerController PlayerController=new();
+    public PlayerController AIController=new(); public OrderManager orderManager=new();
+    public int ExtraAttacks;
+    public void PieceSkill(PieceController a,List<PieceController> targets,SkillPack skill,Vector3 pos) { ExtraAttacks++; }
     public CaverSlot CheckCoverObstruction(PieceController a,PieceController b)=>null;
 }
+public class OrderManager { public List<PieceController> Targets=new(); public List<PieceController> IsInsideSector(Vector3 p,Vector3 d,float r,float a)=>new(Targets); }
 public class BattleScene { public static BattleScene Ins=new(); public BattleManager BM=new(); public UIManager UM=new(); }
 namespace SkillSystem
 {

@@ -1,23 +1,24 @@
-using System.Collections;
-using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
-/// <summary>
-/// 存活时间自动隐藏
-/// 用于粒子特效回收
-/// </summary>
+/// <summary>池对象每次启用独立计时，旧生命周期不能回收新一轮对象。</summary>
 public class LifeTime : MonoBehaviour
 {
     public float lifeTime;
-    // Start is called before the first frame update
-    void OnEnable()
+    private Tween expiry;
+
+    private void OnEnable()
     {
-        if(lifeTime <= 0) return;
-        DOVirtual.DelayedCall(lifeTime, () =>
-        {
-            gameObject.SetActive(false);
-        }, false);
+        CancelExpiry();
+        if (lifeTime <= 0f) return;
+        expiry = DOVirtual.DelayedCall(lifeTime, () => gameObject.SetActive(false), false);
     }
 
+    public void CancelExpiry()
+    {
+        expiry?.Kill();
+        expiry = null;
+    }
+
+    private void OnDisable() => CancelExpiry();
 }

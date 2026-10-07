@@ -168,8 +168,12 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         }
     }
 
+    private int playerAttackBonus, playerConstitutionBonus;
+
     public void SetData(PieceData pieceData, Player playerData = null)
     {
+        ATK -= playerAttackBonus; CON -= playerConstitutionBonus;
+        playerAttackBonus = playerConstitutionBonus = 0;
         _maxAmmoCount = pieceData.maxAmmoCount;
         _maxHealth = pieceData.maxHealth;
         _maxMovePoint = pieceData.maxMovePoint;
@@ -184,8 +188,10 @@ public class UnitAttrCenter : SerializedMonoBehaviour
             // 根据玩家属性调整单位属性
             _maxHealth += playerData.AccessAttribute(2, AttrOp.Get) * 2; // 体能每点增加2点生命
             _maxManaPoint += playerData.AccessAttribute(0, AttrOp.Get) * 2; // 意志每点增加2点能量
-            ATK += (int)(playerData.AccessAttribute(1, AttrOp.Get) * 0.5f); // 作战每点增加0.5点攻击力
-            CON += (int)(playerData.AccessAttribute(4, AttrOp.Get) * 0.5f); // 模式识别每点增加0.5点对抗
+            playerAttackBonus = (int)(playerData.AccessAttribute(1, AttrOp.Get) * 0.5f);
+            playerConstitutionBonus = (int)(playerData.AccessAttribute(4, AttrOp.Get) * 0.5f);
+            ATK += playerAttackBonus;
+            CON += playerConstitutionBonus;
             // 其他属性调整可以在这里添加
             critRate += (playerData.AccessAttribute(3, AttrOp.Get) + playerData.AccessAttribute(4, AttrOp.Get) ) * 2; // 技巧每点增加1%暴击率
         }
@@ -296,11 +302,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         int previousHealth = _curHealth;
         _curHealth -= attackPack.damage;
         // 2. 所有有效命中都显示伤害跳字，包括 0。
-        DamageText damageText = ObjectPool.Ins.GenerateObject(
-            ItemType.DAMAGE_TEXT,
-            transform.position, transform.rotation
-        ).GetComponent<DamageText>();
-        damageText.JumpOutNum(attackPack.damage);
+        BattleScene.Ins.BM.tipTextManager.ShowDamage(transform, attackPack.damage, attackPack.isCritical);
         if (_curHealth <= 0) _curHealth = 0;
         UpdateHpBar();
         NotifyHealthChanged(previousHealth);
@@ -467,14 +469,34 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     /// <summary>普通及延迟技能共用：资源不足不扣费；行动异常中断只消耗行动点。</summary>
     public bool TryCostSkill(SkillPack skill)
     {
-        if (skill == null || !HasMana(skill.mpCost) ||
+        int manaCost = GetSkillManaCost(skill);
+        if (skill == null || !HasMana(manaCost) ||
             !TryGetItemCosts(skill.consumeItems, out var costs) || !HasItemCosts(costs)) return false;
         // CostMP 内部处理死亡、眩晕、行动点校验以及行动触发的 Buff。
         if (!CostMP(ActionType.技能)) return false;
-        _manaPoint -= skill.mpCost;
+        _manaPoint -= manaCost;
         CommitItemCosts(costs);
         BattleScene.Ins.UM.OnPieceStateChance(pc);
         return true;
+    }
+
+    public int GetSkillManaCost(SkillPack skill) => ComponentEquipment.ManaCost(pc?.playerData, skill);
+
+    // 换装仅调整属性差值，不重置生命、能量、弹药、行动点或 Buff。
+    public void RefreshPlayerAttributes(int[] previous, int[] current)
+    {
+        int oldHealth = _curHealth, oldMaxHealth = _maxHealth;
+        _maxHealth = Mathf.Max(1, _maxHealth + (current[2] - previous[2]) * 2);
+        _curHealth = Mathf.Min(_curHealth, _maxHealth);
+        _maxManaPoint = Mathf.Max(0, _maxManaPoint + (current[0] - previous[0]) * 2);
+        _manaPoint = Mathf.Min(_manaPoint, _maxManaPoint);
+        int attackDelta = (int)(current[1] * 0.5f) - (int)(previous[1] * 0.5f);
+        int conDelta = (int)(current[4] * 0.5f) - (int)(previous[4] * 0.5f);
+        ATK += attackDelta; playerAttackBonus += attackDelta;
+        CON += conDelta; playerConstitutionBonus += conDelta;
+        critRate += (current[3] + current[4] - previous[3] - previous[4]) * 2;
+        UpdateHpBar();
+        NotifyHealthChanged(oldHealth, oldMaxHealth);
     }
 
     private static bool TryGetItemCosts(List<ItemPack> items, out Dictionary<ItemName, int> costs)

@@ -12,7 +12,7 @@ using UnityEngine.AI;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
-public class BattleManager : MonoBehaviour
+public partial class BattleManager : MonoBehaviour
 {
     public AIController AIController;
     public PlayerController PlayerController;
@@ -52,47 +52,32 @@ public class BattleManager : MonoBehaviour
 
     [SerializeField] [LabelText("镜头注视时间")] float gazeWaitTime = 0.5f; // 
 
-    private Sequence startSequence; // 战斗开始时的镜头动画序列
-    private Coroutine sweepCoroutine;
 
     public List<PieceController> summonPieces = new();
 
     public void Init()
     {
-        inBattle = true;
-        _turnNumber = 0;
-        characterSkillManager.ClearAllRegistry();
-        PlayerController.Init();
-        AIController.Init();
-        ApplySetting(GM.Ins.battleSetting); // 在完成所有棋子初始化以后，更新预设
-        _delaySkillPack = null;
-        if(pieceActionManager!=null) pieceActionManager.ApplySettingsToPieces(PlayerController.pieces);
-        //StartBattle();
-        //gray = Resources.Load<Material>("Materials/Gray");
-        //grayEnemy = Resources.Load<Material>("Materials/GrayEnemy");
-    }
-
-    public void StartBattle()
-    {
-        Debug.Log("战斗开始");
-        // 初始化角色技能系统
-        characterSkillManager.Init(PlayerController.pieces.Concat(AIController.pieces).Concat(summonPieces).Distinct().ToList());
-
-        startSequence?.Kill();
-        startSequence = DOTween.Sequence();
-        startSequence.AppendInterval(0.5f);
-
-        // 触发扫视
-        startSequence.AppendCallback(SweepActiveEnemies);
-
-        startSequence.AppendInterval(CalculateTotalTime());
-        startSequence.AppendCallback(() =>
+        // 同一场景的多个入口可能请求初始化；先占用，防止 OnInit 事件重入。
+        if (startupInitialized || startupInitializing) return;
+        startupInitializing = true;
+        ResetBattleStartup();
+        try
         {
-            if (sweepCoroutine != null)
-            {
-                EnterBattleSequence();
-            }
-        });
+            inBattle = true;
+            _turnNumber = 0;
+            characterSkillManager.ClearAllRegistry();
+            PlayerController.Init();
+            AIController.Init();
+            ApplySetting(GM.Ins.battleSetting); // 在完成所有棋子初始化以后，更新预设
+            _delaySkillPack = null;
+            if(pieceActionManager!=null) pieceActionManager.ApplySettingsToPieces(PlayerController.pieces);
+            //StartBattle();
+            //gray = Resources.Load<Material>("Materials/Gray");
+            //grayEnemy = Resources.Load<Material>("Materials/GrayEnemy");
+            startupInitialized = true;
+        }
+        finally { startupInitializing = false; }
+        if (startupRequested) StartBattle();
     }
 
     /// <summary>
@@ -109,8 +94,24 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    // 只在真实播放/飞行期间阻止下一动作；不以序列帧数量估算锁定秒数。
+    public bool CanInspectEnemyTargets => inBattle && startupPhase == StartupPhase.Active && PlayerController.isInTurn;
+
+    public bool HasCombatPresentation => _isFlankAttacking ||
+        HasPresentation(PlayerController.pieces) || HasPresentation(AIController.pieces) || HasPresentation(summonPieces);
+
+    private static bool HasPresentation(IEnumerable<PieceController> pieces)
+    {
+        foreach (var piece in pieces)
+            if (piece != null && piece.gameObject.activeInHierarchy &&
+                (piece.IsPerformingAction || (piece.pieceDisplay != null && piece.pieceDisplay.IsPlayingOneShot))) return true;
+        return false;
+    }
+
     public void ChangeTurn()
     {
+        if (HasCombatPresentation) return;
+        BattleScene.Ins?.CM?.ClearEnemyTargetLineInteraction();
         HandleDelaySkill(); // 处理回合结束时的延时技能效果
         if (PlayerController.isInTurn)
         {
@@ -174,6 +175,7 @@ public class BattleManager : MonoBehaviour
         float passiveMultiplier = skillPack.attackPacks.Count > 0 && hostileTarget != null
             ? characterSkillManager.EvaluateDamageMultiplier(attacker.gameObject, hostileTarget.gameObject) : 1f;
         bool isCrit = false;
+        var hitTargets = new List<PieceController>();
         foreach (var target in validTargets)
         {
             // 1. 伤害管理器统一处理目标校验、命中、暴击与各段扣血。
@@ -181,6 +183,7 @@ public class BattleManager : MonoBehaviour
             var damageInfos = settlement.DamageInfos;
             damageInfoList.Add(damageInfos);
             isCrit |= settlement.IsCritical;
+            if (settlement.HitAttack && target.isPlayerPiece != attacker.isPlayerPiece) hitTargets.Add(target);
 
             // 2. 无效目标、未命中或屏障阻挡时，只跳过当前目标的附加效果。
             if (!settlement.CanApplyEffects) continue;
@@ -253,6 +256,8 @@ public class BattleManager : MonoBehaviour
                 buffManager.AddBuff(attacker.unitAttrCenter, buffPack.buffType,
                     buffPack.stacks, buffPack.barrierHealth, buffPack.retaliationTurns);
         }
+
+        ComponentEquipment.OnAttackResolved(attacker, hitTargets, skillPack, actionType, targetPos);
 
         // 操作记录系统
         BattleScene.Ins.UM.logPanel.PlayerLogAttack(attacker.pieceData.pieceName,
@@ -339,6 +344,8 @@ public class BattleManager : MonoBehaviour
 
     public void PlayerWin()
     {
+        BattleScene.Ins?.CM?.ClearEnemyTargetLineInteraction();
+        CancelBattleStartup();
         inBattle = false;
         AIController.isInTurn = false;
         // 敌方棋子全灭，玩家胜利
@@ -371,6 +378,8 @@ public class BattleManager : MonoBehaviour
 
     public void PlayerLoss()
     {
+        BattleScene.Ins?.CM?.ClearEnemyTargetLineInteraction();
+        CancelBattleStartup();
         inBattle = false;
         AIController.isInTurn = false;
         Debug.Log("我方棋子全灭，玩家失败");
@@ -720,7 +729,7 @@ public class BattleManager : MonoBehaviour
                     Quaternion.identity);
             }
 
-            PieceSkill(_delaySkillCaster, newTargets, _delaySkillPack, _delaySkillTargetPos);
+            PieceSkill(_delaySkillCaster, newTargets, _delaySkillPack, _delaySkillTargetPos, ActionType.技能);
             _delaySkillEffectObj.SetActive(false);
             _delaySkillPack = null;
             _delaySkillCaster = null;
@@ -889,125 +898,6 @@ public class BattleManager : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// 扩展方法：在战斗开始时扫视所有已经激活的敌人（参数内嵌版）
-    /// </summary>
-    /// <param name="battleManager">BattleManager 实例</param>
-    /// <param name="gameCamera">镜头控制组件</param>
-    public void SweepActiveEnemies()
-    {
-        if (cameraController == null)
-        {
-            Debug.LogError("[BattleExtension] 扫视初始化失败：BattleManager 或 Camera 为空。");
-            return;
-        }
-
-        // ====== 新增：开始扫视时激活跳过按钮 ======
-
-        BattleScene.Ins.UM.skipButton?.gameObject.SetActive(true);
-
-        // =========================================
-
-        sweepCoroutine = StartCoroutine(SweepRoutine(moveWaitTime, gazeWaitTime));
-    }
-
-    private float CalculateTotalTime()
-    {
-        float totalTime = 0f;
-        foreach (EnemyController enemy in AIController.pieces)
-        {
-            if (enemy != null && enemy.isActived)
-            {
-                totalTime += moveWaitTime + gazeWaitTime;
-            }
-        }
-
-        return totalTime;
-    }
-
-    private IEnumerator SweepRoutine(float moveWaitTime, float gazeWaitTime)
-    {
-        if (AIController.pieces == null || AIController.pieces.Count == 0)
-        {
-            Debug.LogWarning("[BattleExtension] AIController.pieces 为空，跳过扫视。");
-            yield break;
-        }
-
-        Debug.Log("【战前扫视】开始...");
-
-        foreach (EnemyController enemy in AIController.pieces)
-        {
-            if (enemy != null && enemy.isActived)
-            {
-                // 1. 镜头追踪当前敌人
-                cameraController.SetFollow(enemy.transform);
-
-                // 2. 等待镜头移动到位
-                yield return new WaitForSeconds(moveWaitTime);
-
-                // 3. 镜头注视停留
-                yield return new WaitForSeconds(gazeWaitTime);
-            }
-        }
-
-        Debug.Log("【战前扫视】结束。");
-
-        // 回调主管理器的开战函数
-    }
-
-    /// <summary>
-    /// 提取出的后续核心战斗步骤
-    /// </summary>
-    private void EnterBattleSequence()
-    {
-        // ====== 新增：进入战斗阶段时，关闭跳过按钮 ======
-        BattleScene.Ins.UM.skipButton?.gameObject.SetActive(false);
-        // =============================================
-
-        if (sweepCoroutine != null)
-        {
-            StopCoroutine(sweepCoroutine);
-            sweepCoroutine = null;
-        }
-
-        startSequence?.Kill();
-
-        if (tutorialManager.CheckAndShowTutorial())
-        {
-        }
-        else
-        {
-            battleDialogueManager.TriggerBattleStart();
-            PlayerStart();
-        }
-    }
-
-    /// <summary>
-    /// 跳过战前扫视，直接进入战斗
-    /// </summary>
-    public void OnClickSkip()
-    {
-        if (sweepCoroutine != null)
-        {
-            StopCoroutine(sweepCoroutine);
-            Debug.Log("【战前扫视】玩家选择跳过。");
-
-            // 强行把相机拉回玩家棋子
-            if (PlayerController.pieces != null && PlayerController.pieces.Count > 0)
-            {
-                var firstPlayer =
-                    PlayerController.pieces.FirstOrDefault(p => p != null && !p.isDead);
-                if (firstPlayer != null)
-                {
-                    cameraController.SetFollow(firstPlayer.transform);
-                }
-            }
-
-            // 直接执行后续（内部会自动关闭按钮）
-            EnterBattleSequence();
-        }
-    }
-
     // ===== 掩体判定 ========== //
     /// <summary>
     /// 判定掩体是否在攻击射线上生效
@@ -1044,6 +934,7 @@ public class BattleManager : MonoBehaviour
 
 
     // ===== 夹击判定 ========== //
+    private Coroutine flankRoutine;
     private bool _isFlankAttacking = false; // 防重入锁：标记当前是否正在执行夹击结算
 
     /// <summary>
@@ -1105,41 +996,41 @@ public class BattleManager : MonoBehaviour
             ObjectPool.Ins.GenerateObject(ItemType.PincerAttackFx
                 , closestPartner.transform.position + Vector3.up * 1.2f, Quaternion.identity);
             if (normalAttackPack == null) return;
-            try
-            {
-                // 开启防重入锁：此时由这个协同攻击造成的任何伤害/击退，再次调用 CheckFlankAttack 时都会在开头被 return
-                _isFlankAttacking = true;
-                DOVirtual.DelayedCall(0.5f, () =>
-                {
-                    // 触发协同普攻
-                    if (closestPartner.isPlayerPiece)
-                    {
-                        Debug.Log(
-                            $"【协同普攻】{closestPartner.pieceData.pieceName} 对 {target.pieceData.pieceName} 发动协同普攻！");
-                        closestPartner.CastNormalAttack(target);
-                        closestPartner.ableStrick = false;
-                    }
-                    else
-                    {
-                        closestPartner.StartNormalAttack();
-                        ((EnemyController)closestPartner).CastAttackOnTarget(target);
-                        closestPartner.ableStrick = false;
-                    }
-                });
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"夹击协同攻击触发异常：{e.Message}");
-            }
-            finally
-            {
-                DOVirtual.DelayedCall(2f, () =>
-                {
-                    _isFlankAttacking = false;
-                    tutorialManager.TriggerFirstTutorial(FirstTutorialType.FirstStrick); // 触发夹击教程
-                }, false);
-            }
+            _isFlankAttacking = true;
+            closestPartner.ableStrick = false;
+            flankRoutine = StartCoroutine(FlankAttackRoutine(attacker, closestPartner, target));
         }
+    }
+
+    private void OnDisable()
+    {
+        CancelBattleStartup();
+        startupInitialized = false;
+        startupRequested = false;
+        if (flankRoutine != null) StopCoroutine(flankRoutine);
+        flankRoutine = null;
+        _isFlankAttacking = false;
+    }
+
+    private IEnumerator FlankAttackRoutine(PieceController attacker, PieceController partner, PieceController target)
+    {
+        try
+        {
+            // 等原攻击和队友当前动作收尾，再出手；锁覆盖整次夹击，含减速与弹道。
+            while ((attacker != null && attacker.IsPerformingAction) ||
+                   (partner != null && partner.IsPerformingAction)) yield return null;
+            if (partner == null || !partner.isActiveAndEnabled || partner.isDead ||
+                target == null || !target.isActiveAndEnabled || target.isDead) yield break;
+            if (partner.isPlayerPiece) partner.CastNormalAttack(target);
+            else
+            {
+                partner.StartNormalAttack();
+                ((EnemyController)partner).CastAttackOnTarget(target);
+            }
+            while (partner != null && partner.IsPerformingAction) yield return null;
+            tutorialManager.TriggerFirstTutorial(FirstTutorialType.FirstStrick);
+        }
+        finally { _isFlankAttacking = false; }
     }
 
     /// <summary>
@@ -1155,6 +1046,7 @@ public class BattleManager : MonoBehaviour
     // ===== Test ======//
     public void OnClickQuitBattle()
     {
+        CancelBattleStartup();
         // 保存所有棋子状态保存到存档内
         if (GM.Ins.pieceHPInherit)
         {

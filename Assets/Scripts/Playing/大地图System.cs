@@ -15,6 +15,7 @@ public class 大地图System : SerializedMonoBehaviour
     [Tooltip("新游戏的初始地图名称；留空使用场景配置的当前地图")]
     [SerializeField] private string initialMapName = "";
     private bool mapInitialized;
+    private bool storyStartupHandled;
     private DaytimeSystem defaultDaytimeSystem;
     public CanvasGroup gameoverPanel;
     public GameObject mapRoot;
@@ -119,8 +120,31 @@ public class 大地图System : SerializedMonoBehaviour
     private void Start()
     {
         InitializeMap();
-        if (mapInitialized && !isDebugMode)
+        // 读档切场景时由 GM 在转场完全结束后调用，避免 Start 抢先播放。
+        if (GM.Ins != null && !GM.Ins.IsTransitioning)
+            StartStoryAfterLoad();
+    }
+
+    public void StartStoryAfterLoad(string storyAfterBattle = "")
+    {
+        if (!mapInitialized || storyStartupHandled) return;
+        storyStartupHandled = true;
+        if (!string.IsNullOrWhiteSpace(storyAfterBattle))
+        {
+            BlackSceneChapter(storyAfterBattle);
+            return;
+        }
+
+        var profile = GM.Ins.PLAYERPROFILE;
+        if (profile.TryGetStoryToResume(out string scriptFile))
+        {
+            Debug.Log($"恢复未完成剧情，从头播放：{scriptFile}");
+            开始剧情(scriptFile);
+        }
+        else if (!isDebugMode)
+        {
             StartFirstNode();
+        }
     }
 
     /// <summary>等待 GM 数据准备完毕后恢复地图；场景加载回调和 Start 均可安全调用。</summary>
@@ -167,10 +191,12 @@ public class 大地图System : SerializedMonoBehaviour
     {
         if (mapInitialized && 当前地图 != null)
             GM.Ins.PLAYERPROFILE.currentMap = 当前地图.name;
+        if (剧情 != null) 剧情.CaptureReadingState(GM.Ins.PLAYERPROFILE);
     }
 
     public void 剧情结束()
     {
+        剧情.EndReadingStory();
         剧情.gameObject.SetActive(false);
         GM.Ins.AM.StopAll();
         //当前地图.transform.DOScale(Vector3.one, 点击后放大进行时间);

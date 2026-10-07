@@ -16,7 +16,7 @@ public class SkillTooltipUI : MonoBehaviour
     /// 显示并更新技能提示信息
     /// </summary>
     /// <param name="skill">传入的技能数据包</param>
-    public void ShowTooltip(SkillPack skill)
+    public void ShowTooltip(SkillPack skill, PieceController caster = null)
     {
         if (skill == null) return;
 
@@ -26,7 +26,7 @@ public class SkillTooltipUI : MonoBehaviour
         // 2. 拼接技能详细信息（消耗、范围、描述等）
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
         
-        sb.AppendLine($"能量消耗: {skill.mpCost}");
+        sb.AppendLine($"能量消耗: {(caster != null ? caster.unitAttrCenter.GetSkillManaCost(skill) : skill.mpCost)}");
         sb.AppendLine($"作用目标: {(skill.target.ToChinese())}");
         sb.Append($"作用范围: {skill.rangeValue}");
         

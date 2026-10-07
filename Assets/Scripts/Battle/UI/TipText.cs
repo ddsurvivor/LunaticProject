@@ -1,59 +1,67 @@
 using UnityEngine;
-using UnityEngine.UI; // 使用旧版 Text
-using DG.Tweening;
 
+/// <summary>统一跳字表现：上浮、后半程淡出，完成后交回管理器对象池。</summary>
 public class TipText : MonoBehaviour
 {
     [Header("动画参数配置")]
-     private float moveDistance = 2f;     
-    [SerializeField] private float duration = 1.2f;        
-    private Ease moveEase = Ease.OutQuad; 
+    [SerializeField] private float moveDistance = 2f;
+    // 保留预制体原时长，管理器统一乘以2；独立调用也默认翻倍。
+    [SerializeField] private float duration = 1.2f;
+    [SerializeField] private UnityEngine.UI.Text _text;
+    private Vector3 startPosition;
+    private Color startColor;
+    private float elapsed, playDuration;
+    private int originalFontSize;
+    private bool playing;
+    public float BaseDuration => Mathf.Max(0.01f, duration);
+    public bool IsPlaying => playing && gameObject.activeInHierarchy;
+    public int FontSize => _text != null ? _text.fontSize : originalFontSize;
 
-    [SerializeField]
-    private Text _text;
-    private Sequence _tipSequence; // 保存序列引用以便复用时清理
-
-    private void Awake()
+    internal void EnsureAbove(float minimumY)
     {
-        //_text = GetComponent<Text>();
+        if (!IsPlaying || transform.position.y >= minimumY) return;
+        float shift = minimumY - transform.position.y;
+        // 移动整条动画轨迹，不重置计时或透明度，也不让下一帧动画把排好的位置覆盖。
+        startPosition += Vector3.up * shift;
+        transform.position += Vector3.up * shift;
     }
-
-    /// <summary>
-    /// 外部调用的公共接口：初始化并播放提示动画
-    /// </summary>
-    /// <param name="message">需要显示的文本内容</param>
-    public void ShowTip(string message, Color textColor = default)
+    private void Awake() => CacheText();
+    private void CacheText()
     {
-        if (_text == null) return;
-
-        // 安全机制：如果该对象被提早复用，先杀死正在进行的动画
-        _tipSequence?.Kill();
-
-        // 1. 设置文本内容
+        if (_text == null) _text = GetComponentInChildren<UnityEngine.UI.Text>(true);
+        if (_text != null && originalFontSize == 0) originalFontSize = _text.fontSize;
+    }
+    public void ShowTip(string message, Color? textColor = null, int? fontSize = null,
+        float? displayDuration = null)
+    {
+        CacheText();
+        if (_text == null) { playing = false; gameObject.SetActive(false); return; }
         _text.text = message;
-
-        // 2. 重置透明度
-        
-        //Color originalColor = _text.color;
-        _text.color = new Color(textColor.r, textColor.g, textColor.b, 1f);
-
-        // 3. 创建动画序列
-        _tipSequence = DOTween.Sequence();
-
-        // 4. 并行播放：位移 + 淡出
-        _tipSequence.Join(transform.DOMoveY(transform.position.y + moveDistance, duration).SetEase(moveEase));
-        //_tipSequence.Join(_text.DOFade(0f, duration));
-        _tipSequence.Insert(duration/2f, _text.DOFade(0f, duration/2f));
-        // 5. 动画完成后【自动关闭自身】以供对象池回收
-        _tipSequence.OnComplete(() =>
-        {
-            gameObject.SetActive(false);
-        });
+        // BestFit会把伤害字号缩回原预制体上限，显式字号应直接生效。
+        _text.resizeTextForBestFit = false;
+        _text.horizontalOverflow = HorizontalWrapMode.Overflow;
+        _text.verticalOverflow = VerticalWrapMode.Overflow;
+        _text.raycastTarget = false;
+        _text.fontSize = Mathf.Max(1, fontSize ?? originalFontSize);
+        startColor = textColor ?? Color.white;
+        _text.color = startColor;
+        startPosition = transform.position;
+        playDuration = Mathf.Max(0.01f, displayDuration ?? BaseDuration * 2f);
+        elapsed = 0f;
+        playing = true;
+        gameObject.SetActive(true);
     }
-
-    private void OnDestroy()
+    private void Update() => AdvanceAnimation(Time.deltaTime);
+    internal void AdvanceAnimation(float deltaTime)
     {
-        // 良好的习惯：物体销毁时清理未完成的 Tweener，防止内存泄漏
-        _tipSequence?.Kill();
+        if (!IsPlaying) return;
+        elapsed += Mathf.Max(0f, deltaTime);
+        float t = Mathf.Clamp01(elapsed / playDuration);
+        float eased = 1f - (1f - t) * (1f - t);
+        transform.position = startPosition + Vector3.up * (moveDistance * eased);
+        _text.color = new Color(startColor.r, startColor.g, startColor.b,
+            startColor.a * (t <= 0.5f ? 1f : 2f * (1f - t)));
+        if (t >= 1f) { playing = false; gameObject.SetActive(false); }
     }
+    private void OnDisable() => playing = false;
 }

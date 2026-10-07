@@ -160,6 +160,8 @@ static partial class Program
         });
         Batch2();
         BuffRegression();
+        ComponentRegression();
+        FloatingTextRegression();
         Console.WriteLine($"{passed} regression tests passed.");
     }
 }

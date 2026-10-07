@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// 敌人单位棋子控制器
 /// </summary>
-public class EnemyController : PieceController
+public partial class EnemyController : PieceController
 {
     [Sirenix.OdinInspector.LabelText("敌人等级"), Range(1, 100)]
     public int level = 1;
@@ -51,6 +51,8 @@ public class EnemyController : PieceController
 
     public override void Dead()
     {
+        CancelCombatAction();
+        StopHitShake();
         BattleScene.Ins.TM.RequestHitStop();
         Debug.Log($"{this.name} 死亡");
         OnDead?.Invoke();
@@ -78,90 +80,27 @@ public class EnemyController : PieceController
 
     public void CastSkillOnTarget(PieceController targetPc, SkillPack skill)
     {
-        if (skill == null || targetPc == null || !BuffManager.CanTarget(this, targetPc)) return;
-        Debug.Log($"{this.name} 对 {targetPc.name} 施放技能 {skill.skillName}");
-
-        // 根据范围获取所有棋子
-        List<PieceController> targets = BattleScene.Ins.BM.skillManager
-            .GetTargets(this, targetPc.transform, skill);
+        if (IsPerformingAction || isDead || skill == null || targetPc == null || !BuffManager.CanTarget(this, targetPc)) return;
+        var targets = BattleScene.Ins.BM.skillManager.GetTargets(this, targetPc.transform, skill);
         if (targets.Count == 0) return;
+        BeginCombatAction(skill, targets, targetPc.transform.position, ActionType.技能, PieceDisplayState.Skill);
         NotifySkillUsed(skill);
-        Transform atkPos = targetPc.transform;
-        if (atkPos != null && skill.skillVFXType != 0)
-        {
-            ObjectPool.Ins.GenerateObject(
-                skill.skillVFXType,
-                atkPos.position + Vector3.up * 3f,
-                atkPos.localRotation);
-        }
-
-        CheckFace(targetPc.transform.position - transform.position);
-        // 播放技能动画
-        pieceDisplay.ChangeDisplayState(PieceDisplayState.Skill, false, 1f);
-        PlayAudio(skill);
-        if (targets.Count > 0)
-        {
-            ShootBolt(targets[0].transform.position, skill.bulletVFXType);
-        }
-
-        // 延迟0.3f
-        DOVirtual.DelayedCall(0.6f, () =>
-        {
-            if (targets == null || targets.Count == 0) return;
-            Debug.Log($"技能命中数量{targets.Count}");
-            BattleScene.Ins.BM.PieceSkill(this, targets, skill, targets[0].transform.position);
-            enemyCanvas.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
-            rangeUI?.CloseRange();
-        }, false);
-        // 技能聚能充能
+        rangeUI?.CloseRange();
     }
 
     public void CastAttackOnTarget(PieceController targetPc)
     {
-        if (_curAttackPack == null || targetPc == null || !BuffManager.CanTarget(this, targetPc)) return;
-        Debug.Log($"{this.name} 对 {targetPc.name} 施放攻击{_curAtkType} - {_curAttackPack.skillName}");
-        //_curAtkType = range ? ActionType.远程攻击 : ActionType.近战攻击; 
-        // 根据范围获取所有棋子
-        List<PieceController> targets = BattleScene.Ins.BM.skillManager
-            .GetTargets(this, targetPc.transform, _curAttackPack);
-        Transform atkPos = targetPc.transform;
-        if (atkPos != null && _curAttackPack.skillVFXType != 0)
-        {
-            ObjectPool.Ins.GenerateObject(
-                _curAttackPack.skillVFXType,
-                atkPos.position + Vector3.up * 3f,
-                atkPos.localRotation);
-        }
-
-        CheckFace(targetPc.transform.position - transform.position);
-        if (_curAtkType == ActionType.近战攻击)
-        {
-            pieceDisplay.ChangeDisplayState(PieceDisplayState.Attack, false, 1f);
-            PlayAudio(_curAttackPack);
-        }
-        else if (_curAtkType == ActionType.远程攻击)
-        {
-            pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
-            // 消耗弹药
-            unitAttrCenter.CostAmmo();
-            PlayAudio(_curAttackPack);
-            if (targets.Count > 0)
-            {
-                ShootBolt(targets[0].transform.position, _curAttackPack.bulletVFXType);
-            }
-        }
-
-        // 延迟0.3f
-        DOVirtual.DelayedCall(0.6f, () =>
-        {
-            if (targets.Count == 0) return;
-            Debug.Log($"攻击命中数量{targets.Count}");
-            BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack
-                , targets[0].transform.position, _curAtkType);
-            enemyCanvas.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
-            rangeUI?.CloseRange();
-        }, false);
-        // 技能聚能充能
+        if (IsPerformingAction || isDead || _curAttackPack == null || targetPc == null || !BuffManager.CanTarget(this, targetPc)) return;
+        var skill = _curAttackPack;
+        var action = _curAtkType;
+        var targets = BattleScene.Ins.BM.skillManager.GetTargets(this, targetPc.transform, skill);
+        if (targets.Count == 0) return;
+        bool ranged = action == ActionType.远程攻击;
+        if (ranged && unitAttrCenter.AmmoCount <= 0) return;
+        if (ranged) unitAttrCenter.CostAmmo();
+        BeginCombatAction(skill, targets, targetPc.transform.position, action,
+            ranged ? PieceDisplayState.Shoot : PieceDisplayState.Attack);
+        rangeUI?.CloseRange();
     }
 
     #endregion
@@ -214,62 +153,5 @@ public class EnemyController : PieceController
         }
     }
 
-    public override void ShowOutline(bool option)
-    {
-        base.ShowOutline(option);
-        //Debug.Log($"ShowOutline {option} - {_curTargetPc?.name}");
-        if (!option)
-        {
-            if(tagetLine!=null) tagetLine.enabled = false;
-            return;
-        }
-        /*// 显示攻击目标指示线
-        if (player is AIController aiController)
-        {
-            _curTargetPc = aiController.CheckEnemyTarget(this);
-        }
-        UpdateTargetLine();*/
-    }
 
-    public void ShowTargetLine()
-    {
-        // 显示攻击目标指示线
-        if (player is AIController aiController)
-        {
-            _curTargetPc = aiController.CheckEnemyTarget(this);
-        }
-
-        UpdateTargetLine();
-    }
-
-    // 在 EnemyController.cs 中添加
-    private void UpdateTargetLine()
-    {
-        if (_curTargetPc != null && tagetLine != null)
-        {
-            Vector3 start = transform.position + Vector3.up * 1.5f; // 本棋子顶部
-            Vector3 end = _curTargetPc.transform.position + Vector3.up * 1.5f; // 目标棋子顶部
-            Vector3 control = (start + end) / 2 + Vector3.up * 2.5f; // 控制点：中点上移
-
-            int segmentCount = 20;
-            Vector3[] positions = new Vector3[segmentCount + 1];
-            for (int i = 0; i <= segmentCount; i++)
-            {
-                float t = i / (float)segmentCount;
-                // 二次贝塞尔曲线公式
-                positions[i] = Mathf.Pow(1 - t, 2) * start +
-                               2 * (1 - t) * t * control +
-                               Mathf.Pow(t, 2) * end;
-            }
-
-            tagetLine.positionCount = positions.Length;
-            tagetLine.SetPositions(positions);
-            tagetLine.enabled = true;
-        }
-        else if (tagetLine != null)
-        {
-            tagetLine.positionCount = 0;
-            tagetLine.enabled = false;
-        }
-    }
 }

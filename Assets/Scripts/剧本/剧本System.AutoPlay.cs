@@ -100,6 +100,8 @@ public partial class 剧本System
 
     private void Update()
     {
+        if (UpdateReaderInput()) return;
+
         // 使用随组件启停的计时，避免面板隐藏后残留已被 Unity 停止的协程引用。
         if (!isAutoPlay || isWaitingForChoice || 已储存剧本 == null || 已阅读 >= 已储存剧本.Length)
         {

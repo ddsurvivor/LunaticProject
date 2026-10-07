@@ -4,7 +4,9 @@ using System.IO;
 using DG.Tweening;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
@@ -27,154 +29,148 @@ public class PieceDisplay : SerializedMonoBehaviour
     [OdinSerialize]
     public List<List<Sprite>> skillSpriteList = new();
 
-    private UnityAction finishAction;
+    // 每次播放独立持有进度和回调，旧播放不能完成新动作。
+    public sealed class Playback
+    {
+        public bool IsDone { get; internal set; }
+        public bool IsCancelled { get; internal set; }
+        public bool HasReleased { get; internal set; }
+        internal List<Sprite> Frames;
+        internal float Elapsed, FrameDuration, Duration;
+        internal bool Loop, ReturnToIdle;
+        internal UnityAction Release, Finish;
+    }
 
+    private const float frameDuration = 1f / 6f;
+    private Playback playback;
+    private PieceDisplayState state;
+    private bool pendingReaction;
+    private PieceDisplayState pendingReactionState;
+    private bool pendingReactionReturns;
+    public bool IsPlayingOneShot => playback != null && !playback.Loop && !playback.IsDone;
+    private bool IsAction => state == PieceDisplayState.Attack || state == PieceDisplayState.Shoot || state == PieceDisplayState.Skill;
 
-    private float frameDuration = 1 / 6f; // 12帧 //0.2f; // 每帧持续时间，默认为0.2秒
     /// <summary>
-    /// 更改显示状态脚本，传入一个状态和一个持续时间。
-    /// 如果是-1则表示永久更改（或等待动画播放完毕），否则持续时间结束后恢复到idle状态。
+    /// 保留旧调用签名和序列帧数据。一次性动画的正 duration 仅表示播完回待机，
+    /// 不再启动另一个计时器截断动画；循环动画仍可按 duration 结束。
     /// </summary>
-    public void ChangeDisplayState(PieceDisplayState state, bool back = false, float duration = -1f, UnityAction finish = null, int index = 0)
+    public void ChangeDisplayState(PieceDisplayState next, bool back = false, float duration = -1f,
+        UnityAction finish = null, int index = 0)
     {
-        if (pieceSpriteRenderer == null) return;
-        finishAction = finish;
-        StopAllCoroutines();
-
-        switch (state)
+        if (IsPlayingOneShot)
         {
-            case PieceDisplayState.Idle:
-                StartCoroutine(PlaySpriteAnimation(idleSprite, frameDuration, true));
-                break;
-            case PieceDisplayState.Move:
-                // 移动通常也是循环播放
-                StartCoroutine(PlaySpriteAnimation(moveSprite, frameDuration/2f, true));
-                break;
-            case PieceDisplayState.Attack:
-                StartCoroutine(PlaySpriteAnimation(meleeSprites, frameDuration));
-                break;
-            case PieceDisplayState.Shoot:
-                StartCoroutine(PlaySpriteAnimation(rangeSprites, frameDuration));
-                break;
-            case PieceDisplayState.Dodge:
-                StartCoroutine(PlaySpriteAnimation(dodgeSprite, frameDuration));
-                break;
-            case PieceDisplayState.Hit:
-                StartCoroutine(PlaySpriteAnimation(hitSprite, frameDuration));
-                break;
-            case PieceDisplayState.Death:
-                StartCoroutine(PlaySpriteAnimation(deathSprites, frameDuration));
-                break;
-            case PieceDisplayState.Skill:
-                if (index >= 0 && index < skillSpriteList.Count)
-                {
-                    StartCoroutine(PlaySpriteAnimation(skillSpriteList[index], frameDuration));
-                }
-                else
-                {
-                    Debug.LogWarning($"[PieceDisplay] 技能索引 {index} 超出范围。");
-                    finishAction?.Invoke();
-                }
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(state), state, null);
-        }
-
-        if (duration > 0)
-        {
-            StartCoroutine(RevertToIdleAfterDelay(duration));
-        }
-    }
-    
-    private IEnumerator RevertToIdleAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        //pieceSpriteRenderer.sprite = idleSprite;
-        // 进入idle动画状态
-        StartCoroutine(PlaySpriteAnimation(idleSprite, frameDuration,true));
-        finishAction?.Invoke();
-    }
-    
-    public void Dead()
-    {
-        // 死亡后隐藏棋子
-        pieceSpriteRenderer.DOFade(0f, 0.5f);
-    }
-
-    private IEnumerator PlaySpriteAnimation(List<Sprite> sprites, float frameDuration)
-    {
-        if (sprites == null || sprites.Count == 0)
-        {
-            finishAction?.Invoke();
-            yield break;
-        }
-        foreach (var sprite in sprites)
-        {
-            pieceSpriteRenderer.sprite = sprite;
-            yield return new WaitForSeconds(frameDuration);
-        }
-        finishAction?.Invoke();
-    }
-    private IEnumerator PlaySpriteAnimation(List<Sprite> sprites, float frameDuration, bool loop = false)
-    {
-        // 1. 防御性检查：没图片直接闪人，安全第一
-        if (sprites == null || sprites.Count == 0)
-        {
-            finishAction?.Invoke();
-            yield break;
-        }
-
-        int currentFrame = 0;
-
-        while (true)
-        {
-            // 2. 渲染当前帧
-            pieceSpriteRenderer.sprite = sprites[currentFrame];
-            yield return new WaitForSeconds(frameDuration);
-
-            // 3. 准备切到下一帧
-            currentFrame++;
-
-            // 4. 当一轮动画播放完毕时的核心逻辑判定
-            if (currentFrame >= sprites.Count)
+            // 移动/选择结束的 Idle 请求不得剪掉攻击、受击或死亡动画。
+            if (next == PieceDisplayState.Idle || next == PieceDisplayState.Move) return;
+            if ((next == PieceDisplayState.Hit || next == PieceDisplayState.Dodge) && IsAction)
             {
-                if (loop)
-                {
-                    currentFrame = 0; // 如果是循环，索引归零，继续跑 while
-                }
-                else
-                {
-                    break; // 如果不循环，直接跳出整个 while
-                }
+                pendingReaction = true;
+                pendingReactionState = next;
+                pendingReactionReturns = back || duration > 0f;
+                return;
             }
+            // 同一帧的多种伤害包只启动一次受击，不反复从第一帧播放。
+            if ((next == PieceDisplayState.Hit || next == PieceDisplayState.Dodge) && state == next) return;
         }
-
-        // 5. 只有跳出了 while 循环（即 loop = false 且播完）才会走到这里
-        finishAction?.Invoke();
+        StartPlayback(next, GetFrames(next, index), back || duration > 0f, finish, null, duration);
     }
-    
+
+    /// <summary>自动以序列中点作为出手帧，不需要逐个角色增加动画事件。</summary>
+    public Playback PlayAction(PieceDisplayState next, UnityAction release, int index = 0)
+    {
+        return StartPlayback(next, GetFrames(next, index), true, null, release, -1f);
+    }
+
+    private List<Sprite> GetFrames(PieceDisplayState next, int index)
+    {
+        switch (next)
+        {
+            case PieceDisplayState.Idle: return idleSprite;
+            case PieceDisplayState.Move: return moveSprite;
+            case PieceDisplayState.Attack: return meleeSprites;
+            case PieceDisplayState.Shoot: return rangeSprites;
+            case PieceDisplayState.Dodge: return dodgeSprite;
+            case PieceDisplayState.Hit: return hitSprite;
+            case PieceDisplayState.Death: return deathSprites;
+            case PieceDisplayState.Skill:
+                return skillSpriteList != null && index >= 0 && index < skillSpriteList.Count
+                    ? skillSpriteList[index] : null;
+            default: return null;
+        }
+    }
+
+    private Playback StartPlayback(PieceDisplayState next, List<Sprite> frames, bool back,
+        UnityAction finish, UnityAction release, float duration)
+    {
+        StopAnimation();
+        state = next;
+        playback = new Playback
+        {
+            Frames = frames, FrameDuration = next == PieceDisplayState.Move ? frameDuration / 2f : frameDuration,
+            Loop = next == PieceDisplayState.Idle || next == PieceDisplayState.Move,
+            ReturnToIdle = back, Finish = finish, Release = release, Duration = duration
+        };
+        if (pieceSpriteRenderer != null && frames != null && frames.Count > 0)
+            pieceSpriteRenderer.sprite = frames[0];
+        return playback;
+    }
+
+    private void Update()
+    {
+        var current = playback;
+        if (current == null || current.IsDone || Time.deltaTime <= 0f) return;
+        current.Elapsed += Time.deltaTime;
+        int count = pieceSpriteRenderer != null && current.Frames != null ? current.Frames.Count : 0;
+        int frame = Mathf.FloorToInt(current.Elapsed / current.FrameDuration);
+        if (count > 0)
+            pieceSpriteRenderer.sprite = current.Frames[current.Loop ? frame % count : Mathf.Min(frame, count - 1)];
+
+        // 即使低帧率跳过出手帧，仍只发送一次出手事件。空动画在下一次有效更新正常出手。
+        if (!current.HasReleased && (count == 0 || frame >= count / 2))
+        {
+            current.HasReleased = true;
+            current.Release?.Invoke();
+            if (playback != current) return;
+        }
+        bool finished = count == 0 || (!current.Loop && frame >= count) ||
+            (current.Loop && current.Duration > 0f && current.Elapsed >= current.Duration);
+        if (!finished) return;
+        current.IsDone = true;
+        playback = null;
+        bool reaction = pendingReaction;
+        bool reactionReturns = pendingReactionReturns;
+        pendingReaction = false;
+        if (reaction) ChangeDisplayState(pendingReactionState, reactionReturns);
+        else if (current.ReturnToIdle) ChangeDisplayState(PieceDisplayState.Idle);
+        // 先提交完成状态，再执行外部回调，允许回调安全地开启另一段动画。
+        current.Finish?.Invoke();
+    }
+
+    public void Dead() => pieceSpriteRenderer.DOFade(0f, 0.5f);
+
     public void PlayFrame(List<Sprite> sprites, UnityAction finish = null)
     {
-        finishAction = finish;
-        StartCoroutine(PlaySpriteAnimation(sprites, frameDuration));
+        StartPlayback(PieceDisplayState.Skill, sprites, false, finish, null, -1f);
     }
-    
+
     public void FaceRight(bool faceRight)
     {
         Vector3 scale = pieceSpriteRenderer.transform.localScale;
         scale.x = Mathf.Abs(scale.x) * (faceRight ? 1 : -1);
         pieceSpriteRenderer.transform.localScale = scale;
     }
-    
-    /// <summary>
-    /// 停止当前播放的序列帧动画，图片保持在当前帧不动
-    /// </summary>
+
     public void StopAnimation()
     {
-        StopAllCoroutines();
-        // 如果需要，这里也可以选择性地触发 finishAction?.Invoke(); 
-        // 视你的底层逻辑（比如是否有连招、动作锁）而定
+        if (playback != null && !playback.IsDone)
+        {
+            playback.IsCancelled = true;
+            playback.IsDone = true;
+        }
+        playback = null;
+        pendingReaction = false;
     }
+
+    private void OnDisable() => StopAnimation();
 
     #region 加载图片
 

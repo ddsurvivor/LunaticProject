@@ -6,6 +6,8 @@ $sources = @(
     'Assets/Scripts/Battle/Controllers/UnitAttrCenter.cs',
     'Assets/Scripts/Battle/Managers/DamageManager.cs',
     'Assets/Scripts/Battle/Managers/BuffManager.cs',
+    'Assets/Scripts/Battle/Managers/TipTextManager.cs',
+    'Assets/Scripts/Battle/UI/TipText.cs',
     'Assets/Scripts/Battle/Managers/SkillManager.cs',
     'Assets/Scripts/Battle/Managers/DiceCheckManager.cs',
     'Assets/Scripts/Battle/Controllers/PassiveSkill/CharacterSkillManager.cs',
@@ -18,10 +20,14 @@ $sources = @(
     'Assets/Scripts/Battle/Controllers/PassiveSkill/BasePassiveSkill.cs',
     'Assets/Scripts/Battle/Controllers/PassiveSkill/PassiveSkills.cs',
     'Assets/Scripts/玩家系统/交易/ItemPack.cs',
+    'Assets/Scripts/玩家系统/Player.cs',
+    'Assets/Scripts/UI/插件系统/ComponentConfig.cs',
     'Tests/BattleRegression/Stubs.cs',
     'Tests/BattleRegression/Program.cs',
     'Tests/BattleRegression/Batch2.cs',
-    'Tests/BattleRegression/BuffRegression.cs'
+    'Tests/BattleRegression/BuffRegression.cs',
+    'Tests/BattleRegression/ComponentRegression.cs',
+    'Tests/BattleRegression/FloatingTextRegression.cs'
 )
 $includes = $sources | ForEach-Object { '<Compile Include="' + [System.Security.SecurityElement]::Escape((Join-Path $repo $_)) + '" />' }
 $project = '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><EnableDefaultCompileItems>false</EnableDefaultCompileItems><NoWarn>0162;0169;0414;0649</NoWarn></PropertyGroup><ItemGroup>' + ($includes -join "`n") + '</ItemGroup></Project>'

@@ -65,6 +65,8 @@ public class Player
     /// <param name="val">操作数值 (仅在Add和Set模式下有效)</param>
     /// <returns>返回操作后的最终数值</returns>
     public int AccessAttribute(int index, AttrOp op, int val = 0) {
+        if (op == AttrOp.Get && index >= 0 && index <= 4)
+            return BaseAttribute(index) + ComponentEquipment.AttributeBonus(this, index);
         // 先获取目标属性的引用
         switch (index) {
             
@@ -89,6 +91,7 @@ public class Player
     private int Execute(ref int field, AttrOp op, int val) {
         if (op == AttrOp.Add) field += val;
         else if (op == AttrOp.Set) field = val;
+        else if (op == AttrOp.Sub) field -= val;
         return field; // Get 模式直接返回
     }
     private int ExecuteExp(ref int exp, AttrOp op, int val) {
@@ -133,8 +136,16 @@ public class Player
 
     public void Equip(int id)
     {
+        TryEquip(id);
+    }
+
+    public bool TryEquip(int id)
+    {
         ComponentData data = GM.Ins.DM.componentConfig.GetData(id);
-        if (data == null) return;
+        if (data == null || (data.type != ComponentType.Normal && data.type != ComponentType.Weapon) ||
+            !GM.Ins.PLAYERPROFILE.componentInventory.Contains(id) || IsEquipped(id)) return false;
+
+        normalSlots ??= new int[3]; weaponSlots ??= new int[2];
 
         int[] targetSlots = (data.type == ComponentType.Normal) ? normalSlots : weaponSlots;
 
@@ -144,24 +155,39 @@ public class Player
             {
                 targetSlots[i] = id;
                 GM.Ins.PLAYERPROFILE.componentInventory.Remove(id); // 从背包移除
-                break;
+                ComponentEquipment.RefreshBattle(this);
+                GM.Ins.AM.PlayAudio(AudioCueType.Equip);
+                return true;
             }
         }
-        GM.Ins.AM.PlayAudio(AudioCueType.Equip);
+        return false;
     }
 
     public void Unequip(int id)
     {
-        // 查找并重置槽位
-        for (int i = 0; i < normalSlots.Length; i++)
-            if (normalSlots[i] == id) { normalSlots[i] = 0; break; }
-            
-        for (int i = 0; i < weaponSlots.Length; i++)
-            if (weaponSlots[i] == id) { weaponSlots[i] = 0; break; }
-
-        GM.Ins.PLAYERPROFILE.componentInventory.Add(id); // 回到背包
-        GM.Ins.AM.PlayAudio(AudioCueType.Cancel);
+        TryUnequip(id);
     }
+
+    public bool IsEquipped(int id) => id > 0 &&
+        ((normalSlots != null && System.Array.IndexOf(normalSlots, id) >= 0) ||
+         (weaponSlots != null && System.Array.IndexOf(weaponSlots, id) >= 0));
+
+    public bool TryUnequip(int id)
+    {
+        if (!IsEquipped(id)) return false;
+        foreach (var slots in new[] { normalSlots, weaponSlots })
+            if (slots != null)
+                for (int i = 0; i < slots.Length; i++) if (slots[i] == id) slots[i] = 0;
+        if (!GM.Ins.PLAYERPROFILE.componentInventory.Contains(id)) GM.Ins.PLAYERPROFILE.componentInventory.Add(id);
+        ComponentEquipment.RefreshBattle(this);
+        GM.Ins.AM.PlayAudio(AudioCueType.Cancel);
+        return true;
+    }
+
+    private int BaseAttribute(int index) => index switch
+    {
+        0 => yizhi, 1 => tactics, 2 => Physique, 3 => Talk, 4 => Recognition, _ => 0
+    };
 
     
 

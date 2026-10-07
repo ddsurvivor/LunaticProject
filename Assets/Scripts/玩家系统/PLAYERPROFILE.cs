@@ -42,6 +42,29 @@ public class PLAYERPROFILE
     // 实际读取的表格文件名，与用于显示的剧情标题分开保存。
     public string currentScriptFile;
 
+    // 旧存档没有这些字段时，默认按已完成/地图状态加载，不猜测是否需要重播。
+    public bool isStoryInProgress;
+    public string resumeStoryScript;
+
+    public void BeginStory(string scriptFile)
+    {
+        isStoryInProgress = !string.IsNullOrWhiteSpace(scriptFile);
+        resumeStoryScript = isStoryInProgress ? scriptFile : null;
+        if (isStoryInProgress) isNewGame = false;
+    }
+
+    public void EndStory()
+    {
+        isStoryInProgress = false;
+        resumeStoryScript = null;
+    }
+
+    public bool TryGetStoryToResume(out string scriptFile)
+    {
+        scriptFile = isStoryInProgress ? resumeStoryScript : null;
+        return !string.IsNullOrWhiteSpace(scriptFile);
+    }
+
     public static int GetChapterNumberFromScript(string fileName)
     {
         if (string.IsNullOrWhiteSpace(fileName)) return 0;
@@ -159,6 +182,7 @@ public class PLAYERPROFILE
         //itemPacks.Add(new ItemPack(ItemName.应急医疗单元, 2));
         //初始化
         isNewGame = true;
+        EndStory();
 
         dateYear = 1567;
         dateMonth = 1;
@@ -374,16 +398,17 @@ public class PLAYERPROFILE
     
     public void AddComponentToInventory(int componentId)
     {
+        ComponentData compData = GM.Ins.DM.componentConfig.GetData(componentId);
+        if (compData == null) return;
         if (!componentInventory.Contains(componentId))
         {
             componentInventory.Add(componentId);
             Debug.Log($"添加组件 {componentId} 到仓库");
+            if (BattleScene.Ins != null) BattleScene.Ins.UM.ShowItemGet(compData);
         }
         else
         {
             // 显示提示
-            ComponentData compData = GM.Ins.DM.componentConfig.GetData(componentId);
-            if (BattleScene.Ins != null) BattleScene.Ins.UM.ShowItemGet(compData);
             Debug.LogWarning($"组件 {componentId} 已经在仓库中");
         }
     }

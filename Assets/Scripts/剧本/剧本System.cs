@@ -77,6 +77,7 @@ public partial class 剧本System : MonoBehaviour
         curPartName = t;
         已储存剧本 = 读取表格数据(t, Center.Languageint);
         记录上段剧情 = 已储存剧本;
+        RecordReadingStory(t);
     }
 
     public void Awake()
@@ -563,6 +564,7 @@ public partial class 剧本System : MonoBehaviour
                     if (go == null) continue; // 增加安全校验
                     GameObject text = go.GetComponent<打字机>()._textComponent.gameObject;
                     text.AddComponent<Button>();
+                    go.GetComponent<打字机>().ShowOption();
                     // 查询选项id，如果存在，则显示灰色
                     text.GetComponent<Text>().color = 
                         choiceList.Contains(curChoiceId) ? choiceSelectedColor : choiceColor;
@@ -613,6 +615,7 @@ public partial class 剧本System : MonoBehaviour
                 var prams = 指令切割(key);
                 已储存剧本 = 读取表格数据(prams[0], Center.Languageint);
                 curPartName = prams[0];
+                RecordReadingStory(prams[0]);
                 // 自动保存
                 //进度System.存档("cache");
                 记录上段剧情 = 已储存剧本;
@@ -958,6 +961,7 @@ public partial class 剧本System : MonoBehaviour
 
             if (key.Contains(Center.Command_Close))
             {
+                EndReadingStory();
                 this.gameObject.SetActive(false);
             }
 
@@ -1077,12 +1081,14 @@ public partial class 剧本System : MonoBehaviour
                 if (prams.Length >= 1)
                 {
                     string sceneName = prams[0];
+                    EndReadingStory();
                     GM.Ins.LoadScene(sceneName);
                 }
             }
 
             if (key.Contains(Center.Command_Finish))
             {
+                EndReadingStory();
                 LocalGameProgress.MarkGameFinished();
                 大地图System.instance.endingCreditsPlayer.Play();
             }

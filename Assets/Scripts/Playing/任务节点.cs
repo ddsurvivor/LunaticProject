@@ -12,6 +12,8 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     public bool 是主线;
     [LabelText("图标序号")]public int iconIndex;
     public Sprite[] 按钮节点图片;
+    public Sprite selectedNodeSprite;
+    public Vector2 nodeIconSize;
     public string[] 前置任务要求;
     public int[] 前置任务进度要求;
     [TextArea]
@@ -57,7 +59,7 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         {
             icon.sprite = 按钮节点图片[iconIndex];
             // 设置为原图尺寸
-            icon.SetNativeSize();
+            ApplyNodeIconSize();
         }
     }
 
@@ -83,7 +85,7 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         {
             icon.sprite = 按钮节点图片[iconIndex];
             // 设置为原图尺寸
-            icon.SetNativeSize();
+            ApplyNodeIconSize();
         }
         //GetComponentInChildren<Text>().text = gameObject.name.Replace("(Clone)","");
         
@@ -120,10 +122,26 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     }
     
     Sequence infoSequence;
+    private void ApplyNodeIconSize()
+    {
+        if (nodeIconSize.x > 0 && nodeIconSize.y > 0)
+            icon.rectTransform.sizeDelta = nodeIconSize;
+        else
+            icon.SetNativeSize();
+    }
+
     private void ShowDetialInfo()
     {
         if(isShowDetialInfo) return;
         isShowDetialInfo = true;
+        icon.transform.localScale = Vector3.one;
+        if (selectedNodeSprite != null)
+        {
+            icon.sprite = selectedNodeSprite;
+            if (nodeIconSize.x > 0 && nodeIconSize.y > 0)
+                icon.rectTransform.sizeDelta = nodeIconSize *
+                    (selectedNodeSprite.rect.width / 按钮节点图片[iconIndex].rect.width);
+        }
         smallPanel.SetActive(false);
         detialInfoPanel.SetActive(true);
         descText.gameObject.SetActive(false);
@@ -154,6 +172,12 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     public void CloseDetialInfo()
     {
         isShowDetialInfo = false;
+        if (iconIndex >= 0 && iconIndex < 按钮节点图片.Length)
+        {
+            icon.sprite = 按钮节点图片[iconIndex];
+            ApplyNodeIconSize();
+        }
+        icon.transform.localScale = Vector3.one;
         detialInfoPanel.SetActive(false);
         arrow.fillAmount = 0f;
     }

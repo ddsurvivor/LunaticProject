@@ -34,6 +34,12 @@ using UnityEngine.UI;
     [SerializeField][ReadOnly]
     private PieceController piece;
     
+    public UnityEngine.UI.Image healthShadowBar;
+
+    private readonly HealthBarFillAnimation healthAnimation = new();
+
+    private void OnDisable() => healthAnimation.Reset();
+
     public List<BuffCell> buffCells = new();
     public void OnSelectPiece(PieceController piece)
     {
@@ -55,8 +61,8 @@ using UnityEngine.UI;
         head.sprite = Resources.Load<Sprite>(name);
         pieceName.text = playerData.NAME;
         // 更新血量
-        float hpPercent = (float)playerData.curHealth / pieceData.maxHealth;
-        hpBar.fillAmount = hpPercent;
+        float hpPercent = pieceData.maxHealth > 0 ? (float)playerData.curHealth / pieceData.maxHealth : 0f;
+        healthAnimation.Update(hpBar, healthShadowBar, hpPercent, playerData);
         hpNumText.text = playerData.curHealth.ToString();
         hpMaxText.text = "/" + pieceData.maxHealth.ToString();
         // 更新魔法值图标
@@ -101,8 +107,9 @@ using UnityEngine.UI;
         head.sprite = Resources.Load<Sprite>(name);
         pieceName.text = playerData.NAME;
         // 更新血量
-        float hpPercent = (float)piece.unitAttrCenter.CurHealth / piece.unitAttrCenter.MaxHealth;
-        hpBar.fillAmount = hpPercent;
+        float hpPercent = piece.unitAttrCenter.MaxHealth > 0
+            ? (float)piece.unitAttrCenter.CurHealth / piece.unitAttrCenter.MaxHealth : 0f;
+        healthAnimation.Update(hpBar, healthShadowBar, hpPercent, piece);
         hpNumText.text = piece.unitAttrCenter.CurHealth.ToString();
         hpMaxText.text = "/" + piece.unitAttrCenter.MaxHealth.ToString();
         // 更新魔法值图标

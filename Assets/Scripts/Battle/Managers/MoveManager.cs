@@ -18,6 +18,15 @@ public class MoveManager : MonoBehaviour
     private bool isTracking = false;
     private float movementDeadline;
     public bool IsMoving => isTracking;
+    public PieceController MovingPiece => isTracking && agent != null ? agent.GetComponent<PieceController>() : null;
+    private GameObject previewPawn;
+    private bool hasValidMovePreview;
+
+    public bool TryGetPreviewPosition(GameObject pawnObject, out Vector3 position)
+    {
+        position = lastValidPreviewPosition;
+        return hasValidMovePreview && previewPawn == pawnObject;
+    }
 
     private void Awake()
     {
@@ -102,43 +111,33 @@ public class MoveManager : MonoBehaviour
     public void PreviewMove(GameObject pawnObject, Vector3 hoverPosition, float maxDistance)
     {
         if (pawnObject == null || pathRenderer == null) return;
-        pathRenderer.gameObject.SetActive(true);
-
-        // 性能优化点 1：使用鼠标原始坐标进行对比。如果鼠标动的距离非常微小，直接拦截
-        if (Vector3.Distance(hoverPosition, lastMousePreviewPosition) < mouseMoveThreshold)
+        if (previewPawn != pawnObject)
         {
+            ResetPreviewState();
+            previewPawn = pawnObject;
+        }
+        pathRenderer.gameObject.SetActive(true);
+        if (hasValidMovePreview && Vector3.Distance(hoverPosition, lastMousePreviewPosition) < mouseMoveThreshold) return;
+        lastMousePreviewPosition = hoverPosition;
+        var navigation = pawnObject.GetComponent<NavMeshAgent>();
+        tempPath ??= new NavMeshPath();
+        hasValidMovePreview = false;
+        if (navigation == null || maxDistance <= 0f ||
+            !NavMesh.CalculatePath(navigation.transform.position, hoverPosition, NavMesh.AllAreas, tempPath) ||
+            tempPath.status != NavMeshPathStatus.PathComplete || tempPath.corners.Length < 2)
+        {
+            lastValidPreviewPosition = Vector3.positiveInfinity;
+            ClearPathLine();
             return;
         }
-
-        // 记录本次有效的鼠标输入位置
-        lastMousePreviewPosition = hoverPosition;
-
-        NavMeshAgent agent = pawnObject.GetComponent<NavMeshAgent>();
-        if (agent == null) return;
-
-        // 2. 计算完整的寻路路径
-        if (NavMesh.CalculatePath(agent.transform.position, hoverPosition, NavMesh.AllAreas
-                , tempPath))
+        float totalPathLength = CalculatePathLength(tempPath);
+        if (totalPathLength <= maxDistance)
         {
-            float totalPathLength = CalculatePathLength(tempPath);
-
-            // 3. 距离判定
-            if (totalPathLength <= maxDistance)
-            {
-                // 情况 A：在范围内，正常绘制完整路径
-                DrawPath(tempPath);
-                lastValidPreviewPosition = hoverPosition; // 最终移动终点就是鼠标点
-            }
-            else
-            {
-                // 情况 B：超出范围！沿着导航折线截取最大距离的点
-                // 这里我们直接调用一个高效的裁剪绘制函数，避免二次进行 NavMesh 寻路计算，极大节省 CPU
-                Vector3 croppedPoint = DrawAndGetCroppedPath(tempPath, maxDistance);
-
-                // 此时，玩家点击确定后，棋子将走向这个截断点
-                lastValidPreviewPosition = croppedPoint;
-            }
+            DrawPath(tempPath);
+            lastValidPreviewPosition = tempPath.corners[tempPath.corners.Length - 1];
         }
+        else lastValidPreviewPosition = DrawAndGetCroppedPath(tempPath, maxDistance);
+        hasValidMovePreview = true;
     }
 
     /// <summary>只读 AI 寻路：返回实际落点和路程，不绘线、不切换 Agent、不覆盖玩家预览。</summary>
@@ -310,6 +309,8 @@ public class MoveManager : MonoBehaviour
     /// </summary>
     public void ResetPreviewState()
     {
+        hasValidMovePreview = false;
+        previewPawn = null;
         lastValidPreviewPosition = Vector3.positiveInfinity;
         lastMousePreviewPosition = Vector3.positiveInfinity; // 新增重置
         RestoreAllMovementPriorities();
@@ -457,6 +458,8 @@ public class MoveManager : MonoBehaviour
     /// </summary>
     public void ResetPreviewState()
     {
+        hasValidMovePreview = false;
+        previewPawn = null;
         lastValidPreviewPosition = Vector3.positiveInfinity; // 设为一个无穷远的值，确保下次必定触发计算
         ClearPathLine();
     }*/

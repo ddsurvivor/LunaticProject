@@ -91,11 +91,9 @@ public class TutorialUI : MonoBehaviour
         //PlayerPrefs.SetInt("TutorialSeen_" + _currentLevelName, 1);
         //PlayerPrefs.Save();
         GM.Ins.PLAYERPROFILE.seenTutorials.Add(_currentLevelName);
-        if (_isBattleStart)
-        {
-            BattleScene.Ins.BM.battleDialogueManager.TriggerBattleStart();
-            BattleScene.Ins.BM.PlayerStart();
-        }
+        bool battleStart = _isBattleStart;
+        _isBattleStart = false;
+        if (battleStart) BattleScene.Ins.BM.CompleteBattleIntroduction();
         gameObject.SetActive(false);
         GM.Ins.AM.PlayAudio(AudioCueType.Close);
     }

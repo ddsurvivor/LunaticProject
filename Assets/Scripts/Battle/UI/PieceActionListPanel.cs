@@ -409,7 +409,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 hoverScale.onHoverEnter.AddListener(() =>
                 {
                     BattleScene.Ins.UM.skillTooltipUI.ShowTooltip(
-                        pc.availableSkills[capturedIndex]);
+                        pc.availableSkills[capturedIndex], pc);
                 });
                 hoverScale.onHoverExit.AddListener(() =>
                 {

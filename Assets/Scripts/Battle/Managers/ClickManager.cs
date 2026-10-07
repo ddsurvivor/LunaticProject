@@ -4,7 +4,7 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 
 
-public class ClickManager : MonoBehaviour
+public partial class ClickManager : MonoBehaviour
 {
     // 正在拖动的棋子
     private PieceController _selectedPiece;
@@ -28,6 +28,7 @@ public class ClickManager : MonoBehaviour
 
     private void Update()
     {
+        if (BattleScene.Ins.BM.HasCombatPresentation) return;
         if (!BattleScene.Ins.BM.PlayerController.isInTurn) return;
 
         // 鼠标左键点击时发射射线检测
@@ -102,6 +103,7 @@ public class ClickManager : MonoBehaviour
         // 点击右键取消
         if (Input.GetMouseButtonDown(1))
         {
+            ClearEnemyTargetLines(true);
             if (_isDragging)
             {
                 _selectedPiece.transform.position = _dragStartPos;
@@ -109,7 +111,7 @@ public class ClickManager : MonoBehaviour
                 _selectedPiece = null;
                 _isDragging = false;
                 _rangeUI.CloseRange();
-                BattleScene.Ins.BM.moveManager.ClearPathLine();
+                BattleScene.Ins.BM.moveManager.ResetPreviewState();
             }
             BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
             BattleScene.Ins.UM.pieceInfoPanel.StopMpIconsBlink();
@@ -132,36 +134,36 @@ public class ClickManager : MonoBehaviour
 
     private PieceController lastHoveredPiece = null;
 
-    // LateUpdate 保持不变，只需修改射线检测部分
     public void LateUpdate()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit[] hits = Physics.RaycastAll(ray);
+        var scene = BattleScene.Ins;
+        if (scene == null || scene.BM == null || !scene.BM.CanInspectEnemyTargets)
+        {
+            SetHoveredPiece(null);
+            ClearEnemyTargetLines();
+            return;
+        }
+        bool overUI = UnityEngine.EventSystems.EventSystem.current != null &&
+            UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+        SetHoveredPiece(overUI ? null : FindPieceUnderPointer());
+        UpdateTargetLinePresentation();
+    }
 
-        PieceController currentHoveredPiece = null;
+    private PieceController FindPieceUnderPointer()
+    {
+        if (Camera.main == null) return null;
+        var hits = Physics.RaycastAll(Camera.main.ScreenPointToRay(Input.mousePosition));
+        PieceController nearest = null;
+        float distance = float.PositiveInfinity;
         foreach (var hit in hits)
         {
-            var piece = hit.collider.GetComponent<PieceController>();
-            if (piece != null)
-            {
-                currentHoveredPiece = piece;
-                if (lastHoveredPiece != currentHoveredPiece)
-                {
-                    if (lastHoveredPiece != null)
-                    {
-                        lastHoveredPiece.ShowOutline(false);
-                    }
-                    if (currentHoveredPiece != null)
-                    {
-                        currentHoveredPiece.ShowOutline(true);
-                    }
-                    lastHoveredPiece = currentHoveredPiece;
-                }
-                //break; // 只取第一个被射线穿透命中的棋子
-            }
+            var piece = hit.collider.GetComponentInParent<PieceController>();
+            if (piece == null || piece.isDead || !piece.gameObject.activeInHierarchy || hit.distance >= distance) continue;
+            if (piece is EnemyController enemy && !enemy.isActived) continue;
+            nearest = piece;
+            distance = hit.distance;
         }
-
-        
+        return nearest;
     }
 
     private void ClickPieceByIndex(int index)
@@ -171,6 +173,8 @@ public class ClickManager : MonoBehaviour
         {
             var piece = playerPieces[index];
             if (piece.cantControl || piece.isDead) return;
+            CancelMovementPreview();
+            ClearEnemyTargetLines(true);
             _selectedPiece?.CancelSelect();
             _selectedPiece = piece;
             piece.OnSelect();
@@ -184,51 +188,45 @@ public class ClickManager : MonoBehaviour
 
     private void ClickPiece()
     {
-        //BattleScene.Ins.BM.camera.SetFollow(null);
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit[] hits = Physics.RaycastAll(ray);
-
-        foreach (var hit in hits)
+        var piece = FindPieceUnderPointer();
+        if (piece == null) return;
+        CancelMovementPreview();
+        ClearEnemyTargetLines(true);
+        if (piece is EnemyController enemy)
         {
-            PieceController piece = hit.collider.GetComponent<PieceController>();
-            if (piece == null) continue;
-            if (!piece.isPlayerPiece)
-            {
-                if (piece is EnemyController enemy && enemy.isActived)
-                {
-                    enemy.ShowTargetLine();
-                }
-                continue;
-            }
-            if (piece.cantControl)continue;
-            if(piece.isDead) continue;
-            //if(piece.unitAttrCenter.CurMovePoint<=0) continue;
-            _selectedPiece?.CancelSelect();
-            //BattleScene.Ins.BM.camera.SetFollow(piece.transform);
-            _selectedPiece = piece;
-            piece.OnSelect();
-            Debug.Log($"点击棋子{piece.name}");
-            //piece.ShowActionList();
-            BattleScene.Ins.UM.ShowPieceActionPanel(piece);
-            BattleScene.Ins.UM.ShowPieceState(piece);
-            BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(piece);
-            BattleScene.Ins.BM.cameraController.SetFollow(piece.transform);
-            GM.Ins.AM.PlayAudio(AudioCueType.Select);
-            /*_selectedPiece.StartDrag();
-            
-            // 显示移动范围
-            _dragStartPos = _selectedPiece.transform.position;
-            _dragRange = _selectedPiece.unitAttrCenter.MoveRange;
-            _rangeUI.ShowCircleRange(_dragStartPos, _dragRange);*/
+            PinEnemyTargetLine(enemy);
             return;
         }
+        if (!piece.isPlayerPiece || piece.cantControl || piece.isDead) return;
+        _selectedPiece?.CancelSelect();
+        _selectedPiece = piece;
+        piece.OnSelect();
+        BattleScene.Ins.UM.ShowPieceActionPanel(piece);
+        BattleScene.Ins.UM.ShowPieceState(piece);
+        BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(piece);
+        BattleScene.Ins.BM.cameraController.SetFollow(piece.transform);
+        GM.Ins.AM.PlayAudio(AudioCueType.Select);
+    }
 
-        //_selectedPiece?.CancelSelect();
-        //_selectedPiece = null;
+    private void CancelMovementPreview()
+    {
+        if (!_isDragging) return;
+        if (dragMove && _selectedPiece != null)
+        {
+            _selectedPiece.transform.position = _dragStartPos;
+            _selectedPiece.pieceDisplay?.ChangeDisplayState(PieceDisplayState.Idle);
+        }
+        _isDragging = false;
+        _rangeUI?.CloseRange();
+        BattleScene.Ins?.BM?.moveManager?.ResetPreviewState();
     }
 
     public void StartDarg(PieceController piece)
     {
+        if (piece == null || piece.isDead || !piece.isPlayerPiece) return;
+        CancelMovementPreview();
+        ClearEnemyTargetLines(true);
+        BattleScene.Ins.BM.moveManager.ResetPreviewState();
         BattleScene.Ins.BM.cameraController.SetFollow(null);
         _selectedPiece = piece;
         _selectedPiece.StartDrag();
@@ -347,14 +345,12 @@ public class ClickManager : MonoBehaviour
             Debug.Log("停止拖动棋子");
             _isDragging = false;
             BattleScene.Ins.BM.cameraController.SetFollow(_selectedPiece.transform);
-            if (!_selectedPiece.unitAttrCenter.CostMP(ActionType.移动))
+            if (!BattleScene.Ins.BM.moveManager.TryGetPreviewPosition(_selectedPiece.gameObject, out var targetPos) ||
+                !_selectedPiece.unitAttrCenter.CostMP(ActionType.移动))
             {
                 _rangeUI.CloseRange();
                 return;
             }
-            Vector3 targetPos = new Vector3(_rangeUI.moveIcon.transform.position.x,
-                _selectedPiece.transform.position.y,
-                _rangeUI.moveIcon.transform.position.z);
             _selectedPiece.CheckFace(targetPos - _dragStartPos);
             _selectedPiece.StartMove();
             // 记录并显示撤回
@@ -371,7 +367,8 @@ public class ClickManager : MonoBehaviour
             //_selectedPiece = null;
             
             // 确定开始移动
-            BattleScene.Ins.BM.moveManager.ExecuteMove(_selectedPiece.gameObject, piece.StopMove);
+            if (BattleScene.Ins.BM.moveManager.ExecuteMove(_selectedPiece.gameObject, piece.StopMove) <= 0f)
+                piece.StopMove();
             
         }
     }

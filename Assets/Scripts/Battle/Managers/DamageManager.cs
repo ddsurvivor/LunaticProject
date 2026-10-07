@@ -10,6 +10,7 @@ public sealed class DamageManager
     public sealed class Settlement
     {
         public bool CanApplyEffects;
+        public bool HitAttack;
         public bool IsCritical;
         public readonly List<DamageInfo> DamageInfos = new();
     }
@@ -52,7 +53,7 @@ public sealed class DamageManager
         // 2. 仅实战掷骰；每个目标独立暴击，避免暴击传给后续目标。
         if (context.HitRate < 100 && UnityEngine.Random.Range(1, 101) > context.HitRate)
         {
-            target.pieceDisplay.ChangeDisplayState(PieceDisplayState.Dodge, false, 0.5f);
+            target.pieceDisplay.ChangeDisplayState(PieceDisplayState.Dodge, true, -1f);
             battle.tipTextManager.ShowMiss(target.transform);
             return result;
         }
@@ -83,6 +84,7 @@ public sealed class DamageManager
 
         // 4. 屏障阻挡整次攻击，破盾后本次剩余伤害和附加效果仍不穿透。
         result.CanApplyEffects = !context.BarrierBlocked;
+        result.HitAttack = result.CanApplyEffects && skill.attackPacks.Count > 0;
         return result;
     }
 
@@ -162,6 +164,8 @@ public sealed class DamageManager
             or SkillTarget.All or SkillTarget.Self or SkillTarget.AllyBody or SkillTarget.Ally;
         context.HitRate = guaranteed ? 100 : Mathf.Clamp(Mathf.FloorToInt(
             attacker.unitAttrCenter.buffAttrDic[BuffAttrType.HitRate]
+            + (skill.target is SkillTarget.Enemy or SkillTarget.FarthestEnemy
+                ? attacker.unitAttrCenter.buffAttrDic[BuffAttrType.SingleTargetHitRate] : 0f)
             - target.unitAttrCenter.buffAttrDic[BuffAttrType.EvasionRate]
             - (context.Cover != null ? context.Cover.evadeChance : 0)), 0, 100);
         SetRecognition(ref context, skill, check);

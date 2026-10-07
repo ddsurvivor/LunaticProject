@@ -179,6 +179,7 @@ public class PlayerController : SerializedMonoBehaviour
     // UI
     public void OnClickTurnEnd()
     {
+        if (BattleScene.Ins.BM.HasCombatPresentation) return;
         BattleScene.Ins.BM.ChangeTurn();
         BattleScene.Ins.UM.endTurnButton.enabled = false;
     }

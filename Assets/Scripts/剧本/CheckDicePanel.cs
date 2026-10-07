@@ -6,6 +6,12 @@ using DG.Tweening;
 
 public class CheckDicePanel : MonoBehaviour
 {
+    public bool IsRolling { get; private set; }
+    private void OnDisable()
+    {
+        StopAllCoroutines();
+        IsRolling = false;
+    }
     [Header("骰子六面图片")] public Sprite[] diceSprites; // 0-5分别代表1-6点
     public RectTransform bgPanel;// 背景
     private float w = 900f;
@@ -41,6 +47,8 @@ public class CheckDicePanel : MonoBehaviour
     /// <param name="isSuccess">是否判定成功</param>
     public void ShowResult(int diceCount, int[] diceResult, bool isSuccess)
     {
+        StopAllCoroutines();
+        IsRolling = true;
         gameObject.SetActive(true);
         success.gameObject.SetActive(false);
         fail.gameObject.SetActive(false);
@@ -115,6 +123,7 @@ public class CheckDicePanel : MonoBehaviour
         {
             ShowCheckResult(isSuccess);
         }
+        IsRolling = false;
         yield return new WaitForSeconds(closeDelay);
         // 关闭界面
         gameObject.SetActive(false);

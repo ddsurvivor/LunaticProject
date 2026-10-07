@@ -20,6 +20,7 @@ public class 打字机 : MonoBehaviour
     private GameObject outline;
     [SerializeField]
     private RectTransform fill;
+    [SerializeField] private bool avgUI;
 
     public float 初始化(string 文本)
     {
@@ -66,7 +67,7 @@ public class 打字机 : MonoBehaviour
 
     IEnumerator ShowText()
     {
-        _textComponent.color = new Color(1, 1, 1, 1); // 确保文本在显示时是可见的
+        _textComponent.color = DefaultTextColor;
         for (int i = 0; i < 完整文本.Length; i++)
         {
             currentText = 完整文本.Substring(0, i + 1);
@@ -118,7 +119,7 @@ public class 打字机 : MonoBehaviour
     private IEnumerator TypeText(string fullContent)
     {
         _textComponent.text = "";
-        _textComponent.color = new Color(1, 1, 1, 1); // 确保文本在显示时是可见的
+        _textComponent.color = DefaultTextColor;
         // 正则表达式：匹配 <tag> 或 </tag>
         // 旧版 Text 支持的标签有限：<b>, <i>, <size>, <color>
         string tagRegex = @"<[^>]+>";
@@ -204,9 +205,38 @@ public class 打字机 : MonoBehaviour
     /// </summary>
     public void ShowSelect()
     {
+        if (avgUI)
+        {
+            ShowOption();
+            outline.GetComponent<UnityEngine.UI.Image>().color = new Color(0.91f, 0.65f, 0.17f);
+            return;
+        }
         _textComponent.GetComponent<Text>().color = Color.white;
         fill.gameObject.SetActive(true);
         fill.sizeDelta = _textComponent.GetComponent<RectTransform>().sizeDelta + new Vector2(20, 20); // 根据文本大小调整背景框
+    }
+    private Color DefaultTextColor => avgUI
+        ? new Color(0.937255f, 0.913725f, 0.819608f)
+        : Color.white;
+
+    public void ShowOption()
+    {
+        if (!avgUI) return;
+        outline.SetActive(true);
+        var background = outline.GetComponent<UnityEngine.UI.Image>();
+        var rect = (RectTransform)outline.transform;
+        rect.sizeDelta = new Vector2(0, _textComponent.rectTransform.rect.height + 20);
+        var button = _textComponent.GetComponent<UnityEngine.UI.Button>();
+        if (button != null)
+        {
+            // Keep the existing text hit area and route hover tint to the choice frame.
+            button.targetGraphic = background;
+            var colors = button.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(0.91f, 0.65f, 0.17f);
+            colors.selectedColor = colors.highlightedColor;
+            button.colors = colors;
+        }
     }
     /// <summary>
     /// 设置为关闭的选项

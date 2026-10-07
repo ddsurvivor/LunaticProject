@@ -50,8 +50,18 @@ using UnityEngine.SceneManagement;
             // 如果当前场景名称包含battle，则调用战斗
             if (SceneManager.GetActiveScene().name.Contains("BATTLE") || SceneManager.GetActiveScene().name.Contains("Boss"))
             {
-                DOVirtual.DelayedCall(0.5f, () => { BattleScene.Ins.BM.StartBattle(); });
+                // 捕获本次调试场景的管理器，不在延迟回调中查找届时的新场景单例。
+                var manager = FindObjectOfType<BattleManager>();
+                if (manager != null) StartCoroutine(DebugBattleStartRoutine(manager, SceneManager.GetActiveScene()));
             }
+        }
+
+        private IEnumerator DebugBattleStartRoutine(BattleManager manager, Scene scene)
+        {
+            yield return new WaitForSecondsRealtime(0.5f);
+            if (manager != null && manager.isActiveAndEnabled && !IsTransitioning &&
+                manager.gameObject.scene == scene && SceneManager.GetActiveScene() == scene)
+                manager.StartBattle();
         }
 
         /// <summary>统一普通切场景入口，可直接绑定 UnityEvent(string)。</summary>
@@ -79,6 +89,8 @@ using UnityEngine.SceneManagement;
         public void StartBattle(string sceneName, string storyAfterBattle, int setting = 0)
         {
             if (!CanLoadScene(sceneName)) return;
+            if (大地图System.instance != null && 大地图System.instance.剧情 != null)
+                大地图System.instance.剧情.EndReadingStory();
             battleScene = sceneName;
             endLog = storyAfterBattle;
             battleSetting = setting;
@@ -151,13 +163,14 @@ using UnityEngine.SceneManagement;
                     if (大地图System.instance != null)
                     {
                         大地图System.instance.InitializeMap();
-                        大地图System.instance.BlackSceneChapter(storyAfterBattle);
                     }
                 });
                 if (loaded)
                 {
                     var manager = FindObjectOfType<BattleManager>();
                     if (manager != null) manager.StartBattle();
+                    if (大地图System.instance != null)
+                        大地图System.instance.StartStoryAfterLoad(storyAfterBattle);
                 }
             }
             finally
@@ -171,7 +184,7 @@ using UnityEngine.SceneManagement;
             if (大地图System.instance != null)
             {
                 大地图System.instance.InitializeMap();
-                大地图System.instance.BlackSceneChapter(endLog);
+                大地图System.instance.StartStoryAfterLoad(endLog);
             }
         }
     }

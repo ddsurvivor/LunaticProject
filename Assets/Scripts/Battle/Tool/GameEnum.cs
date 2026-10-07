@@ -191,6 +191,7 @@ public enum BuffAttrType
     MoveRangePercent = 5,
     // 动能护甲剩余倍率，100 为完整护甲，70 为剩余 70%
     MeleeArmorPercent = 6,
+    SingleTargetHitRate = 7,
 }
 
 public enum BattleItemType
@@ -331,6 +332,7 @@ public enum PassiveType
     
     [LabelText("内爆")]
     Implosion = 3,
+    [LabelText("蛛丝")] SpiderSilk = 4,
 }
 
 public enum PassiveTriggerType

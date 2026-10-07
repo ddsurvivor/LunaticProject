@@ -20,8 +20,15 @@ public class PieceHeadUI : MonoBehaviour
     private Vector3 normalScale = Vector3.one;
     private Vector3 selectedScale = new Vector3(1.2f, 1.2f, 1.2f);
     
+    public UnityEngine.UI.Image healthShadowBar;
+
+    private readonly HealthBarFillAnimation healthAnimation = new();
+
+    private void OnDisable() => healthAnimation.Reset();
+
     public void Init()
     {
+        healthAnimation.Reset();
         UpdateHealthDisplay();
         SetSelected(false);
     }
@@ -47,7 +54,7 @@ public class PieceHeadUI : MonoBehaviour
     // 更新血量显示
     public void UpdateHealth(float currentHealth, float maxHealth)
     {
-        healthPercent = Mathf.Clamp01(currentHealth / maxHealth);
+        healthPercent = maxHealth > 0f ? Mathf.Clamp01(currentHealth / maxHealth) : 0f;
         UpdateHealthDisplay();
     }
     
@@ -56,7 +63,7 @@ public class PieceHeadUI : MonoBehaviour
     {
         if (healthBar != null)
         {
-            healthBar.fillAmount = healthPercent;
+            healthAnimation.Update(healthBar, healthShadowBar, healthPercent, this);
         }
         
         if (healthText != null)

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
@@ -56,7 +57,7 @@ public class PieceController : MonoBehaviour
     private bool _isUsingSkill = false; // 是否正在使用技能
     public bool IsUsingSkill
     {
-        get { return _isUsingSkill || _isAttacking; }
+        get { return _isUsingSkill || _isAttacking || IsPerformingAction; }
     }
 
     public bool isUsingOrder;
@@ -97,10 +98,50 @@ public class PieceController : MonoBehaviour
 
     private SkillSystem.CharacterSkillManager passiveManager;
 
+    public bool IsPerformingAction { get; private set; }
+    private Coroutine combatRoutine;
+    private int combatVersion;
+    private PieceDisplay.Playback actionPlayback;
+    private Tween projectileTween;
+    private Tween hitShake;
+    private Vector3 hitShakeOrigin;
+
+    protected void CancelCombatAction()
+    {
+        combatVersion++;
+        if (actionPlayback != null && !actionPlayback.IsDone) pieceDisplay?.StopAnimation();
+        actionPlayback = null;
+        if (combatRoutine != null) StopCoroutine(combatRoutine);
+        combatRoutine = null;
+        projectileTween?.Kill();
+        projectileTween = null;
+        IsPerformingAction = false;
+    }
+
+    protected virtual void OnDisable()
+    {
+        CancelCombatAction();
+        StopHitShake();
+        _isAttacking = _isUsingSkill = false;
+        pieceDisplay?.StopAnimation();
+    }
+
+    protected void StopHitShake()
+    {
+        if (hitShake == null) return;
+        hitShake.Kill();
+        hitShake = null;
+        if (pieceDisplay != null && pieceDisplay.pieceSpriteRenderer != null)
+            pieceDisplay.pieceSpriteRenderer.transform.localPosition = hitShakeOrigin;
+    }
+
     private void OnDestroy() => passiveManager?.UnregisterPiece(gameObject);
 
     public void Init(PlayerController player, PieceData pieceData = null)
     {
+        CancelCombatAction();
+        StopHitShake();
+        pieceDisplay?.StopAnimation();
         passiveManager = BattleScene.Ins?.BM?.characterSkillManager;
         passiveManager?.UnregisterPiece(gameObject);
         this.player = player;
@@ -123,7 +164,7 @@ public class PieceController : MonoBehaviour
         if (pieceData != null)
         {
             _pieceData = pieceData;
-            availableSkills = pieceData?.skillPacks;
+            availableSkills = pieceData.skillPacks != null ? new List<SkillPack>(pieceData.skillPacks) : new();
             // 敌人按场景等级加载成长，玩家保持原属性初始化流程。
             if (this is EnemyController enemy)
                 unitAttrCenter.SetEnemyData(_pieceData, enemy.Level);
@@ -170,6 +211,7 @@ public class PieceController : MonoBehaviour
 
     private void Update()
     {
+        if (BattleScene.Ins != null && BattleScene.Ins.BM.HasCombatPresentation) return;
         if (cantControl) return;
         if (!isPlayerPiece) return;
         if (_isAttacking)
@@ -379,6 +421,7 @@ public class PieceController : MonoBehaviour
 
     public void StartNormalAttack(bool range = false)
     {
+        if (IsPerformingAction) return;
         _isAttacking = true;
         if (!range) // 近战攻击
         {
@@ -437,202 +480,137 @@ public class PieceController : MonoBehaviour
     /// <summary>
     /// 夹击和警戒专用，直接发动普通攻击
     /// </summary>
-    /// <param name="pieceController"></param>
+    /// <param name="target"></param>
     /// <param name="range"></param>
-    public void CastNormalAttack(PieceController pieceController, bool range = false, bool isOrder = false)
+    public void CastNormalAttack(PieceController target, bool range = false, bool isOrder = false)
     {
-        if (isDead || !BuffManager.CanTarget(this, pieceController)) return;
-        _curAttackPack = range? _pieceData.rangedAtk : _pieceData.meleeAtk;
-        _curAtkType = range ? ActionType.远程攻击 : ActionType.近战攻击; 
-        //if(!_isAttacking) return;
-        // 根据范围获取所有棋子
-        List<PieceController> targets = new List<PieceController>(){pieceController};
-        if (targets.Count < 1)
-        {
-            Debug.Log("未选中任何目标，无法发动技能");
-            return;
-        }
-
-        Debug.Log("棋子攻击");
-        CheckFace(targets[0].transform.position - transform.position);
-        if (_curAtkType == ActionType.近战攻击)
-        {
-            pieceDisplay.ChangeDisplayState(PieceDisplayState.Attack, false, 1f);
-            PlayAudio(ActionType.近战攻击);
-            PassiveTrigger(PassiveTriggerType.OnMeleeAttack,_curAttackPack, targets[0].transform.position);
-        }
-        else if (_curAtkType == ActionType.远程攻击)
-        {
-            pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
-            // 消耗弹药
-            unitAttrCenter.CostAmmo();
-            PlayAudio(ActionType.远程攻击);
-            PassiveTrigger(PassiveTriggerType.OnRangedAttack);
-        }
-
-
-        // // 不进行聚能充能
-        // if (isPlayerPiece)
-        // {
-        //     if (!BattleScene.Ins.BM.PlayerController.isBursting)
-        //     {
-        //         // 攻击充能
-        //         BattleScene.Ins.BM.PlayerController.ChargeBurst(GameConst.attackBurstCharge);
-        //     }
-        // }
-
-
-        // 结束攻击状态
+        if (IsPerformingAction || isDead || !BuffManager.CanTarget(this, target)) return;
+        var skill = range ? _pieceData.rangedAtk : _pieceData.meleeAtk;
+        var action = range ? ActionType.远程攻击 : ActionType.近战攻击;
+        if (skill == null || (range && unitAttrCenter.AmmoCount <= 0)) return;
+        if (range) unitAttrCenter.CostAmmo();
         _isAttacking = false;
-        if (targets.Count > 0)
-        {
-            ShootBolt(targets[0].transform.position, _curAttackPack.bulletVFXType);
-        }
-        Transform atkPos = targets[0].transform;
-        if (atkPos != null && _curAttackPack.skillVFXType != 0)
-        {
-                    
-            GameObject fx  = ObjectPool.Ins.GenerateObject(
-                _curAttackPack.skillVFXType,
-                atkPos.position + Vector3.up * 0.1f,
-                atkPos.localRotation);
-            if (_curAttackPack.isRotate)
-            {
-                // fx沿 z轴 旋转，方向为从transfrom指向atkPos
-                Vector3 dir = (atkPos.position - transform.position).normalized;
-                dir.y = 0;
-                float angle = Mathf.Atan2(dir.z, dir.x) * Mathf.Rad2Deg;
-                fx.transform.rotation = Quaternion.Euler(45,  -45, angle + 90f);
-                Debug.Log($"生成技能特效{_curAttackPack.skillVFXType},{dir}旋转角度{angle}");
-            }
-        }
-        // 延迟0.3f
-        DOVirtual.DelayedCall(0.6f
-            , () =>
-            {
-                //if (!unitAttrCenter.CostMP()) return;
-                BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack,
-                    atkPos != null ? atkPos.position : Vector3.zero
-                    , _curAtkType, isFlank: !isOrder);
-                rangeUI.CloseRange();
-            }, false);
-
+        BeginCombatAction(skill, new List<PieceController> { target }, target.transform.position,
+            action, range ? PieceDisplayState.Shoot : PieceDisplayState.Attack, !isOrder);
     }
 
     private void CastAttack()
     {
-        if(!_isAttacking) return;
-        // 根据范围获取所有棋子
-        List<PieceController> targets = rangeUI.GetCurTargets;
-        if (targets.Count < 1 && _curAttackPack.target != SkillTarget.Area)
-        {
-            Debug.Log("未选中任何目标，无法发动技能");
-            return;
-        }
-
-        Debug.Log("棋子攻击");
-        if (targets.Count > 0) CheckFace(targets[0].transform.position - transform.position);
-        if (_curAtkType == ActionType.近战攻击)
-        {
-            pieceDisplay.ChangeDisplayState(PieceDisplayState.Attack, false, 1f);
-            PlayAudio(ActionType.近战攻击);
-            PassiveTrigger(PassiveTriggerType.OnMeleeAttack,_curAttackPack, targets[0].transform.position);
-        }
-        else if (_curAtkType == ActionType.远程攻击)
-        {
-            pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
-            // 消耗弹药
-            unitAttrCenter.CostAmmo();
-            PlayAudio(ActionType.远程攻击);
-            PassiveTrigger(PassiveTriggerType.OnRangedAttack);
-        }
-
-
-        // // 聚能充能
-        // if (isPlayerPiece)
-        // {
-        //     if (!BattleScene.Ins.BM.PlayerController.isBursting)
-        //     {
-        //         // 攻击充能
-        //         BattleScene.Ins.BM.PlayerController.ChargeBurst(GameConst.attackBurstCharge);
-        //     }
-        // }
-
-
-        // 结束攻击状态
+        if (!_isAttacking || IsPerformingAction || isDead) return;
+        var skill = _curAttackPack;
+        var action = _curAtkType;
+        var targets = new List<PieceController>(rangeUI.GetCurTargets);
+        if (skill == null || (targets.Count == 0 && skill.target != SkillTarget.Area)) return;
+        bool ranged = action == ActionType.远程攻击;
+        if (ranged && unitAttrCenter.AmmoCount <= 0) return;
+        Vector3 position = rangeUI.GetSkillTransform() != null ? rangeUI.GetSkillTransform().position
+            : targets.Count > 0 ? targets[0].transform.position : transform.position;
+        // 在动作开始时一次性支付，避免动画播完后才发现行动力不足。
+        if (!unitAttrCenter.CostMP(action)) return;
+        if (ranged) unitAttrCenter.CostAmmo();
         _isAttacking = false;
-        if (targets.Count > 0)
-        {
-            ShootBolt(targets[0].transform.position, _curAttackPack.bulletVFXType);
-        }
-        Transform atkPos = rangeUI.GetSkillTransform();
-        if (atkPos != null && _curAttackPack.skillVFXType != 0)
-        {
-                    
-            GameObject fx  = ObjectPool.Ins.GenerateObject(
-                _curAttackPack.skillVFXType,
-                atkPos.position + Vector3.up * 0.1f,
-                atkPos.localRotation);
-            if (_curAttackPack.isRotate)
-            {
-                // fx沿 z轴 旋转，方向为从transfrom指向atkPos
-                Vector3 dir = (atkPos.position - transform.position).normalized;
-                dir.y = 0;
-                float angle = Mathf.Atan2(dir.z, dir.x) * Mathf.Rad2Deg;
-                fx.transform.rotation = Quaternion.Euler(45,  -45, angle + 90f);
-                Debug.Log($"生成技能特效{_curAttackPack.skillVFXType},{dir}旋转角度{angle}");
-            }
-        }
-        // 延迟0.3f
-        DOVirtual.DelayedCall(0.6f
-            , () =>
-            {
-                if (!unitAttrCenter.CostMP(_curAtkType)) return;
-                BattleScene.Ins.BM.PieceSkill(this, targets, _curAttackPack,
-                    atkPos !=null ? atkPos.position : Vector3.zero
-                    , _curAtkType);
-                rangeUI.CloseRange();
-            }, false);
-
-        // 技能聚能充能
+        rangeUI.CloseRange();
+        BeginCombatAction(skill, targets, position, action,
+            ranged ? PieceDisplayState.Shoot : PieceDisplayState.Attack);
     }
 
-
-    /*public void Attack(PieceController enemy)
+    /// <summary>
+    /// 统一玩家、AI、夹击：动画出手帧 -> 弹道到达 -> 伤害/受击 -> 动画结束。
+    /// 参数与目标列表在开始时快照，不能被下一次选技能或关闭范围 UI 改写。
+    /// </summary>
+    protected void BeginCombatAction(SkillPack skill, List<PieceController> targets, Vector3 position,
+        ActionType action, PieceDisplayState displayState, bool isFlank = false,
+        CheckResult check = CheckResult.None, bool waitForRecognition = false)
     {
-        Debug.Log("棋子攻击");
-        if (_curAtkType == ActionType.近战攻击)
-        {
-            pieceDisplay.ChangeDisplayState(PieceDisplayState.Attack, false, 1f);
-            PlayAudio(ActionType.近战攻击);
-        }
-        else if (_curAtkType == ActionType.远程攻击)
-        {
-            pieceDisplay.ChangeDisplayState(PieceDisplayState.Shoot, false, 1f);
-            // 消耗弹药
-            unitAttrCenter.CostAmmo();
-            PlayAudio(ActionType.远程攻击);
-        }
+        if (IsPerformingAction || isDead || !isActiveAndEnabled) return;
+        IsPerformingAction = true;
+        combatVersion++;
+        BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
+        combatRoutine = StartCoroutine(CombatActionRoutine(skill, new List<PieceController>(targets),
+            position, action, displayState, isFlank, check, waitForRecognition));
+    }
 
-
-        // 聚能充能
-        if (isPlayerPiece)
+    private IEnumerator CombatActionRoutine(SkillPack skill, List<PieceController> targets, Vector3 position,
+        ActionType action, PieceDisplayState displayState, bool isFlank, CheckResult check, bool waitForRecognition)
+    {
+        int version = combatVersion;
+        try
         {
-            if (!BattleScene.Ins.BM.PlayerController.isBursting)
+            // 让协程句柄先归属本动作；等待检定真正显示结果，不猜测面板时长。
+            yield return null;
+            var dicePanel = BattleScene.Ins.BM.diceCheckManager.checkDicePanel;
+            while (waitForRecognition && dicePanel != null && dicePanel.IsRolling) yield return null;
+            if (isDead || !isActiveAndEnabled) yield break;
+            CheckFace(position - transform.position);
+            if (displayState == PieceDisplayState.Skill || !isPlayerPiece) PlayAudio(skill);
+            else PlayAudio(action);
+            bool impactDone = false;
+            bool launched = false;
+            Action impact = () =>
             {
-                // 攻击充能
-                BattleScene.Ins.BM.PlayerController.ChargeBurst(GameConst.attackBurstCharge);
+                if (impactDone || version != combatVersion) return;
+                impactDone = true;
+                if (this == null || isDead || !isActiveAndEnabled || BattleScene.Ins == null) return;
+                ShowSkillImpact(skill, position);
+                BattleScene.Ins.BM.PieceSkill(this, targets, skill, position, action, check, isFlank);
+                if (this is EnemyController enemy)
+                    enemy.enemyCanvas?.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
+            };
+            UnityAction release = () =>
+            {
+                if (launched || version != combatVersion || isDead || !isActiveAndEnabled) return;
+                launched = true;
+                projectileTween = ShootBolt(position, skill.bulletVFXType, impact);
+            };
+            PieceDisplay.Playback animation = null;
+            if (pieceDisplay != null && pieceDisplay.isActiveAndEnabled)
+                animation = pieceDisplay.PlayAction(displayState, release, skill.animationIndex);
+            else release();
+            actionPlayback = animation;
+
+            while (!impactDone || (animation != null && !animation.IsDone))
+            {
+                if (isDead || (animation != null && animation.IsCancelled)) yield break;
+                // 外部回收/销毁弹道只取消本次动作，不补发已取消的伤害。
+                if (launched && !impactDone && (projectileTween == null || !projectileTween.IsActive())) yield break;
+                yield return null;
+            }
+            // 不靠固定秒数猜测受击何时结束；聚能保持最后一帧不算仍在播放。
+            while (HasPendingReaction(targets) || (pieceDisplay != null && pieceDisplay.IsPlayingOneShot))
+            {
+                if (isDead) yield break;
+                yield return null;
             }
         }
-
-        BattleScene.Ins.BM.camera.FocusShake(enemy.transform);
-        // 延迟0.3f
-        DOVirtual.DelayedCall(0.3f, () =>
+        finally
         {
-            // 执行攻击
-            BattleScene.Ins.BM.PieceSkill(this, new List<PieceController>(){enemy}, _curAttackPack);
-        }, false);
-    }*/
+            if (actionPlayback != null && !actionPlayback.IsDone) pieceDisplay?.StopAnimation();
+            actionPlayback = null;
+            projectileTween?.Kill();
+            projectileTween = null;
+            IsPerformingAction = false;
+            combatRoutine = null;
+        }
+    }
+
+    private static bool HasPendingReaction(List<PieceController> targets)
+    {
+        foreach (var target in targets)
+            if (target != null && target.gameObject.activeInHierarchy && target.pieceDisplay != null &&
+                target.pieceDisplay.IsPlayingOneShot) return true;
+        return false;
+    }
+
+    private void ShowSkillImpact(SkillPack skill, Vector3 position)
+    {
+        if (skill.skillVFXType == ItemType.NONE) return;
+        var fx = ObjectPool.Ins.GenerateObject(skill.skillVFXType,
+            position + Vector3.up * 0.1f, Quaternion.identity);
+        if (fx == null || !skill.isRotate) return;
+        Vector3 dir = (position - transform.position).normalized;
+        float angle = Mathf.Atan2(dir.z, dir.x) * Mathf.Rad2Deg;
+        fx.transform.rotation = Quaternion.Euler(45, -45, angle + 90f);
+    }
 
     public void Hurt()
     {
@@ -654,11 +632,14 @@ public class PieceController : MonoBehaviour
         }
         else
         {
-            pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, 0.5f);
+            pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, true);
         }
 
         // TODO: 根据受伤的数值改变振动的强度
-        pieceDisplay.pieceSpriteRenderer.transform.DOShakePosition(0.5f, 0.8f);
+        StopHitShake();
+        hitShakeOrigin = pieceDisplay.pieceSpriteRenderer.transform.localPosition;
+        hitShake = pieceDisplay.pieceSpriteRenderer.transform.DOShakePosition(0.5f, 0.8f)
+            .OnComplete(StopHitShake);
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
         //if (uiCanvas != null) uiCanvas.SetActive(true);
         ShowHighlight(false);
@@ -666,6 +647,9 @@ public class PieceController : MonoBehaviour
 
     public virtual void Dead()
     {
+        CancelCombatAction();
+        StopHitShake();
+        BattleScene.Ins.TM.RequestHitStop();
         Debug.Log($"{this.name} 死亡");
         OnDead?.Invoke();
         //if (uiCanvas != null) uiCanvas.SetActive(false);
@@ -695,7 +679,8 @@ public class PieceController : MonoBehaviour
 
     public void StartSkillAttack(SkillPack skillPack)
     {
-        if (!unitAttrCenter.HasMana(skillPack.mpCost))
+        if (IsPerformingAction) return;
+        if (!unitAttrCenter.HasMana(unitAttrCenter.GetSkillManaCost(skillPack)))
         {
             Debug.Log("能量不足");
             return;
@@ -708,7 +693,7 @@ public class PieceController : MonoBehaviour
 
     public bool SkillAvailable(SkillPack skillPack)
     {
-        if (!unitAttrCenter.HasMana(skillPack.mpCost)) return false;
+        if (!unitAttrCenter.HasMana(unitAttrCenter.GetSkillManaCost(skillPack))) return false;
         if (!unitAttrCenter.HasItem(skillPack.consumeItems)) return false;
         return true;
     }
@@ -719,128 +704,42 @@ public class PieceController : MonoBehaviour
     public virtual void CastSkill()
     {
         var skill = _skillPack;
-        if (skill == null) return;
-        if(!_isUsingSkill) return;
+        if (skill == null || !_isUsingSkill || IsPerformingAction || isDead) return;
         Transform atkPos = rangeUI.GetSkillTransform();
-        if (skill.isDelaySkill) // 延时类技能跳过结算
+        if (skill.isDelaySkill)
         {
             if (atkPos == null || !unitAttrCenter.TryCostSkill(skill)) return;
             NotifySkillUsed(skill);
             BattleScene.Ins.BM.RestoreDelaySkill(this, skill, atkPos.position);
             _isUsingSkill = false;
             rangeUI.CloseRange();
-            Debug.Log("延迟类技能");
             return;
         }
-
-        // 根据范围获取所有棋子
-        List<PieceController> targets = new List<PieceController>(rangeUI.GetCurTargets);
-        if (targets.Count < 1 && (skill.target != SkillTarget.Area &&
-                                  skill.target != SkillTarget.Self))
-        {
-            Debug.Log("未选中任何目标，无法发动技能");
-            return;
-        }
-
+        var targets = new List<PieceController>(rangeUI.GetCurTargets);
+        if (targets.Count == 0 && skill.target != SkillTarget.Area && skill.target != SkillTarget.Self) return;
+        Vector3 position = atkPos != null ? atkPos.position
+            : targets.Count > 0 ? targets[0].transform.position : transform.position;
         if (!unitAttrCenter.TryCostSkill(skill)) return;
-        NotifySkillUsed(skill);
         _isUsingSkill = false;
-        Sequence sequence = DOTween.Sequence();
-        
-        CheckResult checkResult = CheckResult.None;
-        if (skill.isRecognitionCheck && targets.Count > 0)
-        {
-            checkResult =
-                BattleScene.Ins.BM.diceCheckManager.ModeRecognitionCheck(this, targets[0]);
-            sequence.AppendInterval(2.5f);
-        }
-
-        Vector3 atkPosValue = atkPos != null ? atkPos.position : Vector3.zero;
-        sequence.SetUpdate(UpdateType.Normal, false);
-        sequence.AppendCallback(() =>
-        {
-            if (atkPos != null)
-            {
-                CheckFace(atkPosValue - transform.position);
-            }
-            else if (targets.Count > 0)
-            {
-                CheckFace(targets[0].transform.position - transform.position);
-            }
-
-            Debug.Log($"{this.name}发动技能攻击{skill.skillName}，targets数量：{targets.Count}");
-
-
-            // 播放技能动画
-            pieceDisplay.ChangeDisplayState(PieceDisplayState.Skill, false, 1f,
-                null, skill.animationIndex);
-
-
-            PlayAudio(skill);
-            
-            // 生成特效
-            //Transform atkPos = rangeUI.GetSkillTransform();
-            if (atkPos != null && skill.skillVFXType != 0)
-            {
-                GameObject fx  = ObjectPool.Ins.GenerateObject(
-                    skill.skillVFXType,
-                    atkPos.position + Vector3.up * 0.1f,
-                    atkPos.localRotation);
-                if (skill.isRotate)
-                {
-                    // fx沿 z轴 旋转，方向为从transfrom指向atkPos
-                    Vector3 dir = (atkPos.position - transform.position).normalized;
-                    dir.y = 0;
-                    float angle = Mathf.Atan2(dir.z, dir.x) * Mathf.Rad2Deg;
-                    fx.transform.rotation = Quaternion.Euler(45,  -45, angle + 90f);
-                    Debug.Log($"生成技能特效{skill.skillVFXType},{dir}旋转角度{angle}");
-                }
-
-            }
-            else if (skill.skillVFXType != 0)
-            {
-                Vector3 pos = targets.Count > 0
-                    ? targets[0].transform.position
-                    : transform.position;
-                ObjectPool.Ins.GenerateObject(
-                    skill.skillVFXType,
-                    pos + Vector3.up * 0.1f,
-                    Quaternion.identity);
-            }
-        });
-        sequence.AppendInterval(0.3f);
-        sequence.AppendCallback(() =>
-        {
-            if (targets.Count > 0)
-            {
-                ShootBolt(targets[0].transform.position, skill.bulletVFXType);
-            }
-        });
-        // 延迟0.3f
-        sequence.AppendCallback(
-            () =>
-            {
-                Vector3 skillPos = atkPosValue;
-                BattleScene.Ins.BM.PieceSkill(this, targets, skill, skillPos, ActionType.技能
-                    , checkResult);
-
-                //Debug.Log("关闭显示范围");
-                rangeUI.CloseRange();
-                
-            });
-
-        // 技能聚能充能
+        rangeUI.CloseRange();
+        CheckResult check = CheckResult.None;
+        bool recognition = skill.isRecognitionCheck && targets.Count > 0;
+        if (recognition) check = BattleScene.Ins.BM.diceCheckManager.ModeRecognitionCheck(this, targets[0]);
+        BeginCombatAction(skill, targets, position, ActionType.技能, PieceDisplayState.Skill,
+            check: check, waitForRecognition: recognition);
+        NotifySkillUsed(skill);
     }
 
 
     // 更新朝向
     protected void NotifySkillUsed(SkillPack skill)
     {
-        PassiveTrigger(PassiveTriggerType.OnSkillUse, skill);
+        ComponentEquipment.OnSkillUsed(this, skill);
         BattleScene.Ins.BM.characterSkillManager.NotifyCastActiveSkill(gameObject);
     }
     public void CheckFace(Vector3 direction)
     {
+        if (pieceDisplay == null || pieceDisplay.pieceSpriteRenderer == null) return;
         // 如果targetPos在当前棋子左侧，则朝向左侧，否则朝向右侧，更新piece display
         // 由于棋子式斜45站立的，所以应该同时计算x轴和z轴
         if (direction.x < -direction.z)
@@ -872,19 +771,25 @@ public class PieceController : MonoBehaviour
         ShootBolt(targetPos, ItemType.ROCKET);
     }
     
-    protected void ShootBolt(Vector3 tagetPos, ItemType itemType)
+    protected Tween ShootBolt(Vector3 tagetPos, ItemType itemType, Action arrived = null)
     {
         if (itemType == ItemType.NONE)
         {
-            Debug.Log("没有子弹特效");
-            return;
+            arrived?.Invoke();
+            return null;
         }
         Debug.Log("生成子弹");
         Vector3 startPos = transform.position + Vector3.up * 1.5f;
         Vector3 targetPosFixed = new Vector3(tagetPos.x, startPos.y, tagetPos.z);
-        Transform bolt = ObjectPool.Ins
-            .GenerateObject(itemType, startPos, Quaternion.identity)
-            .transform;
+        var projectile = ObjectPool.Ins.GenerateObject(itemType, startPos, Quaternion.identity);
+        if (projectile == null)
+        {
+            arrived?.Invoke();
+            return null;
+        }
+        // 本次飞行负责回收，取消预制体通用寿命，防止减速期间提前回收。
+        projectile.GetComponent<LifeTime>()?.CancelExpiry();
+        Transform bolt = projectile.transform;
         //bolt.LookAt(tagetPos);
         // 计算方向并设置bolt的rotation，使其x轴指向目标点
         Vector3 direction = (targetPosFixed - startPos).normalized;
@@ -893,8 +798,18 @@ public class PieceController : MonoBehaviour
             // 让bolt的forward（z轴）指向目标点，然后旋转90度使x轴指向目标
             bolt.rotation = Quaternion.LookRotation(direction) * Quaternion.Euler(0, -90, 0);
         }
-        bolt.DOMove(targetPosFixed, 0.5f).SetEase(Ease.Flash)
-            .OnComplete(() => { ObjectPool.Ins.HideObject(bolt.gameObject); });
+        bool recycled = false;
+        Action recycle = () =>
+        {
+            if (recycled) return;
+            recycled = true;
+            if (projectile != null) ObjectPool.Ins.HideObject(projectile);
+        };
+        return bolt.DOMove(targetPosFixed, 0.5f).SetEase(Ease.Linear)
+            .SetUpdate(UpdateType.Normal, false)
+            .SetLink(projectile, LinkBehaviour.KillOnDisable)
+            .OnComplete(() => { arrived?.Invoke(); recycle(); })
+            .OnKill(() => recycle());
     }
 
     // ======= 道具 ====== //
@@ -1000,73 +915,56 @@ public class PieceController : MonoBehaviour
     /// </summary>
     private void InitComp()
     {
-        if (playerData == null) return;
-        foreach (var i in playerData.normalSlots)
-        {
-            var data = GM.Ins.DM.componentConfig.GetData(i);
-            if (data == null) continue;
-            availablePassives.Add(data.passiveType);
-        }
-
-        foreach (var i in playerData.weaponSlots)
-        {
-            // 添加武器效果
-            var data = GM.Ins.DM.componentConfig.GetData(i);
-            if (data == null) continue;
-            availablePassives.Add(data.passiveType);
-        }
+        componentBonuses.Clear();
+        componentPlayerAttributes = ReadPlayerAttributes();
+        RefreshComponents();
     }
 
-    /// <summary>
-    /// 触发被动效果
-    /// </summary>
-    /// <param name="passiveTriggerType"></param>
-    /// <param name="skillPack"></param>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    private void PassiveTrigger(PassiveTriggerType passiveTriggerType, SkillPack skillPack = null, Vector3 targetPos = default(Vector3))
+    private readonly Dictionary<BuffAttrType, float> componentBonuses = new();
+    private readonly HashSet<PassiveType> componentPassives = new();
+    private int[] componentPlayerAttributes;
+
+    private int[] ReadPlayerAttributes()
     {
-        switch (passiveTriggerType)
+        var result = new int[5];
+        if (playerData != null)
+            for (int i = 0; i < result.Length; i++) result[i] = playerData.AccessAttribute(i, AttrOp.Get);
+        return result;
+    }
+
+    public void RefreshComponents()
+    {
+        foreach (var bonus in componentBonuses) unitAttrCenter.AddBuffAttr(bonus.Key, -bonus.Value);
+        componentBonuses.Clear();
+        foreach (var passive in componentPassives) availablePassives.Remove(passive);
+        componentPassives.Clear();
+        availableSkills = _pieceData?.skillPacks != null ? new List<SkillPack>(_pieceData.skillPacks) : new();
+        var attributes = ReadPlayerAttributes();
+        if (componentPlayerAttributes != null && playerData != null)
+            unitAttrCenter.RefreshPlayerAttributes(componentPlayerAttributes, attributes);
+        componentPlayerAttributes = attributes;
+        foreach (var data in ComponentEquipment.Equipped(playerData))
         {
-            case PassiveTriggerType.OnMeleeAttack:
-                if (availablePassives.Contains(PassiveType.Lash))
-                {
-                    unitAttrCenter.AddMana(3);
-                }
-
-                if (availablePassives.Contains(PassiveType.Implosion))
-                {
-                    // 造成扇形伤害
-                    SkillPack skill = GM.Ins.DM.skillPackListSO.GetSkillPack("内爆");
-                    List<PieceController> targets = BattleScene.Ins.BM.orderManager.IsInsideSector(transform.position
-                        , targetPos - transform.position, skill.rangeValue, skill.rangeAgle);
-                    Debug.Log($"内爆被动触发，造成扇形伤害，目标数量：{targets.Count}");
-                    BattleScene.Ins.BM.tipTextManager.ShowTip(transform, skill.skillName);
-                    targets.Remove(this);
-                    BattleScene.Ins.BM.PieceSkill(this,targets,skill);
-                }
-
-                break;
-            case PassiveTriggerType.OnRangedAttack:
-                break;
-            case PassiveTriggerType.OnDamaged:
-                break;
-            case PassiveTriggerType.OnSkillUse:
-                if (availablePassives.Contains(PassiveType.LongTermInterests))
-                {
-                    // 35%概率不消耗能量
-                    int randomValue = UnityEngine.Random.Range(0, 100);
-                    if (randomValue < 35)
-                    {
-                        unitAttrCenter.AddMana(skillPack.mpCost);
-                        Debug.Log("长远利益被动触发，技能能量返还");
-                    }
-                }
-
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(passiveTriggerType), passiveTriggerType
-                    , null);
+            if (data.effectType == ComponentEffect.PassiveEffect && data.passiveType != PassiveType.None &&
+                !availablePassives.Contains(data.passiveType))
+            {
+                availablePassives.Add(data.passiveType);
+                componentPassives.Add(data.passiveType);
+            }
+            if (data.effectType == ComponentEffect.ActiveSkill && data.skillPack != null &&
+                !string.IsNullOrWhiteSpace(data.skillPack.skillName) && !availableSkills.Contains(data.skillPack))
+                availableSkills.Add(data.skillPack);
+            if (data.battleBonuses == null) continue;
+            foreach (var bonus in data.battleBonuses)
+            {
+                if (bonus == null || bonus.attribute == BuffAttrType.None) continue;
+                componentBonuses.TryGetValue(bonus.attribute, out float old);
+                componentBonuses[bonus.attribute] = old + bonus.value;
+                unitAttrCenter.AddBuffAttr(bonus.attribute, bonus.value);
+            }
         }
+        _isUsingSkill = false;
+        if (BattleScene.Ins?.UM != null) BattleScene.Ins.UM.OnPieceStateChance(this);
     }
 
     /// <summary>

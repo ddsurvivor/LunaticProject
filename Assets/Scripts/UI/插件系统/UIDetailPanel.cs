@@ -17,7 +17,11 @@ public class UIDetailPanel : MonoBehaviour
         mainPage = page;
         
         ComponentData data = GM.Ins.DM.componentConfig.GetData(id);
-        if (data == null) return;
+        if (data == null || mainPage == null || mainPage.charactorPanel.player == null)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
 
         titleText.text = data.itemName;
         descText.text = data.description;
@@ -29,14 +33,22 @@ public class UIDetailPanel : MonoBehaviour
 
     public void OnEquipClick()
     {
-        mainPage.charactorPanel.player.Equip(targetID);
+        if (!mainPage.charactorPanel.player.TryEquip(targetID))
+        {
+            descText.text = "装备失败：没有可用槽位，或该插件已不在背包中。";
+            return;
+        }
         mainPage.RefreshUI();
         gameObject.SetActive(false);
     }
 
     public void OnUnequipClick()
     {
-        mainPage.charactorPanel.player.Unequip(targetID);
+        if (!mainPage.charactorPanel.player.TryUnequip(targetID))
+        {
+            descText.text = "卸下失败：该角色当前未装备此插件。";
+            return;
+        }
         mainPage.RefreshUI();
         gameObject.SetActive(false);
     }

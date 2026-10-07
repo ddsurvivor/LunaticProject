@@ -122,7 +122,7 @@ namespace SkillSystem
                     skill.OnSkillUnequipped(); // 触发卸载逻辑
                 }
                 _runtimeRegistry.Remove(piece);
-                Debug.Log($"[技能系统] 棋子 【{piece.name}】 已从全局技能管理器中注销。");
+                //Debug.Log($"[技能系统] 棋子 【{piece.name}】 已从全局技能管理器中注销。");
             }
         }
 
