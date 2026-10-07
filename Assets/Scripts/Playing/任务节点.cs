@@ -68,11 +68,13 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     {
         //detialInfoPanel.SetActive(true);
         //任务描述Text.text = missionDes;
-        ShowDetialInfo();
+        // 原逻辑：点击节点展开详情。暂时改为鼠标移入时展开，恢复时取消下一行注释。
+        // ShowDetialInfo();
     }
 
     public void OnClickStart()
     {
+        if (IsDetailAnimating) return;
         大地图System.instance.开始剧情 (name.Replace("(Clone)",""));
         // Record the exact StreamingAssets script that was opened.
         if (GM.Ins != null && GM.Ins.PLAYERPROFILE != null)
@@ -122,6 +124,7 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     }
     
     Sequence infoSequence;
+    private bool IsDetailAnimating => infoSequence != null && infoSequence.IsActive() && infoSequence.IsPlaying();
     private void ApplyNodeIconSize()
     {
         if (nodeIconSize.x > 0 && nodeIconSize.y > 0)
@@ -132,7 +135,7 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
     private void ShowDetialInfo()
     {
-        if(isShowDetialInfo) return;
+        if (IsDetailAnimating || isShowDetialInfo) return;
         isShowDetialInfo = true;
         icon.transform.localScale = Vector3.one;
         if (selectedNodeSprite != null)
@@ -171,6 +174,8 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     }
     public void CloseDetialInfo()
     {
+        // 展开动画播完之前不接受关闭，避免后续动画回调重新显示文本或按钮。
+        if (IsDetailAnimating) return;
         isShowDetialInfo = false;
         if (iconIndex >= 0 && iconIndex < 按钮节点图片.Length)
         {
@@ -185,21 +190,28 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     private Tweener currentTween;
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (isShowDetialInfo) return;
-        currentTween?.Kill();
-        smallPanel.SetActive(true);
-        icon.transform.localScale = Vector3.one * 1.2f;
-        currentTween = smallPanel.transform.DOLocalMoveX(-100, 0.2f).SetEase(Ease.OutBack).From();
-        GM.Ins.AM.PlayAudio(AudioCueType.Expand);
+        if (IsDetailAnimating || isShowDetialInfo) return;
+        ShowDetialInfo();
+
+        // 原逻辑：鼠标移入只显示小面板。临时保留，方便恢复。
+        // if (isShowDetialInfo) return;
+        // currentTween?.Kill();
+        // smallPanel.SetActive(true);
+        // icon.transform.localScale = Vector3.one * 1.2f;
+        // currentTween = smallPanel.transform.DOLocalMoveX(-100, 0.2f).SetEase(Ease.OutBack).From();
+        // GM.Ins.AM.PlayAudio(AudioCueType.Expand);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        if (isShowDetialInfo) return;
-        currentTween?.Kill();
-        smallPanel.SetActive(false);
-        icon.transform.localScale = Vector3.one;
-        smallPanel.transform.localPosition = smallPanelOriginalPos;
-        GM.Ins.AM.PlayAudio(AudioCueType.Collapse);
+        // 详情保留到玩家点击关闭；鼠标移出不收起，也不打断展开动画。
+
+        // 原逻辑：鼠标移出收起小面板。临时保留，方便恢复。
+        // if (isShowDetialInfo) return;
+        // currentTween?.Kill();
+        // smallPanel.SetActive(false);
+        // icon.transform.localScale = Vector3.one;
+        // smallPanel.transform.localPosition = smallPanelOriginalPos;
+        // GM.Ins.AM.PlayAudio(AudioCueType.Collapse);
     }
 }
