@@ -13,6 +13,13 @@ public class 打字机 : MonoBehaviour
     public string 完整文本;
     [FormerlySerializedAs("字符延迟")] public float _typeSpeed = 0.03f;
     private bool inited;
+    public bool IsTyping { get; private set; }
+    private bool textCompleted;
+    private int visibleCharactersShown;
+    private 剧本System owner;
+    public float CharacterDelay => Mathf.Max(0f, _typeSpeed) / Mathf.Max(0.1f,
+        GM.Ins != null && GM.Ins.DM != null && GM.Ins.DM.settingsData != null
+            ? GM.Ins.DM.settingsData.textSpeed : 1f);
 
     private string currentText = "";
 
@@ -24,26 +31,37 @@ public class 打字机 : MonoBehaviour
 
     public float 初始化(string 文本)
     {
-        float 框大小 = 0;
-        剧本System.instance.当文本更新时 += 下一句;
- 
-        if (!inited)
-        {
-            inited = true;
-            完整文本 = 文本;
-            _textComponent.text = 完整文本;
-            Canvas.ForceUpdateCanvases();
-            // 计算高度
-            框大小 = _textComponent.GetComponent<RectTransform>().rect.height;
+        return inited ? 0f : 播放文本(文本, 剧本System.instance);
+    }
 
-            // 启动打字机效果
-            StartCoroutine(TypeText(文本));
-            //StartCoroutine(ShowText());
-            fill.gameObject.SetActive(false);
-            outline.SetActive(false);
-        }
-        // 返回计算出的高度
-        return 框大小;
+    /// <summary>同一个 Text 可反复播放不同正文，供 CGLOG 前景文字使用。</summary>
+    public float 播放文本(string 文本, 剧本System reader)
+    {
+        StopAllCoroutines();
+        if (owner != null) owner.当文本更新时 -= 下一句;
+        owner = reader;
+        if (owner != null) owner.当文本更新时 += 下一句;
+        inited = true;
+        textCompleted = false;
+        visibleCharactersShown = 0;
+        完整文本 = 文本 ?? "";
+        _textComponent.text = 完整文本;
+        Canvas.ForceUpdateCanvases();
+        float height = _textComponent.rectTransform.rect.height;
+        if (fill != null) fill.gameObject.SetActive(false);
+        if (outline != null) outline.SetActive(false);
+        StartCoroutine(TypeText(完整文本));
+        return height;
+    }
+
+    public void 清空文本()
+    {
+        StopAllCoroutines();
+        IsTyping = false;
+        textCompleted = true;
+        visibleCharactersShown = 0;
+        完整文本 = "";
+        _textComponent.text = "";
     }
 
     private void Update()
@@ -57,12 +75,23 @@ public class 打字机 : MonoBehaviour
     void 下一句()
     {
         StopAllCoroutines();
+        IsTyping = false;
+        textCompleted = true;
         _textComponent.text = 完整文本 + " ";
+    }
+
+    private void OnEnable()
+    {
+        if (!inited) return;
+        if (owner != null) owner.当文本更新时 += 下一句;
+        if (!textCompleted) StartCoroutine(TypeText(完整文本));
     }
 
     private void OnDisable()
     {
-        剧本System.instance.当文本更新时 -= 下一句;
+        StopAllCoroutines();
+        IsTyping = false;
+        if (owner != null) owner.当文本更新时 -= 下一句;
     }
 
     IEnumerator ShowText()
@@ -72,7 +101,7 @@ public class 打字机 : MonoBehaviour
         {
             currentText = 完整文本.Substring(0, i + 1);
             _textComponent.text = currentText;
-            yield return new WaitForSeconds(_typeSpeed);
+            yield return new WaitForSeconds(CharacterDelay);
         }
     }
     
@@ -118,6 +147,7 @@ public class 打字机 : MonoBehaviour
     
     private IEnumerator TypeText(string fullContent)
     {
+        IsTyping = true;
         _textComponent.text = "";
         _textComponent.color = DefaultTextColor;
         // 正则表达式：匹配 <tag> 或 </tag>
@@ -127,7 +157,7 @@ public class 打字机 : MonoBehaviour
         
         // 获取所有纯文本内容的索引
         List<int> visibleCharIndices = new List<int>();
-        int currentPos = 0;
+
 
         for (int i = 0; i < fullContent.Length; i++)
         {
@@ -150,18 +180,21 @@ public class 打字机 : MonoBehaviour
         }
 
         // 开始逐字显示
-        for (int i = 0; i <= visibleCharIndices.Count; i++)
+        for (int i = visibleCharactersShown; i < visibleCharIndices.Count; i++)
         {
-            int displayLength = (i < visibleCharIndices.Count) ? visibleCharIndices[i] + 1 : fullContent.Length;
+            int displayLength = visibleCharIndices[i] + 1;
             string subString = fullContent.Substring(0, displayLength);
             
             // 核心步骤：补全未闭合的标签
             _textComponent.text = CloseTags(subString);
+            visibleCharactersShown = i + 1;
 
-            yield return new WaitForSeconds(_typeSpeed);
+            if (i + 1 < visibleCharIndices.Count)
+                yield return new WaitForSeconds(CharacterDelay);
         }
-
-        //_typeRoutine = null;
+        _textComponent.text = fullContent;
+        textCompleted = true;
+        IsTyping = false;
     }
 
     /// <summary>

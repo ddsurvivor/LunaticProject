@@ -19,6 +19,7 @@ public partial class 剧本System
     private bool isFastForward = false;
     private bool isWaitingForChoice = false;
     private float autoPlayElapsed;
+    private 打字机 currentTypewriter;
     public bool IsAutoPlay => isAutoPlay;
     public bool IsFastForward => isFastForward;
     public bool IsWaitingForChoice => isWaitingForChoice;
@@ -29,7 +30,7 @@ public partial class 剧本System
     [Tooltip("快进按钮；留空时查找子物体中已绑定 ToggleFastForward 的按钮")] [SerializeField]
     private CustomAdvancedButton fastForwardButton;
 
-    [SerializeField] private float normalDelay = 2.0f;
+    [SerializeField] private float normalDelay = 3.0f;
     [SerializeField] private float fastForwardDelay = 0.3f;
 
     public void ToggleAutoPlay()
@@ -38,6 +39,8 @@ public partial class 剧本System
         autoPlayElapsed = 0f;
         SyncPlaybackButtons();
         Debug.Log(isAutoPlay ? "【剧情系统】已开启自动播放" : "【剧情系统】已关闭自动播放");
+        // 开启时立即推进一次；后续正文仍等待自然显示完成和设置中的间隔。
+        if (isAutoPlay) Next();
     }
 
     public void ToggleFastForward()
@@ -117,8 +120,17 @@ public partial class 剧本System
             return;
         }
 
+        // 普通自动播放只在当前正文逐字显示完成后开始等待；快进不等打字机。
+        if (!isFastForward && currentTypewriter != null && currentTypewriter.IsTyping)
+        {
+            autoPlayElapsed = 0f;
+            return;
+        }
+        var settings = GM.Ins != null && GM.Ins.DM != null ? GM.Ins.DM.settingsData : null;
+        float delay = isFastForward
+            ? Mathf.Max(0.1f, settings != null ? settings.fastForwardInterval : fastForwardDelay)
+            : Mathf.Max(0f, settings != null ? settings.autoPlayDelay : normalDelay);
         autoPlayElapsed += Time.deltaTime;
-        float delay = Mathf.Max(0f, isFastForward ? fastForwardDelay : normalDelay);
         if (autoPlayElapsed >= delay)
         {
             autoPlayElapsed = 0f;

@@ -5,6 +5,8 @@ public class PlayerSettingsData
 {
     // === 1. 文字设置 ===
     public float textSpeed = 1.0f;              // 文本显示速度
+    public float autoPlayDelay = 3f;           // 正文自然显示完成后的等待秒数
+    public float fastForwardInterval = 0.3f;    // 快进每条正文的固定间隔秒数
     public bool showImportantBranchPrompt = true;// 是否提示重要分支
     public int languageIndex = 0;               // 显示语言 (0: 简体中文, 1: 英文 等)
 

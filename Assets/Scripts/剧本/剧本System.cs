@@ -97,6 +97,8 @@ public partial class 剧本System : MonoBehaviour
     {
         已阅读 = 0;
         isWaitingForChoice = false;
+        currentTypewriter = null;
+        ResetCGLogMode();
         autoPlayElapsed = 0f;
         选项按钮.Clear();
         清空文本();
@@ -138,6 +140,7 @@ public partial class 剧本System : MonoBehaviour
             return;
         }
 
+        currentTypewriter = null;
         当文本更新时?.Invoke();
 
         GM.Ins.AM.播放音效("Key");
@@ -181,6 +184,12 @@ public partial class 剧本System : MonoBehaviour
 
     public GameObject 生成剧本预制体()
     {
+        if (isCGLogMode && !isWaitingForChoice)
+        {
+            if (!当前说话内容.Contains(Center.Tag_notspawn))
+                ShowCGLogText(当前说话内容.Contains(Center.Tag_checkview) ? 储存的检定结果 : 当前说话内容);
+            return null;
+        }
         //   Debug.Log("调用生成");
         if (已阅读 > 0 && 当前说话内容 == 已储存剧本[已阅读 - 1][2])
         {
@@ -201,7 +210,8 @@ public partial class 剧本System : MonoBehaviour
             文本 = 储存的检定结果;
         }
 
-        Yoffset += go.GetComponent<打字机>().初始化(文本);
+        currentTypewriter = go.GetComponent<打字机>();
+        Yoffset += currentTypewriter.初始化(文本);
         说话人TextObject.text = 当前说话人;
         Content.GetComponent<RectTransform>()
             .SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Yoffset);
