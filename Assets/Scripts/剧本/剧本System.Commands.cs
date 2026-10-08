@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Globalization;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -77,6 +78,18 @@ public partial class 剧本System
         foreach (var key in face)
         {
             string command = GetCommand(key.Trim());
+            // CGLOG 的参数只有 CG 名称，不能落入下方包含 CG/LOGS 的旧指令判断。
+            if (command == Center.Command_CGLog)
+            {
+                var prams = 指令切割(key);
+                if (prams == null || prams.Length != 1 || string.IsNullOrWhiteSpace(prams[0]))
+                {
+                    Debug.LogError($"CGLOG 指令格式错误：{key}，应为 CGLOG(CG名字)");
+                    continue;
+                }
+                EnterCGLogMode(prams[0].Trim());
+                continue;
+            }
             // ACH 单独处理并退出本条指令，避免成就名中的
             // CHAPTER、GAMEOVER 等字样被下方旧版 Contains 判断误识别为指令。
             if (command == Center.Command_Achievement)
@@ -128,10 +141,11 @@ public partial class 剧本System
                 }
             }
 
-            if (key.Contains(Center.Command_background))
+            if (command == Center.Command_background)
             {
                 if (!key.Contains(Center.Command_FullCG) && !key.Contains(Center.Command_HalfCG))
                 {
+                    ResetCGLogMode();
                     var prams = 指令切割(key);
                     if (prams.Length >= 3)
                     {
@@ -217,6 +231,7 @@ public partial class 剧本System
             if (key.Contains(Center.Command_Choice))
             {
                 isWaitingForChoice = true;
+                SetCGLogChoiceVisibility(true);
                 autoPlayElapsed = 0f;
                 选项按钮.Clear();
                 int choiceStartLine = 已阅读;// 【新增】记录当前 CHOICE 指令的行号，作为相对索引计算的基准
@@ -300,6 +315,7 @@ public partial class 剧本System
                         // 先完成旧选项的清理，再执行分支，避免覆盖分支中新生成的选项状态。
                         选项按钮.Clear();
                         isWaitingForChoice = false;
+                        SetCGLogChoiceVisibility(false);
                         autoPlayElapsed = 0f;
                         if (事件 != null) 进行指令(事件);
                     });
@@ -568,35 +584,11 @@ public partial class 剧本System
             if (key.Contains(Center.Command_FullCG)) // 全屏CG
             {
                 var prams = 指令切割(key);
-                float duration = 2;
-                float fadeTime = 1.5f;
-                if (prams.Length >= 4)
-                {
-                    //自定义时长
-                    duration = float.Parse(prams[1]);
-                    fadeTime = float.Parse(prams[2]);
-                    string _str = prams[3];
-                    ShowText(_str, duration, fadeTime);
-                }
-                else if (prams.Length >= 3)
-                {
-                    //自定义时长
-                    duration = float.Parse(prams[1]);
-                    fadeTime = float.Parse(prams[2]);
-                }
-                else if (prams.Length >= 2)
-                {
-                    //自定义时长
-                    duration = float.Parse(prams[1]);
-                }
-                else if (prams.Length >= 1)
-                {
-                    duration = 2;
-                }
-                else
-                {
-                    continue;
-                }
+                if (prams == null || prams.Length < 1) continue;
+                // 可选时长省略或留空时使用默认值，例如 FULLCG(CGEX1-1,2,)。
+                if (!TryGetCGTime(prams, 1, 2f, key, out float duration) ||
+                    !TryGetCGTime(prams, 2, 1.5f, key, out float fadeTime)) continue;
+                if (prams.Length >= 4) ShowText(prams[3], duration, fadeTime);
 
                 Texture2D texture = Resources.Load<Texture2D>("CG/" + prams[0]);
 
@@ -611,7 +603,7 @@ public partial class 剧本System
                 FULLCG.sprite = sprite;
                 FULLCG.transform.parent.gameObject.SetActive(true);
                 FULLCG.color = new Color(1, 1, 1, 0);
-                Sequence sequence = DOTween.Sequence();
+                Sequence sequence = DOTween.Sequence().SetTarget(FULLCG);
                 sequence.Append(FULLCG.DOFade(1f, fadeTime));
                 sequence.AppendInterval(duration);
                 sequence.Append(FULLCG.DOFade(0f, fadeTime));
@@ -621,16 +613,9 @@ public partial class 剧本System
             if (key.Contains(Center.Command_HalfCG)) // 半屏CG
             {
                 var prams = 指令切割(key);
-                //float duration =2;
-                float fadeTime = CG淡入淡出时间;
-                if (prams.Length >= 2)
-                {
-                    fadeTime = float.Parse(prams[2]);
-                }
-                else if (prams.Length < 1)
-                {
-                    continue;
-                }
+                if (prams == null || prams.Length < 1) continue;
+                int fadeIndex = prams.Length >= 3 ? 2 : 1;
+                if (!TryGetCGTime(prams, fadeIndex, CG淡入淡出时间, key, out float fadeTime)) continue;
 
                 Texture2D texture = Resources.Load<Texture2D>("CG/" + prams[0]);
 
@@ -803,6 +788,16 @@ public partial class 剧本System
                 大地图System.instance.endingCreditsPlayer.Play();
             }
         }
+    }
+
+    private static bool TryGetCGTime(string[] parameters, int index, float defaultValue, string command, out float value)
+    {
+        value = defaultValue;
+        if (index >= parameters.Length || string.IsNullOrWhiteSpace(parameters[index])) return true;
+        if (float.TryParse(parameters[index], NumberStyles.Float, CultureInfo.InvariantCulture, out value) &&
+            value >= 0f && !float.IsNaN(value) && !float.IsInfinity(value)) return true;
+        Debug.LogError($"CG 指令时间参数无效：{command}，第 {index + 1} 个参数应为非负秒数。");
+        return false;
     }
 
     public static string[] 指令切割(string command)

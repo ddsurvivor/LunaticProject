@@ -21,6 +21,10 @@ public class SettingPanel : UIPanel
     [Header("UI - Text Settings SubPage")]
     [SerializeField] private Slider textSpeedSlider;
     [SerializeField] private Text textSpeedValueText; 
+    [SerializeField] private Slider autoPlayDelaySlider;
+    [SerializeField] private Text autoPlayDelayValueText;
+    [SerializeField] private Slider fastForwardIntervalSlider;
+    [SerializeField] private Text fastForwardIntervalValueText;
     [SerializeField] private Toggle branchPromptToggle;
     [SerializeField] private Dropdown languageDropdown;
 
@@ -131,6 +135,11 @@ public class SettingPanel : UIPanel
         if (textSpeedSlider != null)
             textSpeedSlider.onValueChanged.AddListener((val) => UpdateSliderText(val, textSpeedValueText, DisplayType.Multiplier));
 
+        if (autoPlayDelaySlider != null)
+            autoPlayDelaySlider.onValueChanged.AddListener(val => UpdateSliderText(val, autoPlayDelayValueText, DisplayType.Seconds));
+        if (fastForwardIntervalSlider != null)
+            fastForwardIntervalSlider.onValueChanged.AddListener(val => UpdateSliderText(val, fastForwardIntervalValueText, DisplayType.Seconds));
+
         if (brightnessSlider != null)
             brightnessSlider.onValueChanged.AddListener((val) => UpdateSliderText(val, brightnessValueText, DisplayType.Percentage));
 
@@ -147,7 +156,7 @@ public class SettingPanel : UIPanel
             voiceVolumeSlider.onValueChanged.AddListener((val) => UpdateSliderText(val, voiceVolumeValueText, DisplayType.Percentage));
     }
 
-    private enum DisplayType { Percentage, Multiplier }
+    private enum DisplayType { Percentage, Multiplier, Seconds }
 
     private void UpdateFpsText(float value)
     {
@@ -163,6 +172,9 @@ public class SettingPanel : UIPanel
         {
             case DisplayType.Percentage:
                 targetText.text = Mathf.RoundToInt(value * 100f).ToString() + "%";
+                break;
+            case DisplayType.Seconds:
+                targetText.text = value.ToString("F1") + "s";
                 break;
             case DisplayType.Multiplier:
                 targetText.text = value.ToString("F1") + "x";
@@ -188,6 +200,11 @@ public class SettingPanel : UIPanel
         // 优化：传入数据值而非 Slider.value，这样即使 Slider 组件没做，Text 组件也能单测显示数据
         UpdateSliderText(currentSettings.textSpeed, textSpeedValueText, DisplayType.Multiplier);
         
+        if (autoPlayDelaySlider != null) autoPlayDelaySlider.value = currentSettings.autoPlayDelay;
+        if (fastForwardIntervalSlider != null) fastForwardIntervalSlider.value = currentSettings.fastForwardInterval;
+        UpdateSliderText(currentSettings.autoPlayDelay, autoPlayDelayValueText, DisplayType.Seconds);
+        UpdateSliderText(currentSettings.fastForwardInterval, fastForwardIntervalValueText, DisplayType.Seconds);
+
         if (branchPromptToggle != null) branchPromptToggle.isOn = currentSettings.showImportantBranchPrompt;
         if (languageDropdown != null) languageDropdown.value = currentSettings.languageIndex;
 
@@ -238,6 +255,8 @@ public class SettingPanel : UIPanel
         // 工业级无痛存储：只有被拖入场景的 UI 组件才会更新数据。
         // 未配置的 UI 组件将被跳过，它们在配置数据文件（JSON）中的原有值将完美保留，不会被清零或报错！
         if (textSpeedSlider != null) dataToUpdate.textSpeed = textSpeedSlider.value;
+        if (autoPlayDelaySlider != null) dataToUpdate.autoPlayDelay = autoPlayDelaySlider.value;
+        if (fastForwardIntervalSlider != null) dataToUpdate.fastForwardInterval = fastForwardIntervalSlider.value;
         if (branchPromptToggle != null) dataToUpdate.showImportantBranchPrompt = branchPromptToggle.isOn;
         if (languageDropdown != null) dataToUpdate.languageIndex = languageDropdown.value;
 
