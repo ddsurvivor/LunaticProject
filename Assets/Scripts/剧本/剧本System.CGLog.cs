@@ -81,7 +81,9 @@ public partial class 剧本System
             if (frontTypewriter == null) frontTypewriter = frontText.gameObject.AddComponent<打字机>();
             frontTypewriter._textComponent = frontText;
             var template = 剧本预制体 != null ? 剧本预制体.GetComponent<打字机>() : null;
-            if (template != null) frontTypewriter._typeSpeed = template._typeSpeed;
+            // _typeSpeed 是逐字间隔；速度为正文的 50% 时，间隔需加倍。
+            // CharacterDelay 仍统一应用设置菜单中的文本速度倍率。
+            frontTypewriter._typeSpeed = (template != null ? template._typeSpeed : frontTypewriter._typeSpeed) / 0.5f;
         }
         currentTypewriter = frontTypewriter;
         frontTypewriter.播放文本(text, this);
