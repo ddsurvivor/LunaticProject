@@ -7,6 +7,9 @@ public class ItemDetailPanel : MonoBehaviour
     [SerializeField] private Text titleText;
     [SerializeField] private Text descriptionText;
     [SerializeField] private RectTransform rectTransform; // 自身的 RectTransform
+    [SerializeField] private bool centeredNotification;
+    [SerializeField] private GameObject[] hideWhileNotificationOpen;
+    private bool[] previousVisibility;
 
     private Canvas rootCanvas;
 
@@ -29,12 +32,39 @@ public class ItemDetailPanel : MonoBehaviour
         LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform);
 
         // 执行屏幕边缘自适应算法
-        AdjustPosition(mousePosition);
+        if (centeredNotification)
+        {
+            rectTransform.pivot = Vector2.one * 0.5f;
+            rectTransform.anchoredPosition = Vector2.zero;
+        }
+        else AdjustPosition(mousePosition);
     }
 
     public void Close()
     {
         gameObject.SetActive(false);
+    }
+
+    private void OnEnable()
+    {
+        if (!centeredNotification || hideWhileNotificationOpen == null) return;
+        previousVisibility = new bool[hideWhileNotificationOpen.Length];
+        for (int i = 0; i < hideWhileNotificationOpen.Length; i++)
+        {
+            var target = hideWhileNotificationOpen[i];
+            if (target == null) continue;
+            previousVisibility[i] = target.activeSelf;
+            target.SetActive(false);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (previousVisibility == null) return;
+        for (int i = 0; i < previousVisibility.Length; i++)
+            if (hideWhileNotificationOpen[i] != null)
+                hideWhileNotificationOpen[i].SetActive(previousVisibility[i]);
+        previousVisibility = null;
     }
 
     /// <summary>

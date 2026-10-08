@@ -16,6 +16,7 @@ public class SettingPanel : UIPanel
     [SerializeField] private List<TabItem> tabs;
     [SerializeField] private Sprite activeTabSprite;   
     [SerializeField] private Sprite inactiveTabSprite; 
+    [SerializeField] private int initialTabIndex;
 
     [Header("UI - Text Settings SubPage")]
     [SerializeField] private Slider textSpeedSlider;
@@ -30,6 +31,12 @@ public class SettingPanel : UIPanel
     [SerializeField] private Slider brightnessSlider;
     [SerializeField] private Text brightnessValueText; 
     [SerializeField] private Dropdown particleDropdown;
+    [SerializeField] private Slider fpsSlider;
+    [SerializeField] private Text fpsValueText;
+    [SerializeField] private Toggle particleToggle;
+    [SerializeField] private Text pageTitleText;
+    [SerializeField] private Text pageCounterText;
+    [SerializeField] private GameObject[] selectedTabVisuals;
 
     [Header("UI - Audio Settings SubPage")]
     [SerializeField] private Slider masterVolumeSlider;
@@ -75,16 +82,22 @@ public class SettingPanel : UIPanel
                 tabs[index].tabButton.onClick.AddListener(() => SwitchTab(index));
             }
         }
-        SwitchTab(0); 
+        SwitchTab(initialTabIndex);
     }
 
     public void SwitchTab(int targetIndex)
     {
         if (tabs == null || targetIndex < 0 || targetIndex >= tabs.Count) return;
 
+        if (pageTitleText != null)
+            pageTitleText.text = "设置 / " + new[] { "语言设置", "图像设置", "声音设置" }[Mathf.Clamp(targetIndex, 0, 2)];
+        if (pageCounterText != null) pageCounterText.text = $"{targetIndex + 1:00} / {tabs.Count:00}";
+
         for (int i = 0; i < tabs.Count; i++)
         {
             bool isActive = (i == targetIndex);
+            if (selectedTabVisuals != null && i < selectedTabVisuals.Length && selectedTabVisuals[i] != null)
+                selectedTabVisuals[i].SetActive(isActive);
             
             // 保护：子页面可以为空（比如某些页面还没做出来）
             if (tabs[i].subPage != null) 
@@ -105,6 +118,15 @@ public class SettingPanel : UIPanel
 
     private void BindSliderEvents()
     {
+        foreach (var toggle in new[] { fullScreenToggle, particleToggle })
+        {
+            if (toggle == null) continue;
+            var caption = toggle.GetComponentInChildren<Text>();
+            if (caption != null)
+                toggle.onValueChanged.AddListener(value => caption.text = value ? "已开启" : "已关闭");
+        }
+        if (fpsSlider != null)
+            fpsSlider.onValueChanged.AddListener(UpdateFpsText);
         // 已经具备标准的组件存在性检查，确保未配置的 Slider 不会引发监听报错
         if (textSpeedSlider != null)
             textSpeedSlider.onValueChanged.AddListener((val) => UpdateSliderText(val, textSpeedValueText, DisplayType.Multiplier));
@@ -126,6 +148,12 @@ public class SettingPanel : UIPanel
     }
 
     private enum DisplayType { Percentage, Multiplier }
+
+    private void UpdateFpsText(float value)
+    {
+        if (fpsValueText != null)
+            fpsValueText.text = new[] { "30", "60", "无限制" }[Mathf.Clamp(Mathf.RoundToInt(value), 0, 2)];
+    }
 
     private void UpdateSliderText(float value, Text targetText, DisplayType type)
     {
@@ -169,11 +197,20 @@ public class SettingPanel : UIPanel
         if (fullScreenToggle != null) fullScreenToggle.isOn = currentSettings.isFullScreen;
         if (resolutionDropdown != null) resolutionDropdown.value = currentSettings.resolutionIndex;
         if (fpsDropdown != null) fpsDropdown.value = currentSettings.targetFPSIndex;
+        if (fpsSlider != null) fpsSlider.value = currentSettings.targetFPSIndex;
+        UpdateFpsText(currentSettings.targetFPSIndex);
         
         if (brightnessSlider != null) brightnessSlider.value = currentSettings.brightness;
         UpdateSliderText(currentSettings.brightness, brightnessValueText, DisplayType.Percentage);
         
         if (particleDropdown != null) particleDropdown.value = currentSettings.particleEffectLevel;
+        if (particleToggle != null) particleToggle.isOn = currentSettings.particleEffectLevel > 0;
+        foreach (var toggle in new[] { fullScreenToggle, particleToggle })
+        {
+            if (toggle == null) continue;
+            var caption = toggle.GetComponentInChildren<Text>();
+            if (caption != null) caption.text = toggle.isOn ? "已开启" : "已关闭";
+        }
 
         // ==========================================
         // 3. 刷新声音页面（所有组件各自独立保护）
@@ -207,8 +244,11 @@ public class SettingPanel : UIPanel
         if (fullScreenToggle != null) dataToUpdate.isFullScreen = fullScreenToggle.isOn;
         if (resolutionDropdown != null) dataToUpdate.resolutionIndex = resolutionDropdown.value;
         if (fpsDropdown != null) dataToUpdate.targetFPSIndex = fpsDropdown.value;
+        if (fpsSlider != null) dataToUpdate.targetFPSIndex = Mathf.RoundToInt(fpsSlider.value);
         if (brightnessSlider != null) dataToUpdate.brightness = brightnessSlider.value;
         if (particleDropdown != null) dataToUpdate.particleEffectLevel = particleDropdown.value;
+        if (particleToggle != null && particleToggle.isOn != (dataToUpdate.particleEffectLevel > 0))
+            dataToUpdate.particleEffectLevel = particleToggle.isOn ? 2 : 0;
 
         if (masterVolumeSlider != null) dataToUpdate.masterVolume = masterVolumeSlider.value;
         if (bgmVolumeSlider != null) dataToUpdate.bgmVolume = bgmVolumeSlider.value;
