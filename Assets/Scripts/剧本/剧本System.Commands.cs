@@ -601,6 +601,17 @@ public partial class 剧本System
                 Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height)
                     , new Vector2(0.5f, 0.5f));
                 FULLCG.sprite = sprite;
+                // 同一条 FULLCG 同步更新背景，前景淡出后继续显示这张 CG。
+                // 停止旧背景的淡入淡出，避免其完成回调重新覆盖图片。
+                if (BG != null)
+                {
+                    BG.DOKill();
+                    BG.sprite = sprite;
+                    BG.gameObject.SetActive(true);
+                    var backgroundColor = BG.color;
+                    backgroundColor.a = 1f;
+                    BG.color = backgroundColor;
+                }
                 FULLCG.transform.parent.gameObject.SetActive(true);
                 FULLCG.color = new Color(1, 1, 1, 0);
                 Sequence sequence = DOTween.Sequence().SetTarget(FULLCG);
