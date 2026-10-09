@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -17,6 +18,7 @@ public class 打字机 : MonoBehaviour
     private bool textCompleted;
     private int visibleCharactersShown;
     private 剧本System owner;
+    private ChineseTextLayout chineseLayout;
     public float CharacterDelay => Mathf.Max(0f, _typeSpeed) / Mathf.Max(0.1f,
         GM.Ins != null && GM.Ins.DM != null && GM.Ins.DM.settingsData != null
             ? GM.Ins.DM.settingsData.textSpeed : 1f);
@@ -28,23 +30,31 @@ public class 打字机 : MonoBehaviour
     [SerializeField]
     private RectTransform fill;
     [SerializeField] private bool avgUI;
+    private bool textInsetCaptured;
+    private float defaultTextLeft;
 
-    public float 初始化(string 文本)
+    public float 初始化(string 文本, bool isOption = false)
     {
-        return inited ? 0f : 播放文本(文本, 剧本System.instance);
+        // 每次取出对象都重新初始化，不能因曾播放过而跳过状态重置。
+        return 播放文本(文本, 剧本System.instance, isOption);
     }
 
     /// <summary>同一个 Text 可反复播放不同正文，供 CGLOG 前景文字使用。</summary>
-    public float 播放文本(string 文本, 剧本System reader)
+    public float 播放文本(string 文本, 剧本System reader, bool isOption = false)
     {
         StopAllCoroutines();
+        SetOptionTextInset(isOption);
         if (owner != null) owner.当文本更新时 -= 下一句;
         owner = reader;
         if (owner != null) owner.当文本更新时 += 下一句;
         inited = true;
         textCompleted = false;
         visibleCharactersShown = 0;
-        完整文本 = 文本 ?? "";
+        Canvas.ForceUpdateCanvases();
+        if (chineseLayout != null) chineseLayout.LayoutChanged -= OnChineseLayoutChanged;
+        chineseLayout = ChineseTextLayout.Ensure(_textComponent);
+        chineseLayout.LayoutChanged += OnChineseLayoutChanged;
+        完整文本 = chineseLayout.PrepareText(文本 ?? "", true);
         _textComponent.text = 完整文本;
         Canvas.ForceUpdateCanvases();
         float height = _textComponent.rectTransform.rect.height;
@@ -61,6 +71,7 @@ public class 打字机 : MonoBehaviour
         textCompleted = true;
         visibleCharactersShown = 0;
         完整文本 = "";
+        if (chineseLayout != null) chineseLayout.PrepareText("", true);
         _textComponent.text = "";
     }
 
@@ -92,6 +103,20 @@ public class 打字机 : MonoBehaviour
         StopAllCoroutines();
         IsTyping = false;
         if (owner != null) owner.当文本更新时 -= 下一句;
+    }
+
+    private void OnChineseLayoutChanged(string text)
+    {
+        完整文本 = text;
+        if (textCompleted) { _textComponent.text = 完整文本; return; }
+        if (!isActiveAndEnabled) return;
+        StopAllCoroutines();
+        StartCoroutine(TypeText(完整文本));
+    }
+
+    private void OnDestroy()
+    {
+        if (chineseLayout != null) chineseLayout.LayoutChanged -= OnChineseLayoutChanged;
     }
 
     IEnumerator ShowText()
@@ -173,9 +198,13 @@ public class 打字机 : MonoBehaviour
                 }
             }
 
-            if (!isInTag)
+            // 排版生成的换行不占用逐字播放时间。
+            if (!isInTag && fullContent[i] != '\r' && fullContent[i] != '\n')
             {
-                visibleCharIndices.Add(i);
+                // 与排版使用相同的文本元素，避免拆开代理对或组合字符。
+                int elementLength = StringInfo.GetNextTextElement(fullContent, i).Length;
+                visibleCharIndices.Add(i + elementLength - 1);
+                i += elementLength - 1;
             }
         }
 
@@ -240,13 +269,12 @@ public class 打字机 : MonoBehaviour
     {
         if (avgUI)
         {
-            ShowOption();
-            outline.GetComponent<UnityEngine.UI.Image>().color = new Color(0.91f, 0.65f, 0.17f);
+            if (outline != null) outline.SetActive(false);
+            if (fill != null) fill.gameObject.SetActive(true);
             return;
         }
         _textComponent.GetComponent<Text>().color = Color.white;
         fill.gameObject.SetActive(true);
-        fill.sizeDelta = _textComponent.GetComponent<RectTransform>().sizeDelta + new Vector2(20, 20); // 根据文本大小调整背景框
     }
     private Color DefaultTextColor => avgUI
         ? new Color(0.937255f, 0.913725f, 0.819608f)
@@ -255,14 +283,15 @@ public class 打字机 : MonoBehaviour
     public void ShowOption()
     {
         if (!avgUI) return;
+        SetOptionTextInset(true);
+        if (fill != null) fill.gameObject.SetActive(false);
         outline.SetActive(true);
         var background = outline.GetComponent<UnityEngine.UI.Image>();
-        var rect = (RectTransform)outline.transform;
-        rect.sizeDelta = new Vector2(0, _textComponent.rectTransform.rect.height + 20);
+        background.color = Color.white;
         var button = _textComponent.GetComponent<UnityEngine.UI.Button>();
         if (button != null)
         {
-            // Keep the existing text hit area and route hover tint to the choice frame.
+            // 鼠标移入时只为 outline 着色；选中后由 ShowSelect 切换为 fill。
             button.targetGraphic = background;
             var colors = button.colors;
             colors.normalColor = Color.white;
@@ -270,6 +299,21 @@ public class 打字机 : MonoBehaviour
             colors.selectedColor = colors.highlightedColor;
             button.colors = colors;
         }
+    }
+
+    private void SetOptionTextInset(bool isOption)
+    {
+        if (!avgUI || _textComponent == null) return;
+        var rect = _textComponent.rectTransform;
+        if (!textInsetCaptured)
+        {
+            defaultTextLeft = rect.offsetMin.x;
+            textInsetCaptured = true;
+        }
+        var offset = rect.offsetMin;
+        // 使用绝对值，重复选中不会累加；普通正文恢复预制体的初始 Left（20）。
+        offset.x = isOption ? 60f : defaultTextLeft;
+        rect.offsetMin = offset;
     }
     /// <summary>
     /// 设置为关闭的选项

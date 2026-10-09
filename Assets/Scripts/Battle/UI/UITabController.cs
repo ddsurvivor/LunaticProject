@@ -11,6 +11,7 @@ public class UITabController : MonoBehaviour
     {
         public GameObject tabButton;       // 选项卡按钮
         public Image tabBgImage;       // 选项卡自身的底图
+        public GameObject selected;    // 选中状态的标记 (可为空)
         public GameObject subPage;     // 该选项卡绑定的子页面 (可为空)
     }
 
@@ -52,6 +53,7 @@ public class UITabController : MonoBehaviour
             if (tabs[i].tabButton != null)
             {
                 tabs[i].tabButton.GetComponent<CustomAdvancedButton>()?.onClickEvent.AddListener(() => SwitchTab(index, false));
+                tabs[i].selected?.SetActive(false); // 初始化时，所有选中标记都隐藏
             }
         }
     }
@@ -74,13 +76,14 @@ public class UITabController : MonoBehaviour
         for (int i = 0; i < tabs.Count; i++)
         {
             bool isActive = (i == targetIndex);
-
+            tabs[i].selected?.SetActive(false);
             if (tabs[i].subPage != null)
             {
                 if (tabs[i].subPage.GetComponent<UIPanel>() != null)
                 {
                     if (isActive)
                     {
+                        tabs[i].selected?.SetActive(true);
                         tabs[i].subPage.GetComponent<UIPanel>()?.Open();
                     }
                     else
@@ -107,12 +110,13 @@ public class UITabController : MonoBehaviour
                 // 工业防卡死死律：在开启新动画前，必须杀死旧动画，防止玩家疯狂连点导致抖动
                 indicatorBox.DOKill();
 
+                indicatorBox.gameObject.SetActive(true);
                 // 获取目标按钮的目标局部坐标
-                Vector2 targetAnchoredPos = targetButtonRect.anchoredPosition;
+                Vector2 targetAnchoredPos = targetButtonRect.position;
 
                 if (isImmediate)
                 {
-                    indicatorBox.anchoredPosition = targetAnchoredPos;
+                    indicatorBox.position = targetAnchoredPos;
                 }
                 else
                 {

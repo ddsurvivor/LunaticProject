@@ -150,10 +150,16 @@ public static class AvgSaveRecoveryValidation
                 firstCursor = Cursor(map.剧情);
                 map.剧情.Next();
                 Check(Cursor(map.剧情) > firstCursor, "Fixture did not advance beyond beginning");
-                map.剧情.gameObject.SetActive(false);
+                map.剧情.HideReader();
+                Check(map.剧情.IsReaderHiding, "Reader did not start fading out");
+                int closingCursor = Cursor(map.剧情);
+                map.剧情.Next();
+                Check(Cursor(map.剧情) == closingCursor, "Closing reader advanced story");
                 var hidden = RoundTrip("hidden-reader");
                 Check(hidden.isStoryInProgress, "Temporarily hidden reader lost reading state");
-                map.剧情.gameObject.SetActive(true);
+                map.剧情.ShowReader();
+                Check(!map.剧情.IsReaderHiding && map.剧情.GetComponent<CanvasGroup>().alpha == 1f,
+                    "Reopening reader did not cancel fade and restore visibility");
                 var loaded = RoundTrip("reading");
                 Check(loaded.TryGetStoryToResume(out string saved) && saved == scriptFile, "Reading state/file not serialized");
                 Check(!loaded.isNewGame, "Reading save retained new-game flag");
@@ -172,6 +178,12 @@ public static class AvgSaveRecoveryValidation
                 Check(GM.Ins.PLAYERPROFILE.resumeStoryScript == scriptFile, "Wrong script resumed");
                 // 使用真实 END 指令更新任务进度、关闭阅读器、刷新节点。
                 map.剧情.进行指令("END(" + scriptFile + ",1)");
+                stage = 31;
+                return;
+            }
+            if (stage == 31)
+            {
+                if (map.剧情.IsReaderHiding) return;
                 Check(!map.剧情.gameObject.activeSelf, "END did not close reader");
                 var loaded = RoundTrip("completed");
                 Check(!loaded.isStoryInProgress && loaded.resumeStoryScript == null, "Completed story retained replay state");

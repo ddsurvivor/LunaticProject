@@ -15,6 +15,9 @@ public partial class 剧本System
     private Transform cgLogImageLayer;
     private bool cgLogHalfCGActive;
     private Sprite cgLogSprite;
+    private Tween cgLogTransition;
+    private float cgLogFadeOutTime;
+    private bool cgLogFadingOut;
 
     public bool IsCGLogMode => isCGLogMode;
 
@@ -31,7 +34,7 @@ public partial class 剧本System
         return FULLCG != null && frontTextRoot != null && frontText != null;
     }
 
-    private void EnterCGLogMode(string cgName)
+    private void EnterCGLogMode(string cgName, float fadeInTime = 0f, float fadeOutTime = 0f)
     {
         if (!ResolveCGLogUI())
         {
@@ -45,6 +48,10 @@ public partial class 剧本System
             return;
         }
 
+        bool replacingCG = isCGLogMode;
+        float previousFadeOut = cgLogFadeOutTime;
+        cgLogTransition?.Kill();
+        cgLogTransition = null;
         if (!isCGLogMode)
         {
             cgLogDialogueStates.Clear();
@@ -55,15 +62,33 @@ public partial class 剧本System
             cgLogImageLayer = FULLCG.transform.parent == transform ? FULLCG.transform : FULLCG.transform.parent;
         }
         isCGLogMode = true;
+        cgLogFadeOutTime = fadeOutTime;
         FULLCG.DOKill();
-        if (cgLogSprite != null) Destroy(cgLogSprite);
-        cgLogSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-        FULLCG.sprite = cgLogSprite;
-        FULLCG.color = Color.white;
         cgLogImageLayer.gameObject.SetActive(true);
         FULLCG.gameObject.SetActive(true);
         if (HALFCG != null) HALFCG.gameObject.SetActive(false);
         SetCGLogChoiceVisibility(false);
+        if (replacingCG && previousFadeOut > 0f)
+        {
+            var sequence = DOTween.Sequence().SetTarget(FULLCG);
+            sequence.Append(FULLCG.DOFade(0f, previousFadeOut));
+            sequence.AppendCallback(() => ApplyCGLogSprite(texture, fadeInTime > 0f ? 0f : 1f));
+            if (fadeInTime > 0f) sequence.Append(FULLCG.DOFade(1f, fadeInTime));
+            cgLogTransition = sequence;
+        }
+        else
+        {
+            ApplyCGLogSprite(texture, fadeInTime > 0f ? 0f : 1f);
+            if (fadeInTime > 0f) cgLogTransition = FULLCG.DOFade(1f, fadeInTime);
+        }
+    }
+
+    private void ApplyCGLogSprite(Texture2D texture, float alpha)
+    {
+        if (cgLogSprite != null) Destroy(cgLogSprite);
+        cgLogSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+        FULLCG.sprite = cgLogSprite;
+        FULLCG.color = new Color(1f, 1f, 1f, alpha);
     }
 
     private void ShowCGLogText(string text)
@@ -100,18 +125,26 @@ public partial class 剧本System
 
     private void OnDestroy()
     {
+        CancelReaderHide();
+        cgLogTransition?.Kill();
         if (cgLogSprite != null) Destroy(cgLogSprite);
     }
 
-    private void ResetCGLogMode()
+    private void ResetCGLogMode(bool fadeOut = false)
     {
         ResolveCGLogUI();
+        bool wasFadingOut = cgLogFadingOut;
+        cgLogTransition?.Kill();
+        cgLogTransition = null;
+        bool animateExit = fadeOut && isCGLogMode && cgLogFadeOutTime > 0f && FULLCG != null;
+        if (!animateExit && wasFadingOut && cgLogImageLayer != null)
+            cgLogImageLayer.gameObject.SetActive(false);
         if (isCGLogMode)
         {
             foreach (var item in cgLogDialogueStates)
                 if (item.Key != null) item.Key.SetActive(item.Value);
             if (currentTypewriter == frontTypewriter) currentTypewriter = null;
-            if (cgLogImageLayer != null)
+            if (!animateExit && cgLogImageLayer != null)
             {
                 cgLogImageLayer.gameObject.SetActive(false);
             }
@@ -122,7 +155,24 @@ public partial class 剧本System
         if (frontTypewriter != null) frontTypewriter.清空文本();
         if (frontTextRoot != null) frontTextRoot.SetActive(false);
         if (frontText != null) frontText.text = "";
-        if (cgLogSprite != null)
+        if (animateExit)
+        {
+            var retiringSprite = cgLogSprite;
+            cgLogSprite = null;
+            cgLogFadingOut = true;
+            cgLogTransition = FULLCG.DOFade(0f, cgLogFadeOutTime)
+                .OnComplete(() =>
+                {
+                    if (cgLogImageLayer != null) cgLogImageLayer.gameObject.SetActive(false);
+                })
+                .OnKill(() =>
+                {
+                    cgLogFadingOut = false;
+                    if (FULLCG != null && FULLCG.sprite == retiringSprite) FULLCG.sprite = null;
+                    if (retiringSprite != null) Destroy(retiringSprite);
+                });
+        }
+        else if (cgLogSprite != null)
         {
             if (FULLCG != null && FULLCG.sprite == cgLogSprite) FULLCG.sprite = null;
             Destroy(cgLogSprite);

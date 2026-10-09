@@ -35,6 +35,7 @@ public partial class 剧本System
 
     public void ToggleAutoPlay()
     {
+        if (IsReaderHiding) return;
         isAutoPlay = !isAutoPlay;
         autoPlayElapsed = 0f;
         SyncPlaybackButtons();
@@ -45,7 +46,7 @@ public partial class 剧本System
 
     public void ToggleFastForward()
     {
-        if (!isAutoPlay) return;
+        if (IsReaderHiding || !isAutoPlay) return;
         isFastForward = !isFastForward;
         autoPlayElapsed = 0f;
         SyncPlaybackButtons();
@@ -111,6 +112,7 @@ public partial class 剧本System
 
     private void Update()
     {
+        if (IsReaderHiding) return;
         if (UpdateReaderInput()) return;
 
         // 使用随组件启停的计时，避免面板隐藏后残留已被 Unity 停止的协程引用。
@@ -139,12 +141,16 @@ public partial class 剧本System
     }
     private void OnEnable()
     {
+        foreach (var text in GetComponentsInChildren<UnityEngine.UI.Text>(true))
+            ChineseTextLayout.Ensure(text);
+        RestoreReaderVisibility();
         autoPlayElapsed = 0f;
         SyncPlaybackButtons();
     }
 
     private void OnDisable()
     {
+        CancelReaderHide();
         StopReaderShake();
         // 隐藏剧情只暂停推进；玩家选择的自动和快进模式保留到下一段剧本。
         autoPlayElapsed = 0f;

@@ -74,6 +74,7 @@ public partial class 剧本System : MonoBehaviour
 
     public void 设置新剧本(string t)
     {
+        RestoreReaderVisibility();
         刷新();
         curPartName = t;
         已储存剧本 = 读取表格数据(t, Center.Languageint);
@@ -124,7 +125,7 @@ public partial class 剧本System : MonoBehaviour
     [ContextMenu("下一句")]
     public void Next()
     {
-        if (isWaitingForChoice || 已储存剧本 == null) return;
+        if (!isActiveAndEnabled || IsReaderHiding || isWaitingForChoice || 已储存剧本 == null) return;
         autoPlayElapsed = 0f;
         进度条.normalizedPosition = new Vector2(0, -1f);
         if (已阅读 >= 已储存剧本.Length)
@@ -145,6 +146,7 @@ public partial class 剧本System : MonoBehaviour
 
         GM.Ins.AM.播放音效("Key");
         进行指令(当前事件);
+        if (!isActiveAndEnabled || IsReaderHiding) return;
         生成剧本预制体();
         已阅读++;
         进度条.normalizedPosition = new Vector2(0, -1f);
@@ -165,7 +167,7 @@ public partial class 剧本System : MonoBehaviour
 
     public void OnClickSkip(int num = 0)
     {
-        if (isWaitingForChoice || 已储存剧本 == null || 已阅读 >= 已储存剧本.Length) return;
+        if (IsReaderHiding || isWaitingForChoice || 已储存剧本 == null || 已阅读 >= 已储存剧本.Length) return;
         StopAutoPlay();//停止自动播放
         Debug.Log($"跳过{已储存剧本.Length - 已阅读}条剧本，遇到选项时停止");
         GM.Ins.AM.播放音效("Key");
@@ -211,7 +213,8 @@ public partial class 剧本System : MonoBehaviour
         }
 
         currentTypewriter = go.GetComponent<打字机>();
-        Yoffset += currentTypewriter.初始化(文本);
+        // 选项先收缩文字区域，再排版和计算高度，避免换行后遮挡下一条。
+        Yoffset += currentTypewriter.初始化(文本, isWaitingForChoice);
         说话人TextObject.text = 当前说话人;
         Content.GetComponent<RectTransform>()
             .SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Yoffset);
@@ -299,7 +302,7 @@ public partial class 剧本System : MonoBehaviour
     public void LoadImageWithFade(string imageName, Image targetimg, int fadeType = 3
         , float duration = -1)
     {
-        if (FULLCG.gameObject.activeInHierarchy)
+        if (FULLCG.gameObject.activeInHierarchy && !cgLogFadingOut)
             FULLCG.transform.parent.gameObject.SetActive(false);
         if (HALFCG.gameObject.activeInHierarchy)
             HALFCG.transform.parent.gameObject.SetActive(false);

@@ -104,7 +104,7 @@ public class 大地图System : SerializedMonoBehaviour
         {
             yield return new WaitForSeconds(点击进入剧情编辑器等待时间);
             是可以点击地图事件 = true;
-            剧情.gameObject.SetActive(true);
+            剧情.ShowReader();
             剧情.设置新剧本(t);
             剧情.Next();
         }
@@ -197,7 +197,7 @@ public class 大地图System : SerializedMonoBehaviour
     public void 剧情结束()
     {
         剧情.EndReadingStory();
-        剧情.gameObject.SetActive(false);
+        剧情.HideReader();
         GM.Ins.AM.StopAll();
         //当前地图.transform.DOScale(Vector3.one, 点击后放大进行时间);
         foreach (var node in NodeList)

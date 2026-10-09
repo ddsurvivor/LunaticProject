@@ -78,16 +78,18 @@ public partial class 剧本System
         foreach (var key in face)
         {
             string command = GetCommand(key.Trim());
-            // CGLOG 的参数只有 CG 名称，不能落入下方包含 CG/LOGS 的旧指令判断。
+            // CGLOG 单独分派，避免落入下方包含 CG/LOGS 的旧指令判断。
             if (command == Center.Command_CGLog)
             {
                 var prams = 指令切割(key);
-                if (prams == null || prams.Length != 1 || string.IsNullOrWhiteSpace(prams[0]))
+                if (prams == null || prams.Length < 1 || prams.Length > 3 || string.IsNullOrWhiteSpace(prams[0]))
                 {
-                    Debug.LogError($"CGLOG 指令格式错误：{key}，应为 CGLOG(CG名字)");
+                    Debug.LogError($"CGLOG 指令格式错误：{key}，应为 CGLOG(CG名字,淡入秒数,淡出秒数)");
                     continue;
                 }
-                EnterCGLogMode(prams[0].Trim());
+                if (!TryGetCGTime(prams, 1, 0f, key, out float cgLogFadeIn) ||
+                    !TryGetCGTime(prams, 2, 0f, key, out float cgLogFadeOut)) continue;
+                EnterCGLogMode(prams[0].Trim(), cgLogFadeIn, cgLogFadeOut);
                 continue;
             }
             // ACH 单独处理并退出本条指令，避免成就名中的
@@ -145,7 +147,7 @@ public partial class 剧本System
             {
                 if (!key.Contains(Center.Command_FullCG) && !key.Contains(Center.Command_HalfCG))
                 {
-                    ResetCGLogMode();
+                    ResetCGLogMode(true);
                     var prams = 指令切割(key);
                     if (prams.Length >= 3)
                     {
@@ -600,6 +602,8 @@ public partial class 剧本System
 
                 Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height)
                     , new Vector2(0.5f, 0.5f));
+                // 中断尚未完成的 CGLOG 淡出，避免旧回调隐藏新的全屏图。
+                FULLCG.DOKill();
                 FULLCG.sprite = sprite;
                 // 同一条 FULLCG 同步更新背景，前景淡出后继续显示这张 CG。
                 // 停止旧背景的淡入淡出，避免其完成回调重新覆盖图片。
@@ -668,7 +672,7 @@ public partial class 剧本System
             if (key.Contains(Center.Command_Close))
             {
                 EndReadingStory();
-                this.gameObject.SetActive(false);
+                HideReader();
             }
 
             if (key.Contains(Center.Command_Chapter))
@@ -787,8 +791,9 @@ public partial class 剧本System
                 if (prams.Length >= 1)
                 {
                     string sceneName = prams[0];
+                    if (!GM.Ins.CanLoadScene(sceneName)) continue;
                     EndReadingStory();
-                    GM.Ins.LoadScene(sceneName);
+                    HideReader(() => GM.Ins.LoadScene(sceneName));
                 }
             }
 
@@ -796,7 +801,7 @@ public partial class 剧本System
             {
                 EndReadingStory();
                 LocalGameProgress.MarkGameFinished();
-                大地图System.instance.endingCreditsPlayer.Play();
+                HideReader(() => 大地图System.instance.endingCreditsPlayer.Play());
             }
         }
     }

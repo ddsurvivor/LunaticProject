@@ -90,7 +90,11 @@ using UnityEngine.SceneManagement;
         {
             if (!CanLoadScene(sceneName)) return;
             if (大地图System.instance != null && 大地图System.instance.剧情 != null)
+            {
                 大地图System.instance.剧情.EndReadingStory();
+                // 战斗入场已有独立动画，阅读器立即关闭，不等待普通关闭淡出。
+                大地图System.instance.剧情.HideReaderImmediately();
+            }
             battleScene = sceneName;
             endLog = storyAfterBattle;
             battleSetting = setting;
