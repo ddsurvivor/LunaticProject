@@ -34,6 +34,7 @@ public partial class 剧本System
         return FULLCG != null && frontTextRoot != null && frontText != null;
     }
 
+    /// <summary>显示全屏 CG，并切换为前景正文模式。</summary>
     private void EnterCGLogMode(string cgName, float fadeInTime = 0f, float fadeOutTime = 0f)
     {
         if (!ResolveCGLogUI())
@@ -91,6 +92,7 @@ public partial class 剧本System
         FULLCG.color = new Color(1f, 1f, 1f, alpha);
     }
 
+    /// <summary>替换前景正文，以正文一半的速度逐字显示。</summary>
     private void ShowCGLogText(string text)
     {
         if (!ResolveCGLogUI()) return;
@@ -114,6 +116,7 @@ public partial class 剧本System
         frontTypewriter.播放文本(text, this);
     }
 
+    /// <summary>显示选项时隐藏前景正文，选择后恢复。</summary>
     private void SetCGLogChoiceVisibility(bool showChoices)
     {
         if (!isCGLogMode) return;
@@ -130,6 +133,7 @@ public partial class 剧本System
         if (cgLogSprite != null) Destroy(cgLogSprite);
     }
 
+    /// <summary>退出前景正文模式，并按需淡出 CG。</summary>
     private void ResetCGLogMode(bool fadeOut = false)
     {
         ResolveCGLogUI();

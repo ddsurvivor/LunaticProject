@@ -86,6 +86,7 @@ using UnityEngine.SceneManagement;
             return true;
         }
 
+        /// <summary>立即隐藏剧情，播放战斗入场动画并切换场景。</summary>
         public void StartBattle(string sceneName, string storyAfterBattle, int setting = 0)
         {
             if (!CanLoadScene(sceneName)) return;

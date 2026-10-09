@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI; // 严格使用旧版 UI
 using System.Collections.Generic;
 
+/// <summary>显示游戏设置，并保存玩家的修改。</summary>
 public class SettingPanel : UIPanel
 {
     [System.Serializable]
@@ -59,6 +60,7 @@ public class SettingPanel : UIPanel
 
     private void Start()
     {
+        ConfigureResolutionDropdown();
         InitTabs();
         BindSliderEvents(); 
         LoadAndShowSettings();
@@ -69,6 +71,27 @@ public class SettingPanel : UIPanel
             
         if (restoreDefaultsButton != null) 
             restoreDefaultsButton.onClick.AddListener(RestoreDefaultSettings);*/
+    }
+
+    /// <summary>调整分辨率选项行高，避免文字被模板裁切。</summary>
+    private void ConfigureResolutionDropdown()
+    {
+        if (resolutionDropdown == null || resolutionDropdown.template == null || resolutionDropdown.itemText == null)
+            return;
+
+        // 新 UI 使用 22 号字，旧模板的行高仍为 20，Text 的垂直裁切会隐藏整行文字。
+        var label = resolutionDropdown.itemText;
+        // Dropdown 的模板平时处于隐藏状态，父级查询必须包含未激活节点。
+        var item = label.GetComponentInParent<Toggle>(true);
+        if (item == null || !(item.transform is RectTransform itemRect)) return;
+        float rowHeight = Mathf.Max(itemRect.rect.height, label.fontSize * Mathf.Max(1f, label.lineSpacing) + 16f);
+        itemRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, rowHeight);
+        if (itemRect.parent is RectTransform content)
+            content.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, rowHeight);
+        label.verticalOverflow = VerticalWrapMode.Overflow;
+        label.horizontalOverflow = HorizontalWrapMode.Overflow;
+        label.raycastTarget = false;
+        resolutionDropdown.RefreshShownValue();
     }
 
     #region 选项卡切换逻辑 (Tab System)
@@ -182,6 +205,7 @@ public class SettingPanel : UIPanel
         }
     }
 
+    /// <summary>读取当前设置，并刷新各项控件。</summary>
     public void LoadAndShowSettings()
     {
         // 核心底线保护：如果直接在主菜单场景单玩、且没有通过初始化场景启动 GM，直接拦截，防止崩溃
@@ -245,6 +269,7 @@ public class SettingPanel : UIPanel
         UpdateSliderText(currentSettings.voiceVolume, voiceVolumeValueText, DisplayType.Percentage);
     }
 
+    /// <summary>保存控件中的设置，并立即应用。</summary>
     public void SaveAndApplySettings()
     {
         // 拦截保护
@@ -279,6 +304,7 @@ public class SettingPanel : UIPanel
         if (statusText != null) statusText.text = "所有设置已成功应用！";
     }
 
+    /// <summary>恢复默认设置，并刷新页面。</summary>
     public void RestoreDefaultSettings()
     {
         if (GM.Ins == null || GM.Ins.DM == null) return;

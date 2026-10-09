@@ -76,7 +76,7 @@ public class 任务节点 : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     {
         if (IsDetailAnimating) return;
         大地图System.instance.开始剧情 (name.Replace("(Clone)",""));
-        // Record the exact StreamingAssets script that was opened.
+        // 记录打开的剧本名称，保持存档引用一致。
         if (GM.Ins != null && GM.Ins.PLAYERPROFILE != null)
             GM.Ins.PLAYERPROFILE.currentStoryId = titleText.text;
     }

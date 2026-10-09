@@ -30,15 +30,17 @@ public partial class 剧本System
         }
     }
 
+    /// <summary>取消关闭动画，并恢复阅读器显示。</summary>
     public void ShowReader()
     {
         RestoreReaderVisibility();
         gameObject.SetActive(true);
     }
 
-    /// <summary>普通关闭入口；存档完成状态由调用方决定。</summary>
+    /// <summary>淡出并隐藏阅读器。此方法不标记剧情完成。</summary>
     public void HideReader() => HideReader(null);
 
+    /// <summary>淡出并隐藏阅读器，完成后执行回调。</summary>
     public void HideReader(Action onHidden)
     {
         if (readerHiding) return;
@@ -76,6 +78,7 @@ public partial class 剧本System
         gameObject.SetActive(false);
     }
 
+    /// <summary>取消关闭动画及回调，防止旧操作影响新剧情。</summary>
     private void CancelReaderHide()
     {
         readerHideTween?.Kill();

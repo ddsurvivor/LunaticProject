@@ -8,10 +8,12 @@ using System.Linq;
 using System.Collections.Generic;
 using MiniExcelLibs; // 需要引入 MiniExcel 命名空间
 
+/// <summary>
+/// 查看 Story 目录中保存为 bytes 的 Excel 剧本。
+/// </summary>
 public class ExtensionlessExcelEditor : OdinMenuEditorWindow
 {
-    // 指定你存放无后缀 Excel 文件的文件夹路径
-    private const string TargetFolderPath = "Assets/StreamingAssets"; 
+    private const string TargetFolderPath = "Assets/Resources/Story";
 
     [MenuItem("Tools/剧本查看器")]
     private static void OpenWindow()
@@ -35,17 +37,15 @@ public class ExtensionlessExcelEditor : OdinMenuEditorWindow
             AssetDatabase.Refresh();
         }
 
-        // 使用物理路径扫描所有文件，过滤掉 Unity 的 .meta 文件
+        // bytes 只改变扩展名，文件内容仍按 Excel 解析。
         string[] files = Directory.GetFiles(TargetFolderPath)
-                                  .Where(f => !f.EndsWith(".meta"))
+                                  .Where(f => f.EndsWith(".bytes", System.StringComparison.OrdinalIgnoreCase))
+                                  .OrderBy(f => f)
                                   .ToArray();
 
         foreach (var filePath in files)
         {
-            // 过滤掉 Unity 的 meta 文件
-            if (filePath.EndsWith(".meta")) continue;
-
-            string fileName = Path.GetFileName(filePath);
+            string fileName = Path.GetFileNameWithoutExtension(filePath);
             // 检查文件是否合法（至少要有 4 个字节，且头两个字节是 "PK"）
             if (!IsZipFile(filePath))
             {

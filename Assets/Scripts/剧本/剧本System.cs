@@ -223,12 +223,22 @@ public partial class 剧本System : MonoBehaviour
         return go;
     }
 
+    /// <summary>
+    /// 从 Story 资源读取 Excel，并提取当前语言的剧情内容。
+    /// </summary>
     public string[][] 读取表格数据(string 文件名, int 语言偏移)
     {
-        string filepath = Application.streamingAssetsPath + "/" + 文件名;
+        string resourcePath = "Story/" + 文件名;
+        TextAsset 剧本资源 = Resources.Load<TextAsset>(resourcePath);
+        if (剧本资源 == null)
+        {
+            Debug.LogError($"没有找到剧本 {文件名}，请检查 Assets/Resources/{resourcePath}.bytes。");
+            return null;
+        }
 
-        // 使用EPPlus打开临时路径的Excel文件
-        using (var 包 = new ExcelPackage(new FileInfo(filepath)))
+        // bytes 中保留原始 Excel 内容，无需写入临时文件。
+        using (var stream = new MemoryStream(剧本资源.bytes))
+        using (var 包 = new ExcelPackage(stream))
         {
             int 总行数 = 0;
             try
@@ -268,9 +278,9 @@ public partial class 剧本System : MonoBehaviour
                     GM.Ins.PLAYERPROFILE.RecordScriptChapter(文件名);
                 return 数据;
             }
-            catch (IndexOutOfRangeException e)
+            catch (IndexOutOfRangeException)
             {
-                Debug.LogError($"没有找到表格{文件名}检查Streamingassets文件夹里是否有这个表格");
+                Debug.LogError($"剧本 {文件名} 缺少工作表，请检查 Assets/Resources/{resourcePath}.bytes。");
             }
 
             return null;

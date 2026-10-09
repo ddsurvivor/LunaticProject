@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>为旧版 uGUI Text 提供中文禁则排版，打字机使用整段排版结果。</summary>
+/// <summary>控制 uGUI Text 的中文标点换行。</summary>
 [DisallowMultipleComponent, RequireComponent(typeof(UnityEngine.UI.Text))]
 public sealed class ChineseTextLayout : MonoBehaviour
 {
@@ -13,18 +13,21 @@ public sealed class ChineseTextLayout : MonoBehaviour
     private int settingsHash;
     private bool controlledByTypewriter;
     private HorizontalWrapMode originalOverflow;
+    /// <summary>通知打字机使用重新排版后的文本。</summary>
     public event System.Action<string> LayoutChanged;
 
     private int LayoutHash => target.rectTransform.rect.width.GetHashCode() ^ target.fontSize ^
         (int)target.fontStyle * 397 ^ (target.font != null ? target.font.GetInstanceID() : 0) ^
         target.supportRichText.GetHashCode() ^ target.pixelsPerUnit.GetHashCode();
 
+    /// <summary>获取排版组件；缺少时自动添加。</summary>
     public static ChineseTextLayout Ensure(UnityEngine.UI.Text text)
     {
         var layout = text.GetComponent<ChineseTextLayout>();
         return layout != null ? layout : text.gameObject.AddComponent<ChineseTextLayout>();
     }
 
+    /// <summary>按文本框宽度排版。打字机模式保留整段排版结果。</summary>
     public string PrepareText(string text, bool typewriter = false)
     {
         ResolveTarget();

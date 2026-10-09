@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
-/// <summary>中文禁则换行。只插入软换行，不删除原文、富文本标签或显式换行。</summary>
+/// <summary>按中文标点规则换行，保留原文和富文本标签。</summary>
 public static class ChineseLineBreakUtility
 {
     private const string NoLineStart = "，。、；：？！…—）〕］｝〉》」』】〗〙〛’”﹚﹜﹞％‰℃°,.!?;:%)]}";
@@ -18,6 +18,7 @@ public static class ChineseLineBreakUtility
         public float Width;
     }
 
+    /// <summary>使用字符宽度安排换行，保留原有换行。</summary>
     public static string Wrap(string source, float width, Func<string, float> measure, bool richText = true)
     {
         if (string.IsNullOrEmpty(source) || width <= 0f) return source ?? "";
@@ -101,6 +102,7 @@ public static class ChineseLineBreakUtility
             keepLatinWord && left == split - 1 && right == split);
     }
 
+    /// <summary>判断相邻字符之间能否换行。</summary>
     public static bool CanBreak(string left, string right, bool keepLatinWord = true)
     {
         char a = left[left.Length - 1], b = right[0];

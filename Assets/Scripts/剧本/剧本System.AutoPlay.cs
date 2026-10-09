@@ -33,6 +33,7 @@ public partial class 剧本System
     [SerializeField] private float normalDelay = 3.0f;
     [SerializeField] private float fastForwardDelay = 0.3f;
 
+    /// <summary>切换自动播放。开启时立即推进一句。</summary>
     public void ToggleAutoPlay()
     {
         if (IsReaderHiding) return;
@@ -44,6 +45,7 @@ public partial class 剧本System
         if (isAutoPlay) Next();
     }
 
+    /// <summary>切换快进，仅在自动播放开启时生效。</summary>
     public void ToggleFastForward()
     {
         if (IsReaderHiding || !isAutoPlay) return;
@@ -61,6 +63,7 @@ public partial class 剧本System
         SyncPlaybackButtons();
     }
 
+    /// <summary>同步自动和快进按钮的选中状态与可点击状态。</summary>
     private void SyncPlaybackButtons()
     {
         if (!isAutoPlay) isFastForward = false;

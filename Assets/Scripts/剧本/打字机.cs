@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
+/// <summary>逐字显示剧情文本，并控制选项的显示状态。</summary>
 public class 打字机 : MonoBehaviour
 {
     public bool IsTesting;
@@ -33,13 +34,14 @@ public class 打字机 : MonoBehaviour
     private bool textInsetCaptured;
     private float defaultTextLeft;
 
+    /// <summary>重置复用对象的状态，并开始播放文本。</summary>
     public float 初始化(string 文本, bool isOption = false)
     {
         // 每次取出对象都重新初始化，不能因曾播放过而跳过状态重置。
         return 播放文本(文本, 剧本System.instance, isOption);
     }
 
-    /// <summary>同一个 Text 可反复播放不同正文，供 CGLOG 前景文字使用。</summary>
+    /// <summary>重置文字缩进，排版后逐字显示正文或选项。</summary>
     public float 播放文本(string 文本, 剧本System reader, bool isOption = false)
     {
         StopAllCoroutines();
@@ -64,6 +66,7 @@ public class 打字机 : MonoBehaviour
         return height;
     }
 
+    /// <summary>停止逐字显示，并清空文本和排版缓存。</summary>
     public void 清空文本()
     {
         StopAllCoroutines();
@@ -105,6 +108,7 @@ public class 打字机 : MonoBehaviour
         if (owner != null) owner.当文本更新时 -= 下一句;
     }
 
+    /// <summary>应用新排版，并从已显示的位置继续播放。</summary>
     private void OnChineseLayoutChanged(string text)
     {
         完整文本 = text;
@@ -263,7 +267,7 @@ public class 打字机 : MonoBehaviour
     }
 
     /// <summary>
-    /// 将文本显示为选项
+    /// 隐藏选项边框，并显示选中填充。
     /// </summary>
     public void ShowSelect()
     {
@@ -280,6 +284,7 @@ public class 打字机 : MonoBehaviour
         ? new Color(0.937255f, 0.913725f, 0.819608f)
         : Color.white;
 
+    /// <summary>显示选项边框，并设置鼠标悬停颜色。</summary>
     public void ShowOption()
     {
         if (!avgUI) return;
@@ -301,6 +306,7 @@ public class 打字机 : MonoBehaviour
         }
     }
 
+    /// <summary>设置选项缩进；普通正文恢复初始值。</summary>
     private void SetOptionTextInset(bool isOption)
     {
         if (!avgUI || _textComponent == null) return;
@@ -311,7 +317,7 @@ public class 打字机 : MonoBehaviour
             textInsetCaptured = true;
         }
         var offset = rect.offsetMin;
-        // 使用绝对值，重复选中不会累加；普通正文恢复预制体的初始 Left（20）。
+        // 使用绝对值，重复选中不会累加；普通正文恢复初始 Left。
         offset.x = isOption ? 60f : defaultTextLeft;
         rect.offsetMin = offset;
     }

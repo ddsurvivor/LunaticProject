@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 using DG.Tweening; // 引入 DOTween 命名空间
 
+/// <summary>切换标签页，并让指示框跟随选中的按钮。</summary>
 public class UITabController : MonoBehaviour
 {
     [System.Serializable]
@@ -19,17 +20,19 @@ public class UITabController : MonoBehaviour
     [SerializeField] private List<TabItem> tabs;
     [SerializeField] private Sprite activeTabSprite;   // 选中状态的标签底图
     [SerializeField] private Sprite inactiveTabSprite; // 未选中状态的标签底图
-    [SerializeField] private int defaultIndex = 0;     // 默认打开第几个
 
     [Header("Follow Indicator (DOTween)")]
     [SerializeField] private RectTransform indicatorBox; // 跟随选中的方框
     [SerializeField] private float duration = 0.25f;     // 移动耗时
     [SerializeField] private Ease easeType = Ease.OutQuad;// 缓动动画类型
 
-    // 核心解耦机制：向外暴露出切换事件，其他面板想听就听，不听也完全不影响导航栏运行
+    /// <summary>通知订阅者当前选中的标签页。</summary>
     public event Action<int> OnTabChanged;
 
     private int currentSelectedIndex = -1;
+    private Tween indicatorTween;
+    private Vector3 indicatorMoveStart;
+    private float indicatorProgress = 1f;
 
     [SerializeField]
     private UIPanel _uiPanel;
@@ -39,14 +42,24 @@ public class UITabController : MonoBehaviour
         InitTabs();
     }
 
-    private void Start()
+    /// <summary>首次打开第 0 页，再次打开恢复上次选择。</summary>
+    private void OnEnable()
     {
-        // 游戏启动首帧：瞬间切到默认页，不需要飞行过渡动画
-        SwitchTab(defaultIndex, true);
+        Canvas.willRenderCanvases += UpdateIndicatorPosition;
+        // 首次初始化选中 0；重新打开时恢复关闭前的页面和指示框位置。
+        SwitchTab(currentSelectedIndex < 0 ? 0 : currentSelectedIndex, true);
+    }
+
+    private void OnDisable()
+    {
+        Canvas.willRenderCanvases -= UpdateIndicatorPosition;
+        indicatorTween?.Kill();
+        indicatorTween = null;
     }
 
     private void InitTabs()
     {
+        if (tabs == null) return;
         for (int i = 0; i < tabs.Count; i++)
         {
             int index = i; // 解决闭包陷阱
@@ -59,14 +72,14 @@ public class UITabController : MonoBehaviour
     }
 
     /// <summary>
-    /// 核心切换方法
+    /// 更新标签状态、页面显示和指示框位置。
     /// </summary>
     /// <param name="targetIndex">目标索引</param>
     /// <param name="isImmediate">是否瞬间切过去（不播放动画）</param>
     public void SwitchTab(int targetIndex, bool isImmediate)
     {
         // 边界安全检查
-        if (targetIndex < 0 || targetIndex >= tabs.Count) return;
+        if (tabs == null || targetIndex < 0 || targetIndex >= tabs.Count) return;
         // 如果点的已经是当前页，且不是强制初始化，则无视
         //if (targetIndex == currentSelectedIndex && !isImmediate) return;
 
@@ -102,26 +115,33 @@ public class UITabController : MonoBehaviour
         }
 
         // 2. 控制方框跟随（RectTransform 坐标动画）
-        if (indicatorBox != null)
+        if (indicatorBox != null && tabs[targetIndex].tabButton != null)
         {
             RectTransform targetButtonRect = tabs[targetIndex].tabButton.GetComponent<RectTransform>();
             if (targetButtonRect != null)
             {
-                // 工业防卡死死律：在开启新动画前，必须杀死旧动画，防止玩家疯狂连点导致抖动
-                indicatorBox.DOKill();
+                indicatorTween?.Kill();
+                indicatorTween = null;
 
                 indicatorBox.gameObject.SetActive(true);
-                // 获取目标按钮的目标局部坐标
-                Vector2 targetAnchoredPos = targetButtonRect.position;
+                indicatorMoveStart = indicatorBox.localPosition;
+                // 强制布局会触发 willRenderCanvases；先锁住起点，避免提前跳到终点。
+                indicatorProgress = 0f;
+                Canvas.ForceUpdateCanvases();
 
-                if (isImmediate)
+                if (isImmediate || duration <= 0f)
                 {
-                    indicatorBox.position = targetAnchoredPos;
+                    indicatorProgress = 1f;
+                    UpdateIndicatorPosition();
                 }
                 else
                 {
-                    // 使用 DOTween 核心 API 进行平滑缓动
-                    indicatorBox.DOAnchorPos(targetAnchoredPos, duration).SetEase(easeType);
+                    indicatorProgress = 0f;
+                    indicatorTween = DOTween.To(() => indicatorProgress, value =>
+                    {
+                        indicatorProgress = value;
+                        UpdateIndicatorPosition();
+                    }, 1f, duration).SetEase(easeType).SetTarget(indicatorBox);
                 }
             }
         }
@@ -129,12 +149,31 @@ public class UITabController : MonoBehaviour
         // 3. 广播事件，通知可能存在的外部订阅者
         OnTabChanged?.Invoke(targetIndex);
     }
+
+    /// <summary>在指示框父级坐标中对齐按钮中心。</summary>
+    private void UpdateIndicatorPosition()
+    {
+        if (indicatorBox == null || tabs == null || currentSelectedIndex < 0 || currentSelectedIndex >= tabs.Count)
+            return;
+        var button = tabs[currentSelectedIndex].tabButton;
+        if (button == null || !(button.transform is RectTransform target)) return;
+
+        // 对齐矩形中心，而非 pivot；父级、锚点、pivot 和缩放不同也使用同一坐标系。
+        Vector3 center = target.TransformPoint(target.rect.center);
+        if (indicatorBox.parent != null) center = indicatorBox.parent.InverseTransformPoint(center);
+        Vector3 pivotOffset = indicatorBox.localRotation * Vector3.Scale(indicatorBox.rect.center, indicatorBox.localScale);
+        Vector3 destination = center - pivotOffset;
+        // 每次渲染前取最新目标，兼容布局重建和 UIPanel 的缩放、位移动画。
+        indicatorBox.localPosition = Vector3.LerpUnclamped(indicatorMoveStart, destination, indicatorProgress);
+    }
     
+    /// <summary>打开面板，并直接显示指定标签页。</summary>
     public void ShowTab(int index)
     {
-        if (index < 0 || index >= tabs.Count) return;
+        if (tabs == null || index < 0 || index >= tabs.Count) return;
         //gameObject.SetActive(true);
-        _uiPanel.Open();
+        if (_uiPanel != null) _uiPanel.Open();
+        else gameObject.SetActive(true);
         SwitchTab(index, true);
     }
 }

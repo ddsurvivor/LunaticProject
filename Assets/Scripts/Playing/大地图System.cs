@@ -194,6 +194,7 @@ public class 大地图System : SerializedMonoBehaviour
         if (剧情 != null) 剧情.CaptureReadingState(GM.Ins.PLAYERPROFILE);
     }
 
+    /// <summary>记录剧情完成，淡出阅读器并刷新任务节点。</summary>
     public void 剧情结束()
     {
         剧情.EndReadingStory();

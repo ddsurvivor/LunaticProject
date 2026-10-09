@@ -15,6 +15,7 @@ public partial class 剧本System
 
     public float ManualAdvanceInterval => manualAdvanceInterval;
 
+    /// <summary>设置手动推进的最小间隔，单位为秒。</summary>
     public void SetManualAdvanceInterval(float seconds)
     {
         manualAdvanceInterval = Mathf.Max(0f, seconds);

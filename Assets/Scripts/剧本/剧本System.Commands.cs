@@ -18,6 +18,7 @@ public partial class 剧本System
     private Tweener shakeTween;
     private Action restoreShakePositions;
 
+    /// <summary>同步震动画面层，保持对话框静止。</summary>
     public void 执行震动(float strength = 20f, float duration = 0.5f, int vibrato = 10)
     {
         StopReaderShake();
@@ -70,6 +71,7 @@ public partial class 剧本System
         restore?.Invoke();
     }
 
+    /// <summary>依次解析并执行当前剧情行的指令。</summary>
     public void 进行指令(string tar)
     {
         if(tar == null || tar.Length <= 0) return;
@@ -232,8 +234,9 @@ public partial class 剧本System
 
             if (key.Contains(Center.Command_Choice))
             {
+                // 遇到选项时立即退出 CGLOG，恢复普通对话框后再生成选项。
+                if (isCGLogMode) ResetCGLogMode();
                 isWaitingForChoice = true;
-                SetCGLogChoiceVisibility(true);
                 autoPlayElapsed = 0f;
                 选项按钮.Clear();
                 int choiceStartLine = 已阅读;// 【新增】记录当前 CHOICE 指令的行号，作为相对索引计算的基准
@@ -806,6 +809,7 @@ public partial class 剧本System
         }
     }
 
+    /// <summary>读取 CG 时长。空值使用默认值，非法数值拒绝执行。</summary>
     private static bool TryGetCGTime(string[] parameters, int index, float defaultValue, string command, out float value)
     {
         value = defaultValue;
