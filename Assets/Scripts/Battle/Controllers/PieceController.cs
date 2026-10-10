@@ -115,6 +115,7 @@ public class PieceController : MonoBehaviour
         combatRoutine = null;
         projectileTween?.Kill();
         projectileTween = null;
+        if (IsPerformingAction && !isPlayerPiece) rangeUI?.CloseRange();
         IsPerformingAction = false;
     }
 
@@ -145,6 +146,7 @@ public class PieceController : MonoBehaviour
         passiveManager = BattleScene.Ins?.BM?.characterSkillManager;
         passiveManager?.UnregisterPiece(gameObject);
         this.player = player;
+        rangeUI?.Bind(this);
         this.playerData = isPlayerPiece ? GM.Ins.PLAYERPROFILE.GetPlayer(pieceID - 1) : null;
         //unitAttrCenter.Init();
         /*if (isPlayerPiece)
@@ -426,7 +428,7 @@ public class PieceController : MonoBehaviour
         if (!range) // 近战攻击
         {
             _curAttackPack = _pieceData.meleeAtk;
-            rangeUI?.ShowSkillRange(_curAttackPack);
+            if (isPlayerPiece) rangeUI?.ShowSkillRange(_curAttackPack);
             _curAtkType = ActionType.近战攻击;
             // _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Melee)
             //     , DamageType.Melee);
@@ -442,7 +444,7 @@ public class PieceController : MonoBehaviour
 
             //rangeUI?.ShowAttackRange(_pieceData.rangedAtk.rangeValue);
             _curAttackPack = _pieceData.rangedAtk;
-            rangeUI?.ShowSkillRange(_curAttackPack);
+            if (isPlayerPiece) rangeUI?.ShowSkillRange(_curAttackPack);
             _curAtkType = ActionType.远程攻击;
             // _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Ranged)
             //     , DamageType.Ranged);
@@ -488,9 +490,12 @@ public class PieceController : MonoBehaviour
         var skill = range ? _pieceData.rangedAtk : _pieceData.meleeAtk;
         var action = range ? ActionType.远程攻击 : ActionType.近战攻击;
         if (skill == null || (range && unitAttrCenter.AmmoCount <= 0)) return;
+        var targets = isPlayerPiece ? new List<PieceController> { target }
+            : SkillTargeting.Query(this, skill, target.transform.position);
+        if (targets.Count == 0) return;
         if (range) unitAttrCenter.CostAmmo();
         _isAttacking = false;
-        BeginCombatAction(skill, new List<PieceController> { target }, target.transform.position,
+        BeginCombatAction(skill, targets, target.transform.position,
             action, range ? PieceDisplayState.Shoot : PieceDisplayState.Attack, !isOrder);
     }
 
@@ -536,11 +541,20 @@ public class PieceController : MonoBehaviour
         int version = combatVersion;
         try
         {
-            // 让协程句柄先归属本动作；等待检定真正显示结果，不猜测面板时长。
+            // 让协程句柄先归属本动作；等待检定窗口关闭，包含结果展示阶段。
             yield return null;
             var dicePanel = BattleScene.Ins.BM.diceCheckManager.checkDicePanel;
-            while (waitForRecognition && dicePanel != null && dicePanel.IsRolling) yield return null;
+            while (waitForRecognition && dicePanel != null && dicePanel.gameObject.activeInHierarchy) yield return null;
             if (isDead || !isActiveAndEnabled) yield break;
+            if (!isPlayerPiece)
+            {
+                // 预览属于当前动作，AI/回合调度在这 0.8 秒内保持等待。
+                var preview = BattleScene.Ins.BM.skillManager.EnsureRangeUI(this);
+                preview?.ShowPreview(this, skill, position);
+                yield return new WaitForSeconds(0.8f);
+                preview?.CloseRange();
+                if (isDead || !isActiveAndEnabled || version != combatVersion) yield break;
+            }
             CheckFace(position - transform.position);
             if (displayState == PieceDisplayState.Skill || !isPlayerPiece) PlayAudio(skill);
             else PlayAudio(action);
@@ -584,6 +598,7 @@ public class PieceController : MonoBehaviour
         }
         finally
         {
+            if (!isPlayerPiece) rangeUI?.CloseRange();
             if (actionPlayback != null && !actionPlayback.IsDone) pieceDisplay?.StopAnimation();
             actionPlayback = null;
             projectileTween?.Kill();
@@ -687,7 +702,7 @@ public class PieceController : MonoBehaviour
         }
 
         _isUsingSkill = true;
-        rangeUI?.ShowSkillRange(skillPack);
+        if (isPlayerPiece) rangeUI?.ShowSkillRange(skillPack);
         _skillPack = skillPack;
     }
 

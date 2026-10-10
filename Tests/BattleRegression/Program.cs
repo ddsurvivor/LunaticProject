@@ -159,6 +159,7 @@ static partial class Program
             Assert(owner.unitAttrCenter.GetBuffStacks(BuffType.AutoHeal)==0 && attacker.unitAttrCenter.GetBuffStacks(BuffType.AutoHeal)==0,"Unexpected proc");
         });
         Batch2();
+        TargetingRegression();
         BuffRegression();
         ComponentRegression();
         FloatingTextRegression();

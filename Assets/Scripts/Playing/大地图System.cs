@@ -19,6 +19,8 @@ public class 大地图System : SerializedMonoBehaviour
     private DaytimeSystem defaultDaytimeSystem;
     public CanvasGroup gameoverPanel;
     public GameObject mapRoot;
+    [Tooltip("AVG 入场时遮挡地图，首句剧情显示后关闭。")]
+    [SerializeField] private GameObject startupMapCover;
 
     [LabelText("调试模式显示所有关卡")]
     public bool isDebugMode;
@@ -107,6 +109,7 @@ public class 大地图System : SerializedMonoBehaviour
             剧情.ShowReader();
             剧情.设置新剧本(t);
             剧情.Next();
+            HideStartupMapCover();
         }
     }
 
@@ -115,6 +118,7 @@ public class 大地图System : SerializedMonoBehaviour
         是可以点击地图事件 = true;
         instance = this;
         defaultDaytimeSystem = daytimeSystem;
+        if (startupMapCover != null) startupMapCover.SetActive(true);
     }
 
     private void Start()
@@ -141,10 +145,20 @@ public class 大地图System : SerializedMonoBehaviour
             Debug.Log($"恢复未完成剧情，从头播放：{scriptFile}");
             开始剧情(scriptFile);
         }
-        else if (!isDebugMode)
+        else if (!isDebugMode && profile.isNewGame)
         {
             StartFirstNode();
         }
+        else
+        {
+            HideStartupMapCover();
+        }
+    }
+
+    /// <summary>剧情准备好后移除入场遮罩；无需播放剧情时直接显示地图。</summary>
+    public void HideStartupMapCover()
+    {
+        if (startupMapCover != null) startupMapCover.SetActive(false);
     }
 
     /// <summary>等待 GM 数据准备完毕后恢复地图；场景加载回调和 Start 均可安全调用。</summary>

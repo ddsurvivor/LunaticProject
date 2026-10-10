@@ -80,7 +80,7 @@ public partial class EnemyController : PieceController
 
     public void CastSkillOnTarget(PieceController targetPc, SkillPack skill)
     {
-        if (IsPerformingAction || isDead || skill == null || targetPc == null || !BuffManager.CanTarget(this, targetPc)) return;
+        if (IsPerformingAction || isDead || !SkillTargeting.IsValid(this, targetPc, skill)) return;
         var targets = BattleScene.Ins.BM.skillManager.GetTargets(this, targetPc.transform, skill);
         if (targets.Count == 0) return;
         BeginCombatAction(skill, targets, targetPc.transform.position, ActionType.技能, PieceDisplayState.Skill);
@@ -90,7 +90,7 @@ public partial class EnemyController : PieceController
 
     public void CastAttackOnTarget(PieceController targetPc)
     {
-        if (IsPerformingAction || isDead || _curAttackPack == null || targetPc == null || !BuffManager.CanTarget(this, targetPc)) return;
+        if (IsPerformingAction || isDead || !SkillTargeting.IsValid(this, targetPc, _curAttackPack)) return;
         var skill = _curAttackPack;
         var action = _curAtkType;
         var targets = BattleScene.Ins.BM.skillManager.GetTargets(this, targetPc.transform, skill);

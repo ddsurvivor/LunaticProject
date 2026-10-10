@@ -2,12 +2,11 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 #if UNITY_EDITOR
 using UnityEditor;
 using System.IO;
-#else
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 #endif
 
 public class AudioManager : SerializedMonoBehaviour
@@ -18,6 +17,11 @@ public class AudioManager : SerializedMonoBehaviour
     [Title("核心配置")]
     public AudioConfig audioConfig;
     public AudioMixer audioMixer;
+#if UNITY_EDITOR
+    [SerializeField, LabelText("编辑器使用 Addressables")]
+    [Tooltip("开启后使用与发布版相同的加载流程，用于检查音频资源包。")]
+    private bool useAddressablesInEditor;
+#endif
 
     [Title("运行时状态 (只读观察)")]
     [ShowInInspector, ReadOnly]
@@ -26,9 +30,7 @@ public class AudioManager : SerializedMonoBehaviour
 
     // 两种加载方式共用音频缓存，供播放和停止接口使用。
     private Dictionary<string, AudioClip> _audioCache = new Dictionary<string, AudioClip>();
-#if !UNITY_EDITOR
     private Dictionary<string, AsyncOperationHandle<AudioClip>> _audioHandles = new Dictionary<string, AsyncOperationHandle<AudioClip>>();
-#endif
     private bool _isDestroyed;
 
     // 【优化 2：简单的对象池】彻底消除 new GameObject 和 Destroy 带来的 GC
@@ -185,33 +187,37 @@ public class AudioManager : SerializedMonoBehaviour
         }
 
 #if UNITY_EDITOR
-        string assetPath = audioName.Replace('\\', '/');
-        if (!assetPath.StartsWith("Assets/", System.StringComparison.OrdinalIgnoreCase))
-            assetPath = "Assets/SOUND/" + assetPath;
+        if (!useAddressablesInEditor)
+        {
+            string assetPath = audioName.Replace('\\', '/');
+            if (!assetPath.StartsWith("Assets/", System.StringComparison.OrdinalIgnoreCase))
+                assetPath = "Assets/SOUND/" + assetPath;
 
-        AudioClip clip = null;
-        if (Path.HasExtension(assetPath))
-        {
-            clip = AssetDatabase.LoadAssetAtPath<AudioClip>(assetPath);
-        }
-        else
-        {
-            foreach (string extension in new[] { ".wav", ".mp3", ".ogg" })
+            AudioClip clip = null;
+            if (Path.HasExtension(assetPath))
             {
-                clip = AssetDatabase.LoadAssetAtPath<AudioClip>(assetPath + extension);
-                if (clip != null) break;
+                clip = AssetDatabase.LoadAssetAtPath<AudioClip>(assetPath);
             }
-        }
+            else
+            {
+                foreach (string extension in new[] { ".wav", ".mp3", ".ogg" })
+                {
+                    clip = AssetDatabase.LoadAssetAtPath<AudioClip>(assetPath + extension);
+                    if (clip != null) break;
+                }
+            }
 
-        if (clip == null)
-        {
-            Debug.LogWarning($"[AudioManager] 无法通过资源路径加载音频: {assetPath}");
+            if (clip == null)
+            {
+                Debug.LogWarning($"[AudioManager] 无法通过资源路径加载音频: {assetPath}");
+                return;
+            }
+
+            _audioCache[audioName] = clip;
+            onComplete?.Invoke(clip);
             return;
         }
-
-        _audioCache[audioName] = clip;
-        onComplete?.Invoke(clip);
-#else
+#endif
         // 同一音频加载期间复用句柄，避免重复增加 Addressables 引用计数。
         if (_audioHandles.TryGetValue(audioName, out var handle))
         {
@@ -237,12 +243,12 @@ public class AudioManager : SerializedMonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"[AudioManager] 无法通过 Addressables 加载音效: {audioName}");
+                Debug.LogError($"[AudioManager] Addressables 音频加载失败：{audioName}。" +
+                    $"请检查发布包的 StreamingAssets/aa 及音频地址。原因：{h.OperationException}");
                 _audioHandles.Remove(audioName);
                 Addressables.Release(h);
             }
         };
-#endif
     }
 
 
@@ -319,7 +325,6 @@ public class AudioManager : SerializedMonoBehaviour
     {
         _isDestroyed = true;
         // 包括尚未完成的加载，每个句柄只释放一次。
-        #if !UNITY_EDITOR
         foreach (var kvp in _audioHandles)
         {
             if (kvp.Value.IsValid())
@@ -328,7 +333,6 @@ public class AudioManager : SerializedMonoBehaviour
             }
         }
         _audioHandles.Clear();
-        #endif
         _audioCache.Clear();
         _sePool.Clear();
         循环音效字典.Clear();

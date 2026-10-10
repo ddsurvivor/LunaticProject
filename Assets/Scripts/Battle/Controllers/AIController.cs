@@ -303,8 +303,7 @@ public partial class AIController : PlayerController
 
     private static bool IsValidTarget(EnemyController piece, PieceController target)
     {
-        return target != null && !target.isDead && target.gameObject.activeInHierarchy &&
-            BuffManager.CanTarget(piece, target);
+        return SkillTargeting.IsValid(piece, target, SkillTarget.Enemy);
     }
 
     private static int ActionCost(ActionType action) => GM.Ins.DM.gameConstSO.GetActionPointCost(action);

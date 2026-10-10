@@ -6,6 +6,14 @@ using UnityEngine.Serialization;
 [System.Serializable]
 public class SkillPack
 {
+    /// <summary>仅覆盖选择规则，共享技能效果配置，不修改原技能。</summary>
+    public SkillPack WithTarget(SkillTarget targetType)
+    {
+        var copy = (SkillPack)MemberwiseClone();
+        copy.target = targetType;
+        return copy;
+    }
+
     public string skillName;
     public string description;// 技能描述
     [LabelText("能量消耗")]public int mpCost;

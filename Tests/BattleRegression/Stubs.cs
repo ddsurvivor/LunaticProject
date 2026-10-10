@@ -34,6 +34,10 @@ namespace UnityEngine
     public class MonoBehaviour : Component
     {
         public bool isActiveAndEnabled=true;
+        protected static RangeUI Instantiate(RangeUI original, Transform parent)
+        {
+            var result = new GameObject().Add(new RangeUI()); result.transform.parent = parent; return result;
+        }
         protected static GameObject Instantiate(GameObject original)
         {
             var go=new GameObject();
@@ -57,7 +61,8 @@ namespace UnityEngine
     public class Transform
     {
         public GameObject gameObject; public Transform parent;
-        public Vector3 position, localScale; public Quaternion rotation;
+        public Vector3 position, localScale, localPosition; public Quaternion rotation, localRotation;
+        public Vector3 forward = new(0,0,1);
         public int GetInstanceID()=>GetHashCode();
         public T GetComponentInParent<T>() where T:class => gameObject?.GetComponent<T>() ?? parent?.GetComponentInParent<T>();
     }
@@ -67,14 +72,23 @@ namespace UnityEngine
         public Vector3(float x,float y,float z) { this.x=x; this.y=y; this.z=z; }
         public static Vector3 up => new(0,1,0);
         public float sqrMagnitude=>x*x+y*y+z*z;
+        public float magnitude => (float)Math.Sqrt(sqrMagnitude);
+        public Vector3 normalized => magnitude > 0 ? this * (1f / magnitude) : new();
+        public void Normalize() { this = normalized; }
+        public static Vector3 ClampMagnitude(Vector3 v, float max) => v.magnitude > max ? v.normalized * max : v;
+        public static Vector3 Cross(Vector3 a, Vector3 b) => new(a.y*b.z-a.z*b.y,a.z*b.x-a.x*b.z,a.x*b.y-a.y*b.x);
         public static Vector3 operator -(Vector3 a,Vector3 b)=>new(a.x-b.x,a.y-b.y,a.z-b.z);
         public static float Angle(Vector3 a,Vector3 b) { var length=Math.Sqrt(a.sqrMagnitude*b.sqrMagnitude); return length==0?0:(float)(Math.Acos(Math.Clamp((a.x*b.x+a.y*b.y+a.z*b.z)/length,-1,1))*180/Math.PI); }
         public static Vector3 operator +(Vector3 a,Vector3 b) => new(a.x+b.x,a.y+b.y,a.z+b.z);
         public static Vector3 operator *(Vector3 a,float f) => new(a.x*f,a.y*f,a.z*f);
+        public static Vector3 operator /(Vector3 a,float f) => a * (1f/f);
     }
     public struct Quaternion { public static Quaternion identity => default; }
     public static class Mathf
     {
+        public const float Rad2Deg = 180f / (float)Math.PI;
+        public static float Sqrt(float value) => (float)Math.Sqrt(value);
+        public static float Asin(float value) => (float)Math.Asin(value);
         public static int Max(int a,int b)=>Math.Max(a,b); public static float Max(float a,float b)=>Math.Max(a,b);
         public static int Min(int a,int b)=>Math.Min(a,b); public static float Abs(float a)=>Math.Abs(a);
         public static int Clamp(int v,int a,int b)=>Math.Clamp(v,a,b); public static float Clamp(float v,float a,float b)=>Math.Clamp(v,a,b);
@@ -83,9 +97,14 @@ namespace UnityEngine
         public static float Log10(float v)=>(float)Math.Log10(v); public static float Clamp01(float v)=>Math.Clamp(v,0,1);
     }
     public static class Random { public static float value=0f; public static int NextValue=1; public static int Range(int a,int b)=>Math.Clamp(NextValue,a,b-1); }
-    public static class Debug { public static void Log(object o){} public static void LogWarning(object o){} public static void LogError(object o){} }
+    public static class Debug { public static void Log(object o){} public static void LogWarning(object o, object context=null){} public static void LogError(object o){} }
     public class Collider : Component { }
-    public static class Physics { public static Collider[] Results=Array.Empty<Collider>(); public static Collider[] OverlapSphere(Vector3 p,float r)=>Results; }
+    public static class Physics
+    {
+        public static Collider[] Results=Array.Empty<Collider>();
+        public static Vector3 LastCenter; public static float LastRadius;
+        public static Collider[] OverlapSphere(Vector3 p,float r) { LastCenter=p; LastRadius=r; return Results; }
+    }
 }
 namespace UnityEngine.UI
 {
@@ -119,7 +138,7 @@ public class SkillPack
 {
     public string skillName;
     public int mpCost; public bool layerSkill, isRecognitionCheck, isDelaySkill;
-    public SkillTarget target=SkillTarget.EnemyAll; public RangeType rangeType=RangeType.Circle; public float explodeRadius,rangeValue=10,rangeAgle=90;
+    public SkillTarget target=SkillTarget.EnemyAll; public RangeType rangeType=RangeType.Circle; public float explodeRadius,rangeValue=10,rangeAgle=90,arcWeight,arcCenterDis;
     public List<ItemPack> consumeItems=new(); public List<AttackPack> attackPacks=new();
 }
 public class PieceData
@@ -133,6 +152,7 @@ public class PieceData
 }
 public class PieceController : MonoBehaviour
 {
+    public RangeUI rangeUI;
     public Player playerData;
     public List<PassiveType> availablePassives = new();
     public int ComponentRefreshes;
@@ -144,6 +164,12 @@ public class PieceController : MonoBehaviour
     public PieceDisplay pieceDisplay=new();
     public int Deaths, Hurts;
     public void Dead(){ Deaths++; } public void Hurt(){ Hurts++; }
+}
+public class RangeUI : MonoBehaviour
+{
+    public PieceController Owner; public int CloseCalls;
+    public void Bind(PieceController owner) { Owner=owner; }
+    public void CloseRange() { CloseCalls++; }
 }
 public class EnemyController : PieceController
 {

@@ -25,6 +25,7 @@ $sources = @(
     'Tests/BattleRegression/Stubs.cs',
     'Tests/BattleRegression/Program.cs',
     'Tests/BattleRegression/Batch2.cs',
+    'Tests/BattleRegression/TargetingRegression.cs',
     'Tests/BattleRegression/BuffRegression.cs',
     'Tests/BattleRegression/ComponentRegression.cs',
     'Tests/BattleRegression/FloatingTextRegression.cs'
