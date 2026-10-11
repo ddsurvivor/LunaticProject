@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.SceneManagement;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 #if UNITY_EDITOR
@@ -40,9 +41,11 @@ public class AudioManager : SerializedMonoBehaviour
     // 【优化 3：记录循环音效】直接记录 AudioSource 引用，抛弃复杂的 List<GameObject>
     private Dictionary<string, AudioSource> 循环音效字典 = new Dictionary<string, AudioSource>();
 
-    // 【引入方案：时间戳拦截法】解决瞬间“播放又停止”导致的竞态残留
-    private Dictionary<string, float> lastStopTimeDict = new Dictionary<string, float>();
-    private float lastStopAllTime = 0f;
+    // 版本号可取消同一帧内发出的播放请求。
+    private readonly Dictionary<string, long> audioStopVersions = new Dictionary<string, long>();
+    private long playbackVersion;
+    private long musicVersion;
+    private bool isSceneTransitioning;
 
     public void 初始化()
     {
@@ -126,24 +129,26 @@ public class AudioManager : SerializedMonoBehaviour
 
     #endregion
 
-    #region 核心加载与播放逻辑 (Addressables + 时间戳拦截)
+    #region 核心加载与播放逻辑
 
     /// <summary>
-    /// 统一的加载并播放入口，使用回调和时间戳拦截代替协程
+    /// 加载音频，并拦截已停止或已过期的播放请求。
     /// </summary>
     private void 加载并播放(string audioName, bool isBGM, bool isLoopSE)
     {
-        if (string.IsNullOrWhiteSpace(audioName)) return;
+        if (_isDestroyed || isSceneTransitioning || string.IsNullOrWhiteSpace(audioName)) return;
 
-        // 记录发起播放请求的时间
-        float requestTime = Time.unscaledTime;
+        long requestVersion = playbackVersion;
+        audioStopVersions.TryGetValue(audioName, out long stopVersion);
+        long requestMusicVersion = isBGM ? ++musicVersion : musicVersion;
 
         // 加载完毕后的实际执行逻辑 (闭包回调)
         System.Action<AudioClip> onReadyToPlay = (clip) =>
         {
-            // 【核心拦截】：如果加载期间，触发了全局停止，或者停止了该特定音效，直接丢弃[cite: 2]
-            if (lastStopAllTime > requestTime) return;
-            if (lastStopTimeDict.TryGetValue(audioName, out float stopTime) && stopTime > requestTime) return;
+            if (_isDestroyed || isSceneTransitioning || requestVersion != playbackVersion) return;
+            audioStopVersions.TryGetValue(audioName, out long currentStopVersion);
+            if (currentStopVersion != stopVersion) return;
+            if (isBGM && requestMusicVersion != musicVersion) return;
 
             if (isBGM)
             {
@@ -271,8 +276,9 @@ public class AudioManager : SerializedMonoBehaviour
 
     public void 停止音效(string audioName)
     {
-        // 记录停止指令的最新时间[cite: 2]
-        lastStopTimeDict[audioName] = Time.unscaledTime;
+        if (string.IsNullOrWhiteSpace(audioName)) return;
+        audioStopVersions.TryGetValue(audioName, out long version);
+        audioStopVersions[audioName] = version + 1;
 
         // 1. 停止循环字典中的引用
         if (循环音效字典.TryGetValue(audioName, out AudioSource loopSource))
@@ -295,28 +301,55 @@ public class AudioManager : SerializedMonoBehaviour
         }
     }
 
+    /// <summary>停止全部音效，并取消尚未完成的播放请求。</summary>
     public void StopAll()
     {
-        // 记录全局停止指令的时间[cite: 2]
-        lastStopAllTime = Time.unscaledTime;
+        playbackVersion++;
 
         foreach (var source in _sePool)
         {
             if (source != null)
             {
                 source.Stop();
+                source.loop = false;
                 source.clip = null;
             }
         }
         循环音效字典.Clear();
     }
 
+    /// <summary>停止背景音乐，并取消待加载的音乐请求。</summary>
     public void 停止音乐()
     {
-        if (bgmAudioSource != null && bgmAudioSource.isPlaying)
+        musicVersion++;
+        if (bgmAudioSource != null)
         { 
             bgmAudioSource.Stop();
+            bgmAudioSource.clip = null;
         }
+    }
+
+    /// <summary>切场景前停止全部音频，阻止旧场景继续发起播放。</summary>
+    public void BeginSceneTransition()
+    {
+        if (isSceneTransitioning) return;
+        isSceneTransitioning = true;
+        StopAll();
+        停止音乐();
+        SceneManager.sceneLoaded += OnTransitionSceneLoaded;
+    }
+
+    /// <summary>结束转场音频锁定；加载失败时也需调用。</summary>
+    public void EndSceneTransition()
+    {
+        SceneManager.sceneLoaded -= OnTransitionSceneLoaded;
+        isSceneTransitioning = false;
+    }
+
+    private void OnTransitionSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // 在新场景 Start 前恢复播放，避免拦截开始菜单的音乐。
+        EndSceneTransition();
     }
 
     #endregion
@@ -324,6 +357,7 @@ public class AudioManager : SerializedMonoBehaviour
     private void OnDestroy()
     {
         _isDestroyed = true;
+        EndSceneTransition();
         // 包括尚未完成的加载，每个句柄只释放一次。
         foreach (var kvp in _audioHandles)
         {
@@ -345,7 +379,7 @@ public class AudioManager : SerializedMonoBehaviour
     /// <param name="clip">要播放的音频切片</param>
     public void PlayClip(AudioClip clip)
     {
-        if (clip == null) return;
+        if (_isDestroyed || isSceneTransitioning || clip == null) return;
 
         // 直接从我们写好的对象池中取出一个空闲的 AudioSource
         AudioSource seSource = GetAvailableSESource();
