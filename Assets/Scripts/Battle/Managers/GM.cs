@@ -149,6 +149,8 @@ using UnityEngine.SceneManagement;
         {
             try
             {
+                // 所有转场统一清理音频，包括普通返回开始界面。
+                AM.BeginSceneTransition();
                 if (delay > 0f) yield return new WaitForSecondsRealtime(delay);
                 if (battleTransitionPanel == null)
                     battleTransitionPanel = gameObject.AddComponent<BattleTransitionPanel>();
@@ -180,6 +182,7 @@ using UnityEngine.SceneManagement;
             }
             finally
             {
+                AM.EndSceneTransition();
                 IsTransitioning = false;
             }
         }
