@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
-public class ExplosiveBarrel : MonoBehaviour
+public class ExplosiveBarrel : MonoBehaviour, IEnemyExplosiveTarget
 {
     public string barrelName = "爆炸桶";
     [Header("爆炸设置")]
@@ -26,6 +26,13 @@ public class ExplosiveBarrel : MonoBehaviour
     public  bool needInit = true;
     
     public bool selfDestroy = true; // 是否在爆炸后销毁自身
+
+    public PieceController Piece => pieceController;
+    public bool CanBeTriggered => !_hasExploded && pieceController != null && !pieceController.isDead && gameObject.activeInHierarchy;
+    public int CountThreatenedPlayers() => CanBeTriggered
+        ? EnemyExplosiveTargets.CountPlayers(pieceController, transform.position, explosionRadius, effectLayer, skillPack) : 0;
+    private void OnEnable() => EnemyExplosiveTargets.Active.Add(this);
+    private void OnDisable() => EnemyExplosiveTargets.Active.Remove(this);
 
     public void Start()
     {
@@ -64,21 +71,8 @@ public class ExplosiveBarrel : MonoBehaviour
             transform.position + Vector3.up * 3f, Quaternion.identity);
 
         // 2. 核心：寻找爆炸范围内的所有碰撞体
-        Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius, effectLayer);
-
-        List<PieceController> targetPieces = new List<PieceController>();
-        foreach (Collider hit in colliders)
-        {
-            // 3. 尝试获取 PieceController
-            // 注意：如果你的 PieceController 在父物体上，请使用 GetComponentInParent
-            var piece = hit.GetComponent<PieceController>();
-
-            if (piece != null && piece != pieceController && !targetPieces.Contains(piece)) // 4. 排除自己
-            {
-                targetPieces.Add(piece);
-            }
-        }
-        BattleScene.Ins.BM.PieceSkill(pieceController, targetPieces,skillPack);
+        var targetPieces = EnemyExplosiveTargets.CollectTargets(pieceController, transform.position, explosionRadius, effectLayer);
+        BattleScene.Ins.BM.PieceSkill(pieceController, targetPieces, skillPack.WithDeadCaster(), transform.position);
         
         // 播放音效
         AudioSource.PlayClipAtPoint(skillPack.skillSound, Camera.main.transform.position);

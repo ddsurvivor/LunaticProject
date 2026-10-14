@@ -93,8 +93,41 @@ public class ComponentAttributeBonus
     public float value;
 }
 
+public readonly struct ComponentInventoryEntry
+{
+    public int Id { get; }
+    public Player Owner { get; }
+
+    public ComponentInventoryEntry(int id, Player owner = null)
+    {
+        Id = id;
+        Owner = owner;
+    }
+}
+
 public static class ComponentEquipment
 {
+    // 展示列表包含空闲副本及角色身上的副本，不改变存档中的空闲仓库。
+    public static List<ComponentInventoryEntry> InventoryEntries(IEnumerable<int> inventory,
+        IEnumerable<Player> players, Player excludedOwner = null)
+    {
+        var entries = new List<ComponentInventoryEntry>();
+        if (inventory != null)
+            foreach (int id in inventory)
+                if (id > 0) entries.Add(new ComponentInventoryEntry(id));
+        if (players == null) return entries;
+        var seenPlayers = new HashSet<Player>();
+        foreach (var owner in players)
+        {
+            if (owner == null || owner == excludedOwner || !seenPlayers.Add(owner)) continue;
+            foreach (var slots in new[] { owner.normalSlots, owner.weaponSlots })
+                if (slots != null)
+                    foreach (int id in slots)
+                        if (id > 0) entries.Add(new ComponentInventoryEntry(id, owner));
+        }
+        return entries;
+    }
+
     public static IEnumerable<ComponentData> Equipped(Player player)
     {
         var config = GM.Ins?.DM?.componentConfig;

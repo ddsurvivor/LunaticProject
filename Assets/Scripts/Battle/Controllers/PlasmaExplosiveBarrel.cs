@@ -7,7 +7,7 @@ using UnityEngine;
 /// 特殊电浆爆炸桶：多段生命值，每次受击释放脉冲，死亡播放序列帧动画
 /// </summary>
 [RequireComponent(typeof(UnitAttrCenter))]
-public class PlasmaExplosiveBarrel : MonoBehaviour
+public class PlasmaExplosiveBarrel : MonoBehaviour, IEnemyExplosiveTarget
 {
     [Header("基础配置")] public string barrelName = "电浆爆炸桶";
     [SerializeField] private int maxHealth = 4;
@@ -25,6 +25,13 @@ public class PlasmaExplosiveBarrel : MonoBehaviour
 
     public PieceController pieceController;
     private bool _isDead = false;
+
+    public PieceController Piece => pieceController;
+    public bool CanBeTriggered => !_isDead && pieceController != null && !pieceController.isDead && gameObject.activeInHierarchy;
+    public int CountThreatenedPlayers() => CanBeTriggered
+        ? EnemyExplosiveTargets.CountPlayers(pieceController, transform.position, explosionRadius, effectLayer, skillPack) : 0;
+    private void OnEnable() => EnemyExplosiveTargets.Active.Add(this);
+    private void OnDisable() => EnemyExplosiveTargets.Active.Remove(this);
 
     private void Start()
     {
@@ -106,22 +113,10 @@ public class PlasmaExplosiveBarrel : MonoBehaviour
             Quaternion.identity);
 
         // 2. 范围检测
-        Collider[] colliders =
-            Physics.OverlapSphere(transform.position, explosionRadius, effectLayer);
-        List<PieceController> targetPieces = new List<PieceController>();
-
-        foreach (Collider hit in colliders)
-        {
-            var piece = hit.GetComponent<PieceController>();
-            // 排除自己
-            if (piece != null && piece != pieceController && !targetPieces.Contains(piece))
-            {
-                targetPieces.Add(piece);
-            }
-        }
+        var targetPieces = EnemyExplosiveTargets.CollectTargets(pieceController, transform.position, explosionRadius, effectLayer);
 
         // 3. 执行战斗后端逻辑
-        BattleScene.Ins.BM.PieceSkill(pieceController, targetPieces, skillPack);
+        BattleScene.Ins.BM.PieceSkill(pieceController, targetPieces, skillPack.WithDeadCaster(), transform.position);
 
         // 4. 音效
         if (skillPack.skillSound != null)

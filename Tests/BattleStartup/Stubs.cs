@@ -66,6 +66,22 @@ public partial class BattleManager:MonoBehaviour
     private bool inBattle=true;
     private float moveWaitTime=1f,gazeWaitTime=0.5f;
     public int PlayerStarts;
+    public bool HasDeploymentAreas;
+    public bool DeploymentActive => startupPhase == StartupPhase.Deployment;
+    private bool BeginDeploymentIfAvailable()
+    {
+        if (!HasDeploymentAreas) return false;
+        startupPhase = StartupPhase.Deployment;
+        return true;
+    }
+    private void EndDeploymentSession() { }
+    public void ConfirmDeploymentFixture()
+    {
+        if (!DeploymentActive) return;
+        HasDeploymentAreas = false;
+        startupPhase = StartupPhase.Ready;
+        StartBattle();
+    }
     public void PlayerStart() { PlayerStarts++;PlayerController.isInTurn=true; }
     // Test fixture supplies the non-startup scene initialization; startup methods are production code.
     public void InitializeFixture()

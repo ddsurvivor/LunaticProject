@@ -19,6 +19,61 @@ static class Program
     static void Test(string name,Action body) { body();passed++;Console.WriteLine("PASS "+name); }
     static void Main()
     {
+        Test("Nearest and lowest-health targeting ignore standard threat bonuses",()=>{
+            var s=Fixture();var e=Enemy(s);var a=s.BM.PlayerController.pieces[0];var b=s.BM.PlayerController.pieces[1];
+            b.unitAttrCenter.TauntValue=10;e.damageDic[b]=100;e.targetStrategy=EnemyTargetStrategy.Nearest;
+            Assert(s.BM.AIController.CheckEnemyTarget(e)==a,"nearest followed threat");
+            Assert(s.BM.AIController.CheckEnemyTarget(e,a,new Vector3(20,0,0))==b,"nearest preview ignored destination");
+            a.unitAttrCenter.CurHealth=50;b.unitAttrCenter.CurHealth=10;e.targetStrategy=EnemyTargetStrategy.LowestHealth;
+            Assert(s.BM.AIController.CheckEnemyTarget(e)==b,"lowest health failed");
+            b.Blocked=true;Assert(s.BM.AIController.CheckEnemyTarget(e)==a,"untargetable lowest-health pawn selected");
+        });
+        Test("Conditional strategy requires all conditions, respects priority and recovers baseline",()=>{
+            var s=Fixture();var e=Enemy(s);e.strategyRules.Add(new EnemyStrategyRule {
+                targetStrategy=EnemyTargetStrategy.LowestHealth,actionStrategy=EnemyAIType.Shoot,
+                conditions=new(){new(){type=EnemyStrategyConditionType.HealthRatioAtMost,healthRatio=.3f},
+                    new(){type=EnemyStrategyConditionType.TargetCountAtMost,count=1}}});
+            e.unitAttrCenter.CurHealth=30;Assert(e.ResolveStrategy().Action==EnemyAIType.Combine,"partial match triggered");
+            s.BM.PlayerController.pieces[1].isDead=true;Assert(e.ResolveStrategy().Action==EnemyAIType.Shoot,"threshold match failed");
+            e.strategyRules.Add(new EnemyStrategyRule {targetStrategy=EnemyTargetStrategy.Nearest,actionStrategy=EnemyAIType.SkillUser,
+                conditions=new(){new(){type=EnemyStrategyConditionType.AllyCountAtMost,count=1}}});
+            Assert(e.ResolveStrategy().Target==EnemyTargetStrategy.LowestHealth,"later rule overrode first");
+            e.unitAttrCenter.CurHealth=31;Assert(e.ResolveStrategy().Action==EnemyAIType.SkillUser,"ally-count switch failed");
+            e.strategyRules[1].enabled=false;Assert(e.ResolveStrategy().Target==EnemyTargetStrategy.StandardThreat,"baseline not restored");
+        });
+        Test("Strategy switch invalidates committed target in aggro presentation",()=>{
+            var s=Fixture();var e=Enemy(s);var a=s.BM.PlayerController.pieces[0];var b=s.BM.PlayerController.pieces[1];
+            s.BM.AIController.CommitForTest(e,b);e.strategyRules.Add(new EnemyStrategyRule {
+                targetStrategy=EnemyTargetStrategy.Nearest,actionStrategy=EnemyAIType.Shoot,
+                conditions=new(){new(){type=EnemyStrategyConditionType.HealthRatioAtMost,healthRatio=.3f}}});
+            Assert(s.BM.AIController.PreviewEnemyTarget(e)==b,"valid committed plan changed");
+            e.unitAttrCenter.CurHealth=30;Assert(s.BM.AIController.PreviewEnemyTarget(e)==a,"obsolete committed plan survived switch");
+        });
+        Test("Clicked enemy shows ranged ring and follows position and range changes",()=>{
+            var s=Fixture();var e=Enemy(s);s.CM.Hover(e);
+            Assert(s.CM.InspectionRange==null,"hover opened attack range");
+            s.CM.PinEnemyTargetLine(e);var ring=s.CM.InspectionRange;
+            Assert(ring.gameObject.activeSelf,"clicked range hidden");Near(ring.Radius,5,"ranged range not preferred");
+            e.transform.position=new Vector3(7,0,0);e.pieceData.rangedAtk.rangeValue=9;s.CM.Tick();
+            Near(ring.Position.x,7,"range center stale");Near(ring.Radius,9,"range radius stale");
+            s.CM.Hover(null);Assert(ring.gameObject.activeSelf,"pointer exit hid clicked range");
+        });
+        Test("Zero or missing ranged attack falls back to melee and missing attacks hide ring",()=>{
+            var s=Fixture();var e=Enemy(s);e.pieceData.rangedAtk.rangeValue=0;s.CM.PinEnemyTargetLine(e);
+            Near(s.CM.InspectionRange.Radius,2,"zero ranged did not use melee");
+            e.pieceData.rangedAtk=null;s.CM.Tick();Near(s.CM.InspectionRange.Radius,2,"missing ranged did not use melee");
+            e.pieceData.meleeAtk=null;s.CM.Tick();Assert(!s.CM.InspectionRange.gameObject.activeSelf,"missing attacks left range visible");
+        });
+        Test("Switching pinned enemy reuses ring and interaction and invalid state clear it",()=>{
+            var s=Fixture();var e=Enemy(s);var other=Enemy(s,1);s.CM.PinEnemyTargetLine(e);var ring=s.CM.InspectionRange;
+            other.pieceData.rangedAtk.rangeValue=11;s.CM.PinEnemyTargetLine(other);
+            Assert(ring==s.CM.InspectionRange,"created a second ring");Near(ring.Radius,11,"old enemy radius retained");
+            other.isDead=true;s.CM.Tick();Assert(!ring.gameObject.activeSelf,"dead enemy range retained");
+            other.isDead=false;s.CM.PinEnemyTargetLine(other);s.CM.ClearEnemyTargetLineInteraction();Assert(!ring.gameObject.activeSelf,"cancel retained range");
+            s.CM.PinEnemyTargetLine(e);s.CM.Drag(s.BM.PlayerController.pieces[0],true);s.CM.Tick();Assert(!ring.gameObject.activeSelf,"movement retained range");
+            s.CM.EndDrag();s.CM.Tick();Assert(ring.gameObject.activeSelf,"range did not recover");
+            s.BM.CanInspectEnemyTargets=false;s.CM.Tick();Assert(!ring.gameObject.activeSelf,"blocked inspection retained range");
+        });
         Test("Hover enter displays and empty-space exit hides",()=>{
             var s=Fixture();var e=Enemy(s);s.CM.Hover(e);Assert(e.tagetLine.enabled&&e.Outline,"enter failed");
             s.CM.Hover(null);Assert(!e.tagetLine.enabled&&!e.Outline,"exit failed");

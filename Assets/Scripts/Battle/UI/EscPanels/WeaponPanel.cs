@@ -41,18 +41,25 @@ public class WeaponPanel : UIPanel
             weaponUISlots[i].Init(id, this);
         }
 
-        // 3. 刷新插件背包 (预置格子循环利用)
+        // 当前角色的插件已在装备槽中展示，背包补充其他角色装配的插件。
+        var profile = GM.Ins.PLAYERPROFILE;
+        var entries = ComponentEquipment.InventoryEntries(profile.componentInventory, profile.player, player);
+        if (entries.Count > plugsUISlots.Count && plugsUISlots.Count > 0)
+        {
+            var template = plugsUISlots[0];
+            ComponentInventoryUI.EnsureScrollableGrid((RectTransform)template.transform.parent);
+            while (plugsUISlots.Count < entries.Count)
+                plugsUISlots.Add(Instantiate(template, template.transform.parent));
+        }
+
         for (int i = 0; i < plugsUISlots.Count; i++)
         {
-            // 如果玩家背包里的物品数量超过了预设格数，这里会截断（建议预设足够多）
-            int id = (i < GM.Ins.PLAYERPROFILE.componentInventory.Count)
-                ? GM.Ins.PLAYERPROFILE.componentInventory[i]
-                : 0;
-            plugsUISlots[i].Init(id, this);
+            var entry = i < entries.Count ? entries[i] : default;
+            plugsUISlots[i].Init(entry.Id, this, entry.Owner);
         }
     }
     
-    public void ShowDetail(int id, Vector3 pos)
+    public void ShowDetail(int id, Vector3 pos, Player equippedOwner = null)
     {
         detailPanel.gameObject.SetActive(true);
         // 3. 设定基础偏移量
@@ -66,7 +73,7 @@ public class WeaponPanel : UIPanel
         }
 
         detailPanel.transform.position = pos + new Vector3(offsetX, 0, 0);
-        detailPanel.Setup(id, this);
+        detailPanel.Setup(id, this, equippedOwner);
     }
     public bool CheckIsEquipped(int id)
     {

@@ -10,7 +10,8 @@ static partial class Program
     static void Assert(bool condition, string message) { if (!condition) throw new Exception(message); }
     static void Test(string name, Action body)
     {
-        GM.Ins = new GM(); BattleScene.Ins = new BattleScene(); TestEvents.Reset(); Physics.Results=Array.Empty<Collider>();
+        GM.Ins = new GM(); BattleScene.Ins = new BattleScene(); TestEvents.Reset(); Physics.Results=Array.Empty<Collider>();Physics.FilterByPosition=false;
+        EnemyExplosiveTargets.Active.Clear();
         UnityEngine.Random.value = 0; UnityEngine.Random.NextValue = 99;
         body(); passed++; Console.WriteLine("PASS " + name);
     }
@@ -160,6 +161,8 @@ static partial class Program
         });
         Batch2();
         TargetingRegression();
+        EnemyAOERegression();
+        EnemyExplosiveRegression();
         BuffRegression();
         ComponentRegression();
         FloatingTextRegression();

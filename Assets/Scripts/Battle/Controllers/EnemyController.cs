@@ -11,6 +11,7 @@ public partial class EnemyController : PieceController
     public int level = 1;
     public int Level => Mathf.Clamp(level, EnemyLevelGrowth.MinLevel, EnemyLevelGrowth.MaxLevel);
 
+    [Sirenix.OdinInspector.LabelText("基础行动策略")]
     public EnemyAIType enemyAIType;
     public bool isActived = false; // 是否被激活
 
@@ -80,30 +81,59 @@ public partial class EnemyController : PieceController
 
     public void CastSkillOnTarget(PieceController targetPc, SkillPack skill)
     {
-        if (IsPerformingAction || isDead || !SkillTargeting.IsValid(this, targetPc, skill)) return;
-        var targets = BattleScene.Ins.BM.skillManager.GetTargets(this, targetPc.transform, skill);
+        if (IsPerformingAction || isDead || !TryGetAttackPosition(targetPc, skill, out var position)) return;
+        var targets = BattleScene.Ins.BM.skillManager.GetTargets(this, position, skill);
         if (targets.Count == 0) return;
-        BeginCombatAction(skill, targets, targetPc.transform.position, ActionType.技能, PieceDisplayState.Skill);
+        BeginCombatAction(skill, targets, position, ActionType.技能, PieceDisplayState.Skill);
         NotifySkillUsed(skill);
         rangeUI?.CloseRange();
     }
 
     public void CastAttackOnTarget(PieceController targetPc)
     {
-        if (IsPerformingAction || isDead || !SkillTargeting.IsValid(this, targetPc, _curAttackPack)) return;
+        if (IsPerformingAction || isDead || !TryGetAttackPosition(targetPc, _curAttackPack, out var position)) return;
         var skill = _curAttackPack;
         var action = _curAtkType;
-        var targets = BattleScene.Ins.BM.skillManager.GetTargets(this, targetPc.transform, skill);
+        var targets = BattleScene.Ins.BM.skillManager.GetTargets(this, position, skill);
         if (targets.Count == 0) return;
         bool ranged = action == ActionType.远程攻击;
         if (ranged && unitAttrCenter.AmmoCount <= 0) return;
         if (ranged) unitAttrCenter.CostAmmo();
-        BeginCombatAction(skill, targets, targetPc.transform.position, action,
+        BeginCombatAction(skill, targets, position, action,
             ranged ? PieceDisplayState.Shoot : PieceDisplayState.Attack);
         rangeUI?.CloseRange();
     }
 
     #endregion
+
+    public void CastOnExplosive(IEnemyExplosiveTarget explosive, SkillPack skill, ActionType action)
+    {
+        if (IsPerformingAction || !EnemyExplosiveTargets.CanAttack(this, explosive, skill)) return;
+        var attack = skill.WithTarget(SkillTarget.All);
+        var position = explosive.Piece.transform.position;
+        var targets = SkillTargeting.Query(this, attack, position);
+        // 仅允许本次选中的环境目标成为友方命中对象，其他目标沿用原技能阵营规则。
+        targets.RemoveAll(target => target != explosive.Piece && !SkillTargeting.IsValid(this, target, skill));
+        if (!EnemyAttackPosition.IsAOE(skill)) targets.RemoveAll(target => target != explosive.Piece);
+        if (!targets.Contains(explosive.Piece)) return;
+        bool ranged = action == ActionType.远程攻击;
+        if (ranged && unitAttrCenter.AmmoCount <= 0) return;
+        if (ranged) unitAttrCenter.CostAmmo();
+        BeginCombatAction(attack, targets, position, action, action == ActionType.技能 ? PieceDisplayState.Skill :
+            ranged ? PieceDisplayState.Shoot : PieceDisplayState.Attack);
+        if (action == ActionType.技能) NotifySkillUsed(skill);
+        rangeUI?.CloseRange();
+    }
+
+    private bool TryGetAttackPosition(PieceController target, SkillPack skill, out Vector3 position)
+    {
+        position = transform.position;
+        if (maximizeAOETargets && EnemyAttackPosition.IsAOE(skill))
+            return EnemyAttackPosition.TryFind(this, target, skill, out position);
+        if (!SkillTargeting.IsValid(this, target, skill)) return false;
+        position = target.transform.position;
+        return true;
+    }
 
     private void CheckDrop()
     {

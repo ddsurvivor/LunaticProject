@@ -4,6 +4,7 @@ $output = Join-Path $repo 'obj/EnemyTargetLines/Harness'
 New-Item -ItemType Directory -Force $output | Out-Null
 $sources = @(
     'Assets/Scripts/Battle/Controllers/AIController.Targeting.cs',
+    'Assets/Scripts/Battle/Controllers/EnemyController.Strategy.cs',
     'Assets/Scripts/Battle/Controllers/EnemyController.TargetLine.cs',
     'Assets/Scripts/Battle/Managers/ClickManager.TargetLines.cs',
     'Tests/EnemyTargetLines/Stubs.cs',

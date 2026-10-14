@@ -9,8 +9,10 @@ public partial class AIController
         Vector3? previewPosition = null)
     {
         if (enemy == null || enemy.isDead) return null;
-        if (previewPiece == null && pendingAttacks.TryGetValue(enemy, out var plan) && IsValidTarget(enemy, plan.Target))
+        if (previewPiece == null && pendingAttacks.TryGetValue(enemy, out var plan) &&
+            plan.Strategy.Matches(enemy.ResolveStrategy()) && IsValidTarget(enemy, plan.Target))
             return plan.Target;
+        if (previewPiece == null && TryCreateExplosivePlan(enemy, out var explosivePlan)) return explosivePlan.Target;
         return CheckEnemyTarget(enemy, previewPiece, previewPosition);
     }
 
@@ -20,6 +22,22 @@ public partial class AIController
         if (aiPiece == null || aiPiece.isDead) return null;
         var candidates = BattleScene.Ins?.BM?.PlayerController?.pieces;
         if (candidates == null) return null;
+        var strategy = aiPiece.ResolveStrategy().Target;
+        if (strategy != EnemyTargetStrategy.StandardThreat)
+        {
+            PieceController selected = null;
+            float bestValue = float.PositiveInfinity;
+            foreach (var candidate in candidates)
+            {
+                if (!IsValidTarget(aiPiece, candidate)) continue;
+                Vector3 position = candidate == previewPiece && previewPosition.HasValue
+                    ? previewPosition.Value : candidate.transform.position;
+                float value = strategy == EnemyTargetStrategy.LowestHealth ? candidate.unitAttrCenter.CurHealth :
+                    Vector3.Distance(position, aiPiece.transform.position);
+                if (value < bestValue) { bestValue = value; selected = candidate; }
+            }
+            return selected;
+        }
         PieceController nearest = null, highestDamage = null;
         float minDistance = float.MaxValue;
         int maxDamage = -1;

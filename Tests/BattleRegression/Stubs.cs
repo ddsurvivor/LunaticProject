@@ -12,6 +12,7 @@ namespace UnityEngine
     public class SerializeField : Attribute { }
     public class HeaderAttribute : Attribute { public HeaderAttribute(string s) {} }
     public class MinAttribute : Attribute { public MinAttribute(float n) {} }
+    public class RangeAttribute : Attribute { public RangeAttribute(float min,float max) {} }
     public class TooltipAttribute : Attribute { public TooltipAttribute(string s) {} }
     public static class Time { public static float deltaTime; }
     public enum HorizontalWrapMode { Wrap, Overflow }
@@ -51,6 +52,7 @@ namespace UnityEngine
     public class GameObject
     {
         public string name = "test";
+        public int layer;
         public Transform transform;
         public GameObject() { transform=new Transform { gameObject=this }; }
         private readonly Dictionary<Type, object> components = new();
@@ -71,8 +73,10 @@ namespace UnityEngine
         public float x, y, z;
         public Vector3(float x,float y,float z) { this.x=x; this.y=y; this.z=z; }
         public static Vector3 up => new(0,1,0);
+        public static Vector3 zero => new();
         public float sqrMagnitude=>x*x+y*y+z*z;
         public float magnitude => (float)Math.Sqrt(sqrMagnitude);
+        public static float Distance(Vector3 a,Vector3 b)=>(a-b).magnitude;
         public Vector3 normalized => magnitude > 0 ? this * (1f / magnitude) : new();
         public void Normalize() { this = normalized; }
         public static Vector3 ClampMagnitude(Vector3 v, float max) => v.magnitude > max ? v.normalized * max : v;
@@ -87,6 +91,9 @@ namespace UnityEngine
     public static class Mathf
     {
         public const float Rad2Deg = 180f / (float)Math.PI;
+        public const float Deg2Rad = (float)Math.PI / 180f;
+        public static float Sin(float value)=>(float)Math.Sin(value);
+        public static float Cos(float value)=>(float)Math.Cos(value);
         public static float Sqrt(float value) => (float)Math.Sqrt(value);
         public static float Asin(float value) => (float)Math.Asin(value);
         public static int Max(int a,int b)=>Math.Max(a,b); public static float Max(float a,float b)=>Math.Max(a,b);
@@ -99,11 +106,18 @@ namespace UnityEngine
     public static class Random { public static float value=0f; public static int NextValue=1; public static int Range(int a,int b)=>Math.Clamp(NextValue,a,b-1); }
     public static class Debug { public static void Log(object o){} public static void LogWarning(object o, object context=null){} public static void LogError(object o){} }
     public class Collider : Component { }
+    public struct LayerMask { public int value;public static implicit operator LayerMask(int value)=>new(){value=value}; }
     public static class Physics
     {
         public static Collider[] Results=Array.Empty<Collider>();
+        public static bool FilterByPosition;
         public static Vector3 LastCenter; public static float LastRadius;
-        public static Collider[] OverlapSphere(Vector3 p,float r) { LastCenter=p; LastRadius=r; return Results; }
+        public static Collider[] OverlapSphere(Vector3 p,float r)
+        {
+            LastCenter=p; LastRadius=r;
+            return FilterByPosition ? Array.FindAll(Results,c=>(c.transform.position-p).sqrMagnitude <= r*r+0.00001f) : Results;
+        }
+        public static Collider[] OverlapSphere(Vector3 p,float r,LayerMask mask)=>Array.FindAll(OverlapSphere(p,r),c=>(mask.value & (1 << c.gameObject.layer))!=0);
     }
 }
 namespace UnityEngine.UI
@@ -136,6 +150,9 @@ public class CheckDicePanel { public void ShowResult(int n,int[] dice,bool succe
 public enum PieceDisplayState { Dodge }
 public class SkillPack
 {
+    public bool AllowDeadCaster {get;private set;}
+    public SkillPack WithDeadCaster() {var copy=(SkillPack)MemberwiseClone();copy.AllowDeadCaster=true;return copy;}
+    public SkillPack WithTarget(SkillTarget target) {var copy=(SkillPack)MemberwiseClone();copy.target=target;return copy;}
     public string skillName;
     public int mpCost; public bool layerSkill, isRecognitionCheck, isDelaySkill;
     public SkillTarget target=SkillTarget.EnemyAll; public RangeType rangeType=RangeType.Circle; public float explodeRadius,rangeValue=10,rangeAgle=90,arcWeight,arcCenterDis;
@@ -143,6 +160,7 @@ public class SkillPack
 }
 public class PieceData
 {
+    public SkillPack rangedAtk,meleeAtk;
     public int maxAmmoCount=3, maxHealth=100, maxMovePoint=3, maxMana=10, critRate, critDamageRate=100;
     public float moveRange=5, evasionRate; public List<SkillSystem.PassiveSkillType> passiveSkillTypes=new();
     public PieceElementType elementType;
@@ -152,6 +170,8 @@ public class PieceData
 }
 public class PieceController : MonoBehaviour
 {
+    public bool IsPerformingAction;
+    public List<SkillPack> availableSkills=new();
     public RangeUI rangeUI;
     public Player playerData;
     public List<PassiveType> availablePassives = new();
@@ -171,8 +191,10 @@ public class RangeUI : MonoBehaviour
     public void Bind(PieceController owner) { Owner=owner; }
     public void CloseRange() { CloseCalls++; }
 }
-public class EnemyController : PieceController
+public partial class EnemyController : PieceController
 {
+    public bool isActived=true;
+    public EnemyAIType enemyAIType=EnemyAIType.Combine;
     public EnemyCanvas enemyCanvas=new(); public int RecordedDamage;
     public void AddDamageRecord(PieceController p,int d){ RecordedDamage+=d; }
     public void UpdateHpBar(float f){}
@@ -206,6 +228,7 @@ public class GM { public static GM Ins=new(); public Profile PLAYERPROFILE=new()
 public class UIManager { public void OnPieceStateChance(PieceController p){} public void ShowUndoMoveButton(bool b){} }
 public class BattleManager
 {
+    public DamageManager damageManager=>new(this);
     public BuffManager buffManager=new(); public TipTextManager tipTextManager=new(); public DiceCheckManager diceCheckManager=new();
     public SkillSystem.CharacterSkillManager characterSkillManager=new(); public PlayerController PlayerController=new();
     public PlayerController AIController=new(); public OrderManager orderManager=new();

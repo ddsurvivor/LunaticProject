@@ -76,6 +76,14 @@ public class RangeUI : MonoBehaviour
         _curRange = radius;
     }
 
+    /// <summary>只显示检查用圆环，不启用准星、技能选点或目标高亮。</summary>
+    public void ShowInspectionRange(Vector3 position, float radius)
+    {
+        transform.position = new Vector3(position.x, position.y + 0.1f, position.z);
+        attackCircle.SetActive(true);
+        attackCircle.transform.localScale = radius * circleRadius * Vector3.one;
+    }
+
     public void ShowSkillRange(SkillPack skillPack)
     {
         CloseRange();

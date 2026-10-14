@@ -16,6 +16,15 @@ static class Program
     static void Test(string name,Action body) { body();passed++;Console.WriteLine("PASS "+name); }
     static void Main()
     {
+        Test("Deployment holds patrol and player turns until explicitly confirmed",()=>{
+            var b=Fixture();b.HasDeploymentAreas=true;b.StartBattle();b.StartBattle();b.SweepActiveEnemies();
+            Assert(b.DeploymentActive && b.Routines.Count==0 && b.PlayerStarts==0 && b.characterSkillManager.InitCalls==0,"deployment skipped");
+            b.OnClickSkip();b.CompleteBattleIntroduction();
+            Assert(b.DeploymentActive && b.PlayerStarts==0,"skip bypassed deployment");
+            b.ConfirmDeploymentFixture();b.ConfirmDeploymentFixture();
+            Assert(b.Routines.Count==1 && b.characterSkillManager.InitCalls==1,"confirmation duplicated startup");
+            Finish(b.Routines.Single());Assert(b.PlayerStarts==1,"confirmed deployment failed to start combat");
+        });
         Test("Repeated start and public sweep keep exactly one routine and initialization",()=>{
             var b=Fixture();b.StartBattle();var c=b.Routines.Single();c.Step();
             b.StartBattle();b.SweepActiveEnemies();Assert(b.Routines.Count==1 && b.characterSkillManager.InitCalls==1,"duplicate startup");

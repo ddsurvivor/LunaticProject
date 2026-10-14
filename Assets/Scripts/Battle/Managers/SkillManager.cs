@@ -144,13 +144,13 @@ public static class SkillTargeting
 
     public static bool IsValid(PieceController caster, PieceController target, SkillPack skill)
     {
-        return skill != null && IsValid(caster, target, skill.target) &&
+        return skill != null && IsValid(caster, target, skill.target, skill.AllowDeadCaster) &&
             (!skill.layerSkill || Mathf.Abs(caster.transform.position.y - target.transform.position.y) <= 0.1f);
     }
 
-    public static bool IsValid(PieceController caster, PieceController target, SkillTarget targetType)
+    public static bool IsValid(PieceController caster, PieceController target, SkillTarget targetType, bool allowDeadCaster = false)
     {
-        if (caster == null || caster.isDead || target == null ||
+        if (caster == null || (caster.isDead && !allowDeadCaster) || target == null ||
             !target.gameObject.activeInHierarchy || !BuffManager.CanTarget(caster, target)) return false;
         bool ally = caster.isPlayerPiece == target.isPlayerPiece;
         if (targetType == SkillTarget.AllyBody) return ally && target.isDead;

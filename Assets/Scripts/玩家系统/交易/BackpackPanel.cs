@@ -98,27 +98,39 @@ public class BackpackPanel : UIPanel
             }
         }
 
-        // 3. 渲染到 UI 格子上
+        var profile = GM.Ins.PLAYERPROFILE;
+        var plugins = currentTag == ItemTag.All || currentTag == ItemTag.Plugins
+            ? ComponentEquipment.InventoryEntries(profile.componentInventory, profile.player)
+            : new List<ComponentInventoryEntry>();
+        int requiredSlots = filteredPacks.Count + plugins.Count;
+        if (requiredSlots > itemSlots.Length && itemSlots.Length > 0)
+        {
+            var template = itemSlots[0];
+            ComponentInventoryUI.EnsureScrollableGrid((RectTransform)template.transform.parent);
+            int previousCount = itemSlots.Length;
+            System.Array.Resize(ref itemSlots, requiredSlots);
+            for (int i = previousCount; i < itemSlots.Length; i++)
+            {
+                itemSlots[i] = Instantiate(template, template.transform.parent);
+                itemSlots[i].Init(OnSlotSelected);
+            }
+        }
+
+        // 普通物品和插件各自绑定，避免复用格子残留旧详情。
         for (int i = 0; i < itemSlots.Length; i++)
         {
             if (i < filteredPacks.Count)
             {
                 itemSlots[i].SetItem(filteredPacks[i]);
             }
+            else if (i - filteredPacks.Count < plugins.Count)
+            {
+                var entry = plugins[i - filteredPacks.Count];
+                itemSlots[i].SetPlugs(entry.Id, entry.Owner);
+            }
             else
             {
                 itemSlots[i].Clear();
-            }
-        }
-
-        if (currentTag == ItemTag.All || currentTag == ItemTag.Plugins)// 插件显示特殊逻辑
-        {
-            for (int i = filteredPacks.Count; i < itemSlots.Length; i++)
-            {
-                int index = i - filteredPacks.Count;
-                int id = (index < GM.Ins.PLAYERPROFILE.componentInventory.Count) ? GM.Ins.PLAYERPROFILE.componentInventory[index] : 0;
-                itemSlots[i].SetPlugs(id);
-                Debug.Log($"插件格子 {i} 显示组件 ID {id}");
             }
         }
 

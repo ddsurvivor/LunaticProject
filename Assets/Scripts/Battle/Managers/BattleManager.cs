@@ -110,6 +110,7 @@ public partial class BattleManager : MonoBehaviour
 
     public void ChangeTurn()
     {
+        if (IsDeploying) return;
         if (HasCombatPresentation) return;
         BattleScene.Ins?.CM?.ClearEnemyTargetLineInteraction();
         HandleDelaySkill(); // 处理回合结束时的延时技能效果
@@ -167,7 +168,7 @@ public partial class BattleManager : MonoBehaviour
         , SkillPack skillPack, Vector3 targetPos = default, ActionType actionType = 0
         , CheckResult checkResult = CheckResult.None, bool isFlank = false)
     {
-        if (attacker == null || attacker.isDead || skillPack == null || targets == null) return;
+        if (attacker == null || skillPack == null || (attacker.isDead && !skillPack.AllowDeadCaster) || targets == null) return;
         List<List<DamageInfo>> damageInfoList = new();
         var validTargets = SkillTargeting.Filter(attacker, targets, skillPack, targetPos);
         // 每次施法只消费一次攻击被动，全部目标与伤害段共享本次倍率。

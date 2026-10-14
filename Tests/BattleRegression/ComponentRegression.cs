@@ -14,6 +14,26 @@ static partial class Program
 
     static void ComponentRegression()
     {
+        Test("Plugin display includes free copies and equipped copies without changing ownership", () => {
+            var inventory = new List<int> { 5, 5, 0 };
+            var selected = new Player { NAME = "邱悟", normalSlots = new[] { 5, 0, 0 } };
+            var other = new Player { NAME = "绿", normalSlots = new[] { 5, 0, 0 }, weaponSlots = new[] { 6, 0 } };
+            var entries = ComponentEquipment.InventoryEntries(inventory, new[] { selected, null, other, other }, selected);
+            Assert(entries.Count == 4 && entries.Take(2).All(e => e.Id == 5 && e.Owner == null) &&
+                entries[2].Id == 5 && entries[2].Owner == other && entries[3].Id == 6 && entries[3].Owner == other,
+                "Display lost copies, included current equipment, or lost owner");
+            Assert(inventory.SequenceEqual(new[] { 5, 5, 0 }) && other.IsEquipped(5) && selected.IsEquipped(5),
+                "Displaying equipped plugins changed ownership");
+            Assert(ComponentEquipment.InventoryEntries(inventory, new[] { selected, other }).Count == 5,
+                "General backpack did not include all equipped plugins");
+        });
+        Test("Plugin display tolerates legacy empty inventory and null equipment slots", () => {
+            var owner = new Player { normalSlots = null, weaponSlots = new[] { 7, 0 } };
+            var entries = ComponentEquipment.InventoryEntries(null, new[] { owner, null });
+            Assert(entries.Count == 1 && entries[0].Id == 7 && entries[0].Owner == owner,
+                "Legacy save lost equipped plugin");
+            Assert(ComponentEquipment.InventoryEntries(null, null).Count == 0, "Empty save produced plugins");
+        });
         Test("Component configuration flags duplicate ids and unfinished effects", () => {
             Component(1); Component(1, effect: ComponentEffect.ActiveSkill);
             var invalid = Component(2, effect: ComponentEffect.AttrBonus); invalid.attrId = 99;

@@ -11,6 +11,8 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
 
     private ItemPack currentPack;
     private ComponentData currentComponentData; // 当前格子存储的组件数据（如果是插件格子）
+    private Player equippedOwner;
+    private UnityEngine.UI.Text equippedText;
     private Action<string, string, Vector2> onSlotClicked; // 点击回调，传入数据和点击位置
     
     /// <summary>
@@ -23,6 +25,7 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
 
     public void SetItem(ItemPack pack)
     {
+        Clear();
         this.currentPack = pack;
 
         if (pack == null || pack.itemNum <= 0)
@@ -46,17 +49,20 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    public void SetPlugs(int id)
+    public void SetPlugs(int id, Player owner = null)
     {
+        Clear();
         // 从配置表获取数据来显示
         ComponentData data = GM.Ins.DM.componentConfig.GetData(id);
         if (data != null)
         {
             this.currentComponentData = data;
+            equippedOwner = owner;
             iconImage.sprite = data.icon;
             iconImage.enabled = true;
             countText.text = "1";
             countText.enabled = true;
+            ComponentInventoryUI.SetOwnerLabel(transform, ref equippedText, owner, countText);
         }
         else
         {
@@ -67,6 +73,9 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
     public void Clear()
     {
         currentPack = null;
+        currentComponentData = null;
+        equippedOwner = null;
+        ComponentInventoryUI.SetOwnerLabel(transform, ref equippedText, null, null);
         iconImage.sprite = null;
         iconImage.enabled = false;
         countText.text = "";
@@ -86,7 +95,9 @@ public class ItemSlot : MonoBehaviour, IPointerClickHandler
         else if (currentComponentData != null && onSlotClicked != null)
         {
             // 传递当前组件数据和鼠标点击的屏幕坐标
-            onSlotClicked.Invoke(currentComponentData.itemName.ToString(), currentComponentData.description, eventData.position);
+            string description = equippedOwner == null ? currentComponentData.description
+                : $"{equippedOwner.NAME}已装配\n{currentComponentData.description}";
+            onSlotClicked.Invoke(currentComponentData.itemName.ToString(), description, eventData.position);
         }
     }
 }

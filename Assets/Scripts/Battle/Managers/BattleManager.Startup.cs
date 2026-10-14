@@ -4,7 +4,7 @@ using UnityEngine;
 
 public partial class BattleManager
 {
-    private enum StartupPhase { Ready, Sweeping, Introduction, Active, Cancelled }
+    private enum StartupPhase { Ready, Deployment, Sweeping, Introduction, Active, Cancelled }
     private StartupPhase startupPhase;
     private bool startupInitialized, startupInitializing, startupRequested;
     private int startupVersion;
@@ -30,6 +30,7 @@ public partial class BattleManager
         }
         if (!inBattle || startupPhase != StartupPhase.Ready) return;
         startupRequested = false;
+        if (BeginDeploymentIfAvailable()) return;
         startupPhase = StartupPhase.Sweeping; // 在调用可能触发事件的初始化前占用。
         int version = ++startupVersion;
         Debug.Log("战斗开始");
@@ -117,6 +118,7 @@ public partial class BattleManager
     private void CancelBattleStartup()
     {
         startupPhase = StartupPhase.Cancelled;
+        EndDeploymentSession();
         StopBattleSweep();
         SetSkipVisible(false);
     }

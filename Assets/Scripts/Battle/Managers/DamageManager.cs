@@ -63,7 +63,7 @@ public sealed class DamageManager
         foreach (var pack in skill.attackPacks)
         {
             // 致死后不再结算后续段，也不重复发送受击或击杀事件。
-            if (target.isDead || attacker.isDead) break;
+            if (target.isDead || (attacker.isDead && !skill.AllowDeadCaster)) break;
             BurstState burst = CaptureBurst();
             int dice = result.IsCritical ? DamageCalculator.MinDice : DamageCalculator.Roll4D6();
             int damage = CalculateDamage(context, pack, result.IsCritical, dice, ref burst);

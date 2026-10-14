@@ -4,6 +4,7 @@ using UnityEngine;
 public partial class ClickManager
 {
     private EnemyController pinnedTargetLineEnemy;
+    private RangeUI enemyAttackRangeUI;
     private EnemyController suppressedHoveredEnemy;
     private readonly HashSet<EnemyController> displayedTargetLineEnemies = new();
     private readonly HashSet<EnemyController> currentTargetLineEnemies = new();
@@ -36,6 +37,7 @@ public partial class ClickManager
     {
         if (suppressCurrentHover) suppressedHoveredEnemy = lastHoveredPiece as EnemyController;
         pinnedTargetLineEnemy = null;
+        if (enemyAttackRangeUI != null) enemyAttackRangeUI.gameObject.SetActive(false);
         foreach (var enemy in displayedTargetLineEnemies)
             if (enemy != null) enemy.HideTargetLine();
         displayedTargetLineEnemies.Clear();
@@ -69,6 +71,7 @@ public partial class ClickManager
             previewPosition = previewPiece.transform.position;
         }
         bool preview = previewPiece != null && previewPosition.HasValue;
+        UpdateEnemyAttackRange(previewPiece == null);
         currentTargetLineEnemies.Clear();
         if (battle.AIController != null)
         {
@@ -88,6 +91,36 @@ public partial class ClickManager
             if (enemy != null && !currentTargetLineEnemies.Contains(enemy)) enemy.HideTargetLine();
         displayedTargetLineEnemies.Clear();
         foreach (var enemy in currentTargetLineEnemies) displayedTargetLineEnemies.Add(enemy);
+    }
+
+    private void UpdateEnemyAttackRange(bool allowDisplay)
+    {
+        var enemy = pinnedTargetLineEnemy;
+        if (!allowDisplay || enemy == null || enemy.isDead || !enemy.isActived ||
+            !enemy.gameObject.activeInHierarchy || enemy.pieceData == null)
+        {
+            if (enemyAttackRangeUI != null) enemyAttackRangeUI.gameObject.SetActive(false);
+            return;
+        }
+        float radius = enemy.pieceData.rangedAtk?.rangeValue ?? 0f;
+        if (radius <= 0f) radius = enemy.pieceData.meleeAtk?.rangeValue ?? 0f;
+        if (radius <= 0f)
+        {
+            if (enemyAttackRangeUI != null) enemyAttackRangeUI.gameObject.SetActive(false);
+            return;
+        }
+        if (enemyAttackRangeUI == null)
+        {
+            var template = _rangeUI != null ? _rangeUI :
+                BattleScene.Ins?.BM?.skillManager?.EnsureRangeUI(enemy);
+            if (template == null) return;
+            // 独立复用一份范围 UI，避免影响玩家移动预览和敌人的技能范围。
+            enemyAttackRangeUI = Instantiate(template, transform);
+            enemyAttackRangeUI.Bind(null);
+            enemyAttackRangeUI.CloseRange();
+        }
+        enemyAttackRangeUI.gameObject.SetActive(true);
+        enemyAttackRangeUI.ShowInspectionRange(enemy.transform.position, radius);
     }
 
     private void OnDisable()

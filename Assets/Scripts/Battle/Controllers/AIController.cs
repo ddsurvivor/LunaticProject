@@ -138,6 +138,8 @@ public partial class AIController : PlayerController
         public PieceController Target;
         public SkillPack Skill;
         public ActionType Action;
+        public EnemyStrategy Strategy;
+        public IEnemyExplosiveTarget Explosive;
     }
 
     private struct MoveCandidate
@@ -161,8 +163,16 @@ public partial class AIController : PlayerController
         if (aiPiece == null || aiPiece.isDead || !aiPiece.isActived ||
             aiPiece.unitAttrCenter.GetBuffStacks(BuffType.Stun) != 0) return false;
 
+        var strategy = aiPiece.ResolveStrategy();
+        if (pendingAttacks.TryGetValue(aiPiece, out var oldPlan) && !oldPlan.Strategy.Matches(strategy))
+        {
+            pendingAttacks.Remove(aiPiece);
+            retreatAfterShot.Remove(aiPiece);
+        }
+        if (strategy.Action != EnemyAIType.Shoot) retreatAfterShot.Remove(aiPiece);
+
         // 1. 保留关卡专用撤退和跨层梯子逻辑。
-        if (aiPiece.enemyAIType == EnemyAIType.Special)
+        if (strategy.Action == EnemyAIType.Special)
         {
             var retreat = aiPiece.GetComponent<RetreatWin>();
             if (retreat == null || retreat.targetPoint == null) return false;
@@ -175,8 +185,6 @@ public partial class AIController : PlayerController
             return actionAttempted;
         }
         if (!IsValidTarget(aiPiece, target)) return false;
-        if (aiPiece.navigate && Mathf.Abs(target.transform.position.y - aiPiece.transform.position.y) > 1f)
-            return EnemyMoveToLadder(aiPiece);
 
         // 2. 优先完成已承诺的“移动 + 攻击”，避免每移动一步就切换模式。
         if (pendingAttacks.TryGetValue(aiPiece, out var pending))
@@ -186,8 +194,13 @@ public partial class AIController : PlayerController
                 (TryAttackPlan(aiPiece, pending) || actionAttempted)) return true;
         }
 
+        if (TryCreateExplosivePlan(aiPiece, out var explosivePlan) &&
+            (TryAttackPlan(aiPiece, explosivePlan) || actionAttempted)) return true;
+        if (aiPiece.navigate && Mathf.Abs(target.transform.position.y - aiPiece.transform.position.y) > 1f)
+            return EnemyMoveToLadder(aiPiece);
+
         // 3. 射击型先开火，再寻找安全的侧向/斜向撤离点。
-        if (aiPiece.enemyAIType == EnemyAIType.Shoot)
+        if (strategy.Action == EnemyAIType.Shoot)
         {
             if (retreatAfterShot.Remove(aiPiece) &&
                 (TryRetreat(aiPiece, target.transform.position, aiPiece.GetRange(false)) || actionAttempted))
@@ -197,7 +210,7 @@ public partial class AIController : PlayerController
         }
 
         // 4. 技能型优先本回合可施放的技能；无可用技能时按混合型处理。
-        if (aiPiece.enemyAIType == EnemyAIType.SkillUser &&
+        if (strategy.Action == EnemyAIType.SkillUser &&
             (TrySkillPlan(aiPiece, target) || actionAttempted)) return true;
 
         // 5. 混合型优先本回合能完成的近战，再考虑射击，最后接近目标。
@@ -212,7 +225,8 @@ public partial class AIController : PlayerController
         {
             Target = target,
             Skill = ranged ? piece.pieceData.rangedAtk : piece.pieceData.meleeAtk,
-            Action = ranged ? ActionType.远程攻击 : ActionType.近战攻击
+            Action = ranged ? ActionType.远程攻击 : ActionType.近战攻击,
+            Strategy = piece.ResolveStrategy()
         };
     }
 
@@ -225,8 +239,9 @@ public partial class AIController : PlayerController
             foreach (var skill in piece.availableSkills)
             {
                 if (!IsOffensiveSkill(skill) || !piece.unitAttrCenter.HasMana(skill.mpCost)) continue;
-                if (pass == 0 && !CanAttackFrom(piece.transform.position, target, skill)) continue;
-                var plan = new AttackPlan { Target = target, Skill = skill, Action = ActionType.技能 };
+                if (pass == 0 && !CanExecuteAttack(piece, target, skill)) continue;
+                var plan = new AttackPlan { Target = target, Skill = skill, Action = ActionType.技能,
+                    Strategy = piece.ResolveStrategy() };
                 if (TryAttackPlan(piece, plan) || actionAttempted) return true;
             }
         }
@@ -236,12 +251,13 @@ public partial class AIController : PlayerController
     private bool TryAttackPlan(EnemyController piece, AttackPlan plan)
     {
         if (plan.Skill == null) return false;
+        if (plan.Explosive != null && !EnemyExplosiveTargets.CanAttack(piece, plan.Explosive, plan.Skill)) return false;
         if (plan.Action == ActionType.技能 && !piece.unitAttrCenter.HasMana(plan.Skill.mpCost)) return false;
         bool needsReload = plan.Action == ActionType.远程攻击 && piece.unitAttrCenter.AmmoCount <= 0;
         if (needsReload && piece.unitAttrCenter.MaxAmmoCount <= 0) return false;
 
         // 1. 已在范围内就直接行动，不浪费移动点。
-        if (CanAttackFrom(piece.transform.position, plan.Target, plan.Skill))
+        if (plan.Explosive != null || CanExecuteAttack(piece, plan.Target, plan.Skill))
         {
             if (needsReload)
                 return SpendAction(piece, ActionType.重新装填, () => piece.ReloadAmmo());
@@ -252,13 +268,15 @@ public partial class AIController : PlayerController
                     if (!piece.unitAttrCenter.HasMana(plan.Skill.mpCost)) return;
                     piece.StartSkillAttack(plan.Skill);
                     if (!piece.unitAttrCenter.CostMana(plan.Skill.mpCost)) return;
-                    piece.CastSkillOnTarget(plan.Target, plan.Skill);
+                    if (plan.Explosive != null) piece.CastOnExplosive(plan.Explosive, plan.Skill, plan.Action);
+                    else piece.CastSkillOnTarget(plan.Target, plan.Skill);
                 }
                 else
                 {
                     piece.StartNormalAttack(plan.Action == ActionType.远程攻击);
-                    piece.CastAttackOnTarget(plan.Target);
-                    if (piece.enemyAIType == EnemyAIType.Shoot && plan.Action == ActionType.远程攻击)
+                    if (plan.Explosive != null) piece.CastOnExplosive(plan.Explosive, plan.Skill, plan.Action);
+                    else piece.CastAttackOnTarget(plan.Target);
+                    if (piece.ResolveStrategy().Action == EnemyAIType.Shoot && plan.Action == ActionType.远程攻击)
                         retreatAfterShot.Add(piece);
                 }
             });
@@ -299,6 +317,13 @@ public partial class AIController : PlayerController
         if (skill.layerSkill && Mathf.Abs(position.y - target.transform.position.y) > 0.1f) return false;
         float distance = Vector3.Distance(position, target.transform.position);
         return distance <= skill.rangeValue && (skill.rangeType != RangeType.Fan || distance >= 1f);
+    }
+
+    private static bool CanExecuteAttack(EnemyController piece, PieceController target, SkillPack skill)
+    {
+        if (piece.maximizeAOETargets && EnemyAttackPosition.IsAOE(skill))
+            return EnemyAttackPosition.TryFind(piece, target, skill, out _);
+        return CanAttackFrom(piece.transform.position, target, skill);
     }
 
     private static bool IsValidTarget(EnemyController piece, PieceController target)

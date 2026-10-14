@@ -6,6 +6,14 @@ using UnityEngine.Serialization;
 [System.Serializable]
 public class SkillPack
 {
+    /// <summary>仅爆炸物死亡后的延迟结算使用；不序列化、不改变原技能。</summary>
+    [field: System.NonSerialized] public bool AllowDeadCaster { get; private set; }
+    public SkillPack WithDeadCaster()
+    {
+        var copy = (SkillPack)MemberwiseClone();
+        copy.AllowDeadCaster = true;
+        return copy;
+    }
     /// <summary>仅覆盖选择规则，共享技能效果配置，不修改原技能。</summary>
     public SkillPack WithTarget(SkillTarget targetType)
     {

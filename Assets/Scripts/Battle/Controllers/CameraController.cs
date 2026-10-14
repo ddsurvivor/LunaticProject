@@ -14,9 +14,11 @@ public class CameraController : MonoBehaviour
     public float minZoom = 10f;
     public float maxZoom = 50f;
 
-    // 按住鼠标中间拖动时，相机跟随移动
+    // 中键按屏幕射线与水平面的交点拖动，位移不再乘帧间隔。
     private Vector3 _lastMousePosition;
-    [LabelText("拖动速度")] public float panSpeed = 20f;
+    private bool isDragging;
+    [LabelText("键盘平移速度"), MinValue(0)] public float panSpeed = 20f;
+    [LabelText("中键拖动灵敏度"), MinValue(0)] public float dragSensitivity = 1f;
 
     Sequence shakeTweener;
 
@@ -40,6 +42,14 @@ public class CameraController : MonoBehaviour
 
     void LateUpdate()
     {
+        if (virtualCamera == null || followVCam == null) return;
+        var selectedUI = UnityEngine.EventSystems.EventSystem.current != null
+            ? UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject : null;
+        if (selectedUI != null && selectedUI.GetComponent<UnityEngine.UI.InputField>() != null)
+        {
+            isDragging = false;
+            return;
+        }
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if (scroll != 0f)
         {
@@ -48,24 +58,62 @@ public class CameraController : MonoBehaviour
             // 同时设置跟随相机的缩放
             followVCam.m_Lens.OrthographicSize = virtualCamera.m_Lens.OrthographicSize;
         }
-        if (!BattleScene.Ins.BM.PlayerController.isInTurn) return;
+        var battle = BattleScene.Ins != null ? BattleScene.Ins.BM : null;
+        if (battle == null || (battle.PlayerController == null || !battle.PlayerController.isInTurn) && !battle.IsDeploying)
+        {
+            isDragging = false;
+            return;
+        }
+
+        Vector2 keyboard = new Vector2(
+            (Input.GetKey(KeyCode.D) ? 1 : 0) - (Input.GetKey(KeyCode.A) ? 1 : 0),
+            (Input.GetKey(KeyCode.W) ? 1 : 0) - (Input.GetKey(KeyCode.S) ? 1 : 0));
+        keyboard = Vector2.ClampMagnitude(keyboard, 1f);
+        if (keyboard.sqrMagnitude > 0)
+        {
+            SetFollow(null);
+            Vector3 right = Vector3.ProjectOnPlane(virtualCamera.transform.right, Vector3.up).normalized;
+            Vector3 forward = Vector3.Cross(right, Vector3.up);
+            virtualCamera.transform.position += (right * keyboard.x + forward * keyboard.y)
+                * Mathf.Max(0, panSpeed) * Time.unscaledDeltaTime;
+        }
+
         if (Input.GetMouseButtonDown(2))
         {
             _lastMousePosition = Input.mousePosition;
-            SetFollow(null);
+            isDragging = UnityEngine.EventSystems.EventSystem.current == null ||
+                !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+            if (isDragging) SetFollow(null);
         }
+        if (!Input.GetMouseButton(2)) isDragging = false;
 
-        if (Input.GetMouseButton(2))
+        if (isDragging)
         {
-            Vector3 delta = Input.mousePosition - _lastMousePosition;
-            Vector3 move = new Vector3(-delta.x, -delta.y, 0) * panSpeed * Time.deltaTime;
-            //transform.Translate(move, Space.Self);
-            // 将 move 投影到本地 x/y 平面（z=0）
-            move = virtualCamera.transform.right * move.x + virtualCamera.transform.up * move.y;
-            virtualCamera.transform.position += move;
+            SetFollow(null);
+            var camera = mainCam != null ? mainCam : Camera.main;
+            if (camera != null)
+            {
+                var ground = new Plane(Vector3.up, Vector3.zero);
+                Ray previous = camera.ScreenPointToRay(_lastMousePosition);
+                Ray current = camera.ScreenPointToRay(Input.mousePosition);
+                if (ground.Raycast(previous, out float previousDistance) &&
+                    ground.Raycast(current, out float currentDistance))
+                {
+                    Vector3 move = previous.GetPoint(previousDistance) - current.GetPoint(currentDistance);
+                    move.y = 0;
+                    virtualCamera.transform.position += move * Mathf.Max(0, dragSensitivity);
+                }
+            }
             _lastMousePosition = Input.mousePosition;
         }
     }
+
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus) isDragging = false;
+    }
+
+    private void OnDisable() => isDragging = false;
 
     public void SetFollow(Transform transform)
     {
@@ -74,7 +122,9 @@ public class CameraController : MonoBehaviour
             if (followVCam.Priority > virtualCamera.Priority)
             {
                 // 拖动相机首先把位置和跟随相机重合
-                virtualCamera.transform.position = followVCam.transform.position;
+                var renderedCamera = mainCam != null ? mainCam : Camera.main;
+                virtualCamera.transform.position = renderedCamera != null
+                    ? renderedCamera.transform.position : followVCam.transform.position;
                 // 当不跟随物体时，将拖动相机权重增大
                 virtualCamera.Priority = 10;
                 followVCam.Priority = 0;
