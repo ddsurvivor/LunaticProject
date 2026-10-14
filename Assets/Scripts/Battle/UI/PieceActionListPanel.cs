@@ -126,7 +126,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
     /// </summary>
     public void ShowPanel(PieceController pc)
     {
-        if (pc.unitAttrCenter.CurMovePoint < 1) return;
+        if (!BattleScene.Ins.BM.CanControlPiece(pc)) return;
         this.pc = pc;
 
         // 1. 状态更新：装填动作逻辑
@@ -143,6 +143,8 @@ public class PieceActionListPanel : SerializedMonoBehaviour
         // 2. 收集本次需要显示的“目标 Transform 列表”
         List<Transform> targetsToAnimate = new List<Transform>();
         HashSet<ActionType> visibleActions = new HashSet<ActionType>();
+        // 无全局结束按钮时，任何可操作棋子都必须能主动放弃剩余行动力。
+        visibleActions.Add(ActionType.待机);
 
         // 筛选基础动作
         foreach (var pair in actionButtonDic)
@@ -173,6 +175,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 InteractArea currentArea = interactArea;
                 btn.onClick.AddListener(() =>
                 {
+                    if (!BattleScene.Ins.BM.CanControlPiece(pc)) return;
                     if (!pc.unitAttrCenter.CostMP(currentArea is LadderArea
                         ? ActionType.攀爬 : ActionType.交互)) return;
                     currentArea.TriggerAction(pc);
@@ -302,6 +305,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
 
     private void OnActionButtonClicked(ActionType actionType)
     {
+        if (!BattleScene.Ins.BM.CanControlPiece(pc) || BattleScene.Ins.BM.HasCombatPresentation) return;
         if (actionType == ActionType.待机)
         {
             if (pc.unitAttrCenter.CurMovePoint <= 0) return;
@@ -398,6 +402,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 skillButtons[j].onClick.RemoveAllListeners();
                 skillButtons[j].onClick.AddListener(() =>
                 {
+                    if (!BattleScene.Ins.BM.CanControlPiece(pc)) return;
                     gameObject.SetActive(false);
                     pc.StartSkillAttack(pc.availableSkills[capturedIndex]);
                     BattleScene.Ins.UM.skillTooltipUI.HideTooltip();
@@ -465,6 +470,7 @@ public class PieceActionListPanel : SerializedMonoBehaviour
                 skillButtons[j].onClick.RemoveAllListeners();
                 skillButtons[j].onClick.AddListener(() =>
                 {
+                    if (!BattleScene.Ins.BM.CanControlPiece(pc)) return;
                     gameObject.SetActive(false);
                     pc.UseItem(itemData);
                 });

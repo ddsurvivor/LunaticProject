@@ -32,6 +32,10 @@ public class PieceController : MonoBehaviour
     private PieceData _pieceData;
 
     public PieceData pieceData => _pieceData;
+    [Min(0), Tooltip("0 使用棋子数据中的速度，否则覆盖此棋子的回合速度")]
+    public float turnSpeedOverride;
+    public float TurnSpeed => turnSpeedOverride > 0 ? turnSpeedOverride :
+        (pieceData != null && pieceData.speed > 0 ? pieceData.speed : 10f);
 
     public Player playerData;
 
@@ -216,6 +220,7 @@ public class PieceController : MonoBehaviour
         if (BattleScene.Ins != null && BattleScene.Ins.BM.HasCombatPresentation) return;
         if (cantControl) return;
         if (!isPlayerPiece) return;
+        if (!BattleScene.Ins.BM.CanControlPiece(this)) return;
         if (_isAttacking)
         {
             if (Input.GetMouseButtonDown(0))
@@ -361,7 +366,9 @@ public class PieceController : MonoBehaviour
     {
         Debug.Log("取消选择棋子");
         _isAttacking = false;
-        rangeUI.ShowSelect(false);
+        _isUsingSkill = false;
+        isUsingOrder = false;
+        rangeUI?.ShowSelect(false);
         if(!isGrauding) rangeUI?.CloseRange();
         // _actionListPanel.gameObject.SetActive(false);
         BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);

@@ -51,87 +51,54 @@ public partial class AIController : PlayerController
         }
     }
 
+    private int lastWaveRound = -1;
+
     public override void TurnStart()
+    {
+        if (BattleScene.Ins.BM.ActivePiece is EnemyController enemy) BeginEnemyPieceTurn(enemy);
+    }
+
+    public void BeginEnemyPieceTurn(EnemyController enemy)
     {
         pendingAttacks.Clear();
         retreatAfterShot.Clear();
         previousPositions.Clear();
         _timer = 0f;
-        base.TurnStart();
+        isInTurn = true;
+        OnTurnStart?.Invoke();
+        enemy.StartNormalAttack(true);
+    }
 
+    public void RefreshSpeedTurnWorld()
+    {
         if (fogController != null)
-        {
-            // 激活迷雾敌人棋子
             foreach (var pair in fogController.enemyPiecesDict)
-            {
                 if (!pair.Key.gameObject.activeInHierarchy)
-                {
                     foreach (var piece in pair.Value)
-                    {
-                        if (!piece.isDead)
+                        if (piece != null && !piece.isDead && !piece.isActived)
                         {
                             piece.isActived = true;
                             piece.gameObject.SetActive(true);
-                            piece.StartNormalAttack(true);
                         }
-                    }
-                }
-            }
-        }
-
-        if (waveController != null)
+        int round = BattleScene.Ins.BM.TunrNumber;
+        if (waveController != null && lastWaveRound != round)
         {
-            // 刷新增援波次敌人棋子
-            waveController.RefreshEnemies(BattleScene.Ins.BM.TunrNumber);
-        }
-
-        foreach (EnemyController piece in pieces)
-        {
-            if (piece.isActived && !piece.isDead)
-            {
-                piece.StartNormalAttack(true);
-                // 每回合清空仇恨值
-                // piece.damageDic = new();
-            }
+            lastWaveRound = round;
+            waveController.RefreshEnemies(round);
         }
     }
 
     public void Update()
     {
-        if (BattleScene.Ins.BM.HasCombatPresentation) return;
-        if (isInTurn && !BattleScene.Ins.BM.moveManager.IsMoving)
-        {
-            if (realTimeMode)
-            {
-                if (_timer < _realTimeInterval)
-                {
-                    _timer += Time.deltaTime;
-                    return;
-                }
-
-                //EnemyAction_AttackRandom();
-                //EnemyAction_AttackNearestTarget();
-                if (TryExecuteEnemyAction())
-                    _timer = 0f;
-            }
-            else
-            {
-                if (_timer < _actionInterval)
-                {
-                    _timer += Time.deltaTime;
-                    return;
-                }
-                else
-                {
-                    //EnemyAction_AttackRandom();
-                    //EnemyAction_AttackNearestTarget();
-                    EnemyAction_Calculate();
-                    _timer = 0f;
-                }
-            }
-        }
+        var battle = BattleScene.Ins.BM;
+        if (!isInTurn || !battle.SpeedTurnsActive || battle.HasCombatPresentation || battle.moveManager.IsMoving) return;
+        if (!(battle.ActivePiece is EnemyController enemy)) return;
+        _timer += Time.deltaTime;
+        if (_timer < _actionInterval) return;
+        _timer = 0f;
+        if (!BattleManager.IsSpeedParticipant(enemy) || enemy.unitAttrCenter.CurMovePoint <= 0 ||
+            !EnemyActionSelect(enemy, CheckEnemyTarget(enemy))) battle.ChangeTurn();
     }
-
 
     private sealed class AttackPlan
     {

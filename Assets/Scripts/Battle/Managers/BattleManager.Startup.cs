@@ -117,6 +117,7 @@ public partial class BattleManager
 
     private void CancelBattleStartup()
     {
+        StopSpeedTurns();
         startupPhase = StartupPhase.Cancelled;
         EndDeploymentSession();
         StopBattleSweep();

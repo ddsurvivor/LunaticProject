@@ -166,13 +166,36 @@ public partial class ClickManager : MonoBehaviour
         return nearest;
     }
 
+    public void ClearTurnSelection()
+    {
+        CancelMovementPreview();
+        ClearEnemyTargetLines(true);
+        _selectedPiece?.CancelSelect();
+        _selectedPiece = null;
+        lastMovePiece = null;
+        BattleScene.Ins.UM.ShowUndoMoveButton(false);
+        BattleScene.Ins.UM.pieceActionListPanel.HidePanel();
+        BattleScene.Ins.UM.pieceInfoPanel.StopMpIconsBlink();
+    }
+
+    public void SelectActivePiece(PieceController piece)
+    {
+        ClearTurnSelection();
+        if (!BattleScene.Ins.BM.CanControlPiece(piece)) return;
+        _selectedPiece = piece;
+        piece.OnSelect();
+        BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(piece);
+        BattleScene.Ins.UM.ShowPieceState(piece);
+        BattleScene.Ins.UM.ShowPieceActionPanel(piece);
+    }
+
     private void ClickPieceByIndex(int index)
     {
         var playerPieces = BattleScene.Ins.BM.PlayerController.pieces;
         if (index < playerPieces.Count)
         {
             var piece = playerPieces[index];
-            if (piece.cantControl || piece.isDead) return;
+            if (!BattleScene.Ins.BM.CanControlPiece(piece)) return;
             CancelMovementPreview();
             ClearEnemyTargetLines(true);
             _selectedPiece?.CancelSelect();
@@ -197,7 +220,7 @@ public partial class ClickManager : MonoBehaviour
             PinEnemyTargetLine(enemy);
             return;
         }
-        if (!piece.isPlayerPiece || piece.cantControl || piece.isDead) return;
+        if (!piece.isPlayerPiece || !BattleScene.Ins.BM.CanControlPiece(piece)) return;
         _selectedPiece?.CancelSelect();
         _selectedPiece = piece;
         piece.OnSelect();
@@ -223,7 +246,7 @@ public partial class ClickManager : MonoBehaviour
 
     public void StartDarg(PieceController piece)
     {
-        if (piece == null || piece.isDead || !piece.isPlayerPiece) return;
+        if (!BattleScene.Ins.BM.CanControlPiece(piece) || !piece.isPlayerPiece) return;
         CancelMovementPreview();
         ClearEnemyTargetLines(true);
         BattleScene.Ins.BM.moveManager.ResetPreviewState();
@@ -378,6 +401,7 @@ public partial class ClickManager : MonoBehaviour
     /// </summary>
     public void CancelMove()
     {
+        if (!BattleScene.Ins.BM.CanControlPiece(lastMovePiece)) return;
         if (lastMovePiece != null && (lastMovePiece.isDead ||
             lastMovePiece.unitAttrCenter.GetBuffStacks(BuffType.SpontaneousMemeticAttack) != 0)) return;
         if (lastMovePiece != null)

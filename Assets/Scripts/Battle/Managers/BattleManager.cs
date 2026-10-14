@@ -108,61 +108,13 @@ public partial class BattleManager : MonoBehaviour
         return false;
     }
 
+    // 兼容旧事件入口；实际交棒由调度器等待动画及移动完成后执行。
     public void ChangeTurn()
     {
-        if (IsDeploying) return;
-        if (HasCombatPresentation) return;
-        BattleScene.Ins?.CM?.ClearEnemyTargetLineInteraction();
-        HandleDelaySkill(); // 处理回合结束时的延时技能效果
-        if (PlayerController.isInTurn)
-        {
-            PlayerController.isInTurn = false;
-            PlayerController.TurnEnd();
-
-            float delayTime = 0.5f;
-            if (summonPieces.Count > 0)
-            {
-                delayTime += summonPieces.Count * 3f;
-            }
-
-            StartCoroutine(SummonsActionPhaseRoutine());
-            DOVirtual.DelayedCall(delayTime, () =>
-            {
-                BattleScene.Ins.UM.ShowTurnChange(false);
-                AIController.isInTurn = true;
-                AIController.TurnStart();
-            });
-            //BattleScene.Ins.UM.turnPanel.ShowTurnChange("敌人回合");
-        }
-        else
-        {
-            PlayerStart(false);
-        }
-
-        //CheckAllLadderMove(PlayerController.isInTurn);
-        //CheckAllArea();
+        if (SpeedTurnsActive && ActivePiece != null) finishPieceTurn = true;
     }
 
-    public void PlayerStart(bool firstTurn = true)
-    {
-        AIController.isInTurn = false;
-        PlayerController.isInTurn = true;
-        if(!firstTurn) AIController.TurnEnd();
-        PlayerController.TurnStart();
-        BattleScene.Ins.UM.endTurnButton.enabled = true;
-        BattleScene.Ins.UM.ShowTurnChange(true);
-        orderManager.ClearAll(true); //取消所有警戒状态
-        //BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家回合");
-        _turnNumber++;
-        battleDialogueManager.TriggerTurnNumStart(_turnNumber);
-        BattleScene.Ins.UM.turnNumberText.text = TunrNumber.ToString();
-        // 胜利条件：坚持回合数
-        if (TunrNumber >= winTurnCondition)
-        {
-            Debug.Log($"达到胜利回合数{TunrNumber}，玩家胜利");
-            PlayerWin();
-        }
-    }
+    public void PlayerStart(bool firstTurn = true) => StartSpeedTurns();
 
     public void PieceSkill(PieceController attacker, List<PieceController> targets
         , SkillPack skillPack, Vector3 targetPos = default, ActionType actionType = 0
@@ -731,7 +683,7 @@ public partial class BattleManager : MonoBehaviour
             }
 
             PieceSkill(_delaySkillCaster, newTargets, _delaySkillPack, _delaySkillTargetPos, ActionType.技能);
-            _delaySkillEffectObj.SetActive(false);
+            if (_delaySkillEffectObj != null) _delaySkillEffectObj.SetActive(false);
             _delaySkillPack = null;
             _delaySkillCaster = null;
         }

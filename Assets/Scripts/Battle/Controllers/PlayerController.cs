@@ -44,46 +44,28 @@ public class PlayerController : SerializedMonoBehaviour
         BattleScene.Ins.UM.ShowBurstReady(false);
     }
 
+    // 保留序列化事件入口，但不再刷新整个阵营。
     public virtual void TurnStart()
     {
-        OnTurnStart.Invoke();
-        // 所有棋子重置状态
-        foreach (var piece in pieces)
-        {
-            if (piece.gameObject.activeInHierarchy && !piece.isDead)
-            {
-                piece.TurnStart();
-                BattleScene.Ins.BM.buffManager.ProcessBuffs(piece.unitAttrCenter);
-            }
-        }
+        var piece = BattleScene.Ins.BM.ActivePiece;
+        if (piece != null && pieces.Contains(piece)) BeginPieceTurn(piece);
+    }
 
-        // 相机锁定第一个棋子
-        foreach (var piece in pieces)
-        {
-            if (piece.gameObject.activeInHierarchy && !piece.isDead)
-            {
-                BattleScene.Ins.BM.cameraController.SetFollow(piece.transform);
-                break;
-            }
-        }
-
-        BattleScene.Ins.UM.endTurnButton.enabled = false;
+    public void BeginPieceTurn(PieceController piece)
+    {
+        isInTurn = true;
+        OnTurnStart?.Invoke();
+        BattleScene.Ins.UM.pieceInfoPanel.OnSelectPiece(piece);
         BattleScene.Ins.UM.OnTurnStart();
     }
 
-    public virtual void TurnEnd()
-    {
-        OnTurnEnd.Invoke();
-        // 可以在这里添加玩家回合结束时的逻辑
-        foreach (var piece in pieces)
-        {
-            piece.TurnEnd();
-        }
+    public virtual void TurnEnd() => EndPieceTurn();
 
-        if (isBursting)
-        {
-            EndBurstMode(); // 回合结束关闭聚能状态
-        }
+    public void EndPieceTurn()
+    {
+        isInTurn = false;
+        OnTurnEnd?.Invoke();
+        if (isBursting) EndBurstMode();
     }
 
     /// <summary>
@@ -124,11 +106,9 @@ public class PlayerController : SerializedMonoBehaviour
         UpdateBurstBar();
         totalDamage = 0;
         burstTarget = null;
-        // 所有棋子重置状态
-        foreach (var piece in pieces)
-        {
-            piece.TurnStart();
-        }
+        // 聚能只恢复当前棋子的行动力，不触发第二次回合开始或影响其他棋子。
+        var active = BattleScene.Ins.BM.ActivePiece;
+        if (active != null) active.unitAttrCenter.FullMovePoint();
         // 所有敌人棋子暂定
         foreach (var aiPiece in BattleScene.Ins.BM.AIController.pieces)
         {
@@ -177,16 +157,13 @@ public class PlayerController : SerializedMonoBehaviour
 
 
     // UI
-    public void OnClickTurnEnd()
-    {
-        if (BattleScene.Ins.BM.HasCombatPresentation) return;
-        BattleScene.Ins.BM.ChangeTurn();
-        BattleScene.Ins.UM.endTurnButton.enabled = false;
-    }
+    // 旧按钮/快捷键事件不再负责结束回合，使用棋子的待机行动。
+    public void OnClickTurnEnd() { }
 
     public void OnClickBurst()
     {
         if (!this.isInTurn) return; //只能在回合内发动聚能
+        if (!ableBurst || !BattleScene.Ins.BM.CanControlPiece(BattleScene.Ins.BM.ActivePiece)) return;
         Debug.Log("发动聚能");
         //BattleScene.Ins.UM.ShowBurstReady(false);
         BattleScene.Ins.UM.burstButton.gameObject.SetActive(false);

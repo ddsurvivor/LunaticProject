@@ -16,6 +16,8 @@ public class PieceData
     public Dictionary<EnemyGrowthAttribute, float> levelGrowth = new();
     [OdinSerialize, LabelText("分类型基础攻击力")]
     public Dictionary<DamageType, int> attackDic = new();
+    [Min(1), LabelText("回合速度")] public float speed = 10f;
+    [LabelText("行动条头像")] public Sprite turnPortrait;
     [LabelText("棋子编号")]public int pieceId;
     [LabelText("棋子名称")]public string pieceName;
     [LabelText("生命值")]public int maxHealth;

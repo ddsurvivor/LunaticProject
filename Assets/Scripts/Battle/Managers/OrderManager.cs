@@ -40,6 +40,12 @@ public class OrderManager : MonoBehaviour
         }
     }
 
+    public void ClearForPiece(PieceController piece)
+    {
+        for (int i = activeOrders.Count - 1; i >= 0; i--)
+            if (activeOrders[i].guard == piece) DisarmOrder(activeOrders[i]);
+    }
+
     public void OnUnitMoveStart(PieceController unit)
     {
         moveUnit = unit;

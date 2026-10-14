@@ -27,7 +27,7 @@ public class SelfExploreSummonPiece : MonoBehaviour
         if (pieceController == null || pieceController.isDead) return;
         var unit = pieceController.unitAttrCenter;
         var buffs = BattleScene.Ins.BM.buffManager;
-        buffs.ProcessBuffs(unit);
+        if (!BattleScene.Ins.BM.SpeedTurnsActive) buffs.ProcessBuffs(unit);
         if (unit.pc.isDead || unit.GetBuffStacks(BuffType.Stun) != 0 ||
             unit.GetBuffStacks(BuffType.Bind) != 0)
         {
@@ -202,7 +202,7 @@ public class SelfExploreSummonPiece : MonoBehaviour
     {
         isActionFinished = true;
         if (pieceController != null)
-            BattleScene.Ins.BM.buffManager.ProcessBuffDurations(pieceController.unitAttrCenter);
+            if (!BattleScene.Ins.BM.SpeedTurnsActive) BattleScene.Ins.BM.buffManager.ProcessBuffDurations(pieceController.unitAttrCenter);
     }
 
     private float EffectiveMoveRange => moveRange * Mathf.Max(0f,

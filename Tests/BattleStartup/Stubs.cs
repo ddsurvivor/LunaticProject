@@ -74,6 +74,7 @@ public partial class BattleManager:MonoBehaviour
         startupPhase = StartupPhase.Deployment;
         return true;
     }
+    private void StopSpeedTurns() { PlayerController.isInTurn=false;AIController.isInTurn=false; }
     private void EndDeploymentSession() { }
     public void ConfirmDeploymentFixture()
     {
