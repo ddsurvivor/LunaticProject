@@ -45,6 +45,7 @@ public class UIManager : SerializedMonoBehaviour
     public Dictionary<KeyCode, GameObject> keyPanelDic = new();
     
 
+    [SerializeField] private SpeedTimelineUI speedTimelinePrefab;
     private SpeedTimelineUI speedTimeline;
     public void EnableSpeedTimeline(BattleManager battle)
     {
@@ -52,7 +53,7 @@ public class UIManager : SerializedMonoBehaviour
         foreach (var image in turnImage) if (image != null) image.SetActive(false);
         if (speedTimeline != null) Destroy(speedTimeline.gameObject);
         var canvas = pieceInfoPanel.GetComponentInParent<Canvas>();
-        if (canvas != null) speedTimeline = SpeedTimelineUI.Create(canvas.rootCanvas, battle);
+        if (canvas != null) speedTimeline = SpeedTimelineUI.Create(canvas.rootCanvas, battle, speedTimelinePrefab);
     }
 
     public void Init()
