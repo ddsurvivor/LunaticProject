@@ -1,0 +1,43 @@
+STEAM REVIEW - WINDOWS DEVELOPMENT BUILD
+
+Launch the game through Steam and wait for the title screen.
+No manual save-file placement is required. Missing review saves are installed
+automatically in the current Windows user's save directory.
+
+Hold Ctrl+Alt and press a number key (top row or numeric keypad).
+Use 0 for the tenth action:
+Ctrl+Alt+1  Hide/show the English review guide.
+Ctrl+Alt+2  Chapter 2 opening (EXC2-1), load slot 03.
+Ctrl+Alt+3  Chapter 3 opening (EXC3-1), load slot 04.
+Ctrl+Alt+4  Chapter 4 opening (EXC4-1), load slot 05.
+Ctrl+Alt+5  Death ending (EXC1-3-B), load slot 06.
+Ctrl+Alt+6  Injury / bleeding finale (EXC4-F), load slot 07.
+Ctrl+Alt+7  Attack / injury sequence (EXC2-8-B), load slot 08.
+Ctrl+Alt+8  Suicide reference (EXC1-3), load slot 09.
+Ctrl+Alt+9  Restore all seven review slots; previous files are backed up first.
+Ctrl+Alt+0 Open the actual save directory for this Windows account.
+
+Chapter jumps read pristine bundled templates even if the load slots contain
+old saves. Jumping replaces unsaved progress; it does not overwrite disk saves.
+Keys are ignored during transitions. Use them after the title screen is ready.
+After restoring slots while the load menu is closed, reopen it to see the files.
+
+For the suicide reference: use Ctrl+Alt+8 and advance the dialogue normally.
+EXC1-3 spreadsheet row 15 explicitly describes a character taking her own life
+with a firearm. This is narrative text; this guide does not claim a specific
+graphic depiction. EXC4-1 row 46 also refers to the character's suicide.
+
+The death and injury entries are supplied to inspect violence/blood. They are
+not presented as evidence of sexual content. No specific non-explicit sexual
+content entry has been confirmed by the developer's current text search.
+
+The UI identifies slots using 1-based numbers; JSON filenames are 0-based.
+Save folder: Application.persistentDataPath/Datas
+Windows default for current project settings:
+%USERPROFILE%\AppData\LocalLow\PristineArchiveStudio\EI_ Iris2\Datas
+Use Ctrl+Alt+0 or the [SteamReview] log if the product settings/path differ.
+Restore backups: Datas/ReviewBackups/<UTC timestamp and unique id>/
+
+These helpers are available in a Windows Development Player and Editor Play Mode.
+In the Editor, start Play Mode from StartScene and focus the Game view for keys.
+The default game language and all normal story content remain as configured.
