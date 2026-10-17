@@ -1,18 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Existing action-loop dependencies only; the explosive plan builder itself is linked from Assets.
-public partial class AIController : PlayerController
+public partial class AIController
 {
-    private class AttackPlan
-    {
-        public PieceController Target;public SkillPack Skill;public ActionType Action;
-        public EnemyStrategy Strategy;public IEnemyExplosiveTarget Explosive;
-    }
-    private static int ActionCost(ActionType action)=>GM.Ins.DM.gameConstSO.GetActionPointCost(action);
-    private static bool CanAfford(EnemyController piece,ActionType action)=>piece.unitAttrCenter.CurMovePoint>=ActionCost(action);
-    private static bool IsOffensiveSkill(SkillPack skill)=>skill!=null && skill.rangeValue>0 &&
-        skill.target is SkillTarget.Enemy or SkillTarget.EnemyAll or SkillTarget.All or SkillTarget.FarthestEnemy;
     public PieceController ExplosiveChoice(EnemyController enemy)=>TryCreateExplosivePlan(enemy,out var plan)?plan.Target:null;
     public ActionType ExplosiveAction(EnemyController enemy)=>TryCreateExplosivePlan(enemy,out var plan)?plan.Action:0;
 }

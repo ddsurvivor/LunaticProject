@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,6 +64,7 @@ public partial class BattleManager : MonoBehaviour
         try
         {
             inBattle = true;
+            LastOutcome = BattleOutcome.None;
             _turnNumber = 0;
             characterSkillManager.ClearAllRegistry();
             PlayerController.Init();
@@ -108,12 +109,13 @@ public partial class BattleManager : MonoBehaviour
         return false;
     }
 
-    // 兼容旧事件入口；实际交棒由调度器等待动画及移动完成后执行。
+    /// <summary>兼容旧交棒事件，标记结束当前棋子；实际切换由调度器等待动画与移动完成后执行。</summary>
     public void ChangeTurn()
     {
         if (SpeedTurnsActive && ActivePiece != null) finishPieceTurn = true;
     }
 
+    /// <summary>兼容旧玩家回合入口并启动速度调度；保留 firstTurn 参数供原调用使用。</summary>
     public void PlayerStart(bool firstTurn = true) => StartSpeedTurns();
 
     public void PieceSkill(PieceController attacker, List<PieceController> targets
@@ -181,7 +183,7 @@ public partial class BattleManager : MonoBehaviour
             // 处理附加效果
             ApplySKillEffect(skillPack, attacker, target, targetPos);
             ApplyAddEffect(skillPack, attacker, target, targetPos);
-            if (attacker.player != null && attacker.player.isBursting) // 聚能状态下所有攻击附加击退效果
+            if (IsBurstActor(attacker)) // 聚能状态下所有攻击附加击退效果
             {
                 SpaceBombEffect(skillPack, attacker, target, targetPos, true); // 去除假死
                 // 如果没有击退效果则添加默认击退效果，如果有击退效果则不添加
@@ -231,7 +233,7 @@ public partial class BattleManager : MonoBehaviour
         }
 
         // 处理聚能充能效果，多段伤害只充能一次
-        if (attacker.isPlayerPiece)
+        if (attacker.isPlayerPiece && hitTargets.Count > 0)
         {
             if (!PlayerController.isBursting)
             {
@@ -297,6 +299,7 @@ public partial class BattleManager : MonoBehaviour
 
     public void PlayerWin()
     {
+        if (ObserveBattleOutcome(BattleOutcome.PlayerVictory)) return;
         BattleScene.Ins?.CM?.ClearEnemyTargetLineInteraction();
         CancelBattleStartup();
         inBattle = false;
@@ -331,6 +334,7 @@ public partial class BattleManager : MonoBehaviour
 
     public void PlayerLoss()
     {
+        if (ObserveBattleOutcome(BattleOutcome.PlayerDefeat)) return;
         BattleScene.Ins?.CM?.ClearEnemyTargetLineInteraction();
         CancelBattleStartup();
         inBattle = false;
@@ -717,23 +721,20 @@ public partial class BattleManager : MonoBehaviour
     //         Debug.Log("设置灰色滤镜: " + option);
     //     }
     // }
+    /// <summary>切换现有双方共享材质的聚能灰度；仅影响使用这些材质的对象。</summary>
     public void ShowBurstGray(bool option)
     {
         // 把 gray材质上的shader里的GREYSCALE_ON属性打开，所有使用这个材质的图片就会变灰
-        if (gray != null)
+        foreach (var material in new[] { gray, grayEnemy })
         {
+            if (material == null) continue;
             if (option)
             {
-                // 获取场景中所有这个材质的物品
-
-
-                gray.EnableKeyword("GREYSCALE_ON");
-                grayEnemy.EnableKeyword("GREYSCALE_ON");
+                material.EnableKeyword("GREYSCALE_ON");
             }
             else
             {
-                gray.DisableKeyword("GREYSCALE_ON");
-                grayEnemy.DisableKeyword("GREYSCALE_ON");
+                material.DisableKeyword("GREYSCALE_ON");
             }
 
             //Debug.Log("设置灰色滤镜: " + option);

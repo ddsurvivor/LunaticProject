@@ -5,7 +5,8 @@ using UnityEngine;
 // Presentation and scene dependencies only. Combat rules are linked from Assets by Run.ps1.
 namespace UnityEngine
 {
-    public class ScriptableObject { }
+    public class Object { }
+    public class ScriptableObject:Object { }
     public class Sprite { }
     public class TextAreaAttribute : Attribute { }
     public class CreateAssetMenuAttribute : Attribute { public string fileName, menuName; }
@@ -23,13 +24,13 @@ namespace UnityEngine
         public Color(float r,float g,float b,float a=1f) { this.r=r;this.g=g;this.b=b;this.a=a; }
         public static Color white=>new(1,1,1); public static Color red=>new(1,0,0); public static Color green=>new(0,1,0);
     }
-    public class Component
+    public class Component:Object
     {
         public GameObject gameObject;
         private readonly Transform fallback = new Transform();
         public Transform transform => gameObject?.transform ?? fallback;
         public string name => gameObject?.name ?? "test"; public int GetInstanceID()=>GetHashCode(); public T GetComponentInParent<T>() where T:class=>GetComponent<T>();
-        public T GetComponent<T>() where T : class => gameObject.GetComponent<T>();
+        public T GetComponent<T>() where T : class => gameObject?.GetComponent<T>();
         public T GetComponentInChildren<T>(bool includeInactive) where T:class => GetComponent<T>();
     }
     public class MonoBehaviour : Component
@@ -49,8 +50,9 @@ namespace UnityEngine
         }
         protected static void Destroy(GameObject go) { go.SetActive(false); }
     }
-    public class GameObject
+    public class GameObject:Object
     {
+        public GameObject gameObject=>this;
         public string name = "test";
         public int layer;
         public Transform transform;
@@ -74,6 +76,8 @@ namespace UnityEngine
         public Vector3(float x,float y,float z) { this.x=x; this.y=y; this.z=z; }
         public static Vector3 up => new(0,1,0);
         public static Vector3 zero => new();
+        public static Vector3 forward=>new(0,0,1);
+        public static float SqrMagnitude(Vector3 value)=>value.sqrMagnitude;
         public float sqrMagnitude=>x*x+y*y+z*z;
         public float magnitude => (float)Math.Sqrt(sqrMagnitude);
         public static float Distance(Vector3 a,Vector3 b)=>(a-b).magnitude;
@@ -87,7 +91,13 @@ namespace UnityEngine
         public static Vector3 operator *(Vector3 a,float f) => new(a.x*f,a.y*f,a.z*f);
         public static Vector3 operator /(Vector3 a,float f) => a * (1f/f);
     }
-    public struct Quaternion { public static Quaternion identity => default; }
+    public struct Quaternion
+    {
+        private float y;
+        public static Quaternion identity => default;
+        public static Quaternion Euler(float x,float y,float z)=>new(){y=y*Mathf.Deg2Rad};
+        public static Vector3 operator *(Quaternion rotation,Vector3 vector)=>new(vector.x*Mathf.Cos(rotation.y)+vector.z*Mathf.Sin(rotation.y),vector.y,-vector.x*Mathf.Sin(rotation.y)+vector.z*Mathf.Cos(rotation.y));
+    }
     public static class Mathf
     {
         public const float Rad2Deg = 180f / (float)Math.PI;
@@ -98,19 +108,24 @@ namespace UnityEngine
         public static float Asin(float value) => (float)Math.Asin(value);
         public static int Max(int a,int b)=>Math.Max(a,b); public static float Max(float a,float b)=>Math.Max(a,b);
         public static int Min(int a,int b)=>Math.Min(a,b); public static float Abs(float a)=>Math.Abs(a);
+        public static float Min(float a,float b)=>Math.Min(a,b);
         public static int Clamp(int v,int a,int b)=>Math.Clamp(v,a,b); public static float Clamp(float v,float a,float b)=>Math.Clamp(v,a,b);
         public static int FloorToInt(float v)=>(int)Math.Floor(v); public static int CeilToInt(float v)=>(int)Math.Ceiling(v);
         public static int RoundToInt(float v)=>(int)Math.Round(v);
         public static float Log10(float v)=>(float)Math.Log10(v); public static float Clamp01(float v)=>Math.Clamp(v,0,1);
     }
-    public static class Random { public static float value=0f; public static int NextValue=1; public static int Range(int a,int b)=>Math.Clamp(NextValue,a,b-1); }
+    public static class Random { public static float value=0f; public static int NextValue=1; public static int Range(int a,int b)=>Math.Clamp(NextValue,a,b-1);public static float Range(float a,float b)=>a; }
     public static class Debug { public static void Log(object o){} public static void LogWarning(object o, object context=null){} public static void LogError(object o){} }
     public class Collider : Component { }
     public struct LayerMask { public int value;public static implicit operator LayerMask(int value)=>new(){value=value}; }
+    public struct RaycastHit {public Collider collider;}
     public static class Physics
     {
         public static Collider[] Results=Array.Empty<Collider>();
         public static bool FilterByPosition;
+        public static GameObject CoverObject;
+        public static RaycastHit[] RaycastAll(Vector3 origin,Vector3 direction,float distance)=>CoverObject!=null && origin.x<=0
+            ? new[]{new RaycastHit {collider=CoverObject.GetComponent<Collider>()}}:Array.Empty<RaycastHit>();
         public static Vector3 LastCenter; public static float LastRadius;
         public static Collider[] OverlapSphere(Vector3 p,float r)
         {
@@ -129,7 +144,7 @@ namespace UnityEngine.UI
         public UnityEngine.VerticalWrapMode verticalOverflow;
     }
 }
-namespace UnityEngine.Events { public class UnityEvent { } }
+namespace UnityEngine.Events { public class UnityEvent { public void Invoke(){} } }
 namespace UnityEngine.Serialization { public class FormerlySerializedAsAttribute : Attribute { public FormerlySerializedAsAttribute(string name) {} } }
 namespace Sirenix.OdinInspector
 {
@@ -140,20 +155,26 @@ namespace Sirenix.OdinInspector
     public class ShowIfAttribute : Attribute { public ShowIfAttribute(string s) {} }
 }
 namespace Sirenix.Serialization { public class OdinSerializeAttribute : Attribute { } }
-namespace DG.Tweening { public static class TweenExtensions { public static void DOScale(this Transform t,Vector3 v,float f){} } }
+namespace DG.Tweening
+{
+    public static class TweenExtensions { public static void DOScale(this Transform t,Vector3 v,float f){} }
+    public static class DOVirtual {public static void DelayedCall(float delay,Action action){action();}}
+}
 public enum ItemName { A, B }
 public enum ItemTag { All, Consumables, Plugins, Materials }
 public enum UseType { InBattle, OutOfBattle, WhenEnergyNotFull, WhenHpNotFull, WhenStaminaNotFull, ActiveInBattle }
 public enum ItemType { SHIELD, DAMAGE_TEXT, KINETIC_ATTACK, ENERGY_ATTACK, HEAL_EFFECT, CHARGE_EFFECT, SPECIALTY_ACTIVATE }
 public enum AudioCueType { Heal, Equip, Cancel }
 public class CheckDicePanel { public void ShowResult(int n,int[] dice,bool success) {} }
-public enum PieceDisplayState { Dodge }
+public enum PieceDisplayState { Dodge,Idle,Move,Skill,Shoot,Attack }
 public class SkillPack
 {
     public bool AllowDeadCaster {get;private set;}
     public SkillPack WithDeadCaster() {var copy=(SkillPack)MemberwiseClone();copy.AllowDeadCaster=true;return copy;}
     public SkillPack WithTarget(SkillTarget target) {var copy=(SkillPack)MemberwiseClone();copy.target=target;return copy;}
     public string skillName;
+    public EnemySkillRole enemySkillRole;
+    public List<BuffPack> buffPacks=new();public List<SkillEffect> skillEffects=new();
     public int mpCost; public bool layerSkill, isRecognitionCheck, isDelaySkill;
     public SkillTarget target=SkillTarget.EnemyAll; public RangeType rangeType=RangeType.Circle; public float explodeRadius,rangeValue=10,rangeAgle=90,arcWeight,arcCenterDis;
     public List<ItemPack> consumeItems=new(); public List<AttackPack> attackPacks=new();
@@ -168,7 +189,7 @@ public class PieceData
     public Dictionary<DamageType,int> attackDic=new(), _armorDic=new();
     public Dictionary<UnitAttrType,float> attrDic=new();
 }
-public class PieceController : MonoBehaviour
+public partial class PieceController : MonoBehaviour
 {
     public bool IsPerformingAction;
     public List<SkillPack> availableSkills=new();
@@ -194,13 +215,15 @@ public class RangeUI : MonoBehaviour
 public partial class EnemyController : PieceController
 {
     public bool isActived=true;
+    public bool navigate;
+    public Dictionary<PieceController,int> damageDic=new();
     public EnemyAIType enemyAIType=EnemyAIType.Combine;
     public EnemyCanvas enemyCanvas=new(); public int RecordedDamage;
     public void AddDamageRecord(PieceController p,int d){ RecordedDamage+=d; }
     public void UpdateHpBar(float f){}
 }
 public class EnemyCanvas { public void UpdateBuffs(List<BuffState> b){} }
-public class PieceDisplay { public void ChangeDisplayState(PieceDisplayState s,bool b,float f){} }
+public class PieceDisplay { public void ChangeDisplayState(PieceDisplayState s,bool b=true,float f=0){} }
 public class HpBarUI { }
 public class DamageText : MonoBehaviour { public void JumpOutNum(int n){} }
 public class ObjectPool
@@ -208,10 +231,10 @@ public class ObjectPool
     public static ObjectPool Ins=new();
     public GameObject GenerateObject(ItemType t,Vector3 p,Quaternion q) { var go=new GameObject(); go.Add(new DamageText()); return go; }
 }
-public class PlayerController { public bool isBursting; public PieceController burstTarget; public int totalDamage; public List<PieceController> pieces=new(); }
-public class CaverSlot { public int evadeChance, damageReduction; }
+public class PlayerController:MonoBehaviour { public UnityEngine.Events.UnityEvent OnTurnStart=new(); public bool isInTurn;public virtual void TurnStart(){} public float Charge; public void ChargeBurst(float amount) { if(!isBursting)Charge+=amount; } public bool isBursting; public PieceController burstTarget; public int totalDamage; public List<PieceController> pieces=new(); }
+public class CaverSlot { public GameObject gameObject=new();public int evadeChance, damageReduction; }
 public class DamageInfo { public int damageValue; public DamageInfo(int d,string type,bool crit){ damageValue=d; } }
-public static class GameConst { public const float burstDamageRate=1.2f, burstAddDamageRate=0.2f; }
+public static class GameConst { public const float hurtBurstCharge=5; public const float burstDamageRate=1.2f, burstAddDamageRate=0.2f; }
 public class GameConstSO { public float FlankDamageRate=0.5f; public int GetActionPointCost(ActionType action)=>1; }
 public class LevelUpConfig { public int GetRequiredExpForLevel(int level)=>100; public int GetReward(int level)=>1; }
 public class SkillPackListSO { public SkillPack Skill; public SkillPack GetSkillPack(string name)=>Skill; }
@@ -226,18 +249,23 @@ public class Profile
 }
 public class GM { public static GM Ins=new(); public Profile PLAYERPROFILE=new(); public DataManager DM=new(); public AudioManager AM=new(); }
 public class UIManager { public void OnPieceStateChance(PieceController p){} public void ShowUndoMoveButton(bool b){} }
-public class BattleManager
+public partial class BattleManager
 {
+    public bool IsBurstActor(PieceController p)=>p.player != null && p.player.isBursting;
     public DamageManager damageManager=>new(this);
     public BuffManager buffManager=new(); public TipTextManager tipTextManager=new(); public DiceCheckManager diceCheckManager=new();
     public SkillSystem.CharacterSkillManager characterSkillManager=new(); public PlayerController PlayerController=new();
-    public PlayerController AIController=new(); public OrderManager orderManager=new();
+    public AIController AIController=new(); public OrderManager orderManager=new();
+    public bool BurstInputPending,HasCombatPresentation;public bool SpeedTurnsActive=true;
+    public PieceController ActivePiece;public MoveManager moveManager=new();public CameraController cameraController=new();
+    public int TunrNumber,TurnChanges;public static bool IsSpeedParticipant(PieceController piece)=>piece!=null&&!piece.isDead;
+    public void ChangeTurn(){TurnChanges++;}
     public int ExtraAttacks;
     public void PieceSkill(PieceController a,List<PieceController> targets,SkillPack skill,Vector3 pos) { ExtraAttacks++; }
     public CaverSlot CheckCoverObstruction(PieceController a,PieceController b)=>null;
 }
 public class OrderManager { public List<PieceController> Targets=new(); public List<PieceController> IsInsideSector(Vector3 p,Vector3 d,float r,float a)=>new(Targets); }
-public class BattleScene { public static BattleScene Ins=new(); public BattleManager BM=new(); public UIManager UM=new(); }
+public class BattleScene { public static BattleScene Ins=new(); public BattleManager BM=new(); public UIManager UM=new();public ClickManager CM=new(); }
 namespace SkillSystem
 {
     public class PassiveSkillData { public string skillName="passive"; }

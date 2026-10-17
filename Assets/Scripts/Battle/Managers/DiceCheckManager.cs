@@ -5,12 +5,12 @@
     {
         public CheckDicePanel checkDicePanel;
         /// <summary>
-        /// 检定功能函数：模式识别对抗
+        /// 模式识别对抗；可仅关闭展示，掷骰、结果和成功事件保持不变。
         /// </summary>
         /// <param name="attacker">攻击方棋子</param>
         /// <param name="defender">目标方棋子</param>
         /// <returns>检定结果</returns>
-        public CheckResult ModeRecognitionCheck(PieceController attacker, PieceController defender)
+        public CheckResult ModeRecognitionCheck(PieceController attacker, PieceController defender, bool showPresentation = true)
         {
             // 假设属性名为 ModeRecognition 和 CounterAttribute
             // 攻击方模式识别属性加成
@@ -30,7 +30,7 @@
             // 这里以骰子和大于等于10为成功示例
             bool isSuccess = diceSum >= counterAttr;
 
-            checkDicePanel?.ShowResult(3, diceResult, isSuccess);
+            if (showPresentation) checkDicePanel?.ShowResult(3, diceResult, isSuccess);
             if (isSuccess)
                 BattleScene.Ins.BM.characterSkillManager.NotifyPatternRecognitionPassed(attacker.gameObject);
 

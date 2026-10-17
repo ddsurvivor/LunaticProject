@@ -103,6 +103,7 @@ public class DataManager : SerializedMonoBehaviour
 
     public void SaveData(int index)
     {
+        if (BattleScene.Ins != null && BattleScene.Ins.BM.SuppressExternalPresentation) return;
         if (大地图System.instance != null)
             大地图System.instance.CaptureMapState();
         GM.Ins.PLAYERPROFILE.lastSaveTime = System.DateTime.Now;

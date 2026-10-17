@@ -83,6 +83,73 @@ static class Program
         battle.StartFixture(); battle.Until(() => battle.ActivePiece == b);
         Check(a.Starts == 1 && a.Ends == 1 && !battle.CanControlPiece(a),
             "Start-of-turn stun skips input and settles exactly one personal duration");
+        BurstCases();
         Console.WriteLine($"{passed} speed-turn regression tests passed.");
     }
+    static void BurstCases()
+    {
+        var gauge = new BurstGauge();
+        gauge.Reset(3, true); gauge.Add(500);
+        Check(gauge.Capacity == 100 && gauge.Charge == 100 && gauge.AffordableActors == 2,
+            "Prologue caps any upgrade at two actor entries");
+        gauge.Reset(3, false); gauge.Add(100);
+        Check(gauge.Capacity == 200 && Math.Abs(gauge.Charge - 121) < 0.01,
+            "Power spine level three uses 2x capacity and compounded 1.21x gain");
+        Check(gauge.Spend(2) && Math.Abs(gauge.Charge - 21) < 0.01 && !gauge.Spend(1),
+            "Per actor cost stays 50 and unused charge is retained");
+        gauge.BeginCooldown(); gauge.Add(200);
+        Check(!gauge.Spend(1) && gauge.Charge == 200, "Cooldown blocks spending but still accumulates charge");
+        gauge.CompleteNormalTurn(); gauge.CompleteNormalTurn();
+        Check(!gauge.Ready && gauge.Cooldown == 1, "Two action turns cannot clear a three-turn cooldown");
+        gauge.CompleteNormalTurn(); Check(gauge.Ready, "Third normal action turn unlocks burst");
+        gauge.Reset(0, false); gauge.Add(49); Check(!gauge.Ready, "Below 50 charge is not ready");
+        gauge.Add(1); Check(gauge.Ready && !gauge.Spend(0) && gauge.Spend(1), "Exactly 50 enables one actor");
+
+        var battle = BattleManager.Fixture();
+        var player = new PieceController { TurnSpeed = 10 };
+        var other = new PieceController { TurnSpeed = 10 };
+        var enemy = new EnemyController { TurnSpeed = 100 };
+        battle.PlayerController.pieces.AddRange(new[] { player, other });
+        battle.AIController.pieces.Add(enemy);
+        battle.PlayerController.Gauge.Add(100);
+        battle.StartFixture(); battle.Until(() => battle.ActivePiece == enemy);
+        float progress = battle.ActionProgress(player);
+        battle.HasCombatPresentation = true; battle.OnBurstButton(); battle.Step();
+        Check(battle.BurstInputPending && !battle.IsChoosingBurst && battle.ActivePiece == enemy,
+            "Enemy-action burst request waits for current projectile or animation");
+        battle.HasCombatPresentation = false; battle.Until(() => battle.IsChoosingBurst);
+        battle.ToggleBurstActor(enemy); battle.ToggleBurstActor(player); battle.ToggleBurstActor(other);
+        Check(battle.SelectedBurstCount == 2 && !battle.CanControlPiece(player),
+            "Selection allows multiple allies but no enemies or ordinary input");
+        battle.OnBurstButton(); battle.Until(() => battle.PlayerController.isBursting);
+        Check(battle.ActivePiece == player && player.Starts == 0 && player.Ends == 0 &&
+            battle.buffManager.Starts.Count == 1 && battle.PlayerController.Gauge.Charge == 0,
+            "Burst grants separate full AP without normal turn or duplicate buff ticks");
+        player.unitAttrCenter.CurMovePoint = 0;
+        battle.Until(() => battle.ActivePiece == other);
+        Check(player.unitAttrCenter.CurMovePoint == 2 && battle.ActionProgress(player) == progress,
+            "Completed burst actor keeps normal AP and speed progress");
+        battle.OnBurstButton(); battle.Until(() => !battle.PlayerController.isBursting);
+        Check(other.unitAttrCenter.CurMovePoint == 2 && enemy.Ends == 1 && battle.PlayerController.Gauge.Cooldown == 3,
+            "Cancel completes enemy interruption and retains all three cooldown turns");
+
+        battle = BattleManager.Fixture(); player = new PieceController { TurnSpeed = 100 };
+        enemy = new EnemyController { TurnSpeed = 10 };
+        battle.PlayerController.pieces.Add(player); battle.AIController.pieces.Add(enemy);
+        battle.PlayerController.Gauge.Add(100); battle.StartFixture(); battle.Until(() => battle.ActivePiece == player);
+        player.unitAttrCenter.CurMovePoint = 1;
+        battle.OnBurstButton(); battle.Until(() => battle.IsChoosingBurst); battle.ToggleBurstActor(player);
+        battle.CancelBurstSelection(); battle.Until(() => !battle.IsChoosingBurst);
+        Check(battle.PlayerController.Gauge.Charge == 100 && battle.CanControlPiece(player),
+            "Cancelling selection restores original turn without a charge or cooldown");
+        battle.OnBurstButton(); battle.Until(() => battle.IsChoosingBurst); battle.ToggleBurstActor(player); battle.OnBurstButton();
+        battle.Until(() => battle.PlayerController.isBursting);
+        player.unitAttrCenter.CurMovePoint = 0;
+        battle.Until(() => !battle.PlayerController.isBursting);
+        Check(battle.ActivePiece == player && player.unitAttrCenter.CurMovePoint == 1 && player.Starts == 1 && player.Ends == 0,
+            "Burst during own turn resumes the saved AP without resetting ordinary lifecycle");
+        battle.StopFixture();
+        Check(!battle.BurstInputPending && !battle.PlayerController.isBursting, "Battle stop clears selection and burst state");
+    }
+
 }

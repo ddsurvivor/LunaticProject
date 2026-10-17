@@ -42,8 +42,17 @@ namespace UnityEngine
     }
 }
 namespace Sirenix.OdinInspector { public class LabelTextAttribute : Attribute { public LabelTextAttribute(string value) { } } }
-public enum EnemyAIType { Shoot=2,SkillUser=3,Combine=5,Special=6 }
-public class UnitAttrCenter { public int TauntValue; public int CurHealth=100,MaxHealth=100; }
+public enum EnemyAIType { Shoot=2,SkillUser=3,Combine=5,Special=6,NearestAdaptive=10 }
+public enum EnemyHealthPriority {CurrentHealth,MaximumHealth}
+public enum EnemyFragilePriority {MaximumHealth,Defense}
+public enum DamageType {Ranged}
+public class AttrCenter {public int GetArmor(DamageType type)=>0;}
+public static class EnemyBehaviorRules
+{
+    public static EnemyTargetStrategy TargetStrategy(EnemyController enemy,EnemyStrategy strategy)=>strategy.Target;
+    public static PieceController ChooseInRangeWeakTarget(EnemyController enemy,List<PieceController> candidates,PieceController nearest,PieceController previewPiece,Vector3? previewPosition)=>nearest;
+}
+public class UnitAttrCenter { public AttrCenter attr=new();public int TauntValue; public int CurHealth=100,MaxHealth=100; }
 public class PieceController
 {
     public PieceData pieceData=new();

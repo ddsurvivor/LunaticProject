@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>由 BattleManager 持有，统一技能伤害结算与只读预览。</summary>
@@ -156,7 +156,7 @@ public sealed class DamageManager
         var context = new Context
         {
             Attacker = attacker, Target = target, PassiveMultiplier = 1f, Cover = battle.CheckCoverObstruction(attacker, target),
-            IsBursting = attacker.player != null && attacker.player.isBursting, IsFlank = isFlank,
+            IsBursting = battle.IsBurstActor(attacker), IsFlank = isFlank,
             BarrierBlocked = attacker.isPlayerPiece != target.isPlayerPiece
                 && target.unitAttrCenter.GetBuffStacks(BuffType.SlowingField) != 0
         };

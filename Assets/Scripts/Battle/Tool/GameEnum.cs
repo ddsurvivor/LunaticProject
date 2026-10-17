@@ -212,6 +212,35 @@ public enum EnemyAIType
     Combine = 5,// 根据当前距离选择近战还是远程，但优先近战
     [LabelText("特殊型")]
     Special = 6,// 特殊行为由关卡设计决定
+    [LabelText("1·就近追击（范围内优先弱血量）")] NearestAdaptive = 10,
+    [LabelText("2·低防射击（半射程规避）")] WeakestDefenseShooter = 11,
+    [LabelText("3·伤害仇敌（群体优先范围攻击）")] DamageHunterAOE = 12,
+    [LabelText("4·伤害仇敌（远程技能概率）")] DamageHunterRangedSkill = 13,
+    [LabelText("5·伤害仇敌（近战技能概率）")] DamageHunterMeleeSkill = 14,
+    [LabelText("6·伤害仇敌（仅近战）")] DamageHunterMeleeOnly = 15,
+    [LabelText("7·弱者追击（仅近战）")] FragileMeleeOnly = 16,
+    [LabelText("8·回复支援优先")] HealingSupport = 17,
+    [LabelText("9·残血攻击后撤离")] WoundedRetreat = 18,
+}
+
+public enum EnemySkillRole
+{
+    [LabelText("自动识别")] Auto = 0,
+    [LabelText("远程攻击技能")] RangedAttack = 1,
+    [LabelText("近战攻击技能")] MeleeAttack = 2,
+    [LabelText("回复技能")] Healing = 3
+}
+
+public enum EnemyHealthPriority
+{
+    [LabelText("当前生命值较低")] CurrentHealth = 0,
+    [LabelText("最大生命值较低")] MaximumHealth = 1
+}
+
+public enum EnemyFragilePriority
+{
+    [LabelText("最大生命值最低")] MaximumHealth = 0,
+    [LabelText("防御力最低")] Defense = 1
 }
 
 #region 技能枚举

@@ -89,6 +89,18 @@ public partial class EnemyController : PieceController
         rangeUI?.CloseRange();
     }
 
+    /// <summary>回复计划复用正式技能动画与结算，区域回复允许没有直接命中目标。</summary>
+    public void CastSupportSkill(PieceController target, SkillPack skill)
+    {
+        if (IsPerformingAction || isDead || target == null || skill == null) return;
+        Vector3 position = target.transform.position;
+        var targets = SkillTargeting.Query(this, skill, position);
+        if (skill.target != SkillTarget.Area && !targets.Contains(target)) return;
+        BeginCombatAction(skill, targets, position, ActionType.技能, PieceDisplayState.Skill);
+        NotifySkillUsed(skill);
+        rangeUI?.CloseRange();
+    }
+
     public void CastAttackOnTarget(PieceController targetPc)
     {
         if (IsPerformingAction || isDead || !TryGetAttackPosition(targetPc, _curAttackPack, out var position)) return;

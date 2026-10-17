@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using Sirenix.OdinInspector;
@@ -306,6 +306,9 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         if (_curHealth <= 0) _curHealth = 0;
         UpdateHpBar();
         NotifyHealthChanged(previousHealth);
+        // 按真实掉血充能，放在死亡分支前以覆盖致死伤害，零伤害不计入。
+        if (pc.isPlayerPiece && _curHealth < previousHealth)
+            BattleScene.Ins.BM.PlayerController.ChargeBurst(GameConst.hurtBurstCharge);
         if (_curHealth <= 0)
         {
             if (pc != null)

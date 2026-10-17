@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
@@ -11,7 +11,7 @@ using UnityEngine.Serialization;
 /// <summary>
 /// 棋子控制器
 /// </summary>
-public class PieceController : MonoBehaviour
+public partial class PieceController : MonoBehaviour
 {
     [Header("引用")]
     //public string pieceName;
@@ -33,7 +33,8 @@ public class PieceController : MonoBehaviour
 
     public PieceData pieceData => _pieceData;
     [Min(0), Tooltip("0 使用棋子数据中的速度，否则覆盖此棋子的回合速度")]
-    public float turnSpeedOverride;
+    public float turnSpeedOverride; // 大于 0 时仅覆盖当前实例的回合速度。
+    /// <summary>返回行动条每次累加的速度，依次使用实例覆盖、棋子配置及默认值 10。</summary>
     public float TurnSpeed => turnSpeedOverride > 0 ? turnSpeedOverride :
         (pieceData != null && pieceData.speed > 0 ? pieceData.speed : 10f);
 
@@ -217,6 +218,7 @@ public class PieceController : MonoBehaviour
 
     private void Update()
     {
+        if (BattleScene.Ins != null && BattleScene.Ins.BM.HasExternalPlayerControl) return;
         if (BattleScene.Ins != null && BattleScene.Ins.BM.HasCombatPresentation) return;
         if (cantControl) return;
         if (!isPlayerPiece) return;
@@ -638,24 +640,9 @@ public class PieceController : MonoBehaviour
     {
         BattleScene.Ins.TM.RequestHitStop();
         OnHurt?.Invoke();
-        // 聚能充能
-        if (isPlayerPiece)
-        {
-            // 受伤充能
-            BattleScene.Ins.BM.PlayerController.ChargeBurst(GameConst.hurtBurstCharge);
-        }
-
         Debug.Log($"{this.name} 受伤");
-        // 判定地方聚能状态
-        if (!isPlayerPiece && BattleScene.Ins.BM.PlayerController.isBursting)
-        {
-            // 如果是敌人棋子且玩家处于聚能状态，受伤动画持续到回合结束
-            pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, false, -1);
-        }
-        else
-        {
-            pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, true);
-        }
+        // 聚能期间仍完整播放受击；延迟表现队列另行实现，不能用循环受击冒充冻结。
+        pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, true);
 
         // TODO: 根据受伤的数值改变振动的强度
         StopHitShake();

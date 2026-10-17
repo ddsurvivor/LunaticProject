@@ -10,11 +10,12 @@ public static class SpeedTimelinePrefabBuilder
 {
     const string Art = "Assets/Art/UI/AvgCommon";
     const string Components = "Assets/Prefab/UI/AvgCommon";
-    const string Timeline = "Assets/Resources/UI/SpeedTimeline.prefab";
+    const string Timeline = "Assets/Resources/UI/SpeedTimeline.prefab"; // 与运行时 Resources 加载路径对应。
     static readonly Color Gold = new Color32(219, 185, 116, 255);
     static Font font;
     static Sprite panel, title, button, selected, grid, accent, close, scroll;
 
+    /// <summary>批处理入口：重新生成 UI 素材与预制体，校验引用并输出预览；批处理成功返回 0，失败返回 1。</summary>
     public static void BuildAndValidate()
     {
         try
@@ -52,6 +53,7 @@ public static class SpeedTimelinePrefabBuilder
         importer.maxTextureSize = 2048;
         var settings = new TextureImporterSettings();
         importer.ReadTextureSettings(settings);
+        // 九宫格需保留完整矩形，避免紧密网格裁掉边角。
         settings.spriteMeshType = SpriteMeshType.FullRect;
         importer.SetTextureSettings(settings);
         importer.SaveAndReimport();
@@ -74,6 +76,7 @@ public static class SpeedTimelinePrefabBuilder
         close = Import("返回开始菜单/关闭/48×48", "Close", Vector4.zero);
         scroll = Import("对话框/滚动条", "Scrollbar", Vector4.zero);
 
+        // 先保存通用组件，再组装运行时加载的完整速度条。
         var root = Rect("Panel", null, new Vector2(560, 240));
         Image(root, panel, Color.white);
         Save(root, "Panel");
@@ -127,6 +130,7 @@ public static class SpeedTimelinePrefabBuilder
         Label(root, "0 · 起点", 12, new Vector2(-60, 15), new Vector2(90, 22), new Color32(145, 160, 176, 255), new Vector2(1, 0));
         marker = CreateMarker(track);
         marker.gameObject.name = "PortraitTemplate";
+        // 模板仅供运行时复制，不作为实际参战者显示。
         marker.gameObject.SetActive(false);
         root.gameObject.AddComponent<SpeedTimelineUI>().Configure(track, marker);
         PrefabUtility.SaveAsPrefabAsset(root.gameObject, Timeline);
@@ -213,6 +217,7 @@ public static class SpeedTimelinePrefabBuilder
         var serialized = new SerializedObject(prefab.GetComponent<SpeedTimelineUI>());
         if (!serialized.FindProperty("track").objectReferenceValue || !serialized.FindProperty("markerTemplate").objectReferenceValue)
             throw new Exception("Unbound timeline references");
+        // 速度条只展示信息，任何子图形都不能遮挡战斗点击。
         if (prefab.GetComponentsInChildren<UnityEngine.UI.Graphic>(true).Any(g => g.raycastTarget))
             throw new Exception("Timeline must not block clicks");
         foreach (var image in prefab.GetComponentsInChildren<UnityEngine.UI.Image>(true))
@@ -222,6 +227,7 @@ public static class SpeedTimelinePrefabBuilder
 
     static void Preview()
     {
+        // 使用独立预览场景渲染，避免向当前编辑的关卡写入展示对象。
         var scene = EditorSceneManager.NewPreviewScene();
         var canvasRoot = new GameObject("PreviewCanvas", typeof(RectTransform), typeof(Canvas));
         UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(canvasRoot, scene);

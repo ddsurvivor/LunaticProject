@@ -40,6 +40,7 @@ public class OrderManager : MonoBehaviour
         }
     }
 
+    /// <summary>仅解除指定棋子的警戒，供该棋子开始普通或聚能行动时调用。</summary>
     public void ClearForPiece(PieceController piece)
     {
         for (int i = activeOrders.Count - 1; i >= 0; i--)

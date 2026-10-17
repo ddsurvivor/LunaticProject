@@ -16,27 +16,42 @@ public partial class AIController
         return CheckEnemyTarget(enemy, previewPiece, previewPosition);
     }
 
+    /// <summary>按当前模式或独立索敌策略选择玩家；移动预览只替换查询坐标，不改变真实位置。</summary>
     public PieceController CheckEnemyTarget(EnemyController aiPiece, PieceController previewPiece = null,
         Vector3? previewPosition = null)
     {
         if (aiPiece == null || aiPiece.isDead) return null;
         var candidates = BattleScene.Ins?.BM?.PlayerController?.pieces;
         if (candidates == null) return null;
-        var strategy = aiPiece.ResolveStrategy().Target;
+        var behavior = aiPiece.ResolveStrategy();
+        var strategy = EnemyBehaviorRules.TargetStrategy(aiPiece, behavior);
         if (strategy != EnemyTargetStrategy.StandardThreat)
         {
             PieceController selected = null;
             float bestValue = float.PositiveInfinity;
+            float bestDistance = float.PositiveInfinity;
             foreach (var candidate in candidates)
             {
                 if (!IsValidTarget(aiPiece, candidate)) continue;
                 Vector3 position = candidate == previewPiece && previewPosition.HasValue
                     ? previewPosition.Value : candidate.transform.position;
-                float value = strategy == EnemyTargetStrategy.LowestHealth ? candidate.unitAttrCenter.CurHealth :
-                    Vector3.Distance(position, aiPiece.transform.position);
-                if (value < bestValue) { bestValue = value; selected = candidate; }
+                float distance = Vector3.Distance(position, aiPiece.transform.position);
+                float value;
+                switch (strategy)
+                {
+                    case EnemyTargetStrategy.LowestHealth: value = candidate.unitAttrCenter.CurHealth; break;
+                    case EnemyTargetStrategy.LowestMaxHealth: value = candidate.unitAttrCenter.MaxHealth; break;
+                    case EnemyTargetStrategy.LowestDefense: value = candidate.unitAttrCenter.attr.GetArmor(aiPiece.defenseType); break;
+                    case EnemyTargetStrategy.HighestDamage:
+                        value = aiPiece.damageDic.TryGetValue(candidate, out int damage) ? -damage : 0f;
+                        break;
+                    default: value = distance; break;
+                }
+                if (value < bestValue || strategy == EnemyTargetStrategy.HighestDamage && value == bestValue && distance < bestDistance)
+                { bestValue = value; bestDistance = distance; selected = candidate; }
             }
-            return selected;
+            return behavior.Action == EnemyAIType.NearestAdaptive
+                ? EnemyBehaviorRules.ChooseInRangeWeakTarget(aiPiece, candidates, selected, previewPiece, previewPosition) : selected;
         }
         PieceController nearest = null, highestDamage = null;
         float minDistance = float.MaxValue;

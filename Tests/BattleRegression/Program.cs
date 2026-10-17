@@ -11,7 +11,7 @@ static partial class Program
     static void Test(string name, Action body)
     {
         GM.Ins = new GM(); BattleScene.Ins = new BattleScene(); TestEvents.Reset(); Physics.Results=Array.Empty<Collider>();Physics.FilterByPosition=false;
-        EnemyExplosiveTargets.Active.Clear();
+        EnemyExplosiveTargets.Active.Clear();Physics.CoverObject=null;
         UnityEngine.Random.value = 0; UnityEngine.Random.NextValue = 99;
         body(); passed++; Console.WriteLine("PASS " + name);
     }
@@ -40,6 +40,23 @@ static partial class Program
     }
     static void Main()
     {
+        Test("Burst charges only on actual player health loss including lethal damage", () => {
+            var player = Unit(); var gauge = BattleScene.Ins.BM.PlayerController;
+            player.unitAttrCenter.TakeDamage(new AttackPack(0, DamageType.Melee));
+            Assert(gauge.Charge == 0, "Zero damage must not charge");
+            player.unitAttrCenter.TakeDamage(new AttackPack(1, DamageType.Melee));
+            Assert(gauge.Charge == GameConst.hurtBurstCharge, "Health loss must charge once");
+            player.unitAttrCenter.TakeDamage(new AttackPack(9999, DamageType.Melee));
+            Assert(gauge.Charge == 2 * GameConst.hurtBurstCharge, "Lethal damage must also charge");
+            Unit(false, true).unitAttrCenter.TakeDamage(new AttackPack(1, DamageType.Melee));
+            Assert(gauge.Charge == 2 * GameConst.hurtBurstCharge, "Enemy health loss must not grant hurt charge");
+        });
+        Test("Burst actions do not recharge their own gauge", () => {
+            var player = Unit(); var gauge = BattleScene.Ins.BM.PlayerController;
+            gauge.isBursting = true;
+            player.unitAttrCenter.TakeDamage(new AttackPack(1, DamageType.Melee));
+            Assert(gauge.Charge == 0, "Burst damage must not refill gauge");
+        });
         Test("Default kinetic armor and Frail application/removal agree with preview", () => {
             var a=Unit(); var t=Unit(false,true); t.unitAttrCenter.attr.SetArmor(DamageType.Melee,10);
             var s=Skill(); s.attackPacks.Add(new AttackPack(20,DamageType.Melee));
@@ -163,6 +180,8 @@ static partial class Program
         TargetingRegression();
         EnemyAOERegression();
         EnemyExplosiveRegression();
+        EnemyBehaviorRegression();
+        PlayerAutoBattleRegression();
         BuffRegression();
         ComponentRegression();
         FloatingTextRegression();

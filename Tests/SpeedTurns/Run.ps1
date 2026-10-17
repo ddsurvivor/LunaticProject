@@ -5,6 +5,8 @@ New-Item -ItemType Directory -Force $output | Out-Null
 $sources = @(
     'Assets/Scripts/Battle/Managers/SpeedTurnQueue.cs',
     'Assets/Scripts/Battle/Managers/BattleManager.SpeedTurns.cs',
+    'Assets/Scripts/Battle/Managers/BattleManager.BurstTurns.cs',
+    'Assets/Scripts/Battle/Controllers/BurstGauge.cs',
     'Tests/SpeedTurns/Stubs.cs',
     'Tests/SpeedTurns/Program.cs'
 )

@@ -23,6 +23,11 @@ namespace BattleDialogue
         /// <param name="onComplete">对话完全结束时触发的回调</param>
         public void StartLog(string logName, Action onComplete = null)
         {
+            if (BattleScene.Ins != null && BattleScene.Ins.BM.SuppressExternalPresentation)
+            {
+                onComplete?.Invoke();
+                return;
+            }
             if (string.IsNullOrEmpty(logName))
             {
                 Debug.LogWarning("[DialogueManager] 触发的 logName 为空，直接跳过对话并执行后续逻辑。");

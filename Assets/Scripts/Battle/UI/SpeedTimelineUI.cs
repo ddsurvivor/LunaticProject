@@ -5,12 +5,13 @@ using UnityEngine;
 /// <summary>附着现有战斗 Canvas 的顶部速度条；头像从右侧0向左侧100移动。</summary>
 public sealed class SpeedTimelineUI : MonoBehaviour
 {
-    [SerializeField] private RectTransform track;
-    [SerializeField] private SpeedTimelineMarkerUI markerTemplate;
-    [SerializeField] private float laneOffset = 22f;
+    [SerializeField] private RectTransform track; // 右侧为进度 0，左侧为进度 100。
+    [SerializeField] private SpeedTimelineMarkerUI markerTemplate; // 隐藏的头像模板，运行时按棋子复制。
+    [SerializeField] private float laneOffset = 22f; // 双方头像距轨道中心的纵向偏移。
     private BattleManager battle;
     private readonly Dictionary<PieceController, SpeedTimelineMarkerUI> markers = new();
 
+    /// <summary>在战斗 Canvas 下创建并绑定速度条；未指定预制体时从 Resources 加载，缺失则返回 null。</summary>
     public static SpeedTimelineUI Create(Canvas canvas, BattleManager manager, SpeedTimelineUI prefab = null)
     {
         if (prefab == null) prefab = Resources.Load<SpeedTimelineUI>("UI/SpeedTimeline");
@@ -25,6 +26,7 @@ public sealed class SpeedTimelineUI : MonoBehaviour
         return ui;
     }
 
+    /// <summary>供预制体生成器绑定轨道和头像模板，运行时沿用保存的引用。</summary>
     public void Configure(RectTransform trackRect, SpeedTimelineMarkerUI template)
     {
         track = trackRect;
@@ -40,6 +42,7 @@ public sealed class SpeedTimelineUI : MonoBehaviour
             return;
         }
         var participants = battle.SpeedParticipants();
+        // 同步动态参战者，死亡或离场后移除对应头像。
         foreach (var old in markers.Keys.Where(p => !participants.Contains(p)).ToArray())
         {
             Destroy(markers[old].Rect.gameObject);
@@ -56,6 +59,7 @@ public sealed class SpeedTimelineUI : MonoBehaviour
                 var portrait = marker.Portrait;
                 portrait.color = Color.white;
                 portrait.preserveAspect = true;
+                // 优先专用头像，缺失时依次回退角色立绘和棋子精灵。
                 portrait.sprite = piece.pieceData?.turnPortrait;
                 if (portrait.sprite == null && piece.isPlayerPiece)
                 {
@@ -70,7 +74,7 @@ public sealed class SpeedTimelineUI : MonoBehaviour
             marker.SetState(active, piece.isPlayerPiece);
             float lane = piece.isPlayerPiece ? laneOffset : -laneOffset;
             float x = -track.rect.width * Mathf.Clamp01(battle.ActionProgress(piece) / 100f);
-            var group = (piece.isPlayerPiece, Mathf.RoundToInt(x / 24));
+            var group = (piece.isPlayerPiece, Mathf.RoundToInt(x / 24)); // 同阵营且位置接近的头像共用避让计数。
             occupied.TryGetValue(group, out int overlap);
             occupied[group] = overlap + 1;
             // 满条/起跑时将同阵营头像扇形展开，避免只看见最后一个棋子。

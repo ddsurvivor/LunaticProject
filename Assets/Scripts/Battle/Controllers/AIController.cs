@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,17 +58,21 @@ public partial class AIController : PlayerController
         if (BattleScene.Ins.BM.ActivePiece is EnemyController enemy) BeginEnemyPieceTurn(enemy);
     }
 
+    /// <summary>开启当前敌人的个人回合，清空上次决策缓存并初始化本角色的攻击选择。</summary>
     public void BeginEnemyPieceTurn(EnemyController enemy)
     {
         pendingAttacks.Clear();
         retreatAfterShot.Clear();
         previousPositions.Clear();
+        woundedAttackDone.Clear();
+        healedThisTurn.Clear();
         _timer = 0f;
         isInTurn = true;
         OnTurnStart?.Invoke();
         enemy.StartNormalAttack(true);
     }
 
+    /// <summary>由速度调度器刷新敌人唤醒及增援；同一标准时间轮只刷新一次增援。</summary>
     public void RefreshSpeedTurnWorld()
     {
         if (fogController != null)
@@ -91,7 +95,7 @@ public partial class AIController : PlayerController
     public void Update()
     {
         var battle = BattleScene.Ins.BM;
-        if (!isInTurn || !battle.SpeedTurnsActive || battle.HasCombatPresentation || battle.moveManager.IsMoving) return;
+        if (battle.BurstInputPending || !isInTurn || !battle.SpeedTurnsActive || battle.HasCombatPresentation || battle.moveManager.IsMoving) return;
         if (!(battle.ActivePiece is EnemyController enemy)) return;
         _timer += Time.deltaTime;
         if (_timer < _actionInterval) return;
@@ -107,6 +111,7 @@ public partial class AIController : PlayerController
         public ActionType Action;
         public EnemyStrategy Strategy;
         public IEnemyExplosiveTarget Explosive;
+        public bool Support; // 回复计划使用友军合法性和范围规则。
     }
 
     private struct MoveCandidate
@@ -136,9 +141,9 @@ public partial class AIController : PlayerController
             pendingAttacks.Remove(aiPiece);
             retreatAfterShot.Remove(aiPiece);
         }
-        if (strategy.Action != EnemyAIType.Shoot) retreatAfterShot.Remove(aiPiece);
+        if (!EnemyBehaviorRules.IsShooter(strategy.Action)) retreatAfterShot.Remove(aiPiece);
 
-        // 1. 保留关卡专用撤退和跨层梯子逻辑。
+        // 关卡专用撤退不受通用治疗和残血撤离接管。
         if (strategy.Action == EnemyAIType.Special)
         {
             var retreat = aiPiece.GetComponent<RetreatWin>();
@@ -151,15 +156,25 @@ public partial class AIController : PlayerController
             retreat.CheckTargetReached();
             return actionAttempted;
         }
+        if (TryHealingPriority(aiPiece, strategy)) return true;
+        if (EnemyBehaviorRules.ShouldFlee(aiPiece))
+        {
+            pendingAttacks.Remove(aiPiece);
+            if (!woundedAttackDone.Contains(aiPiece) && TryWoundedAttack(aiPiece, target, strategy)) return true;
+            return TryFleeToEdge(aiPiece);
+        }
         if (!IsValidTarget(aiPiece, target)) return false;
 
-        // 2. 优先完成已承诺的“移动 + 攻击”，避免每移动一步就切换模式。
+        // 未触发紧急回复或撤离时，继续已经承诺的移动后攻击。
         if (pendingAttacks.TryGetValue(aiPiece, out var pending))
         {
             pendingAttacks.Remove(aiPiece);
-            if (IsValidTarget(aiPiece, pending.Target) &&
+            if ((pending.Support ? IsSupportTarget(aiPiece, pending.Target, pending.Skill) : IsValidTarget(aiPiece, pending.Target)) &&
                 (TryAttackPlan(aiPiece, pending) || actionAttempted)) return true;
         }
+
+        if (EnemyBehaviorRules.IsDesignMode(strategy.Action))
+            return TryDesignAttack(aiPiece, target, strategy, true);
 
         if (TryCreateExplosivePlan(aiPiece, out var explosivePlan) &&
             (TryAttackPlan(aiPiece, explosivePlan) || actionAttempted)) return true;
@@ -215,16 +230,17 @@ public partial class AIController : PlayerController
         return false;
     }
 
-    private bool TryAttackPlan(EnemyController piece, AttackPlan plan)
+    private bool TryAttackPlan(EnemyController piece, AttackPlan plan, bool allowMove = true)
     {
         if (plan.Skill == null) return false;
         if (plan.Explosive != null && !EnemyExplosiveTargets.CanAttack(piece, plan.Explosive, plan.Skill)) return false;
         if (plan.Action == ActionType.技能 && !piece.unitAttrCenter.HasMana(plan.Skill.mpCost)) return false;
         bool needsReload = plan.Action == ActionType.远程攻击 && piece.unitAttrCenter.AmmoCount <= 0;
         if (needsReload && piece.unitAttrCenter.MaxAmmoCount <= 0) return false;
+        if (!allowMove && needsReload && EnemyBehaviorRules.ShouldFlee(piece)) return false;
 
-        // 1. 已在范围内就直接行动，不浪费移动点。
-        if (plan.Explosive != null || CanExecuteAttack(piece, plan.Target, plan.Skill))
+        // 先尝试原地施放；紧急撤离和攻击优先检查禁止为攻击额外移动。
+        if (plan.Explosive != null || (plan.Support ? CanExecuteSupport(piece, plan.Target, plan.Skill) : CanExecutePlan(piece, plan)))
         {
             if (needsReload)
                 return SpendAction(piece, ActionType.重新装填, () => piece.ReloadAmmo());
@@ -235,7 +251,8 @@ public partial class AIController : PlayerController
                     if (!piece.unitAttrCenter.HasMana(plan.Skill.mpCost)) return;
                     piece.StartSkillAttack(plan.Skill);
                     if (!piece.unitAttrCenter.CostMana(plan.Skill.mpCost)) return;
-                    if (plan.Explosive != null) piece.CastOnExplosive(plan.Explosive, plan.Skill, plan.Action);
+                    if (plan.Support) piece.CastSupportSkill(plan.Target, plan.Skill);
+                    else if (plan.Explosive != null) piece.CastOnExplosive(plan.Explosive, plan.Skill, plan.Action);
                     else piece.CastSkillOnTarget(plan.Target, plan.Skill);
                 }
                 else
@@ -243,22 +260,27 @@ public partial class AIController : PlayerController
                     piece.StartNormalAttack(plan.Action == ActionType.远程攻击);
                     if (plan.Explosive != null) piece.CastOnExplosive(plan.Explosive, plan.Skill, plan.Action);
                     else piece.CastAttackOnTarget(plan.Target);
-                    if (piece.ResolveStrategy().Action == EnemyAIType.Shoot && plan.Action == ActionType.远程攻击)
-                        retreatAfterShot.Add(piece);
+                }
+                if (piece.IsPerformingAction && plan.Support) healedThisTurn.Add(piece);
+                if (piece.IsPerformingAction && !plan.Support)
+                {
+                    woundedAttackDone.Add(piece);
+                    if (EnemyBehaviorRules.IsShooter(piece.ResolveStrategy().Action)) retreatAfterShot.Add(piece);
                 }
             });
         }
 
-        // 2. 预留攻击和必要装填的行动力，再用实际路径长度判断本回合能否打到。
-        if (!CanAfford(piece, plan.Action) || !CanMove(piece)) return false;
+        // 预留施放和必要装填费用，避免移动后没有资源完成计划。
+        if (!allowMove || !CanAfford(piece, plan.Action) || !CanMove(piece)) return false;
         int reserved = ActionCost(plan.Action) + (needsReload ? ActionCost(ActionType.重新装填) : 0);
         int moves = (piece.unitAttrCenter.CurMovePoint - reserved) / Mathf.Max(1, ActionCost(ActionType.移动));
         if (moves <= 0) return false;
         var candidates = FindPositions(piece, plan.Target.transform.position, plan.Skill.rangeValue,
-            moves * piece.unitAttrCenter.MoveRange, p => CanAttackFrom(p, plan.Target, plan.Skill));
+            moves * piece.unitAttrCenter.MoveRange, p => CanAttackFrom(p, plan.Target, plan.Skill) &&
+                (plan.Support || !NeedsClearShot(piece) || !CoverObstructsFrom(p, plan.Target)));
         if (candidates.Count == 0) return false;
 
-        // 3. 从所需移动次数最少的合法点中随机选择，移动后保留攻击计划。
+        // 同等移动次数中随机选合法落点，并记录移动后的施放计划。
         float moveRange = piece.unitAttrCenter.MoveRange;
         int fewestMoves = candidates.Min(c => Mathf.CeilToInt(c.PathLength / moveRange));
         candidates.RemoveAll(c => Mathf.CeilToInt(c.PathLength / moveRange) != fewestMoves);
@@ -274,8 +296,7 @@ public partial class AIController : PlayerController
 
     private static bool IsOffensiveSkill(SkillPack skill)
     {
-        return skill != null && skill.rangeValue > 0 &&
-            skill.target is SkillTarget.Enemy or SkillTarget.EnemyAll or SkillTarget.All or SkillTarget.FarthestEnemy;
+        return EnemyBehaviorRules.IsOffensive(skill);
     }
 
     private static bool CanAttackFrom(Vector3 position, PieceController target, SkillPack skill)

@@ -17,6 +17,7 @@ public class TutorialManager : MonoBehaviour
 
     public bool CheckAndShowTutorial()
     {
+        if (BattleScene.Ins != null && BattleScene.Ins.BM.SuppressExternalPresentation) return false;
         string levelName = SceneManager.GetActiveScene().name;
 
         // 已看过则跳过
@@ -35,6 +36,7 @@ public class TutorialManager : MonoBehaviour
     
     public void TriggerFirstTutorial(FirstTutorialType type)
     {
+        if (BattleScene.Ins != null && BattleScene.Ins.BM.SuppressExternalPresentation) return;
         
         TutorialData data = database.GetTurorial(type);
         // 已看过则跳过

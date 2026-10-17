@@ -31,11 +31,14 @@ public partial class AIController
                 candidate = new AttackPlan { Target = explosive.Piece, Skill = skill, Action = action,
                     Strategy = strategy, Explosive = explosive };
             }
-            if (strategy.Action == EnemyAIType.SkillUser && piece.availableSkills != null)
+            if ((strategy.Action == EnemyAIType.SkillUser || strategy.Action == EnemyAIType.HealingSupport) && piece.availableSkills != null)
                 foreach (var skill in piece.availableSkills)
                     if (IsOffensiveSkill(skill)) Consider(skill, ActionType.技能);
-            if (strategy.Action != EnemyAIType.Shoot) Consider(piece.pieceData.meleeAtk, ActionType.近战攻击);
-            Consider(piece.pieceData.rangedAtk, ActionType.远程攻击);
+            bool preferRanged = EnemyBehaviorRules.PreferRanged(piece, strategy.Action, distance);
+            if (!EnemyBehaviorRules.IsShooter(strategy.Action) &&
+                (strategy.Action != EnemyAIType.NearestAdaptive || !preferRanged)) Consider(piece.pieceData.meleeAtk, ActionType.近战攻击);
+            if (!EnemyBehaviorRules.IsMeleeOnly(strategy.Action) &&
+                (strategy.Action != EnemyAIType.NearestAdaptive || preferRanged)) Consider(piece.pieceData.rangedAtk, ActionType.远程攻击);
             if (candidate == null) continue;
             best = candidate;
             bestCount = count;

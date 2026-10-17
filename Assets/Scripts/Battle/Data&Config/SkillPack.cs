@@ -23,6 +23,7 @@ public class SkillPack
     }
 
     public string skillName;
+    [LabelText("敌人 AI 技能用途")] public EnemySkillRole enemySkillRole = EnemySkillRole.Auto; // 默认按技能效果和相对近战射程推断用途。
     public string description;// 技能描述
     [LabelText("能量消耗")]public int mpCost;
     //public int cooldown;// 冷却时间

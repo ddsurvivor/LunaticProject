@@ -6,7 +6,10 @@ public enum EnemyTargetStrategy
 {
     [Sirenix.OdinInspector.LabelText("标准仇恨")] StandardThreat,
     [Sirenix.OdinInspector.LabelText("最近目标")] Nearest,
-    [Sirenix.OdinInspector.LabelText("最低当前血量")] LowestHealth
+    [Sirenix.OdinInspector.LabelText("最低当前血量")] LowestHealth,
+    [Sirenix.OdinInspector.LabelText("最高历史伤害来源")] HighestDamage,
+    [Sirenix.OdinInspector.LabelText("最低最大生命值")] LowestMaxHealth,
+    [Sirenix.OdinInspector.LabelText("最低防御力")] LowestDefense
 }
 
 public enum EnemyStrategyConditionType
@@ -65,6 +68,16 @@ public partial class EnemyController
     [Sirenix.OdinInspector.LabelText("AOE 优先命中更多目标")] public bool maximizeAOETargets = true;
     [Tooltip("允许攻击当前能波及玩家的爆炸桶/电浆桶；默认关闭，按敌人单独配置。")]
     [Sirenix.OdinInspector.LabelText("允许攻击爆炸物")] public bool attackExplosives = false;
+    [Header("通用行为模式配置")]
+    [Sirenix.OdinInspector.LabelText("模式1·范围内血量优先级")] public EnemyHealthPriority healthPriority;
+    [Sirenix.OdinInspector.LabelText("模式7·弱者判定")] public EnemyFragilePriority fragilePriority;
+    [Sirenix.OdinInspector.LabelText("防御力比较类型")] public DamageType defenseType = DamageType.Ranged;
+    [Sirenix.OdinInspector.LabelText("优先回复低血量友军")] public bool prioritizeHealing = true;
+    [Sirenix.OdinInspector.LabelText("Boss（不自动残血撤离）")] public bool isBoss;
+    [Sirenix.OdinInspector.LabelText("残血时向场地边缘撤离")] public bool retreatWhenLowHealth = true;
+    [Sirenix.OdinInspector.LabelText("残血撤离阈值"), Range(0f, 1f)] public float retreatHealthRatio = 0.3f; // 严格低于此比例时触发撤离。
+    [Sirenix.OdinInspector.LabelText("回复优先阈值"), Range(0f, 1f)] public float healHealthRatio = 0.5f; // 严格低于此比例时成为回复目标。
+    [Sirenix.OdinInspector.LabelText("模式4·低血量技能优先阈值"), Range(0f, 1f)] public float executeHealthRatio = 0.3f;
 
     /// <summary>只读评估，每次规划都根据当前状态重新选择；条件解除则恢复基础策略。</summary>
     public EnemyStrategy ResolveStrategy()

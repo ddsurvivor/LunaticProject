@@ -47,6 +47,7 @@ public class UIManager : SerializedMonoBehaviour
 
     [SerializeField] private SpeedTimelineUI speedTimelinePrefab;
     private SpeedTimelineUI speedTimeline;
+    /// <summary>为当前战斗创建速度条；已有实例时先销毁，避免重复显示。</summary>
     public void EnableSpeedTimeline(BattleManager battle)
     {
         if (endTurnButton != null) endTurnButton.gameObject.SetActive(false);

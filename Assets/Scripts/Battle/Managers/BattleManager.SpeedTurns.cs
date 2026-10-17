@@ -1,25 +1,31 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public partial class BattleManager
 {
-    private readonly SpeedTurnQueue<PieceController> speedQueue = new();
-    private Coroutine speedRoutine;
-    private bool finishPieceTurn;
+    private readonly SpeedTurnQueue<PieceController> speedQueue = new(); // 保存普通行动条及满条顺序。
+    private Coroutine speedRoutine; // 战斗期间唯一的速度回合调度协程。
+    private bool finishPieceTurn; // 请求结束当前普通棋子的剩余行动。
+    /// <summary>当前获得控制权的棋子；聚能期间临时指向正在额外行动的角色。</summary>
     public PieceController ActivePiece { get; private set; }
+    /// <summary>速度回合调度是否已启动，供输入和速度条 UI 判断生命周期。</summary>
     public bool SpeedTurnsActive { get; private set; }
+    /// <summary>返回速度条显示进度；当前行动者固定显示 100，其余读取队列进度。</summary>
     public float ActionProgress(PieceController piece) => piece == ActivePiece ? 100 : (float)speedQueue.Progress(piece);
+    /// <summary>统一校验玩家能否操作该棋子，包含回合归属、AP、控制状态及动作等待限制。</summary>
     public bool CanControlPiece(PieceController piece) => SpeedTurnsActive && inBattle &&
-        PlayerController.isInTurn && piece != null && piece == ActivePiece &&
+        !BurstInputPending && PlayerController.isInTurn && piece != null && piece == ActivePiece &&
         IsSpeedParticipant(piece) && !piece.cantControl && !piece.isIdle && piece.unitAttrCenter.CurMovePoint > 0 &&
         !HasCombatPresentation && !moveManager.IsMoving;
 
+    /// <summary>判断棋子能否参与速度调度；排除死亡、未激活及尚未唤醒的敌人。</summary>
     public static bool IsSpeedParticipant(PieceController piece) => piece != null &&
         piece.gameObject.activeInHierarchy && piece.unitAttrCenter != null && !piece.isDead &&
         (!(piece is EnemyController enemy) || enemy.isActived);
 
+    /// <summary>收集当前有效参战者；按双方交错顺序注册，作为同刻满条时的稳定排序依据。</summary>
     public List<PieceController> SpeedParticipants()
     {
         // 同速时交错注册双方；后续同刻到达按稳定顺序处理。
@@ -39,11 +45,13 @@ public partial class BattleManager
         speedQueue.Clear();
         SpeedTurnsActive = true;
         BattleScene.Ins.UM.EnableSpeedTimeline(this);
+        PlayerController.RefreshBurstUI();
         speedRoutine = StartCoroutine(SpeedTurnRoutine());
     }
 
     private void StopSpeedTurns()
     {
+        ResetBurstInterruption();
         SpeedTurnsActive = false;
         if (speedRoutine != null) StopCoroutine(speedRoutine);
         speedRoutine = null;
@@ -60,6 +68,7 @@ public partial class BattleManager
             if (HasCombatPresentation || moveManager.IsMoving) { yield return null; continue; }
             AIController.RefreshSpeedTurnWorld();
             speedQueue.Sync(SpeedParticipants());
+            // 优先处理已满条的棋子，队列无就绪单位时才推进速度时钟。
             var next = speedQueue.TakeReady();
             if (next == null)
             {
@@ -81,8 +90,10 @@ public partial class BattleManager
 
             ActivePiece = next;
             finishPieceTurn = false;
+            burstUsedThisTurn = false;
             orderManager?.ClearForPiece(next);
             bool manual = PlayerController.pieces.Contains(next) && !(next is EnemyController);
+            // 每个普通棋子回合只触发自身开始事件和 Buff 结算。
             next.TurnStart();
             if (!inBattle || !SpeedTurnsActive) yield break;
             buffManager.ProcessBuffs(next.unitAttrCenter);
@@ -108,7 +119,12 @@ public partial class BattleManager
             yield return null;
             while (inBattle && IsSpeedParticipant(next) && !finishPieceTurn &&
                    !next.isIdle && !next.cantControl && next.unitAttrCenter.CurMovePoint > 0)
-                yield return null;
+            {
+                if (burstRequested) yield return BurstInterruption(next);
+                else yield return null;
+            }
+            // 最后一次行动中提出的请求也必须在结束当前棋子前被处理。
+            if (burstRequested && inBattle) yield return BurstInterruption(next);
             PlayerController.isInTurn = false;
             AIController.isInTurn = false;
             while (inBattle && (HasCombatPresentation || moveManager.IsMoving)) yield return null;
@@ -120,6 +136,8 @@ public partial class BattleManager
             if (next != null) next.TurnEnd();
             if (manual) PlayerController.EndPieceTurn();
             else if (next is EnemyController) AIController.EndPieceTurn();
+            // 聚能额外行动及刚被插入聚能的普通回合均不抵扣新冷却。
+            if (!burstUsedThisTurn) PlayerController.CompleteNormalTurnForBurst();
             ActivePiece = null;
             PlayerCheckWin();
             yield return null;

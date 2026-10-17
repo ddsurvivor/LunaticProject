@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -28,6 +28,17 @@ public partial class ClickManager : MonoBehaviour
 
     private void Update()
     {
+        if (BattleScene.Ins.BM.HasExternalPlayerControl) return;
+        // 聚能选人优先接管世界点击，避免同时触发普通选择或移动。
+        if (BattleScene.Ins.BM.IsChoosingBurst)
+        {
+            if (Input.GetMouseButtonDown(1)) BattleScene.Ins.BM.CancelBurstSelection();
+            if (Input.GetMouseButtonDown(0) && (UnityEngine.EventSystems.EventSystem.current == null ||
+                !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()))
+                BattleScene.Ins.BM.ToggleBurstActor(FindPieceUnderPointer());
+            return;
+        }
+        if (BattleScene.Ins.BM.BurstInputPending) return;
         if (BattleScene.Ins.BM.HasCombatPresentation) return;
         if (!BattleScene.Ins.BM.PlayerController.isInTurn) return;
 
@@ -166,6 +177,7 @@ public partial class ClickManager : MonoBehaviour
         return nearest;
     }
 
+    /// <summary>交棒或进入聚能选人前清除选择、移动预览及相关操作 UI。</summary>
     public void ClearTurnSelection()
     {
         CancelMovementPreview();
@@ -178,6 +190,7 @@ public partial class ClickManager : MonoBehaviour
         BattleScene.Ins.UM.pieceInfoPanel.StopMpIconsBlink();
     }
 
+    /// <summary>清除旧选择后选中可操作的当前行动者；不满足控制条件时只清理旧状态。</summary>
     public void SelectActivePiece(PieceController piece)
     {
         ClearTurnSelection();
