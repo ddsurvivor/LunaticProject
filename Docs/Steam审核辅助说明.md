@@ -48,6 +48,6 @@ Steam 官方审核流程：https://partner.steamgames.com/doc/store/review_proce
 
 ## 移除和验证边界
 
-删除 `Assets/ReviewSupport` 与 `Assets/StreamingAssets/ReviewSaves` 及各自 .meta 即移除全部游戏内功能，无核心脚本依赖。测试工具位于 `Tests/ReviewSupport`，也可以删除。仅取消 Development Build 会排除运行代码，但模板仍属于 StreamingAssets，发行源目录中应按需要排除它们。用户目录内已经安装的文件不会自动删除。
+删除 `Assets/ReviewSupport` 与 `Assets/StreamingAssets/ReviewSaves` 及各自 .meta 即移除全部游戏内功能，无核心脚本依赖。测试工具位于 `tmp/Tests/ReviewSupport`，也可以删除。仅取消 Development Build 会排除运行代码，但模板仍属于 StreamingAssets，发行源目录中应按需要排除它们。用户目录内已经安装的文件不会自动删除。
 
 自动验证检查临时目录内首次安装、旧档保护、重复启动、显式恢复备份、设置保留、坏模板拒绝及路径限制；同时编译开发/发行条件和 Editor 构建校验代码，并静态核对七个模板的地图与前置节点。尚未代替真实 Player 实测，也未上传 Steam 或重提工单。

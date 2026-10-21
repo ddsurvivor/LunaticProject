@@ -110,12 +110,12 @@ public class OrderManager : MonoBehaviour
             if (state.profile.type == OrderType.Melee)
             {
                 state.guard.StartNormalAttack();
-                ((EnemyController)state.guard).CastAttackOnTarget(target);
+                ((EnemyController)state.guard).CastAttackOnTarget(target, isMemeReaction: true);
             }
             else if (state.profile.type == OrderType.Ranged)
             {
                 state.guard.StartNormalAttack(true);
-                ((EnemyController)state.guard).CastAttackOnTarget(target);
+                ((EnemyController)state.guard).CastAttackOnTarget(target, isMemeReaction: true);
             }
         }
     }

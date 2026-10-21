@@ -40,6 +40,10 @@ public partial class PieceController : MonoBehaviour
 
     public Player playerData;
 
+    private MemeUnitState memeState;
+    /// <summary>当前战斗的模因暴露与抗性；棋子重新初始化时清除。</summary>
+    public MemeUnitState MemeState => memeState ??= new MemeUnitState();
+
     public int pieceID; // 棋子ID
 
     [HideInInspector] public PlayerController player;
@@ -145,6 +149,7 @@ public partial class PieceController : MonoBehaviour
 
     public void Init(PlayerController player, PieceData pieceData = null)
     {
+        MemeState.Reset();
         CancelCombatAction();
         StopHitShake();
         pieceDisplay?.StopAnimation();
@@ -505,7 +510,7 @@ public partial class PieceController : MonoBehaviour
         if (range) unitAttrCenter.CostAmmo();
         _isAttacking = false;
         BeginCombatAction(skill, targets, target.transform.position,
-            action, range ? PieceDisplayState.Shoot : PieceDisplayState.Attack, !isOrder);
+            action, range ? PieceDisplayState.Shoot : PieceDisplayState.Attack, !isOrder, isMemeReaction: true);
     }
 
     private void CastAttack()
@@ -529,32 +534,43 @@ public partial class PieceController : MonoBehaviour
     }
 
     /// <summary>
-    /// 统一玩家、AI、夹击：动画出手帧 -> 弹道到达 -> 伤害/受击 -> 动画结束。
+    /// 统一玩家、AI、夹击：检定展示结束 -> 攻击动画出手帧 -> 弹道到达 -> 伤害/受击。
     /// 参数与目标列表在开始时快照，不能被下一次选技能或关闭范围 UI 改写。
     /// </summary>
     protected void BeginCombatAction(SkillPack skill, List<PieceController> targets, Vector3 position,
         ActionType action, PieceDisplayState displayState, bool isFlank = false,
-        CheckResult check = CheckResult.None, bool waitForRecognition = false)
+        CheckResult check = CheckResult.None, bool waitForRecognition = false, bool isMemeReaction = false)
     {
         if (IsPerformingAction || isDead || !isActiveAndEnabled) return;
         IsPerformingAction = true;
         combatVersion++;
         BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
         combatRoutine = StartCoroutine(CombatActionRoutine(skill, new List<PieceController>(targets),
-            position, action, displayState, isFlank, check, waitForRecognition));
+            position, action, displayState, isFlank, check, waitForRecognition, isMemeReaction));
     }
 
     private IEnumerator CombatActionRoutine(SkillPack skill, List<PieceController> targets, Vector3 position,
-        ActionType action, PieceDisplayState displayState, bool isFlank, CheckResult check, bool waitForRecognition)
+        ActionType action, PieceDisplayState displayState, bool isFlank, CheckResult check, bool waitForRecognition, bool isMemeReaction)
     {
         int version = combatVersion;
+        var memeAction = BattleScene.Ins.BM.memeService.BeginAction(this, skill, isFlank || isMemeReaction);
         try
         {
             // 让协程句柄先归属本动作；等待检定窗口关闭，包含结果展示阶段。
             yield return null;
-            var dicePanel = BattleScene.Ins.BM.diceCheckManager.checkDicePanel;
-            while (waitForRecognition && dicePanel != null && dicePanel.gameObject.activeInHierarchy) yield return null;
-            if (isDead || !isActiveAndEnabled) yield break;
+            var diceManager = BattleScene.Ins.BM.diceCheckManager;
+            // 普攻和敌方入口也可能使用识别技能；已计算的检定结果不得重复掷骰。
+            if (skill.isRecognitionCheck && check == CheckResult.None && targets.Count > 0)
+            {
+                check = diceManager.ModeRecognitionCheck(this, targets[0]);
+                waitForRecognition = true;
+            }
+            while (waitForRecognition && diceManager.IsPresenting) yield return null;
+            if (isDead || !isActiveAndEnabled || version != combatVersion) yield break;
+            // 确认攻击时准备并保存被动倍率；进攻分析的检定也必须在攻击动画前展示完毕。
+            float passiveMultiplier = BattleScene.Ins.BM.PrepareAttackMultiplier(this, targets, skill, position);
+            while (diceManager.IsPresenting) yield return null;
+            if (isDead || !isActiveAndEnabled || version != combatVersion) yield break;
             if (!isPlayerPiece)
             {
                 // 预览属于当前动作，AI/回合调度在这 0.8 秒内保持等待。
@@ -575,7 +591,8 @@ public partial class PieceController : MonoBehaviour
                 impactDone = true;
                 if (this == null || isDead || !isActiveAndEnabled || BattleScene.Ins == null) return;
                 ShowSkillImpact(skill, position);
-                BattleScene.Ins.BM.PieceSkill(this, targets, skill, position, action, check, isFlank);
+                BattleScene.Ins.BM.PieceSkill(this, targets, skill, position, action, check, isFlank, memeAction,
+                    preparedPassiveMultiplier: passiveMultiplier);
                 if (this is EnemyController enemy)
                     enemy.enemyCanvas?.hpBarUI.UpdateMpIcons(unitAttrCenter.CurMovePoint);
             };
@@ -599,7 +616,8 @@ public partial class PieceController : MonoBehaviour
                 yield return null;
             }
             // 不靠固定秒数猜测受击何时结束；聚能保持最后一帧不算仍在播放。
-            while (HasPendingReaction(targets) || (pieceDisplay != null && pieceDisplay.IsPlayingOneShot))
+            while (BattleScene.Ins.BM.HasPendingRecognitionSettlement || HasPendingReaction(targets) ||
+                (pieceDisplay != null && pieceDisplay.IsPlayingOneShot))
             {
                 if (isDead) yield break;
                 yield return null;

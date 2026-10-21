@@ -101,7 +101,11 @@ public partial class EnemyController : PieceController
         rangeUI?.CloseRange();
     }
 
-    public void CastAttackOnTarget(PieceController targetPc)
+    /// <summary>结算已选定的普通攻击，保留原单参数入口供场景事件和 AI 调用。</summary>
+    public void CastAttackOnTarget(PieceController targetPc) => CastAttackOnTarget(targetPc, false);
+
+    /// <summary>夹击和警戒须标记 isMemeReaction，遵守词条反应限制，不改变攻击的伤害倍率。</summary>
+    public void CastAttackOnTarget(PieceController targetPc, bool isMemeReaction)
     {
         if (IsPerformingAction || isDead || !TryGetAttackPosition(targetPc, _curAttackPack, out var position)) return;
         var skill = _curAttackPack;
@@ -112,7 +116,7 @@ public partial class EnemyController : PieceController
         if (ranged && unitAttrCenter.AmmoCount <= 0) return;
         if (ranged) unitAttrCenter.CostAmmo();
         BeginCombatAction(skill, targets, position, action,
-            ranged ? PieceDisplayState.Shoot : PieceDisplayState.Attack);
+            ranged ? PieceDisplayState.Shoot : PieceDisplayState.Attack, isMemeReaction: isMemeReaction);
         rangeUI?.CloseRange();
     }
 

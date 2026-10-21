@@ -30,7 +30,7 @@ public sealed class BattleObstacle : BattlePlaceable
         obstacle.carving = true;
         obstacle.carveOnlyStationary = false;
         SetSprite("Visual", sprite, Vector3.up * size.y * 0.5f,
-            Quaternion.Euler(spriteTilt, 0, 0), new Vector2(size.x, size.y + size.z), tint);
+            SpriteRotation(spriteTilt), SpriteSize(sprite, size.x, size.y), tint);
 
         var cover = GetComponent<CaverSlot>();
         cover.evadeChance = providesCover ? evadeChance : 0;

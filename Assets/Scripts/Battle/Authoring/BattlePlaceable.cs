@@ -16,6 +16,7 @@ public abstract class BattlePlaceable : MonoBehaviour
         if (refreshPending || transform.localToWorldMatrix != lastMatrix) Refresh();
     }
 
+    /// <summary>按参数同步显示、碰撞与导航；图片使用固定相机朝向，不随根节点旋转。</summary>
     [Button("检查并刷新", ButtonSizes.Medium)]
     public void Refresh()
     {
@@ -62,7 +63,7 @@ public abstract class BattlePlaceable : MonoBehaviour
         if (renderer == null) renderer = child.gameObject.AddComponent<SpriteRenderer>();
         renderer.sprite = sprite;
         renderer.color = tint;
-        renderer.sortingLayerName = "Default";
+        //renderer.sortingLayerName = "BGUI";
         child.localPosition = position;
         child.localRotation = rotation;
         renderer.drawMode = SpriteDrawMode.Simple;
@@ -72,6 +73,15 @@ public abstract class BattlePlaceable : MonoBehaviour
         if (sprite != null)
             child.localPosition -= rotation * Vector3.Scale(sprite.bounds.center, child.localScale);
         return renderer;
+    }
+
+    protected Quaternion SpriteRotation(float tilt = 45f) =>
+        Quaternion.Inverse(transform.rotation) * Quaternion.Euler(tilt, -45f, 0);
+
+    protected Vector2 SpriteSize(Sprite sprite, float width, float minimumHeight)
+    {
+        float aspect = sprite != null ? sprite.bounds.size.y / Mathf.Max(0.001f, sprite.bounds.size.x) : 1f;
+        return new Vector2(width, Mathf.Max(minimumHeight, width * aspect));
     }
 
     protected static float Dimension(float value, float minimum = 0.1f) =>

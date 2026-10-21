@@ -42,8 +42,11 @@ public class PieceDisplay : SerializedMonoBehaviour
     }
 
     private const float frameDuration = 1f / 6f;
+    private const float dodgeDuration = 1f; // 闪避统一播放一秒，不随素材帧数变化。
     private Playback playback;
     private PieceDisplayState state;
+    private Vector3 dodgeOrigin; // 闪避位移前的位置，结束或中断时必须恢复。
+    private bool dodgeOffset;
     private bool pendingReaction;
     private PieceDisplayState pendingReactionState;
     private bool pendingReactionReturns;
@@ -88,7 +91,8 @@ public class PieceDisplay : SerializedMonoBehaviour
             case PieceDisplayState.Move: return moveSprite;
             case PieceDisplayState.Attack: return meleeSprites;
             case PieceDisplayState.Shoot: return rangeSprites;
-            case PieceDisplayState.Dodge: return dodgeSprite;
+            case PieceDisplayState.Dodge:
+                return dodgeSprite != null && dodgeSprite.Any(sprite => sprite != null) ? dodgeSprite : idleSprite;
             case PieceDisplayState.Hit: return hitSprite;
             case PieceDisplayState.Death: return deathSprites;
             case PieceDisplayState.Skill:
@@ -105,10 +109,17 @@ public class PieceDisplay : SerializedMonoBehaviour
         state = next;
         playback = new Playback
         {
-            Frames = frames, FrameDuration = next == PieceDisplayState.Move ? frameDuration / 2f : frameDuration,
+            Frames = frames, FrameDuration = next == PieceDisplayState.Dodge
+                ? dodgeDuration / Math.Max(1, frames?.Count ?? 0)
+                : next == PieceDisplayState.Move ? frameDuration / 2f : frameDuration,
             Loop = next == PieceDisplayState.Idle || next == PieceDisplayState.Move,
             ReturnToIdle = back, Finish = finish, Release = release, Duration = duration
         };
+        if (next == PieceDisplayState.Dodge && pieceSpriteRenderer != null)
+        {
+            dodgeOrigin = pieceSpriteRenderer.transform.localPosition;
+            dodgeOffset = true;
+        }
         if (pieceSpriteRenderer != null && frames != null && frames.Count > 0)
             pieceSpriteRenderer.sprite = frames[0];
         return playback;
@@ -121,6 +132,14 @@ public class PieceDisplay : SerializedMonoBehaviour
         current.Elapsed += Time.deltaTime;
         int count = pieceSpriteRenderer != null && current.Frames != null ? current.Frames.Count : 0;
         int frame = Mathf.FloorToInt(current.Elapsed / current.FrameDuration);
+        if (dodgeOffset)
+        {
+            // 单张或缺失闪避素材时也用横移表达闪身，且不改变棋子的碰撞与导航位置。
+            float progress = Math.Min(1f, current.Elapsed / (current.FrameDuration * Math.Max(1, count)));
+            float direction = pieceSpriteRenderer.transform.localScale.x < 0 ? 1f : -1f;
+            pieceSpriteRenderer.transform.localPosition = dodgeOrigin + Vector3.right *
+                ((float)Math.Sin(progress * Math.PI) * 0.3f * direction);
+        }
         if (count > 0)
             pieceSpriteRenderer.sprite = current.Frames[current.Loop ? frame % count : Mathf.Min(frame, count - 1)];
 
@@ -135,6 +154,7 @@ public class PieceDisplay : SerializedMonoBehaviour
             (current.Loop && current.Duration > 0f && current.Elapsed >= current.Duration);
         if (!finished) return;
         current.IsDone = true;
+        RestoreDodgePosition();
         playback = null;
         bool reaction = pendingReaction;
         bool reactionReturns = pendingReactionReturns;
@@ -161,6 +181,7 @@ public class PieceDisplay : SerializedMonoBehaviour
 
     public void StopAnimation()
     {
+        RestoreDodgePosition();
         if (playback != null && !playback.IsDone)
         {
             playback.IsCancelled = true;
@@ -168,6 +189,13 @@ public class PieceDisplay : SerializedMonoBehaviour
         }
         playback = null;
         pendingReaction = false;
+    }
+
+    private void RestoreDodgePosition()
+    {
+        if (dodgeOffset && pieceSpriteRenderer != null)
+            pieceSpriteRenderer.transform.localPosition = dodgeOrigin;
+        dodgeOffset = false;
     }
 
     private void OnDisable() => StopAnimation();

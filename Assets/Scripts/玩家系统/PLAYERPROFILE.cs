@@ -20,6 +20,8 @@ public class PLAYERPROFILE
     /// </summary>
     public Player[] player = new Player[20];
 
+    public MemeProgress memeProgress = new(); // 队伍永久解锁，不随单场战斗清除。
+
     [Header("进度存档")] public int dateYear = 1567;
     public int dateMonth = 1;
     public int dateDay = 45;

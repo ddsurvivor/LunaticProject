@@ -32,6 +32,11 @@ public partial class BattleManager : MonoBehaviour
     private DamageManager _damageManager;
     public DamageManager damageManager => _damageManager ??= new DamageManager(this);
 
+    public MemeCatalogSO memeCatalog; // 留空时读取 DataManager 的全局模因配置。
+    private MemeService _memeService;
+    /// <summary>本场模因装配与触发入口，不需要额外挂载组件。</summary>
+    public MemeService memeService => _memeService ??= new MemeService(this);
+
     public PieceDataListSO pieceDataListSO;
 
     //public List<LadderArea> ladderAreas = new();
@@ -98,7 +103,7 @@ public partial class BattleManager : MonoBehaviour
     // 只在真实播放/飞行期间阻止下一动作；不以序列帧数量估算锁定秒数。
     public bool CanInspectEnemyTargets => inBattle && startupPhase == StartupPhase.Active && PlayerController.isInTurn;
 
-    public bool HasCombatPresentation => _isFlankAttacking ||
+    public bool HasCombatPresentation => _isFlankAttacking || HasPendingRecognitionSettlement ||
         HasPresentation(PlayerController.pieces) || HasPresentation(AIController.pieces) || HasPresentation(summonPieces);
 
     private static bool HasPresentation(IEnumerable<PieceController> pieces)
@@ -118,17 +123,37 @@ public partial class BattleManager : MonoBehaviour
     /// <summary>兼容旧玩家回合入口并启动速度调度；保留 firstTurn 参数供原调用使用。</summary>
     public void PlayerStart(bool firstTurn = true) => StartSpeedTurns();
 
+    /// <summary>在攻击动画开始前准备本次攻击的被动倍率；所有目标与伤害段共享，命中时必须复用该值。</summary>
+    public float PrepareAttackMultiplier(PieceController attacker, List<PieceController> targets, SkillPack skill, Vector3 targetPos)
+    {
+        var validTargets = SkillTargeting.Filter(attacker, targets, skill, targetPos);
+        var hostileTarget = validTargets.FirstOrDefault(t => !t.isDead && t.isPlayerPiece != attacker.isPlayerPiece);
+        return skill.attackPacks.Count > 0 && hostileTarget != null
+            ? characterSkillManager.EvaluateDamageMultiplier(attacker.gameObject, hostileTarget.gameObject) : 1f;
+    }
+
+    /// <summary>在正常命中时统一结算技能，复用动画前已准备的被动倍率；无动画的旧入口仍等待检定结束。</summary>
     public void PieceSkill(PieceController attacker, List<PieceController> targets
         , SkillPack skillPack, Vector3 targetPos = default, ActionType actionType = 0
-        , CheckResult checkResult = CheckResult.None, bool isFlank = false)
+        , CheckResult checkResult = CheckResult.None, bool isFlank = false, MemeActionContext memeActionContext = null,
+        float? preparedPassiveMultiplier = null)
     {
         if (attacker == null || skillPack == null || (attacker.isDead && !skillPack.AllowDeadCaster) || targets == null) return;
         List<List<DamageInfo>> damageInfoList = new();
+        var memeAction = memeActionContext ?? memeService.BeginAction(attacker, skillPack, isFlank);
         var validTargets = SkillTargeting.Filter(attacker, targets, skillPack, targetPos);
         // 每次施法只消费一次攻击被动，全部目标与伤害段共享本次倍率。
         var hostileTarget = validTargets.FirstOrDefault(t => !t.isDead && t.isPlayerPiece != attacker.isPlayerPiece);
-        float passiveMultiplier = skillPack.attackPacks.Count > 0 && hostileTarget != null
-            ? characterSkillManager.EvaluateDamageMultiplier(attacker.gameObject, hostileTarget.gameObject) : 1f;
+        float passiveMultiplier = preparedPassiveMultiplier ?? PrepareAttackMultiplier(attacker, validTargets, skillPack, targetPos);
+        if (skillPack.isRecognitionCheck && checkResult == CheckResult.None && hostileTarget != null)
+            checkResult = diceCheckManager.ModeRecognitionCheck(attacker, hostileTarget);
+        // 攻击被动也能弹出检定；先保留本次倍率和结果，展示结束后再进入扣血流程。
+        if (diceCheckManager != null && diceCheckManager.IsPresenting)
+        {
+            StartCoroutine(WaitForRecognitionSettlement(attacker, new List<PieceController>(validTargets), skillPack,
+                targetPos, actionType, checkResult, isFlank, memeAction, passiveMultiplier));
+            return;
+        }
         bool isCrit = false;
         var hitTargets = new List<PieceController>();
         foreach (var target in validTargets)
@@ -142,6 +167,9 @@ public partial class BattleManager : MonoBehaviour
 
             // 2. 无效目标、未命中或屏障阻挡时，只跳过当前目标的附加效果。
             if (!settlement.CanApplyEffects) continue;
+
+            // 每目标只在整次伤害结算后触发一次，未命中、屏障和致死目标不会获得新状态。
+            memeService.ResolveTarget(attacker, target, skillPack, checkResult, memeAction);
 
             // 处理buff
             foreach (var buffPack in skillPack.buffPacks)
@@ -958,6 +986,7 @@ public partial class BattleManager : MonoBehaviour
 
     private void OnDisable()
     {
+        CancelRecognitionSettlements();
         CancelBattleStartup();
         startupInitialized = false;
         startupRequested = false;
@@ -979,7 +1008,7 @@ public partial class BattleManager : MonoBehaviour
             else
             {
                 partner.StartNormalAttack();
-                ((EnemyController)partner).CastAttackOnTarget(target);
+                ((EnemyController)partner).CastAttackOnTarget(target, isMemeReaction: true);
             }
             while (partner != null && partner.IsPerformingAction) yield return null;
             tutorialManager.TriggerFirstTutorial(FirstTutorialType.FirstStrick);

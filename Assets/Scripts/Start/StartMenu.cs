@@ -61,7 +61,7 @@ public class StartMenu : MonoBehaviour
     [Button("清除通关标记")]
     private void ClearMark()
     {
-        PlayerPrefs.DeleteKey("LunaticProject.GameFinished");
-        PlayerPrefs.Save();
+        LocalGameProgress.ClearGameFinished();
+        RefreshCG();
     }
 }

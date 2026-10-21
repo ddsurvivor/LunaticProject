@@ -32,6 +32,7 @@ public class ComponentData
     [ShowIf("@this.effectType == ComponentEffect.AttrBonus")][LabelText("属性加成值")]
     public int attrValue;
     public List<ComponentAttributeBonus> battleBonuses = new();
+    [LabelText("固有模因编号")] public List<int> memeIds = new();
     [Min(0)] public int extraSkillMana;
     [ShowIf("@this.effectType == ComponentEffect.PassiveEffect")][LabelText("被动技能id")]
     public PassiveType passiveType; // 被动效果ID
@@ -192,7 +193,8 @@ public static class ComponentEquipment
                     var targets = battle.orderManager.IsInsideSector(attacker.transform.position,
                         hits[0].transform.position - attacker.transform.position, explosion.rangeValue, explosion.rangeAgle);
                     targets.RemoveAll(t => t == null || t.isPlayerPiece == attacker.isPlayerPiece);
-                    battle.PieceSkill(attacker, targets, explosion, hits[0].transform.position);
+                    battle.PieceSkill(attacker, targets, explosion, hits[0].transform.position,
+                        memeActionContext: battle.memeService.BeginAction(attacker, explosion, isReaction: true));
                 }
             }
         }

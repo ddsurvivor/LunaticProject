@@ -4,6 +4,9 @@
     public class DiceCheckManager: MonoBehaviour
     {
         public CheckDicePanel checkDicePanel;
+        /// <summary>检定仍在滚动或展示结果时为 true，伤害结算必须等待结束。</summary>
+        public bool IsPresenting => checkDicePanel != null &&
+            (checkDicePanel.IsRolling || checkDicePanel.gameObject.activeInHierarchy);
         /// <summary>
         /// 模式识别对抗；可仅关闭展示，掷骰、结果和成功事件保持不变。
         /// </summary>

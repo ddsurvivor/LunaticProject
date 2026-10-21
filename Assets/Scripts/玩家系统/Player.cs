@@ -34,6 +34,7 @@ public class Player
     // 存储 ID：3个普通槽位，2个武器槽位
     public int[] normalSlots = new int[3]; 
     public int[] weaponSlots = new int[2];
+    public int[] memeSlots = new int[MemeEquipment.SlotCount]; // 仅保存两个自由装配词条的编号。
 
     public int SkillPoints
     {

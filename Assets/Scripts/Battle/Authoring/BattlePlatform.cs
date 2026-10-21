@@ -27,16 +27,20 @@ public sealed class BattlePlatform : BattlePlaceable
         box.isTrigger = false;
         box.center = Vector3.up * (height * 0.5f);
         box.size = new Vector3(size.x, height, size.y);
-        SetSprite("Top", topSprite, Vector3.up * (height + 0.01f), Quaternion.Euler(90, 0, 0), size, Color.white);
-        var side = sideSprite != null ? sideSprite : topSprite;
-        SetSprite("Front", side, new Vector3(0, height * 0.5f, -size.y * 0.5f - 0.01f),
-            Quaternion.identity, new Vector2(size.x, height), sideTint);
-        SetSprite("Back", side, new Vector3(0, height * 0.5f, size.y * 0.5f + 0.01f),
-            Quaternion.Euler(0, 180, 0), new Vector2(size.x, height), sideTint);
-        SetSprite("Left", side, new Vector3(-size.x * 0.5f - 0.01f, height * 0.5f, 0),
-            Quaternion.Euler(0, 90, 0), new Vector2(size.y, height), sideTint);
-        SetSprite("Right", side, new Vector3(size.x * 0.5f + 0.01f, height * 0.5f, 0),
-            Quaternion.Euler(0, -90, 0), new Vector2(size.y, height), sideTint);
+        // 美术已经包含斜视透视；和 Barrel 一样正对固定相机，不能再铺到盒子的五个面上。
+        float imageWidth = (size.x + size.y) * 0.7071068f;
+        SetSprite("Top", topSprite, Vector3.up * (height + 0.01f), SpriteRotation(),
+            SpriteSize(topSprite, imageWidth, 0.1f), Color.white);
+        bool hasSide = sideSprite != null && sideSprite != topSprite;
+        var front = SetSprite("Front", sideSprite, Vector3.up * (height * 0.5f), SpriteRotation(),
+            SpriteSize(sideSprite, imageWidth, height), sideTint);
+        front.gameObject.SetActive(hasSide);
+        // 兼容旧预制体，关闭曾经把同一张地板图重复贴出的侧面。
+        foreach (string childName in new[] { "Back", "Left", "Right" })
+        {
+            var oldSide = transform.Find(childName);
+            if (oldSide != null) oldSide.gameObject.SetActive(false);
+        }
 
         // 只切掉实心平台下方的旧地面导航，顶部留出缝隙，不切掉自己的可走面。
         var blocker = Child("BaseNavigationBlocker");

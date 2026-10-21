@@ -10,24 +10,9 @@ public class SkillPackListSO : SerializedScriptableObject
     [OdinSerialize]
     public List<SkillPack> skillPacks = new();
 
+    /// <summary>按名称查询正式技能配置，未配置时返回 null。</summary>
     public SkillPack GetSkillPack(string skillName)
     {
-        return skillPacks.Find(sp => sp.skillName == skillName) ?? BattleTestSkillFactory.Create(skillName);
-    }
-
-    [Button("加入/更新 Buff 测试技能")]
-    public void InstallBuffTestSkills()
-    {
-        foreach (var name in BattleTestSkillFactory.SkillNames)
-        {
-            var testSkill = BattleTestSkillFactory.Create(name);
-            int index = skillPacks.FindIndex(sp => sp.skillName == name);
-            if (index < 0) skillPacks.Add(testSkill);
-            else skillPacks[index] = testSkill;
-        }
-#if UNITY_EDITOR
-        UnityEditor.EditorUtility.SetDirty(this);
-        UnityEditor.AssetDatabase.SaveAssets();
-#endif
+        return skillPacks.Find(sp => sp.skillName == skillName);
     }
 }

@@ -88,8 +88,6 @@ public class TutorialUI : MonoBehaviour
 
     public void CompleteTutorial()
     {
-        //PlayerPrefs.SetInt("TutorialSeen_" + _currentLevelName, 1);
-        //PlayerPrefs.Save();
         GM.Ins.PLAYERPROFILE.seenTutorials.Add(_currentLevelName);
         bool battleStart = _isBattleStart;
         _isBattleStart = false;

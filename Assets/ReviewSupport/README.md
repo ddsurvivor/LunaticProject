@@ -14,4 +14,4 @@ Ctrl+Alt+2/3/4：第二、三、四章开头。Ctrl+Alt+5/6/7：死亡结局、�
 
 全部移除：删除 `Assets/ReviewSupport` 和 `Assets/StreamingAssets/ReviewSaves`（连同对应 .meta），不需要修改核心代码。仅取消 Development Build 会去掉运行功能，但 StreamingAssets 中的模板和说明仍会随包，正式发行若不想携带它们，应删除/从发行源目录排除 ReviewSaves。已安装到用户目录的存档不会自动删除。
 
-验证：`Tests/ReviewSupport/Run.ps1` 检查实际安装逻辑的临时目录行为；`Tests/ReviewSupport/validate_assets.py` 检查七个入口、前置节点和模板对应的场景/剧本。另需在 Windows Development Player 实测键盘、提示层、转场和剧情首句。独立编译和文件检查不能替代 Player 测试。
+验证：`tmp/Tests/ReviewSupport/Run.ps1` 检查实际安装逻辑的临时目录行为；`tmp/Tests/ReviewSupport/validate_assets.py` 检查七个入口、前置节点和模板对应的场景/剧本。另需在 Windows Development Player 实测键盘、提示层、转场和剧情首句。独立编译和文件检查不能替代 Player 测试。

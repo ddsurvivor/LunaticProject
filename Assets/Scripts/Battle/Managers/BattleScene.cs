@@ -18,10 +18,6 @@ using System;
         {
             BM.Init();
             UM.Init();
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (GetComponent<BattleTestTools>() == null)
-                gameObject.AddComponent<BattleTestTools>();
-#endif
         }
         
         

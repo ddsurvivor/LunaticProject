@@ -32,12 +32,8 @@ PortraitTemplate 默认隐藏，只作为实例模板，不会在实际战斗中
 
 ## 重建与验证
 
-使用项目对应 Unity 2021.3 编辑器，关闭该项目的交互式编辑器后运行：
+重建与校验脚本已迁入本地临时目录 `tmp/Assets/Scripts/Editor/SpeedTimelinePrefabBuilder.cs`，不再随仓库提交，也不会默认加载到 Unity。需要重建时按临时测试方式加载并执行，完成后清理入口；测试报告存放在 `tmp/Results/`。
 
-```powershell
-& 'D:/Applications/Unity/Unity 2021.3.23f1/Editor/Unity.exe' -batchmode -projectPath D:/GitHub/LunaticProject -executeMethod SpeedTimelinePrefabBuilder.BuildAndValidate -logFile D:/GitHub/LunaticProject/Artifacts/UI/build.log
-```
-
-该命令会重新生成上述专用输出目录中的 PNG 和预制体，并输出引用、切片、射线遮挡校验及组件预览；手动调整后的预制体请不要直接重建覆盖。生成逻辑在 `Assets/Scripts/Editor/SpeedTimelinePrefabBuilder.cs`。
+重建会覆盖专用输出目录中的 PNG 和预制体，并校验引用、切片、射线遮挡及组件预览；手动调整后的预制体请不要直接重建覆盖。
 
 已完成 Unity 2021 批处理编译、导入、预制体引用与切片校验和离屏视觉检查；未在实际战斗 Play Mode 中完整运行。

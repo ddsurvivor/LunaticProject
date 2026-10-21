@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 /// <summary>在真正的 Unity 编辑器中创建预制体，避免手写组件序列化数据。</summary>
@@ -9,7 +10,7 @@ public static class BattleAuthoringPrefabBuilder
 {
     public const string Folder = "Assets/Prefab/Battle/Authoring";
 
-    [MenuItem("Tools/战斗搭建/生成三个搭建预制体")]
+    /// <summary>生成搭建预制体资源；场景搭建使用三个独立的添加菜单。</summary>
     public static void Build()
     {
         if (!AssetDatabase.IsValidFolder(Folder)) AssetDatabase.CreateFolder("Assets/Prefab/Battle", "Authoring");
@@ -17,27 +18,46 @@ public static class BattleAuthoringPrefabBuilder
         Sprite cover = LoadSprite(AssetDatabase.GUIDToAssetPath("ae27a69373b73824da7f771cc71ea1b9"));
         Sprite floor = LoadSprite("Assets/A美术/CombatMap/再生号空间站/RespawnFloor1_001.png");
         Save<BattleObstacle>("障碍物掩体", c => { c.sprite = cover != null ? cover : marker; c.Refresh(); });
-        Save<BattlePlatform>("高层平台", c => { c.topSprite = floor != null ? floor : marker; c.sideSprite = c.topSprite; c.Refresh(); });
+        Save<BattlePlatform>("高层平台", c => { c.topSprite = floor != null ? floor : marker; c.Refresh(); });
         Save<BattleDeploymentArea>("角色出生区域", c => { c.sprite = marker; c.Refresh(); });
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log("战斗搭建：三个预制体已保存至 " + Folder);
     }
 
-    public static void BuildAndValidate()
+    /// <summary>向当前编辑场景添加障碍物，支持撤销并自动选中。</summary>
+    [MenuItem("Tools/战斗搭建/添加障碍物掩体")]
+    public static void AddObstacle() => AddToScene<BattleObstacle>("障碍物掩体");
+
+    /// <summary>向当前编辑场景添加高层平台，支持撤销并自动选中。</summary>
+    [MenuItem("Tools/战斗搭建/添加高层平台")]
+    public static void AddPlatform() => AddToScene<BattlePlatform>("高层平台");
+
+    /// <summary>向当前编辑场景添加角色出生区域，支持撤销并自动选中。</summary>
+    [MenuItem("Tools/战斗搭建/添加角色出生区域")]
+    public static void AddDeploymentArea() => AddToScene<BattleDeploymentArea>("角色出生区域");
+
+    private static void AddToScene<T>(string name) where T : BattlePlaceable
     {
-        try
+        Undo.IncrementCurrentGroup();
+        Undo.SetCurrentGroupName("添加" + name);
+        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(Folder + "/" + name + ".prefab");
+        if (prefab == null)
         {
             Build();
-            BattleAuthoringValidation.Run();
-            if (Application.isBatchMode) EditorApplication.Exit(0);
+            prefab = AssetDatabase.LoadAssetAtPath<GameObject>(Folder + "/" + name + ".prefab");
         }
-        catch (Exception error)
-        {
-            Debug.LogException(error);
-            if (Application.isBatchMode) EditorApplication.Exit(1);
-            throw;
-        }
+        var root = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+        Undo.RegisterCreatedObjectUndo(root, "添加" + name);
+        var view = SceneView.lastActiveSceneView;
+        Vector3 position = view != null ? view.pivot : Vector3.zero;
+        position.y = 0;
+        root.transform.position = position;
+        root.GetComponent<T>().Refresh();
+        PrefabUtility.RecordPrefabInstancePropertyModifications(root.transform);
+        EditorSceneManager.MarkSceneDirty(root.scene);
+        Selection.activeGameObject = root;
+        if (view != null) view.FrameSelected();
     }
 
     private static Sprite LoadSprite(string path) => string.IsNullOrEmpty(path) ? null :

@@ -20,6 +20,7 @@ public class DataManager : SerializedMonoBehaviour
     
     public LevelUpConfig levelUpConfig;
     public ComponentConfig componentConfig;
+    public MemeCatalogSO memeCatalog;
     public PieceDataListSO pieceDataListSO;
     public PassiveSkillConfigSO passiveSkillConfigSO;
     public SkillPackListSO skillPackListSO;
