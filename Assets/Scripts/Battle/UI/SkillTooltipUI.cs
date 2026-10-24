@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI; // 使用旧版 UI 命名空间
 
-public class SkillTooltipUI : MonoBehaviour
+public partial class SkillTooltipUI : MonoBehaviour
 {
 
     [Header("UI 组件引用")]
@@ -18,7 +18,7 @@ public class SkillTooltipUI : MonoBehaviour
     /// <param name="skill">传入的技能数据包</param>
     public void ShowTooltip(SkillPack skill, PieceController caster = null)
     {
-        if (skill == null) return;
+        if (skill == null) { HideTooltip(); return; }
 
         // 1. 设置技能名字
         nameText.text = skill.skillName;
@@ -82,6 +82,7 @@ public class SkillTooltipUI : MonoBehaviour
         tooltipImage.gameObject.SetActive(false);
         // 4. 显示面板
         this.gameObject.SetActive(true);
+        RefreshLayout(true);
     }
 
     /// <summary>
@@ -94,7 +95,7 @@ public class SkillTooltipUI : MonoBehaviour
 
     public void ShowItemTip(ItemData itemData)
     {
-        if (itemData == null) return;
+        if (itemData == null) { HideTooltip(); return; }
 
         // 1. 设置物品名字
         nameText.text = itemData.itemName.ToString();
@@ -115,6 +116,7 @@ public class SkillTooltipUI : MonoBehaviour
 
         // 4. 显示面板
         this.gameObject.SetActive(true);
+        RefreshLayout(true);
     }
     
 }

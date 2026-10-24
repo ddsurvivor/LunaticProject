@@ -28,7 +28,7 @@ public static class EnemyBehaviorRules
     /// <summary>普通攻击的远近分界为远程射程的一半；模式1无弹药时强制接近近战。</summary>
     public static bool PreferRanged(EnemyController enemy, EnemyAIType action, float distance)
     {
-        float ranged = enemy.pieceData?.rangedAtk?.rangeValue ?? 0f;
+        float ranged = enemy.pieceData?.RangedAttack?.rangeValue ?? 0f;
         if (ranged <= 0f || IsMeleeOnly(action)) return false;
         if (action == EnemyAIType.NearestAdaptive)
             return enemy.unitAttrCenter.AmmoCount > 0 && distance > ranged * 0.5f && distance <= ranged;
@@ -39,7 +39,7 @@ public static class EnemyBehaviorRules
     /// <summary>返回普攻和攻击技能的最远射程，不把回复技能计入远近分界。</summary>
     public static float MaximumRange(EnemyController enemy)
     {
-        float range = Mathf.Max(enemy.pieceData?.meleeAtk?.rangeValue ?? 0f, enemy.pieceData?.rangedAtk?.rangeValue ?? 0f);
+        float range = Mathf.Max(enemy.pieceData?.MeleeAttack?.rangeValue ?? 0f, enemy.pieceData?.RangedAttack?.rangeValue ?? 0f);
         if (enemy.availableSkills != null)
             foreach (var skill in enemy.availableSkills)
                 if (IsOffensive(skill)) range = Mathf.Max(range, skill.rangeValue);
@@ -67,7 +67,7 @@ public static class EnemyBehaviorRules
         if (skill == null) return EnemySkillRole.Auto;
         if (skill.enemySkillRole != EnemySkillRole.Auto) return skill.enemySkillRole;
         if (IsHealingSkill(skill)) return EnemySkillRole.Healing;
-        return skill.rangeValue <= (enemy.pieceData?.meleeAtk?.rangeValue ?? 0f)
+        return skill.rangeValue <= (enemy.pieceData?.MeleeAttack?.rangeValue ?? 0f)
             ? EnemySkillRole.MeleeAttack : EnemySkillRole.RangedAttack;
     }
 
@@ -93,7 +93,7 @@ public static class EnemyBehaviorRules
             Vector3 position = target == previewPiece && previewPosition.HasValue ? previewPosition.Value : target.transform.position;
             float distance = Vector3.Distance(enemy.transform.position, position);
             bool ranged = PreferRanged(enemy, EnemyAIType.NearestAdaptive, distance);
-            var attack = ranged ? enemy.pieceData?.rangedAtk : enemy.pieceData?.meleeAtk;
+            var attack = ranged ? enemy.pieceData?.RangedAttack : enemy.pieceData?.MeleeAttack;
             if (attack == null || distance > attack.rangeValue || attack.layerSkill && Mathf.Abs(position.y - enemy.transform.position.y) > 0.1f) continue;
             count++;
             if (weakest == null || HealthValue(enemy, target) < HealthValue(enemy, weakest)) weakest = target;

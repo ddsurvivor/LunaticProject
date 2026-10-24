@@ -10,6 +10,14 @@ public enum AttrOp { Get=0, Add=1, Set=2,Sub=3 } // 定义操作：读取、累�
 /// </summary>
 public class Player
 {
+    public SkillLoadoutState skills = new(); // 学习与配置结果随玩家存档保存。
+    /// <summary>返回存档中配置的主动技能；旧存档首次读取时继承角色初始配置。</summary>
+    public List<SkillPack> GetConfiguredSkills(PieceData data)
+    {
+        skills ??= new SkillLoadoutState();
+        skills.Initialize(data);
+        return data?.skillLibrary != null ? skills.Resolve(data.skillLibrary) : data?.DefaultSkills ?? new List<SkillPack>();
+    }
     public int pieceId;
     [ShowInInspector]private string name;
     [ShowInInspector]private int hp;

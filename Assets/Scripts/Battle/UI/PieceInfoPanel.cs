@@ -20,6 +20,7 @@ using UnityEngine.UI;
     //public List<GameObject> mpIcons;
     public Text mpNumText;
     public Text mpMaxText;
+    [SerializeField] private ActionPointPipsUI actionPointPips;
     public Image manaBar;
     //public List<GameObject> manaIcons;
     public Text manaNumText;
@@ -69,6 +70,7 @@ using UnityEngine.UI;
         //int curMP = 3;
         mpNumText.text = pieceData.maxMovePoint.ToString();
         mpMaxText.text = "/" + pieceData.maxMovePoint.ToString();
+        if (actionPointPips != null) actionPointPips.SetPoints(pieceData.maxMovePoint, pieceData.maxMovePoint);
         /*for (int i = 0; i < mpIcons.Count; i++)
         {
             if (i < curMP)
@@ -116,6 +118,7 @@ using UnityEngine.UI;
         int curMP = piece.unitAttrCenter.CurMovePoint;
         mpNumText.text = curMP.ToString();
         mpMaxText.text = "/" + piece.unitAttrCenter.MaxMovePoint.ToString();
+        if (actionPointPips != null) actionPointPips.SetPoints(curMP, piece.unitAttrCenter.MaxMovePoint);
         /*for (int i = 0; i < mpIcons.Count; i++)
         {
             if (i < curMP)

@@ -24,7 +24,7 @@ public partial class AIController
             if (allowMove && TryShooterEvade(piece)) return true;
             if (!allowMove) return false;
             return TryAttackPlan(piece, NormalPlan(piece, target, true)) || actionAttempted ||
-                TryApproach(piece, target.transform.position, piece.pieceData.rangedAtk?.rangeValue ?? 0f);
+                TryApproach(piece, target.transform.position, piece.pieceData.RangedAttack?.rangeValue ?? 0f);
         }
 
         bool crowd = (mode == EnemyAIType.DamageHunterAOE || mode == EnemyAIType.DamageHunterRangedSkill) && HasMultiTargetAttack(piece, target);
@@ -60,7 +60,7 @@ public partial class AIController
         if (TryAttackPlan(piece, NormalPlan(piece, target, ranged), allowMove) || actionAttempted) return true;
         if (!allowMove) return false;
         // 模式1无弹药或处于半射程内时坚持近战，不通过失败回退偷偷改成射击。
-        float range = (ranged ? piece.pieceData.rangedAtk : piece.pieceData.meleeAtk)?.rangeValue ?? 0f;
+        float range = (ranged ? piece.pieceData.RangedAttack : piece.pieceData.MeleeAttack)?.rangeValue ?? 0f;
         return TryApproach(piece, target.transform.position, range);
     }
 
@@ -84,7 +84,7 @@ public partial class AIController
 
     private bool HasMultiTargetAttack(EnemyController piece, PieceController target)
     {
-        if (CountSkillHits(piece, target, piece.pieceData.meleeAtk) > 1 || CountSkillHits(piece, target, piece.pieceData.rangedAtk) > 1) return true;
+        if (CountSkillHits(piece, target, piece.pieceData.MeleeAttack) > 1 || CountSkillHits(piece, target, piece.pieceData.RangedAttack) > 1) return true;
         return piece.availableSkills != null && piece.availableSkills.Any(s => IsOffensiveSkill(s) &&
             piece.unitAttrCenter.HasMana(s.mpCost) && CountSkillHits(piece, target, s) > 1);
     }
@@ -176,7 +176,7 @@ public partial class AIController
 
     private bool TryShooterEvade(EnemyController piece)
     {
-        float safeRange = (piece.pieceData.rangedAtk?.rangeValue ?? 0f) * 0.5f;
+        float safeRange = (piece.pieceData.RangedAttack?.rangeValue ?? 0f) * 0.5f;
         if (safeRange <= 0f || !CanMove(piece)) return false;
         var threats = BattleScene.Ins.BM.PlayerController.pieces.Where(p => IsValidTarget(piece, p)).ToList();
         if (threats.Count == 0) return false;

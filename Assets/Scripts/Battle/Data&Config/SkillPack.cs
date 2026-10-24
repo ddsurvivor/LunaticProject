@@ -6,6 +6,7 @@ using UnityEngine.Serialization;
 [System.Serializable]
 public class SkillPack
 {
+    [LabelText("技能 ID"), ReadOnly] public string skillId; // 稳定引用标识，改名不影响角色配置或存档。
     /// <summary>仅爆炸物死亡后的延迟结算使用；不序列化、不改变原技能。</summary>
     [field: System.NonSerialized] public bool AllowDeadCaster { get; private set; }
     public SkillPack WithDeadCaster()

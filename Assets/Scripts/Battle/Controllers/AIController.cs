@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -206,7 +206,7 @@ public partial class AIController : PlayerController
         return new AttackPlan
         {
             Target = target,
-            Skill = ranged ? piece.pieceData.rangedAtk : piece.pieceData.meleeAtk,
+            Skill = ranged ? piece.pieceData.RangedAttack : piece.pieceData.MeleeAttack,
             Action = ranged ? ActionType.远程攻击 : ActionType.近战攻击,
             Strategy = piece.ResolveStrategy()
         };
@@ -436,7 +436,7 @@ public partial class AIController : PlayerController
         foreach (var player in BattleScene.Ins.BM.PlayerController.pieces)
         {
             if (player == null || player.isDead || !player.gameObject.activeInHierarchy) continue;
-            float meleeRange = player.pieceData.meleeAtk != null ? player.pieceData.meleeAtk.rangeValue : 0f;
+            float meleeRange = player.pieceData.MeleeAttack != null ? player.pieceData.MeleeAttack.rangeValue : 0f;
             float chase = player.unitAttrCenter.GetBuffStacks(BuffType.Bind) != 0 ? 0f : player.unitAttrCenter.MoveRange;
             safety = Mathf.Min(safety, Vector3.Distance(point, player.transform.position) - chase - meleeRange);
         }

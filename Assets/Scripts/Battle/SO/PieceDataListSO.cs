@@ -9,6 +9,7 @@
     [CreateAssetMenu(fileName = "PieceDataListSO", menuName = "BattleSO/PieceDataListSO", order = 1)]
     public class PieceDataListSO: SerializedScriptableObject
     {
+        [HideInInspector] public bool skillsMigrated; // 已完成内嵌技能转存，防止重复迁移。
         [OdinSerialize]
         //[TableList]
         public List<PieceData> pieceDataList = new();

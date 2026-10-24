@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -972,7 +972,7 @@ public partial class BattleManager : MonoBehaviour
                 $"【夹击触发】最近的队友 {closestPartner.pieceData.pieceName} 对 {target.pieceData.pieceName} 发动协同夹击！（距离：{minDistance:F2}米）");
 
             // 获取普攻数据
-            SkillPack normalAttackPack = closestPartner.pieceData.meleeAtk;
+            SkillPack normalAttackPack = closestPartner.pieceData.MeleeAttack;
             // 音效特效
             GM.Ins.AM.PlayAudio(AudioCueType.PincerTrigger);
             ObjectPool.Ins.GenerateObject(ItemType.PincerAttackFx
@@ -1022,7 +1022,7 @@ public partial class BattleManager : MonoBehaviour
     private bool IsTargetInAttackRange(PieceController checker, PieceController target)
     {
         float distance = Vector3.Distance(checker.transform.position, target.transform.position);
-        return distance <= checker.pieceData.meleeAtk.rangeValue;
+        return distance <= checker.pieceData.MeleeAttack.rangeValue;
     }
 
 
