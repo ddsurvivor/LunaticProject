@@ -114,9 +114,10 @@ public class CharacterUIPage : UIPanel
             group.gameObject.SetActive(false);
         }
 
-        for (var index = 0; index < pieceData.skillPacks.Count; index++)
+        var configuredSkills = player != null ? player.GetConfiguredSkills(pieceData) : pieceData.DefaultSkills;
+        for (var index = 0; index < configuredSkills.Count; index++)
         {
-            var VARIABLE = pieceData.skillPacks[index];
+            var VARIABLE = configuredSkills[index];
             if (activeSkillGroupList.Count > index)
             {
                 activeSkillGroupList[index].gameObject.SetActive(true);

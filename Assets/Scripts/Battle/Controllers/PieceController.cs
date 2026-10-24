@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
@@ -176,7 +176,8 @@ public partial class PieceController : MonoBehaviour
         if (pieceData != null)
         {
             _pieceData = pieceData;
-            availableSkills = pieceData.skillPacks != null ? new List<SkillPack>(pieceData.skillPacks) : new();
+            skillLoadout = isPlayerPiece && playerData != null ? playerData.skills ??= new SkillLoadoutState() : new SkillLoadoutState();
+            RefreshConfiguredSkills();
             // 敌人按场景等级加载成长，玩家保持原属性初始化流程。
             if (this is EnemyController enemy)
                 unitAttrCenter.SetEnemyData(_pieceData, enemy.Level);
@@ -441,7 +442,7 @@ public partial class PieceController : MonoBehaviour
         _isAttacking = true;
         if (!range) // 近战攻击
         {
-            _curAttackPack = _pieceData.meleeAtk;
+            _curAttackPack = _pieceData.MeleeAttack;
             if (isPlayerPiece) rangeUI?.ShowSkillRange(_curAttackPack);
             _curAtkType = ActionType.近战攻击;
             // _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Melee)
@@ -456,8 +457,8 @@ public partial class PieceController : MonoBehaviour
                 return;
             }
 
-            //rangeUI?.ShowAttackRange(_pieceData.rangedAtk.rangeValue);
-            _curAttackPack = _pieceData.rangedAtk;
+            //rangeUI?.ShowAttackRange(_pieceData.RangedAttack.rangeValue);
+            _curAttackPack = _pieceData.RangedAttack;
             if (isPlayerPiece) rangeUI?.ShowSkillRange(_curAttackPack);
             _curAtkType = ActionType.远程攻击;
             // _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Ranged)
@@ -501,7 +502,7 @@ public partial class PieceController : MonoBehaviour
     public void CastNormalAttack(PieceController target, bool range = false, bool isOrder = false)
     {
         if (IsPerformingAction || isDead || !BuffManager.CanTarget(this, target)) return;
-        var skill = range ? _pieceData.rangedAtk : _pieceData.meleeAtk;
+        var skill = range ? _pieceData.RangedAttack : _pieceData.MeleeAttack;
         var action = range ? ActionType.远程攻击 : ActionType.近战攻击;
         if (skill == null || (range && unitAttrCenter.AmmoCount <= 0)) return;
         var targets = isPlayerPiece ? new List<PieceController> { target }
@@ -571,6 +572,8 @@ public partial class PieceController : MonoBehaviour
             float passiveMultiplier = BattleScene.Ins.BM.PrepareAttackMultiplier(this, targets, skill, position);
             while (diceManager.IsPresenting) yield return null;
             if (isDead || !isActiveAndEnabled || version != combatVersion) yield break;
+            // 范围预览与攻击动画共用目标朝向，避免敌人预告攻击时仍背对目标。
+            CheckFace(position - transform.position);
             if (!isPlayerPiece)
             {
                 // 预览属于当前动作，AI/回合调度在这 0.8 秒内保持等待。
@@ -580,7 +583,6 @@ public partial class PieceController : MonoBehaviour
                 preview?.CloseRange();
                 if (isDead || !isActiveAndEnabled || version != combatVersion) yield break;
             }
-            CheckFace(position - transform.position);
             if (displayState == PieceDisplayState.Skill || !isPlayerPiece) PlayAudio(skill);
             else PlayAudio(action);
             bool impactDone = false;
@@ -781,7 +783,7 @@ public partial class PieceController : MonoBehaviour
 
     public float GetRange(bool isNormalAtk)
     {
-        return isNormalAtk ? _pieceData.meleeAtk.rangeValue : _pieceData.rangedAtk.rangeValue;
+        return isNormalAtk ? _pieceData.MeleeAttack.rangeValue : _pieceData.RangedAttack.rangeValue;
     }
 
     public virtual void ShowHighlight(bool option)
@@ -965,7 +967,7 @@ public partial class PieceController : MonoBehaviour
         componentBonuses.Clear();
         foreach (var passive in componentPassives) availablePassives.Remove(passive);
         componentPassives.Clear();
-        availableSkills = _pieceData?.skillPacks != null ? new List<SkillPack>(_pieceData.skillPacks) : new();
+        RefreshConfiguredSkills();
         var attributes = ReadPlayerAttributes();
         if (componentPlayerAttributes != null && playerData != null)
             unitAttrCenter.RefreshPlayerAttributes(componentPlayerAttributes, attributes);
@@ -978,9 +980,6 @@ public partial class PieceController : MonoBehaviour
                 availablePassives.Add(data.passiveType);
                 componentPassives.Add(data.passiveType);
             }
-            if (data.effectType == ComponentEffect.ActiveSkill && data.skillPack != null &&
-                !string.IsNullOrWhiteSpace(data.skillPack.skillName) && !availableSkills.Contains(data.skillPack))
-                availableSkills.Add(data.skillPack);
             if (data.battleBonuses == null) continue;
             foreach (var bonus in data.battleBonuses)
             {

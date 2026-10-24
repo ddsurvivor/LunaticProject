@@ -36,9 +36,9 @@ public partial class AIController
                     if (IsOffensiveSkill(skill)) Consider(skill, ActionType.技能);
             bool preferRanged = EnemyBehaviorRules.PreferRanged(piece, strategy.Action, distance);
             if (!EnemyBehaviorRules.IsShooter(strategy.Action) &&
-                (strategy.Action != EnemyAIType.NearestAdaptive || !preferRanged)) Consider(piece.pieceData.meleeAtk, ActionType.近战攻击);
+                (strategy.Action != EnemyAIType.NearestAdaptive || !preferRanged)) Consider(piece.pieceData.MeleeAttack, ActionType.近战攻击);
             if (!EnemyBehaviorRules.IsMeleeOnly(strategy.Action) &&
-                (strategy.Action != EnemyAIType.NearestAdaptive || preferRanged)) Consider(piece.pieceData.rangedAtk, ActionType.远程攻击);
+                (strategy.Action != EnemyAIType.NearestAdaptive || preferRanged)) Consider(piece.pieceData.RangedAttack, ActionType.远程攻击);
             if (candidate == null) continue;
             best = candidate;
             bestCount = count;

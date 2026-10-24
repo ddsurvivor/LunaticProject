@@ -86,7 +86,7 @@ public partial class PieceController
         bool special = command.kind == PlayerBattleCommandKind.Skill;
         bool ranged = command.kind == PlayerBattleCommandKind.Ranged;
         if (!special && !ranged && command.kind != PlayerBattleCommandKind.Melee) return BattleCommandResult.Rejected;
-        var skill = special ? command.skill : ranged ? pieceData?.rangedAtk : pieceData?.meleeAtk;
+        var skill = special ? command.skill : ranged ? pieceData?.RangedAttack : pieceData?.MeleeAttack;
         if (skill == null || special && !availableSkills.Contains(skill) || ranged && unitAttrCenter.AmmoCount <= 0) return BattleCommandResult.Rejected;
         Vector3 position = SkillTargeting.ClampPosition(transform.position, command.position, skill.rangeValue);
         var targets = SkillTargeting.Query(this, skill, position);

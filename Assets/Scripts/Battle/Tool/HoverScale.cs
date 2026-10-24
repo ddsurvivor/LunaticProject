@@ -31,6 +31,16 @@ public class HoverScale : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     
     public UnityEvent onHoverEnter; // 鼠标进入时的额外事件
     public UnityEvent onHoverExit; // 鼠标离开时的额外事件
+    /// <summary>紧凑菜单保留悬停事件，但不缩放行或覆盖文字的统一配色。</summary>
+    public void ConfigureMenuRow()
+    {
+        hoverScale = 1f;
+        originalScale = Vector3.one;
+        originalColor = GameConst.UIColors.Text;
+        hoverColor = GameConst.UIColors.Text;
+        if (onHoverEnter == null) onHoverEnter = new UnityEvent();
+        if (onHoverExit == null) onHoverExit = new UnityEvent();
+    }
     void Awake()
     {
         rectTransform = GetComponent<RectTransform>();

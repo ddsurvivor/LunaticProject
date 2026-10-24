@@ -102,8 +102,8 @@ public partial class ClickManager
             if (enemyAttackRangeUI != null) enemyAttackRangeUI.gameObject.SetActive(false);
             return;
         }
-        float radius = enemy.pieceData.rangedAtk?.rangeValue ?? 0f;
-        if (radius <= 0f) radius = enemy.pieceData.meleeAtk?.rangeValue ?? 0f;
+        float radius = enemy.pieceData.RangedAttack?.rangeValue ?? 0f;
+        if (radius <= 0f) radius = enemy.pieceData.MeleeAttack?.rangeValue ?? 0f;
         if (radius <= 0f)
         {
             if (enemyAttackRangeUI != null) enemyAttackRangeUI.gameObject.SetActive(false);
