@@ -56,6 +56,7 @@ public partial class UIManager
 
     private void LateUpdate()
     {
+        if (MemeLoadoutPanel.IsOpen) return;
         if (actionActor == null)
         {
             if (selectionViews.Count > 0) ClearActionFlow();

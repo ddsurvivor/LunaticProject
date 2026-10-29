@@ -130,6 +130,9 @@ public partial class PieceController : MonoBehaviour
         IsPerformingAction = false;
     }
 
+    /// <summary>仅供战斗反应队列中止其持有的在途攻击，取消弹道及尚未提交的命中。</summary>
+    internal void CancelBattleReaction() => CancelCombatAction();
+
     protected virtual void OnDisable()
     {
         CancelCombatAction();
@@ -147,10 +150,15 @@ public partial class PieceController : MonoBehaviour
             pieceDisplay.pieceSpriteRenderer.transform.localPosition = hitShakeOrigin;
     }
 
-    private void OnDestroy() => passiveManager?.UnregisterPiece(gameObject);
+    private void OnDestroy()
+    {
+        passiveManager?.UnregisterPiece(gameObject);
+        BattleScene.Ins?.BM?.timedMemeStatuses.ClearForPiece(this);
+    }
 
     public void Init(PlayerController player, PieceData pieceData = null)
     {
+        BattleScene.Ins?.BM?.timedMemeStatuses.ClearForPiece(this);
         MemeState.Reset();
         CancelCombatAction();
         StopHitShake();
@@ -506,7 +514,7 @@ public partial class PieceController : MonoBehaviour
     /// <param name="range"></param>
     public void CastNormalAttack(PieceController target, bool range = false, bool isOrder = false)
     {
-        if (IsPerformingAction || isDead || !BuffManager.CanTarget(this, target)) return;
+        if (IsPerformingAction || isDead || !BattleRelations.CanAttack(this, target) || !BuffManager.CanTarget(this, target)) return;
         var skill = range ? _pieceData.RangedAttack : _pieceData.MeleeAttack;
         var action = range ? ActionType.RangedAttack : ActionType.MeleeAttack;
         if (skill == null || (range && unitAttrCenter.AmmoCount <= 0)) return;
@@ -687,6 +695,7 @@ public partial class PieceController : MonoBehaviour
 
     public virtual void Dead()
     {
+        BattleScene.Ins?.BM?.timedMemeStatuses.ClearForPiece(this);
         CancelCombatAction();
         StopHitShake();
         BattleScene.Ins.TM.RequestHitStop();
@@ -793,9 +802,11 @@ public partial class PieceController : MonoBehaviour
         }
     }
 
+    /// <summary>读取对应普攻射程；未配置该攻击时返回零，供AI跳过不可用攻击。</summary>
     public float GetRange(bool isNormalAtk)
     {
-        return isNormalAtk ? _pieceData.MeleeAttack.rangeValue : _pieceData.RangedAttack.rangeValue;
+        var skill = isNormalAtk ? _pieceData?.MeleeAttack : _pieceData?.RangedAttack;
+        return skill?.rangeValue ?? 0f;
     }
 
     public virtual void ShowHighlight(bool option)
@@ -1003,17 +1014,22 @@ public partial class PieceController : MonoBehaviour
     }
 
     private OrderProfile _orderProfile;
+    /// <summary>只进入警戒方向选择，不支付AP；确认时才走统一费用及行动前状态入口。</summary>
     public void StartOrderGraud(OrderProfile orderProfile)
     {
+        if (orderProfile == null || rangeUI == null || isDead) return;
         _orderProfile = orderProfile;
         rangeUI.ShowOrderRange(orderProfile);
         isUsingOrder = true;
     }
+    /// <summary>确认警戒时按配置支付一次AP；状态中断保留已付AP，未成功确认不建立指令。</summary>
     public void CastOrder()
     {
-        if (!BattleScene.Ins.BM.buffManager.OnAction(unitAttrCenter))
+        if (!isUsingOrder || _orderProfile == null || isDead) return;
+        if (!unitAttrCenter.CostMP(ActionType.GuardOrder))
         {
             isUsingOrder = false;
+            _orderProfile = null;
             rangeUI.CloseRange();
             return;
         }

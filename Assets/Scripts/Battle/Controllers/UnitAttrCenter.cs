@@ -45,7 +45,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     [SerializeField] [ReadOnly] private float _moveRange;
     public float MoveRange => Mathf.Max(0f, _moveRange) *
         (buffAttrDic.TryGetValue(BuffAttrType.MoveRangePercent, out float percent)
-            ? Mathf.Max(0f, percent) / 100f : 1f);
+            ? Mathf.Max(0f, percent) / 100f : 1f) * (pc != null ? pc.MemeState.TimedMoveMultiplier : 1f);
 
     [SerializeField] [ReadOnly]
     // 嘲讽值
@@ -315,6 +315,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         if (_curHealth <= 0) _curHealth = 0;
         // 在生命变化回调与死亡事件前固定本段结果，嵌套被动不能篡改这次实际掉血。
         var result = new BattleDamageResult(pc, source, attackPack.damage, previousHealth, _curHealth);
+        BattleScene.Ins.BM.timedMemeStatuses.OnDamageCommitted(result);
         UpdateHpBar();
         NotifyHealthChanged(previousHealth);
         // 按真实掉血充能，放在死亡分支前以覆盖致死伤害，零伤害不计入。
@@ -382,6 +383,8 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     public bool CostMP(ActionType actionType)
     {
         if (pc.isDead || GetBuffStacks(BuffType.Stun) != 0) return false;
+        if ((actionType == ActionType.MeleeAttack || actionType == ActionType.RangedAttack || actionType == ActionType.OrbitalStrike || actionType == ActionType.GuardOrder) &&
+            !BattleRelations.CanInitiateAttack(pc)) return false;
         if ((actionType == ActionType.Move || actionType == ActionType.Climb) &&
             GetBuffStacks(BuffType.Bind) != 0) return false;
         int costPoint = GM.Ins.DM.gameConstSO.GetActionPointCost(actionType);
@@ -389,6 +392,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         {
             _curMovePoint -= costPoint;
             BattleScene.Ins.UM.NotifyActionCommitted(pc);
+            if (costPoint > 0 && actionType != ActionType.Wait && !BattleScene.Ins.BM.timedMemeStatuses.BeforePaidAction(pc)) return false;
             if (!BattleScene.Ins.BM.buffManager.OnAction(this)) return false;
             if ((actionType == ActionType.Move || actionType == ActionType.Climb) &&
                 GetBuffStacks(BuffType.Bind) != 0) return false;
@@ -399,13 +403,18 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         }
         return false;
     }
-    public bool CostMP(int costPoint)
+    /// <summary>旧固定费用入口不推断行动类型；结束回合沿用此入口，不触发新的主动行动状态。</summary>
+    public bool CostMP(int costPoint) => CostMP(costPoint, false);
+
+    /// <summary>固定费用主动行动显式传true；先扣AP再结算精确状态，致死不退AP、不执行后续动作。</summary>
+    public bool CostMP(int costPoint, bool activeAction)
     {
         if (pc.isDead || GetBuffStacks(BuffType.Stun) != 0) return false;
         if (_curMovePoint >= costPoint)
         {
             _curMovePoint -= costPoint;
             BattleScene.Ins.UM.NotifyActionCommitted(pc);
+            if (costPoint > 0 && activeAction && !BattleScene.Ins.BM.timedMemeStatuses.BeforePaidAction(pc)) return false;
             if (!BattleScene.Ins.BM.buffManager.OnAction(this)) return false;
             Debug.Log($"{gameObject.name}消耗行动力{costPoint}，剩余行动力{_curMovePoint}");
             BattleScene.Ins.UM.OnPieceStateChance(pc);
@@ -524,7 +533,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     public bool TryCostSkill(SkillPack skill)
     {
         int manaCost = GetSkillManaCost(skill);
-        if (skill == null || !HasMana(manaCost) ||
+        if (skill == null || BattleRelations.IsOffensive(skill) && !BattleRelations.CanInitiateAttack(pc) || !HasMana(manaCost) ||
             !TryGetItemCosts(skill.consumeItems, out var costs) || !HasItemCosts(costs)) return false;
         // CostMP 内部处理死亡、眩晕、行动点校验以及行动触发的 Buff。
         if (!CostMP(ActionType.Skill)) return false;

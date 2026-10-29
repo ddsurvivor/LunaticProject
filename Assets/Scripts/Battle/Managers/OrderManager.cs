@@ -11,6 +11,8 @@ public class OrderManager : MonoBehaviour
     private List<UnitOrderState> activeOrders = new List<UnitOrderState>();
     private bool isMoving;
     private PieceController moveUnit;
+    private Vector3 previousMovePosition; // 同一移动的相邻采样线段，覆盖一帧穿越扇形。
+    private BattleActionContext moveAction; // 一次移动中的所有警戒共享根行动。
 
     /// <summary>
     /// 确认下达警戒指令
@@ -19,13 +21,15 @@ public class OrderManager : MonoBehaviour
     /// <param name="orderProfile"></param>
     public void ConfirmOrder(PieceController unit, OrderProfile orderProfile, Quaternion rotate)
     {
-        // 3. 玩家确认方向后:
+        if (!BattleRelations.CanInitiateAttack(unit) || orderProfile == null || unit.rangeUI == null || unit.rangeUI.fanRoot == null) return;
+        ClearForPiece(unit);
+        // 朝向在确认时快照，后续攻击转身不改变已下达警戒。
         UnitOrderState unitOrderState = new UnitOrderState()
         {
             guard = unit, profile = orderProfile,
             // 方向根据范围指示器
-            remainingTriggers = orderProfile.maxTriggerCount
-            ,
+            remainingTriggers = Mathf.Max(1, orderProfile.maxTriggerCount),
+            facingDir = new Vector2(unit.rangeUI.fanRoot.transform.forward.x, unit.rangeUI.fanRoot.transform.forward.z)
         };
         activeOrders.Add(unitOrderState);
         BattleScene.Ins.BM.tipTextManager.ShowTip(unit.transform, "确认指令");
@@ -47,77 +51,114 @@ public class OrderManager : MonoBehaviour
             if (activeOrders[i].guard == piece) DisarmOrder(activeOrders[i]);
     }
 
+    /// <summary>记录实际移动起点；逐帧及移动结束时检查经过的线段。</summary>
     public void OnUnitMoveStart(PieceController unit)
     {
         moveUnit = unit;
-        isMoving = true;
+        isMoving = unit != null;
+        if (!isMoving) return;
+        previousMovePosition = unit.transform.position;
+        moveAction = BattleActionContext.Current ?? new BattleActionContext(unit);
+        CheckMoveUnit();
     }
 
+    /// <summary>移动结束前补查最后一段，避免Update顺序漏掉终点前的穿越。</summary>
     public void OnUnityMoveEnd(PieceController unit)
     {
-        moveUnit = null;
-        isMoving = false;
+        if (unit != moveUnit) return;
+        CheckMoveUnit();
+        CancelMovementTracking();
     }
+
+    /// <summary>中止只释放移动跟踪和待执行标记，不补发反应。</summary>
+    public void CancelMovementTracking()
+    {
+        moveUnit = null;
+        moveAction = null;
+        isMoving = false;
+        foreach (var state in activeOrders) state.reactionQueued = false;
+    }
+
+    private void OnDisable() => CancelMovementTracking();
 
     private void CheckMoveUnit()
     {
+        if (moveUnit == null) return;
+        var current = moveUnit.transform.position;
         for (int i = activeOrders.Count - 1; i >= 0; i--)
         {
             var state = activeOrders[i];
-
-
-            // 警戒者和移动单位同阵营,跳过(不对友军触发)
-            if (state.guard.isPlayerPiece == moveUnit.isPlayerPiece) continue;
-
-
-            // 核心判定:moveUnit当前位置是否落在state的扇形范围内
-            bool isInsideNow = IsInsideSector(state, moveUnit.transform.position);
-
-
-            // 只在"上一帧在外,这一帧在内"的瞬间触发一次,
-            // 避免移动单位停在扇形里不动时,每帧重复触发攻击
-            if (isInsideNow)
+            if (state.guard == null || state.guard.isDead || !state.guard.isActiveAndEnabled)
             {
-                TriggerOrderAttack(state, moveUnit);
-                // 多个单位可同时触发
+                DisarmOrder(state);
+                continue;
             }
+            if (moveUnit.isDead || !moveUnit.isActiveAndEnabled || state.reactionQueued ||
+                !BattleRelations.CanAttack(state.guard, moveUnit)) continue;
+            if (!CrossesSector(state, previousMovePosition, current)) continue;
+            state.reactionQueued = BattleScene.Ins.BM.QueueOrderReaction(state, moveUnit, moveAction);
         }
+        previousMovePosition = current;
     }
 
-    private void TriggerOrderAttack(UnitOrderState state, PieceController target)
+    /// <summary>供反应队列在出手前确认警戒尚未解除。</summary>
+    public bool IsOrderActive(UnitOrderState state) => activeOrders.Contains(state) && state.remainingTriggers > 0;
+
+    /// <summary>只在成功发动攻击后消耗次数；双方均按配置次数解除警戒。</summary>
+    public void ConsumeOrder(UnitOrderState state)
     {
-        if (!BuffManager.CanTarget(state.guard, target) ||
-            !BattleScene.Ins.BM.buffManager.OnAction(state.guard.unitAttrCenter)) return;
-        // 1. 根据guard的orderState.profile.type区分近战/远程表现:
-        // 触发协同普攻
-        if (state.guard.isPlayerPiece)
+        if (--state.remainingTriggers <= 0) DisarmOrder(state);
+    }
+
+    private bool CrossesSector(UnitOrderState state, Vector3 from, Vector3 to)
+    {
+        Vector3 origin = state.guard.transform.position;
+        Vector2 a = new Vector2(from.x - origin.x, from.z - origin.z);
+        Vector2 b = new Vector2(to.x - origin.x, to.z - origin.z);
+        Vector2 delta = b - a;
+        var cuts = new List<float> { 0f, 1f };
+        // 圆弧、内圈及两条角边界将线段切开，各段中点即可完整判定，不依赖采样步长。
+        AddCircleCuts(a, delta, state.profile.sectorRadius, cuts);
+        AddCircleCuts(a, delta, 1f, cuts);
+        float halfAngle = state.profile.sectorAngleDeg * .5f;
+        foreach (float angle in new[] { -halfAngle, halfAngle })
         {
-            //closestPartner.StartNormalAttack();
-            if (state.profile.type == OrderType.Melee)
-            {
-                state.guard.CastNormalAttack(target, false, true);
-                BattleScene.Ins.BM.tipTextManager.ShowTip(state.guard.transform, "触发指令");
-                DisarmOrder(state);
-            }
-            else if (state.profile.type == OrderType.Ranged)
-            {
-                state.guard.CastNormalAttack(target, true, true);
-                DisarmOrder(state);
-            }
+            Vector2 edge = Rotate(state.facingDir, angle);
+            float denominator = Cross(delta, edge);
+            if (Mathf.Abs(denominator) > .000001f) AddCut(-Cross(a, edge) / denominator, cuts);
         }
-        else
+        cuts.Sort();
+        for (int i = 0; i < cuts.Count; i++)
         {
-            if (state.profile.type == OrderType.Melee)
-            {
-                state.guard.StartNormalAttack();
-                ((EnemyController)state.guard).CastAttackOnTarget(target, isMemeReaction: true);
-            }
-            else if (state.profile.type == OrderType.Ranged)
-            {
-                state.guard.StartNormalAttack(true);
-                ((EnemyController)state.guard).CastAttackOnTarget(target, isMemeReaction: true);
-            }
+            if (Inside(a + delta * cuts[i], state)) return true;
+            if (i > 0 && Inside(a + delta * ((cuts[i - 1] + cuts[i]) * .5f), state)) return true;
         }
+        return false;
+    }
+
+    private static bool Inside(Vector2 point, UnitOrderState state) => point.magnitude >= 1f &&
+        point.magnitude <= state.profile.sectorRadius &&
+        Vector2.Angle(state.facingDir, point) <= state.profile.sectorAngleDeg * .5f;
+
+    private static float Cross(Vector2 a, Vector2 b) => a.x * b.y - a.y * b.x;
+    private static Vector2 Rotate(Vector2 value, float degrees)
+    {
+        float angle = degrees * Mathf.Deg2Rad;
+        return new Vector2(value.x * Mathf.Cos(angle) - value.y * Mathf.Sin(angle),
+            value.x * Mathf.Sin(angle) + value.y * Mathf.Cos(angle));
+    }
+    private static void AddCut(float t, List<float> cuts) { if (t >= 0f && t <= 1f) cuts.Add(t); }
+    private static void AddCircleCuts(Vector2 a, Vector2 delta, float radius, List<float> cuts)
+    {
+        float aa = delta.sqrMagnitude;
+        if (aa < .000001f) return;
+        float bb = 2f * Vector2.Dot(a, delta);
+        float cc = a.sqrMagnitude - radius * radius;
+        float discriminant = bb * bb - 4f * aa * cc;
+        if (discriminant < 0f) return;
+        float root = Mathf.Sqrt(discriminant);
+        AddCut((-bb - root) / (2f * aa), cuts);
+        AddCut((-bb + root) / (2f * aa), cuts);
     }
 
     // 解除警戒:从activeOrders移除,销毁常驻扇形显示,解锁guard可操控状态
@@ -125,41 +166,12 @@ public class OrderManager : MonoBehaviour
     {
         activeOrders.Remove(state);
         // 关闭范围显示
-        state.guard.rangeUI.CloseRange();
+        state.reactionQueued = false;
+        if (state.guard == null) return;
+        state.guard.rangeUI?.CloseRange();
         state.guard.isGrauding = false;
     }
 
-    // 扇形几何判定:以guard站立点为顶点,facingDir为朝向,
-    // 判断targetPos是否同时满足"距离<=半径"和"夹角<=半张角"
-    private bool IsInsideSector(UnitOrderState state, Vector3 targetWorldPos)
-    {
-        // 1. 获取扇形参数
-        float halfAngle = state.profile.sectorAngleDeg / 2f;
-        float range = state.profile.sectorRadius;
-        Vector3 origin = state.guard.transform.position;
-        Vector3 forward = state.guard.rangeUI.fanRoot.transform.forward;
-
-
-        Vector3 dir = (targetWorldPos - origin);
-        dir.y = 0; // 忽略y轴
-        if (dir.magnitude > range || dir.magnitude < 1f) return false; // 超出半径
-
-        float angle = Vector3.Angle(forward, dir);
-        if (angle <= halfAngle)
-        {
-            return true; // 在扇形内
-        }
-        else
-        {
-            return false; // 不在扇形内
-        }
-        /*Vector2 toTarget = (Vector2)(targetWorldPos - state.guard.transform.position);
-        float dist = toTarget.magnitude;
-        if (dist > state.profile.sectorRadius) return false;
-        
-        float angleToTarget = Vector2.Angle(state.facingDir, toTarget);
-        return angleToTarget <= state.profile.sectorAngleDeg * 0.5f;*/
-    }
     public List<PieceController> IsInsideSector(Vector3 origin, Vector3 forward, float sectorAngleDeg, float sectorRadius)
     {
         // 1. 获取扇形参数
@@ -197,10 +209,9 @@ public class OrderManager : MonoBehaviour
         for (var i = activeOrders.Count - 1; i >= 0; i--)
         {
             var activeOrder = activeOrders[i];
-            if (activeOrder.guard.isPlayerPiece) DisarmOrder(activeOrder);
+            if (activeOrder.guard == null || activeOrder.guard.isPlayerPiece == isPlayer) DisarmOrder(activeOrder);
         }
 
-        activeOrders.Clear();
     }
 }
 
@@ -234,4 +245,5 @@ public class UnitOrderState
 
     //public Vector3 originWorldPos;  // 扇形顶点（一般是该角色站立点）
     public int remainingTriggers;
+    public bool reactionQueued; // 已捕获穿越，排队期间不重复提交。
 }

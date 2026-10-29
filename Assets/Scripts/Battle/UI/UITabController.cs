@@ -66,7 +66,8 @@ public class UITabController : MonoBehaviour
             if (tabs[i].tabButton != null)
             {
                 tabs[i].tabButton.GetComponent<CustomAdvancedButton>()?.onClickEvent.AddListener(() => SwitchTab(index, false));
-                tabs[i].selected?.SetActive(false); // 初始化时，所有选中标记都隐藏
+                // Unity序列化空对象须使用对象判空，不能用?.调用原生接口。
+                if (tabs[i].selected != null) tabs[i].selected.SetActive(false);
             }
         }
     }
@@ -89,14 +90,14 @@ public class UITabController : MonoBehaviour
         for (int i = 0; i < tabs.Count; i++)
         {
             bool isActive = (i == targetIndex);
-            tabs[i].selected?.SetActive(false);
+            if (tabs[i].selected != null) tabs[i].selected.SetActive(false);
             if (tabs[i].subPage != null)
             {
                 if (tabs[i].subPage.GetComponent<UIPanel>() != null)
                 {
                     if (isActive)
                     {
-                        tabs[i].selected?.SetActive(true);
+                        if (tabs[i].selected != null) tabs[i].selected.SetActive(true);
                         tabs[i].subPage.GetComponent<UIPanel>()?.Open();
                     }
                     else

@@ -34,8 +34,8 @@ public static class MemeEquipment
         {
             if (id == 0) continue;
             var definition = catalog != null ? catalog.GetDefinition(id) : null;
-            if (definition == null || !definition.enabled || !definition.IsValid()) { error = $"模因 {id} 不可用"; return false; }
-            if (progress == null || !progress.IsUnlocked(id)) { error = $"模因 {id} 尚未解锁"; return false; }
+            if (definition == null || !definition.enabled || !definition.IsValid()) { error = "所选模因不可用"; return false; }
+            if (progress == null || !progress.IsUnlocked(id)) { error = $"模因“{definition.displayName}”尚未解锁"; return false; }
             if (!seen.Add(id)) { error = "同一模因不能重复装配"; return false; }
         }
         return true;

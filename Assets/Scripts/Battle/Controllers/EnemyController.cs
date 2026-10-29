@@ -52,6 +52,7 @@ public partial class EnemyController : PieceController
 
     public override void Dead()
     {
+        BattleScene.Ins?.BM?.timedMemeStatuses.ClearForPiece(this);
         CancelCombatAction();
         StopHitShake();
         BattleScene.Ins.TM.RequestHitStop();
@@ -81,7 +82,7 @@ public partial class EnemyController : PieceController
 
     public void CastSkillOnTarget(PieceController targetPc, SkillPack skill)
     {
-        if (IsPerformingAction || isDead || !TryGetAttackPosition(targetPc, skill, out var position)) return;
+        if (IsPerformingAction || isDead || !BattleRelations.CanAttack(this, targetPc) || !TryGetAttackPosition(targetPc, skill, out var position)) return;
         var targets = BattleScene.Ins.BM.skillManager.GetTargets(this, position, skill);
         if (targets.Count == 0) return;
         BeginCombatAction(skill, targets, position, ActionType.Skill, PieceDisplayState.Skill);
@@ -104,13 +105,19 @@ public partial class EnemyController : PieceController
     /// <summary>结算已选定的普通攻击，保留原单参数入口供场景事件和 AI 调用。</summary>
     public void CastAttackOnTarget(PieceController targetPc) => CastAttackOnTarget(targetPc, false);
 
-    /// <summary>夹击和警戒须标记 isMemeReaction，遵守词条反应限制，不改变攻击的伤害倍率。</summary>
-    public void CastAttackOnTarget(PieceController targetPc, bool isMemeReaction)
+    /// <summary>夹击和警戒标记反应来源，沿用原模因限制与范围查询。</summary>
+    public void CastAttackOnTarget(PieceController targetPc, bool isMemeReaction) =>
+        CastAttackOnTarget(targetPc, isMemeReaction, false);
+
+    /// <summary>反应须标记isMemeReaction；警戒捕获的单体目标保留经过事实，范围攻击仍查询实际范围。</summary>
+    public void CastAttackOnTarget(PieceController targetPc, bool isMemeReaction, bool capturedOrderTarget)
     {
-        if (IsPerformingAction || isDead || !TryGetAttackPosition(targetPc, _curAttackPack, out var position)) return;
+        if (IsPerformingAction || isDead || !BattleRelations.CanAttack(this, targetPc) || !TryGetAttackPosition(targetPc, _curAttackPack, out var position)) return;
         var skill = _curAttackPack;
         var action = _curAtkType;
-        var targets = BattleScene.Ins.BM.skillManager.GetTargets(this, position, skill);
+        var targets = capturedOrderTarget && skill.target == SkillTarget.Enemy
+            ? new List<PieceController> { targetPc }
+            : BattleScene.Ins.BM.skillManager.GetTargets(this, position, skill);
         if (targets.Count == 0) return;
         bool ranged = action == ActionType.RangedAttack;
         if (ranged && unitAttrCenter.AmmoCount <= 0) return;

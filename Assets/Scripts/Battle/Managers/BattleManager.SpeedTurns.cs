@@ -25,7 +25,7 @@ public partial class BattleManager
     /// <summary>统一校验玩家能否操作该棋子，包含回合归属、AP、控制状态及动作等待限制。</summary>
     public bool CanControlPiece(PieceController piece) => SpeedTurnsActive && inBattle &&
         !BurstInputPending && PlayerController.isInTurn && piece != null && piece == ActivePiece &&
-        IsSpeedParticipant(piece) && !piece.cantControl && !piece.isIdle && piece.unitAttrCenter.CurMovePoint > 0 &&
+        IsSpeedParticipant(piece) && !piece.cantControl && !BattleRelations.IsBehaviorControlled(piece) && !piece.isIdle && piece.unitAttrCenter.CurMovePoint > 0 &&
         !HasCombatPresentation && !moveManager.IsMoving;
 
     /// <summary>受击表现结束后，仅在当前棋子仍可继续行动时恢复其镜头；交棒由调度器聚焦下一位。</summary>
@@ -113,9 +113,12 @@ public partial class BattleManager
             orderManager?.ClearForPiece(next);
             bool manual = PlayerController.pieces.Contains(next) && !(next is EnemyController);
             // 每个普通棋子回合只触发自身开始事件和 Buff 结算。
+            // 新状态在事件前快照，保护TurnStart内施加或刷新的持续时间。
+            timedMemeStatuses.BeginNormalTurn(next);
             next.TurnStart();
             if (!inBattle || !SpeedTurnsActive) yield break;
             buffManager.ProcessBuffs(next.unitAttrCenter);
+            timedMemeStatuses.ResolveTurnStart(next);
             if (!inBattle) yield break;
             // 回合开始的持续伤害也可能触发受击；结束后再聚焦行动者并开放控制。
             while (inBattle && HasCombatPresentation) yield return null;
@@ -129,7 +132,7 @@ public partial class BattleManager
                     BattleScene.Ins.CM.SelectActivePiece(next);
                 }
                 else if (next is EnemyController enemy) AIController.BeginEnemyPieceTurn(enemy);
-                else if (!next.cantControl && next.unitAttrCenter.CurMovePoint > 0)
+                else if (!next.cantControl && !BattleRelations.IsBehaviorControlled(next) && next.unitAttrCenter.CurMovePoint > 0)
                 {
                     var summon = next.GetComponent<SelfExploreSummonPiece>();
                     if (summon != null) summon.ExecuteAI();
@@ -155,7 +158,11 @@ public partial class BattleManager
             if (_delaySkillCaster == next) HandleDelaySkill();
             while (inBattle && (HasCombatPresentation || moveManager.IsMoving)) yield return null;
             if (!inBattle) yield break;
-            if (next != null) next.TurnEnd();
+            if (next != null)
+            {
+                next.TurnEnd();
+                timedMemeStatuses.EndNormalTurn(next);
+            }
             if (manual) PlayerController.EndPieceTurn();
             else if (next is EnemyController) AIController.EndPieceTurn();
             // 聚能额外行动及刚被插入聚能的普通回合均不抵扣新冷却。

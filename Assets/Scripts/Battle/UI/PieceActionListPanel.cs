@@ -65,6 +65,9 @@ public partial class PieceActionListPanel : SerializedMonoBehaviour
             && (HasAction(ActionType.Reload) || HasAction(ActionType.RangedAttack))) AddPrimaryAction(ActionType.Reload, true);
         foreach (var action in new[] { ActionType.Scan, ActionType.ReleaseBind, ActionType.Climb,
             ActionType.Interact, ActionType.OrbitalStrike, ActionType.Talk }) AddPrimaryAction(action);
+        primaryEntries.Add(new Entry { title = () => "模因装配", available = CanAct,
+            cost = () => new ActionResourceCost(MemeEquipment.BattleEquipCost),
+            execute = () => MemeLoadoutPanel.OpenBattle(pc, primaryRows[0].actionNameText) });
         AddPrimaryAction(ActionType.Wait, true);
         gameObject.SetActive(true);
         BindRows(primaryEntries, primaryRows, primaryContent);

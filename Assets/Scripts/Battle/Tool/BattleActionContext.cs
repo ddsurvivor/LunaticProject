@@ -1,24 +1,30 @@
 using System;
 using System.Threading;
 
-/// <summary>一次结算的身份与根行动；不改变费用、公式或反应顺序，不作为存档中的永久ID。</summary>
+/// <summary>一次结算的身份与根行动；共享反应预算，不改变费用与公式，不作为存档中的永久ID。</summary>
 public sealed class BattleActionContext
 {
     private static long nextId; // 当前进程单调递增，预览不分配行动ID。
     /// <summary>仅同步主线程结算有效；延迟回调必须显式捕获，不能跨yield保持作用域。</summary>
     public static BattleActionContext Current { get; private set; }
     public long ActionId { get; }
-    /// <summary>本行动及其派生反应共用的根ID；用于追踪，不自动抑制反应或重复提交。</summary>
+    /// <summary>本行动及其派生反应共用的根ID；队列据此共用去重记录和连锁预算。</summary>
     public long RootActionId { get; }
     public PieceController Actor { get; }
     public SkillPack Skill { get; }
     public bool IsReaction { get; }
+    /// <summary>相对根行动的反应层数；普通派生伤害不增加深度。</summary>
+    public int ReactionDepth { get; }
+    internal BattleReactionChain ReactionChain { get; }
 
     public BattleActionContext(PieceController actor = null, SkillPack skill = null, bool isReaction = false,
         BattleActionContext parent = null)
     {
         ActionId = Interlocked.Increment(ref nextId);
-        RootActionId = (parent ?? Current)?.RootActionId ?? ActionId;
+        var source = parent ?? Current;
+        RootActionId = source?.RootActionId ?? ActionId;
+        ReactionDepth = (source?.ReactionDepth ?? 0) + (isReaction ? 1 : 0);
+        ReactionChain = source?.ReactionChain ?? new BattleReactionChain();
         Actor = actor;
         Skill = skill;
         IsReaction = isReaction;
@@ -39,6 +45,12 @@ public sealed class BattleActionContext
             Current = previous;
         }
     }
+}
+
+internal sealed class BattleReactionChain
+{
+    internal readonly System.Collections.Generic.HashSet<string> Keys = new(); // 随根行动释放，异步回调共用去重记录。
+    internal int Count; // 本根已接纳事件总数，出队后不返还预算。
 }
 
 public enum BattleDamageKind { Unknown, Skill, Periodic, ActionEffect, Collision, SelfDamage, Component }

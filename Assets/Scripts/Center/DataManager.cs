@@ -34,6 +34,21 @@ public class DataManager : SerializedMonoBehaviour
     public LevelUpConfig levelUpConfig;
     public ComponentConfig componentConfig;
     public MemeCatalogSO memeCatalog;
+    /// <summary>优先使用显式目录，未配置的旧场景加载正式Resources目录；不授予任何解锁。</summary>
+    public MemeCatalogSO MemeCatalog => memeCatalog != null ? memeCatalog : memeCatalog = Resources.Load<MemeCatalogSO>("Battle/MemeCatalog");
+
+    /// <summary>剧情、成长和配方共同授予入口；重复或无效编号不修改进度，存档仍走原保存流程。</summary>
+    public bool TryUnlockMeme(int id, out string error)
+    {
+        var definition = MemeCatalog?.GetDefinition(id);
+        var profile = GM.Ins?.PLAYERPROFILE;
+        error = null;
+        if (profile == null || definition == null || !definition.enabled || !definition.IsValid())
+        { error = "模因不存在或尚不可用"; return false; }
+        if (profile.memeProgress?.IsUnlocked(id) == true) { error = "模因已经解锁"; return false; }
+        profile.memeProgress ??= new MemeProgress();
+        return profile.memeProgress.TryUnlock(MemeCatalog, id);
+    }
     public PieceDataListSO pieceDataListSO;
     public PassiveSkillConfigSO passiveSkillConfigSO;
     public SkillPackListSO skillPackListSO;

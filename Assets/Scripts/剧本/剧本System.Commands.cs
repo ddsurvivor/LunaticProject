@@ -109,6 +109,15 @@ public partial class 剧本System
                 continue;
             }
 
+            if (command == "UNLOCKMEME")
+            {
+                var parameters = 指令切割(key);
+                if (parameters == null || parameters.Length != 1 || !int.TryParse(parameters[0], out int memeId))
+                    Debug.LogError("UNLOCKMEME格式应为UNLOCKMEME(词条编号)");
+                else if (!GM.Ins.DM.TryUnlockMeme(memeId, out var error)) Debug.LogWarning(error);
+                continue;
+            }
+
             if (command == Center.Command_End)
             {
                 var prams = 指令切割(key);

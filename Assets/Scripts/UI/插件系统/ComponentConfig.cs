@@ -180,7 +180,7 @@ public static class ComponentEquipment
     public static void OnAttackResolved(PieceController attacker, List<PieceController> hits,
         SkillPack skill, ActionType action, Vector3 targetPosition)
     {
-        if (attacker == null || attacker.isDead || hits.Count == 0) return;
+        if (attacker == null || attacker.isDead || !BattleRelations.CanInitiateAttack(attacker) || hits.Count == 0) return;
         var battle = BattleScene.Ins.BM;
         if (action == ActionType.MeleeAttack)
         {
@@ -192,7 +192,7 @@ public static class ComponentEquipment
                 {
                     var targets = battle.orderManager.IsInsideSector(attacker.transform.position,
                         hits[0].transform.position - attacker.transform.position, explosion.rangeValue, explosion.rangeAgle);
-                    targets.RemoveAll(t => t == null || t.isPlayerPiece == attacker.isPlayerPiece);
+                    targets.RemoveAll(t => !BattleRelations.CanAttack(attacker, t));
                     battle.PieceSkill(attacker, targets, explosion, hits[0].transform.position,
                         memeActionContext: battle.memeService.BeginAction(attacker, explosion, isReaction: true));
                 }
@@ -201,10 +201,10 @@ public static class ComponentEquipment
         if (action != ActionType.Skill || !attacker.availablePassives.Contains(PassiveType.SpiderSilk)) return;
         var affected = new HashSet<PieceController>(hits);
         var candidates = new List<PieceController>();
-        var enemies = attacker.isPlayerPiece ? battle.AIController.pieces : battle.PlayerController.pieces;
+        var enemies = battle.SpeedParticipants();
         foreach (var enemy in enemies)
             if (enemy != null && !enemy.isDead && enemy.gameObject.activeInHierarchy &&
-                enemy.isPlayerPiece != attacker.isPlayerPiece && BuffManager.CanTarget(attacker, enemy) &&
+                BattleRelations.CanAttack(attacker, enemy) && BuffManager.CanTarget(attacker, enemy) &&
                 !affected.Contains(enemy) && !candidates.Contains(enemy)) candidates.Add(enemy);
         for (int i = 0; i < 2 && candidates.Count > 0; i++)
         {
@@ -213,7 +213,7 @@ public static class ComponentEquipment
         }
         foreach (var target in affected)
         {
-            if (target == null || target.isDead) continue;
+            if (target == null || target.isDead || !BattleRelations.CanAttack(attacker, target)) continue;
             battle.buffManager.AddBuff(target.unitAttrCenter, BuffType.Stun, 2);
             target.unitAttrCenter.TakeDamage(new AttackPack(15, DamageType.Electric),
                 new BattleDamageSource(BattleDamageKind.Component, attacker, skill));

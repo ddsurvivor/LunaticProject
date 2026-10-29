@@ -87,12 +87,14 @@ public partial class PieceController
         bool ranged = command.kind == PlayerBattleCommandKind.Ranged;
         if (!special && !ranged && command.kind != PlayerBattleCommandKind.Melee) return BattleCommandResult.Rejected;
         var skill = special ? command.skill : ranged ? pieceData?.RangedAttack : pieceData?.MeleeAttack;
-        if (skill == null || special && !availableSkills.Contains(skill) || ranged && unitAttrCenter.AmmoCount <= 0) return BattleCommandResult.Rejected;
+        if (skill == null || BattleRelations.IsOffensive(skill) && !BattleRelations.CanInitiateAttack(this) || special && !availableSkills.Contains(skill) || ranged && unitAttrCenter.AmmoCount <= 0) return BattleCommandResult.Rejected;
         Vector3 position = SkillTargeting.ClampPosition(transform.position, command.position, skill.rangeValue);
         var targets = SkillTargeting.Query(this, skill, position);
         if (targets.Count == 0 && skill.target != SkillTarget.Area && skill.target != SkillTarget.Self) return BattleCommandResult.Rejected;
         var action = special ? ActionType.Skill : ranged ? ActionType.RangedAttack : ActionType.MeleeAttack;
         if (!(special ? unitAttrCenter.TryCostSkill(skill) : unitAttrCenter.CostMP(action))) return PaidFailure();
+        // 付费自伤可能解除行为状态，提交后再次校验当前关系，避免按旧敌我关系出手。
+        if (targets.Count > 0 && !targets.Exists(t => SkillTargeting.IsValid(this, t, skill))) return BattleCommandResult.Interrupted;
         if (ranged) unitAttrCenter.CostAmmo();
         _isAttacking = _isUsingSkill = isUsingOrder = false;
         rangeUI?.CloseRange();

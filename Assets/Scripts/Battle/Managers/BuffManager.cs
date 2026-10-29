@@ -12,14 +12,14 @@ public class BuffManager : MonoBehaviour
 
     public static bool CanTarget(PieceController attacker, PieceController target)
     {
-        return attacker != null && target != null && (attacker.isPlayerPiece == target.isPlayerPiece ||
+        return attacker != null && target != null && (!BattleRelations.CanAttack(attacker, target) ||
             target.unitAttrCenter.GetBuffStacks(BuffType.CognitiveProtection) == 0);
     }
 
     // 每次攻击每个目标触发一次，未命中也会招致反噬。
     public void OnAttacked(PieceController attacker, PieceController target)
     {
-        if (attacker.isPlayerPiece == target.isPlayerPiece) return;
+        if (!BattleRelations.CanAttack(attacker, target)) return;
         var protection = target.unitAttrCenter.buffStates.Find(
             b => b.buffType == BuffType.OffensiveCognitiveProtection);
         if (protection == null || attacker.isDead) return;

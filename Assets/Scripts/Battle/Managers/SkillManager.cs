@@ -144,22 +144,22 @@ public static class SkillTargeting
 
     public static bool IsValid(PieceController caster, PieceController target, SkillPack skill)
     {
-        return skill != null && IsValid(caster, target, skill.target, skill.AllowDeadCaster) &&
+        return skill != null && (!BattleRelations.IsOffensive(skill) || BattleRelations.CanInitiateAttack(caster)) && IsValid(caster, target, skill.target, skill.AllowDeadCaster) &&
             (!skill.layerSkill || Mathf.Abs(caster.transform.position.y - target.transform.position.y) <= 0.1f);
     }
 
     public static bool IsValid(PieceController caster, PieceController target, SkillTarget targetType, bool allowDeadCaster = false)
     {
         if (caster == null || (caster.isDead && !allowDeadCaster) || target == null ||
-            !target.gameObject.activeInHierarchy || !BuffManager.CanTarget(caster, target)) return false;
-        bool ally = caster.isPlayerPiece == target.isPlayerPiece;
+            !target.gameObject.activeInHierarchy) return false;
+        bool ally = BattleRelations.CanSupport(caster, target);
         if (targetType == SkillTarget.AllyBody) return ally && target.isDead;
         if (target.isDead) return false;
         switch (targetType)
         {
             case SkillTarget.Enemy:
             case SkillTarget.EnemyAll:
-            case SkillTarget.FarthestEnemy: return !ally;
+            case SkillTarget.FarthestEnemy: return BattleRelations.CanAttack(caster, target) && BuffManager.CanTarget(caster, target);
             case SkillTarget.Ally: return ally;
             case SkillTarget.Self: return caster == target;
             case SkillTarget.All: return true;

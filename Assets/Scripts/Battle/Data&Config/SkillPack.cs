@@ -47,6 +47,7 @@ public class SkillPack
     public List<AttackPack> attackPacks = new();// 伤害列表
     public int atkTimes = 1; // 攻击次数
     public List<BuffPack> buffPacks = new();    // 附加效果列表
+    public MemeCureTag memeCureTags; // 默认None；普通回血不隐式获得指定治疗标签。
     public List<SkillEffect> skillEffects = new(); // 技能特殊效果列表
     public AudioClip skillSound;// 施放音效
     public List<ItemPack> consumeItems = new(); // 施放消耗道具列表

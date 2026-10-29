@@ -31,7 +31,7 @@ public partial class ClickManager : MonoBehaviour
 
     private void Update()
     {
-        if (BattleScene.Ins.BM.HasExternalPlayerControl) return;
+        if (BattleScene.Ins.BM.HasExternalPlayerControl || MemeLoadoutPanel.IsOpen) return;
         // 聚能选人优先接管世界点击，避免同时触发普通选择或移动。
         if (BattleScene.Ins.BM.IsChoosingBurst)
         {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -95,6 +95,7 @@ public partial class AIController : PlayerController
     public void Update()
     {
         var battle = BattleScene.Ins.BM;
+        if (UpdateBehaviorControl(battle)) return;
         if (battle.BurstInputPending || !isInTurn || !battle.SpeedTurnsActive || battle.HasCombatPresentation || battle.moveManager.IsMoving) return;
         if (!(battle.ActivePiece is EnemyController enemy)) return;
         _timer += Time.deltaTime;
@@ -156,7 +157,7 @@ public partial class AIController : PlayerController
             retreat.CheckTargetReached();
             return actionAttempted;
         }
-        if (TryHealingPriority(aiPiece, strategy)) return true;
+        if (TryBehaviorRecovery(aiPiece) || TryHealingPriority(aiPiece, strategy)) return true;
         if (EnemyBehaviorRules.ShouldFlee(aiPiece))
         {
             pendingAttacks.Remove(aiPiece);

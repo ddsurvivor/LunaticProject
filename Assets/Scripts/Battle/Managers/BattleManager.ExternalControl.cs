@@ -47,6 +47,8 @@ public partial class BattleManager
     private bool ObserveBattleOutcome(BattleOutcome outcome)
     {
         if (LastOutcome != BattleOutcome.None) return true;
+        CancelBattleReactions();
+        _timedMemeStatuses?.ClearAll();
         bool intercept = SuppressExternalPresentation; // 回调可能释放持有权，先快照是否拦截结算副作用。
         if (intercept)
         {

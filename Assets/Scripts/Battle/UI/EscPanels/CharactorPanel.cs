@@ -27,5 +27,6 @@ public class CharactorPanel : UIPanel
         avatarImage.sprite = Resources.Load<Sprite>("CG/" + player.spriteName);
         nameText.text = player.NAME;
         pieceInfoPanel.SetPlayer(player, pieceData);
+        MemeLoadoutPanel.EnsureCharacterEntry(this);
     }
 }

@@ -37,6 +37,10 @@ public partial class BattleManager : MonoBehaviour
     /// <summary>本场模因装配与触发入口，不需要额外挂载组件。</summary>
     public MemeService memeService => _memeService ??= new MemeService(this);
 
+    private TimedMemeStatusService _timedMemeStatuses;
+    /// <summary>本场精确模因状态与计时，不复用旧Buff层数。</summary>
+    public TimedMemeStatusService timedMemeStatuses => _timedMemeStatuses ??= new TimedMemeStatusService();
+
     public PieceDataListSO pieceDataListSO;
 
     //public List<LadderArea> ladderAreas = new();
@@ -71,6 +75,7 @@ public partial class BattleManager : MonoBehaviour
             inBattle = true;
             LastOutcome = BattleOutcome.None;
             _turnNumber = 0;
+            _timedMemeStatuses?.ClearAll();
             characterSkillManager.ClearAllRegistry();
             PlayerController.Init();
             AIController.Init();
@@ -108,7 +113,7 @@ public partial class BattleManager : MonoBehaviour
     public bool HasCombatPresentation => (cameraController != null && cameraController.IsPresentingHit) || HasActionPresentation;
 
     /// <summary>攻击、受击、死亡和结算仍在播放；不含镜头，供镜头等待而不形成循环依赖。</summary>
-    public bool HasActionPresentation => _isFlankAttacking || HasPendingRecognitionSettlement ||
+    public bool HasActionPresentation => HasPendingBattleReactions || HasPendingRecognitionSettlement ||
         HasPresentation(PlayerController.pieces) || HasPresentation(AIController.pieces) || HasPresentation(summonPieces);
 
     private static bool HasPresentation(IEnumerable<PieceController> pieces)
@@ -132,7 +137,7 @@ public partial class BattleManager : MonoBehaviour
     public float PrepareAttackMultiplier(PieceController attacker, List<PieceController> targets, SkillPack skill, Vector3 targetPos)
     {
         var validTargets = SkillTargeting.Filter(attacker, targets, skill, targetPos);
-        var hostileTarget = validTargets.FirstOrDefault(t => !t.isDead && t.isPlayerPiece != attacker.isPlayerPiece);
+        var hostileTarget = validTargets.FirstOrDefault(t => !t.isDead && BattleRelations.CanAttack(attacker, t));
         return skill.attackPacks.Count > 0 && hostileTarget != null
             ? characterSkillManager.EvaluateDamageMultiplier(attacker.gameObject, hostileTarget.gameObject) : 1f;
     }
@@ -143,13 +148,13 @@ public partial class BattleManager : MonoBehaviour
         , CheckResult checkResult = CheckResult.None, bool isFlank = false, MemeActionContext memeActionContext = null,
         float? preparedPassiveMultiplier = null)
     {
-        if (attacker == null || skillPack == null || (attacker.isDead && !skillPack.AllowDeadCaster) || targets == null) return;
+        if (attacker == null || skillPack == null || BattleRelations.IsOffensive(skillPack) && !BattleRelations.CanInitiateAttack(attacker) || (attacker.isDead && !skillPack.AllowDeadCaster) || targets == null) return;
         List<List<DamageInfo>> damageInfoList = new();
         var memeAction = memeActionContext ?? memeService.BeginAction(attacker, skillPack, isFlank);
         using var actionScope = memeAction.EnsureAction(attacker, skillPack).Enter();
         var validTargets = SkillTargeting.Filter(attacker, targets, skillPack, targetPos);
         // 每次施法只消费一次攻击被动，全部目标与伤害段共享本次倍率。
-        var hostileTarget = validTargets.FirstOrDefault(t => !t.isDead && t.isPlayerPiece != attacker.isPlayerPiece);
+        var hostileTarget = validTargets.FirstOrDefault(t => !t.isDead && BattleRelations.CanAttack(attacker, t));
         float passiveMultiplier = preparedPassiveMultiplier ?? PrepareAttackMultiplier(attacker, validTargets, skillPack, targetPos);
         if (skillPack.isRecognitionCheck && checkResult == CheckResult.None && hostileTarget != null)
             checkResult = diceCheckManager.ModeRecognitionCheck(attacker, hostileTarget);
@@ -169,7 +174,7 @@ public partial class BattleManager : MonoBehaviour
             var damageInfos = settlement.DamageInfos;
             damageInfoList.Add(damageInfos);
             isCrit |= settlement.IsCritical;
-            if (settlement.HitAttack && target.isPlayerPiece != attacker.isPlayerPiece) hitTargets.Add(target);
+            if (settlement.HitAttack && BattleRelations.CanAttack(attacker, target)) hitTargets.Add(target);
 
             // 2. 无效目标、未命中或屏障阻挡时，只跳过当前目标的附加效果。
             if (!settlement.CanApplyEffects) continue;
@@ -196,7 +201,7 @@ public partial class BattleManager : MonoBehaviour
                 else if (buffPack.target == SkillTarget.EnemyAll ||
                          buffPack.target == SkillTarget.Enemy || buffPack.target == SkillTarget.FarthestEnemy)
                 {
-                    if (target.isPlayerPiece == attacker.isPlayerPiece) continue;
+                    if (!BattleRelations.CanAttack(attacker, target)) continue;
                     if (GameConst.CheckRate(buffPack.rate))
                     {
                         buffManager.AddBuff(target.unitAttrCenter, buffPack.buffType
@@ -205,7 +210,7 @@ public partial class BattleManager : MonoBehaviour
                 }
                 else if (buffPack.target == SkillTarget.Ally || buffPack.target == SkillTarget.AllyBody)
                 {
-                    if (target.isPlayerPiece != attacker.isPlayerPiece) continue;
+                    if (!BattleRelations.CanSupport(attacker, target)) continue;
                     if (GameConst.CheckRate(buffPack.rate))
                     {
                         buffManager.AddBuff(target.unitAttrCenter, buffPack.buffType
@@ -217,6 +222,7 @@ public partial class BattleManager : MonoBehaviour
             // 处理附加效果
             ApplySKillEffect(skillPack, attacker, target, targetPos);
             ApplyAddEffect(skillPack, attacker, target, targetPos);
+            if (skillPack.memeCureTags != MemeCureTag.None) timedMemeStatuses.TryCure(target, skillPack.memeCureTags);
             if (IsBurstActor(attacker)) // 聚能状态下所有攻击附加击退效果
             {
                 SpaceBombEffect(skillPack, attacker, target, targetPos, true); // 去除假死
@@ -235,7 +241,7 @@ public partial class BattleManager : MonoBehaviour
                 }
             }
 
-            // 判定夹击
+            // 排队到击退落点与碰撞结算后再判定夹击。
             CheckFlankAttack(attacker, target);
         }
 
@@ -551,7 +557,8 @@ public partial class BattleManager : MonoBehaviour
     private void HitBackEffect(HitBackEffect hitBackEffect, PieceController caster = null,
         PieceController target = null, Vector3 targetPos = default)
     {
-        if (target == null || target.ableMove == false) return;
+        if (!CanReact(target) || caster == null || target.ableMove == false) return;
+        if (pieceDisplacements.TryGetValue(target, out var previousDisplacement)) previousDisplacement.Kill();
 
         // 获取目标棋子的 NavMeshAgent
         NavMeshAgent agent = target.GetComponent<NavMeshAgent>();
@@ -603,21 +610,21 @@ public partial class BattleManager : MonoBehaviour
 
         // =================【核心优化：防止 Agent 与 Tween 打架】=================
         // 在用 DOTween 强行平移前，必须关闭 Agent 避障与定位，否则会发生剧烈抖动或无法位移
-        if (agent != null)
-        {
-            agent.enabled = false;
-        }
+        bool restoreAgent = agent != null && agent.enabled;
+        if (agent != null) agent.enabled = false;
 
         // 锁定Y轴，防止击退造成高度偏差
         finalPos.y = target.transform.position.y;
 
         // 在安排位移时捕获来源，延迟碰撞沿用原根行动。
         var collisionSource = new BattleDamageSource(BattleDamageKind.Collision, caster);
-        // 执行位移
-        target.transform.DOMove(finalPos, 0.2f).SetEase(Ease.OutQuad).OnComplete(() =>
+        int version = reactionVersion;
+        Tween displacement = null;
+        displacement = target.transform.DOMove(finalPos, 0.2f).SetEase(Ease.OutQuad).OnComplete(() =>
         {
             // =================【核心优化：位移结束同步网格】=================
-            if (agent != null)
+            if (version != reactionVersion || !CanReact(target)) return;
+            if (restoreAgent && agent != null)
             {
                 agent.enabled = true;
                 // 核心关键：使用 Warp 强行将 Agent 的内部坐标刷新到当前物理坐标，彻底根治“退回原点”Bug
@@ -636,7 +643,18 @@ public partial class BattleManager : MonoBehaviour
 
                 TriggerCollisionDamage(hitPieces, hitBackEffect.hitBackDamage, collisionSource);
             }
+        }).OnKill(() =>
+        {
+            displacements.Remove(displacement);
+            if (target != null) pieceDisplacements.Remove(target);
+            if (restoreAgent && CanReact(target) && agent != null && !agent.enabled)
+            {
+                agent.enabled = true;
+                agent.Warp(target.transform.position);
+            }
         });
+        displacements.Add(displacement);
+        pieceDisplacements[target] = displacement;
     }
 
     /// <summary>
@@ -646,7 +664,8 @@ public partial class BattleManager : MonoBehaviour
     {
         foreach (var piece in hitPieces)
         {
-            // 所有被撞到的棋子都受伤
+            if (!CanReact(piece)) continue;
+            // 所有仍存活的碰撞参与者沿用原碰撞基数。
             piece.unitAttrCenter.TakeDamage(new AttackPack(damage, DamageType.Melee), source ?? new BattleDamageSource(BattleDamageKind.Collision));
             BattleScene.Ins.UM.logPanel.PlayerLog(
                 $"{piece.pieceData.pieceName} 受到碰撞伤害 <color=red>{damage}</color>！");
@@ -928,25 +947,23 @@ public partial class BattleManager : MonoBehaviour
 
 
     // ===== 夹击判定 ========== //
-    private Coroutine flankRoutine;
-    private bool _isFlankAttacking = false; // 防重入锁：标记当前是否正在执行夹击结算
 
-    /// <summary>
-    /// 夹击判定：当目标受到攻击后，检查攻击者的队友是否也能触及该目标，若满足则触发协同普攻
-    /// </summary>
-    /// <param name="attacker">发起当前攻击的棋子</param>
-    /// <param name="target">被攻击的受害者</param>
-    /// 
+    /// <summary>命中后排队判定夹击；等待实际落点与碰撞后选择最近队友，同根同队友同目标只反应一次。</summary>
     public void CheckFlankAttack(PieceController attacker, PieceController target)
     {
-        if (_isFlankAttacking) return;
-        if (target == null || attacker == null || target.unitAttrCenter.CurHealth <= 0) return;
-        if (attacker.isPlayerPiece == target.isPlayerPiece) return; // 排除：攻击者与目标属于同一阵营
+        if (flankReactionExecuting || !CanReact(attacker) || !CanReact(target) ||
+            !BattleRelations.CanAttack(attacker, target)) return;
+        var parent = BattleActionContext.Current ?? new BattleActionContext(attacker);
+        EnqueueReaction($"flank-check:{attacker.GetInstanceID()}:{target.GetInstanceID()}", parent,
+            () => ResolveFlankAttack(attacker, target));
+    }
+
+    private IEnumerator ResolveFlankAttack(PieceController attacker, PieceController target)
+    {
+        if (!CanReact(attacker) || !CanReact(target) || !BattleRelations.CanAttack(attacker, target)) yield break;
 
         // 获取攻击者的队友列表
-        IEnumerable<PieceController> teammates = attacker.isPlayerPiece
-            ? PlayerController.pieces
-            : AIController.pieces.Cast<PieceController>();
+        IEnumerable<PieceController> teammates = SpeedParticipants().Where(p => BattleRelations.CanSupport(attacker, p));
 
         PieceController closestPartner = null;
         float minDistance = float.MaxValue; // 初始化一个极大值用于比对
@@ -954,8 +971,7 @@ public partial class BattleManager : MonoBehaviour
         foreach (var partner in teammates)
         {
             // 排除：自身、空引用、已死亡的队友
-            if (partner == attacker || partner == null ||
-                partner.unitAttrCenter.CurHealth <= 0) continue;
+            if (partner == attacker || !CanReact(partner) || !BattleRelations.CanAttack(partner, target) || partner.pieceData.MeleeAttack == null) continue;
             if (!partner.ableStrick) continue; // 排除：无法夹击的队友
 
             // 如果是敌方单位，还需确保其已激活
@@ -983,16 +999,28 @@ public partial class BattleManager : MonoBehaviour
             Debug.Log(
                 $"【夹击触发】最近的队友 {closestPartner.pieceData.pieceName} 对 {target.pieceData.pieceName} 发动协同夹击！（距离：{minDistance:F2}米）");
 
-            // 获取普攻数据
-            SkillPack normalAttackPack = closestPartner.pieceData.MeleeAttack;
-            // 音效特效
+            var chain = BattleActionContext.Current.ReactionChain;
+            if (!chain.Keys.Add($"flank:{closestPartner.GetInstanceID()}:{target.GetInstanceID()}")) yield break;
+            if (!BuffManager.CanTarget(closestPartner, target) ||
+                closestPartner.unitAttrCenter.GetBuffStacks(BuffType.Stun) != 0) yield break;
             GM.Ins.AM.PlayAudio(AudioCueType.PincerTrigger);
-            ObjectPool.Ins.GenerateObject(ItemType.PincerAttackFx
-                , closestPartner.transform.position + Vector3.up * 1.2f, Quaternion.identity);
-            if (normalAttackPack == null) return;
-            _isFlankAttacking = true;
+            ObjectPool.Ins.GenerateObject(ItemType.PincerAttackFx,
+                closestPartner.transform.position + Vector3.up * 1.2f, Quaternion.identity);
+            flankReactionExecuting = true;
             closestPartner.ableStrick = false;
-            flankRoutine = StartCoroutine(FlankAttackRoutine(attacker, closestPartner, target, BattleActionContext.Current));
+            try
+            {
+                reactionActor = closestPartner;
+                if (closestPartner.isPlayerPiece) closestPartner.CastNormalAttack(target);
+                else
+                {
+                    closestPartner.StartNormalAttack();
+                    ((EnemyController)closestPartner).CastAttackOnTarget(target, isMemeReaction: true);
+                }
+                while (closestPartner != null && closestPartner.IsPerformingAction) yield return null;
+                tutorialManager.TriggerFirstTutorial(FirstTutorialType.FirstStrick);
+            }
+            finally { flankReactionExecuting = false; reactionActor = null; }
         }
     }
 
@@ -1002,34 +1030,8 @@ public partial class BattleManager : MonoBehaviour
         CancelBattleStartup();
         startupInitialized = false;
         startupRequested = false;
-        if (flankRoutine != null) StopCoroutine(flankRoutine);
-        flankRoutine = null;
-        _isFlankAttacking = false;
-    }
-
-    private IEnumerator FlankAttackRoutine(PieceController attacker, PieceController partner, PieceController target, BattleActionContext parent)
-    {
-        try
-        {
-            // 等原攻击和队友当前动作收尾，再出手；锁覆盖整次夹击，含减速与弹道。
-            while ((attacker != null && attacker.IsPerformingAction) ||
-                   (partner != null && partner.IsPerformingAction)) yield return null;
-            if (partner == null || !partner.isActiveAndEnabled || partner.isDead ||
-                target == null || !target.isActiveAndEnabled || target.isDead) yield break;
-            // 仅在同步发起反应时恢复父行动，不能在后续等待动画时占用全局上下文。
-            using (parent?.Enter())
-            {
-                if (partner.isPlayerPiece) partner.CastNormalAttack(target);
-                else
-                {
-                    partner.StartNormalAttack();
-                    ((EnemyController)partner).CastAttackOnTarget(target, isMemeReaction: true);
-                }
-            }
-            while (partner != null && partner.IsPerformingAction) yield return null;
-            tutorialManager.TriggerFirstTutorial(FirstTutorialType.FirstStrick);
-        }
-        finally { _isFlankAttacking = false; }
+        CancelBattleReactions();
+        _timedMemeStatuses?.ClearAll();
     }
 
     /// <summary>
@@ -1046,6 +1048,8 @@ public partial class BattleManager : MonoBehaviour
     public void OnClickQuitBattle()
     {
         CancelBattleStartup();
+        CancelBattleReactions();
+        _timedMemeStatuses?.ClearAll();
         // 保存所有棋子状态保存到存档内
         if (GM.Ins.pieceHPInherit)
         {

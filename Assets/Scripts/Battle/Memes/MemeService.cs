@@ -8,8 +8,11 @@ public readonly struct MemeEffectContext
     public PieceController Target { get; }
     public MemeDefinition Meme { get; }
     public MemeSourceKind Sources { get; }
-    public MemeEffectContext(PieceController actor, PieceController target, MemeDefinition meme, MemeSourceKind sources)
-    { Actor = actor; Target = target; Meme = meme; Sources = sources; }
+    /// <summary>真实效果的显式行动来源；预览为空，处理器不必依赖调用时的全局作用域。</summary>
+    public BattleActionContext Action { get; }
+    public MemeEffectContext(PieceController actor, PieceController target, MemeDefinition meme, MemeSourceKind sources,
+        BattleActionContext action = null)
+    { Actor = actor; Target = target; Meme = meme; Sources = sources; Action = action; }
 }
 
 /// <summary>自定义模因效果入口；CanApply 必须只读，Apply 不得重新判定词条概率。</summary>
@@ -25,7 +28,7 @@ public sealed class MemeService
     private readonly BattleManager battle;
     private readonly MemeResolver resolver;
     private readonly Dictionary<string, IMemeEffectHandler> handlers = new(StringComparer.Ordinal);
-    public MemeCatalogSO Catalog => battle.memeCatalog != null ? battle.memeCatalog : GM.Ins?.DM?.memeCatalog;
+    public MemeCatalogSO Catalog => battle.memeCatalog != null ? battle.memeCatalog : GM.Ins?.DM?.MemeCatalog;
 
     /// <summary>完成单个词条判定和效果提交后通知；预览不发送该事件。</summary>
     public event Action<MemeEffectContext, MemeAttempt> AttemptResolved;
@@ -34,6 +37,11 @@ public sealed class MemeService
     {
         this.battle = battle ?? throw new ArgumentNullException(nameof(battle));
         resolver = new MemeResolver(rollPercent ?? (chance => BattleRandom.Range(0, 100) < chance));
+        handlers.Add(TimedMemeStatusService.CellHandler, battle.timedMemeStatuses.CreateHandler(TimedMemeStatusService.CellHandler));
+        handlers.Add(TimedMemeStatusService.HeatHandler, battle.timedMemeStatuses.CreateHandler(TimedMemeStatusService.HeatHandler));
+        foreach (var id in new[] { TimedMemeStatusService.ParalysisHandler, TimedMemeStatusService.ViolenceHandler,
+            TimedMemeStatusService.InversionHandler, TimedMemeStatusService.DragonHandler })
+            handlers.Add(id, battle.timedMemeStatuses.CreateHandler(id));
     }
 
     /// <summary>注册复杂行为处理器；重复编号会拒绝，防止悄悄替换本场规则。</summary>
@@ -89,7 +97,7 @@ public sealed class MemeService
         if (MemeEquipment.SameSlots(actor.playerData.memeSlots, slots)) { error = "模因配置没有变化"; return false; }
         // 先快照整套配置，再调用已有费用入口；行动中断保留其正常扣费语义。
         var replacement = MemeEquipment.CopySlots(slots);
-        if (!actor.unitAttrCenter.CostMP(MemeEquipment.BattleEquipCost))
+        if (!actor.unitAttrCenter.CostMP(MemeEquipment.BattleEquipCost, true))
         { error = "行动点不足或配置行动被状态中断"; return false; }
         actor.playerData.memeSlots = replacement;
         return true;
@@ -104,7 +112,8 @@ public sealed class MemeService
         foreach (var source in action.Sources)
         {
             var meme = catalog != null ? catalog.GetDefinition(source.Id) : null;
-            var context = new MemeEffectContext(actor, target, meme, source.Kind);
+            var context = new MemeEffectContext(actor, target, meme, source.Kind,
+                preview ? null : action.EnsureAction(actor, skill));
             var targetContext = BuildTarget(actor, target, skill, check, source.Id);
             MemeOutcome outcome = resolver.Preview(meme, targetContext, action);
             if (outcome == MemeOutcome.Eligible && !CanApply(context)) outcome = MemeOutcome.UnsupportedEffect;
@@ -129,7 +138,8 @@ public sealed class MemeService
         {
             targetId = target.GetInstanceID(), bodyType = target.pieceData?.memeBodyType ?? MemeBodyType.None,
             tags = target.pieceData?.memeTargetTags, networkLinked = target.MemeState.NetworkLinked,
-            friendly = actor.isPlayerPiece == target.isPlayerPiece,
+            friendly = skill.attackPacks != null && skill.attackPacks.Count > 0
+                ? !BattleRelations.CanAttack(actor, target) : BattleRelations.CanSupport(actor, target),
             trigger = skill.attackPacks != null && skill.attackPacks.Count > 0 ? MemeTrigger.AttackHit : MemeTrigger.SupportResolved,
             recognitionPassed = skill.isRecognitionCheck && (check == CheckResult.DamageIncreased || check == CheckResult.MustCrit),
             resistancePercent = target.MemeState.GetResistance(id)

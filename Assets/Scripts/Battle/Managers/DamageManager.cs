@@ -47,7 +47,7 @@ public sealed class DamageManager
         if (!CanAffect(attacker, target, skill)) return result;
         action ??= BattleActionContext.Current ?? new BattleActionContext(attacker, skill, isFlank);
         using var actionScope = action.Enter();
-        if (skill.attackPacks.Count > 0 && attacker.isPlayerPiece != target.isPlayerPiece)
+        if (skill.attackPacks.Count > 0 && BattleRelations.CanAttack(attacker, target))
             battle.buffManager.OnAttacked(attacker, target);
         Context context = CreateContext(attacker, target, skill, checkResult, isFlank);
         context.PassiveMultiplier = passiveMultiplier;
@@ -162,7 +162,7 @@ public sealed class DamageManager
         {
             Attacker = attacker, Target = target, PassiveMultiplier = 1f, Cover = battle.CheckCoverObstruction(attacker, target),
             IsBursting = battle.IsBurstActor(attacker), IsFlank = isFlank,
-            BarrierBlocked = attacker.isPlayerPiece != target.isPlayerPiece
+            BarrierBlocked = skill.attackPacks.Count > 0
                 && target.unitAttrCenter.GetBuffStacks(BuffType.SlowingField) != 0
         };
         bool guaranteed = context.IsBursting || skill.target is SkillTarget.EnemyAll
