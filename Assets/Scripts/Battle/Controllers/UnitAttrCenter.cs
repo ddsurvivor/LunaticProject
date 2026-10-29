@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using Sirenix.OdinInspector;
@@ -294,16 +294,27 @@ public class UnitAttrCenter : SerializedMonoBehaviour
             (previousMaxHealth < 0 || previousMaxHealth == _maxHealth))) return;
         BattleScene.Ins?.BM?.characterSkillManager?.NotifyHpChanged(pc.gameObject, _curHealth, _maxHealth);
     }
-    public void TakeDamage(AttackPack attackPack)
+    /// <summary>每次有效生命伤害提交后发送一次结果；观察者不得再次扣除本次伤害，屏障全吸收不发送。</summary>
+    public event System.Action<BattleDamageResult> DamageApplied;
+
+    /// <summary>兼容旧伤害入口；未提供来源时标记Unknown，仍只提交一次伤害。</summary>
+    public void TakeDamage(AttackPack attackPack) => TakeDamage(attackPack, new BattleDamageSource(BattleDamageKind.Unknown));
+
+    /// <summary>提交有来源的伤害并返回实际生命损失；负伤害和死亡目标不发送结果事件。</summary>
+    public BattleDamageResult TakeDamage(AttackPack attackPack, BattleDamageSource source)
     {
-        if (pc.isDead) return;
+        source ??= new BattleDamageSource(BattleDamageKind.Unknown);
+        if (pc.isDead || attackPack.damage < 0)
+            return new BattleDamageResult(pc, source, attackPack.damage, _curHealth, _curHealth, true);
+        using var sourceScope = source.Action.Enter();
         // 1. 负数不作为伤害处理；零伤害命中仍继续播放受击反馈。
-        if (attackPack.damage < 0) return;
         int previousHealth = _curHealth;
         _curHealth -= attackPack.damage;
         // 2. 所有有效命中都显示伤害跳字，包括 0。
         BattleScene.Ins.BM.tipTextManager.ShowDamage(transform, attackPack.damage, attackPack.isCritical);
         if (_curHealth <= 0) _curHealth = 0;
+        // 在生命变化回调与死亡事件前固定本段结果，嵌套被动不能篡改这次实际掉血。
+        var result = new BattleDamageResult(pc, source, attackPack.damage, previousHealth, _curHealth);
         UpdateHpBar();
         NotifyHealthChanged(previousHealth);
         // 按真实掉血充能，放在死亡分支前以覆盖致死伤害，零伤害不计入。
@@ -323,7 +334,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         }
         else
         {
-            if (pc == null) return;
+            if (pc == null) return result;
             
             pc.Hurt();
             
@@ -338,7 +349,8 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         }
 
         BattleScene.Ins.UM.OnPieceStateChance(pc);
-        //Debug.Log($"受到{attackPack.damageType}伤害{attackPack.damage}");
+        DamageApplied?.Invoke(result);
+        return result;
     }
 
     public void Heal(int healAmount)
@@ -370,14 +382,15 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     public bool CostMP(ActionType actionType)
     {
         if (pc.isDead || GetBuffStacks(BuffType.Stun) != 0) return false;
-        if ((actionType == ActionType.移动 || actionType == ActionType.攀爬) &&
+        if ((actionType == ActionType.Move || actionType == ActionType.Climb) &&
             GetBuffStacks(BuffType.Bind) != 0) return false;
         int costPoint = GM.Ins.DM.gameConstSO.GetActionPointCost(actionType);
         if (_curMovePoint >= costPoint)
         {
             _curMovePoint -= costPoint;
+            BattleScene.Ins.UM.NotifyActionCommitted(pc);
             if (!BattleScene.Ins.BM.buffManager.OnAction(this)) return false;
-            if ((actionType == ActionType.移动 || actionType == ActionType.攀爬) &&
+            if ((actionType == ActionType.Move || actionType == ActionType.Climb) &&
                 GetBuffStacks(BuffType.Bind) != 0) return false;
             Debug.Log($"{gameObject.name}执行{actionType}消耗行动力{costPoint}，剩余行动力{_curMovePoint}");
             BattleScene.Ins.UM.OnPieceStateChance(pc);
@@ -392,6 +405,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         if (_curMovePoint >= costPoint)
         {
             _curMovePoint -= costPoint;
+            BattleScene.Ins.UM.NotifyActionCommitted(pc);
             if (!BattleScene.Ins.BM.buffManager.OnAction(this)) return false;
             Debug.Log($"{gameObject.name}消耗行动力{costPoint}，剩余行动力{_curMovePoint}");
             BattleScene.Ins.UM.OnPieceStateChance(pc);
@@ -464,9 +478,46 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         return true;
     }
 
+    /// <summary>战斗道具确认时支付 Item 行动点和一件库存；提交前资源不足不扣费，行动钩子中断或使库存失效时只消耗 AP。</summary>
+    public bool TryCostBattleItem(ItemName itemName)
+    {
+        var costs = new Dictionary<ItemName, int> { [itemName] = 1 };
+        if (!HasItemCosts(costs) || !CostMP(ActionType.Item)) return false;
+        // 行动钩子可能改变背包；不在库存已失效时继续生效或扣成负数。
+        if (!HasItemCosts(costs)) return false;
+        CommitItemCosts(costs);
+        return true;
+    }
+
+    /// <summary>只读查询材料是否足够；合并同名费用，不分配集合、不输出日志或扣费，适用于持续 UI 刷新。</summary>
     public bool HasItem(List<ItemPack> itemPacks)
     {
-        return TryGetItemCosts(itemPacks, out var costs) && HasItemCosts(costs);
+        if (itemPacks == null) return true;
+        foreach (var item in itemPacks)
+            if (item == null || item.itemNum < 0) return false;
+        for (int i = 0; i < itemPacks.Count; i++)
+        {
+            var item = itemPacks[i];
+            bool counted = false;
+            for (int j = 0; j < i; j++)
+                if (itemPacks[j].itemName == item.itemName) { counted = true; break; }
+            if (counted) continue;
+            int total = 0;
+            // 材料列表通常很短，直接合计避免每帧为每个技能分配临时字典。
+            for (int j = i; j < itemPacks.Count; j++)
+            {
+                if (itemPacks[j].itemName != item.itemName) continue;
+                int amount = itemPacks[j].itemNum;
+                if (total > int.MaxValue - amount) return false;
+                total += amount;
+            }
+            if (total == 0) continue;
+            int owned = 0;
+            foreach (var pack in GM.Ins.PLAYERPROFILE.itemPacks)
+                if (pack.itemName == item.itemName) { owned = pack.itemNum; break; }
+            if (owned < total) return false;
+        }
+        return true;
     }
 
     /// <summary>普通及延迟技能共用：资源不足不扣费；行动异常中断只消耗行动点。</summary>
@@ -476,7 +527,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         if (skill == null || !HasMana(manaCost) ||
             !TryGetItemCosts(skill.consumeItems, out var costs) || !HasItemCosts(costs)) return false;
         // CostMP 内部处理死亡、眩晕、行动点校验以及行动触发的 Buff。
-        if (!CostMP(ActionType.技能)) return false;
+        if (!CostMP(ActionType.Skill)) return false;
         _manaPoint -= manaCost;
         CommitItemCosts(costs);
         BattleScene.Ins.UM.OnPieceStateChance(pc);

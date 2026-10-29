@@ -19,7 +19,34 @@ public sealed class SpeedTurnQueue<T> where T : class
     /// <summary>清空参战者、进度及时间，供新战斗初始化使用。</summary>
     public void Clear() { entries.Clear(); nextOrder = 0; Ticks = 0; }
     /// <summary>读取棋子累计进度；尚未注册时返回 0，已满条时可能超过 100。</summary>
-    public double Progress(T unit) => entries.Find(e => ReferenceEquals(e.Unit, unit))?.Progress ?? 0;
+    public double Progress(T unit) => FindEntry(unit)?.Progress ?? 0;
+
+    /// <summary>只读比较展示顺序：满条者按真实到达时刻，未满条者按进度，同值按首次注册次序；未注册者排后。</summary>
+    public int CompareDisplayOrder(T a, T b)
+    {
+        if (ReferenceEquals(a, b)) return 0;
+        var left = FindEntry(a);
+        var right = FindEntry(b);
+        if (left == null || right == null) return left == null ? (right == null ? 0 : 1) : -1;
+        bool leftReady = left.Progress >= 100, rightReady = right.Progress >= 100;
+        if (leftReady != rightReady) return leftReady ? -1 : 1;
+        if (leftReady) return CompareReady(left, right);
+        int progress = right.Progress.CompareTo(left.Progress);
+        return progress != 0 ? progress : left.Order.CompareTo(right.Order);
+    }
+
+    private static int CompareReady(Entry left, Entry right)
+    {
+        int arrival = left.Arrival.CompareTo(right.Arrival);
+        return arrival != 0 ? arrival : left.Order.CompareTo(right.Order);
+    }
+
+    private Entry FindEntry(T unit)
+    {
+        foreach (var entry in entries)
+            if (ReferenceEquals(entry.Unit, unit)) return entry;
+        return null;
+    }
 
     /// <summary>同步有效参战者，保留已有进度，新加入者从 0 开始。</summary>
     public void Sync(IEnumerable<T> units)
@@ -51,8 +78,7 @@ public sealed class SpeedTurnQueue<T> where T : class
     {
         Entry first = null;
         foreach (var entry in entries)
-            if (entry.Progress >= 100 && (first == null || entry.Arrival < first.Arrival ||
-                (entry.Arrival == first.Arrival && entry.Order < first.Order))) first = entry;
+            if (entry.Progress >= 100 && (first == null || CompareReady(entry, first) < 0)) first = entry;
         if (first == null) return null;
         // 只消费一条进度，高速棋子的溢出仍参与下一次就绪判断。
         first.Progress -= 100;

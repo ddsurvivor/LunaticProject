@@ -7,10 +7,15 @@ public sealed class MemeActionContext
     private readonly Dictionary<int, MemeSourceKind> sources = new();
     private readonly HashSet<(int target, int meme)> attempted = new(); // 每个目标每种模因只判定一次。
     public bool IsReaction { get; }
+    public BattleActionContext Action { get; private set; } // 预览及旧独立调用可以为空，不创建虚假行动。
     public IReadOnlyList<MemeSource> Sources { get; }
 
-    public MemeActionContext(IEnumerable<MemeSource> entries, bool isReaction = false)
+    internal BattleActionContext EnsureAction(PieceController actor, SkillPack skill) =>
+        Action ??= new BattleActionContext(actor, skill, IsReaction);
+
+    public MemeActionContext(IEnumerable<MemeSource> entries, bool isReaction = false, BattleActionContext action = null)
     {
+        Action = action;
         IsReaction = isReaction;
         if (entries != null)
             foreach (var source in entries)

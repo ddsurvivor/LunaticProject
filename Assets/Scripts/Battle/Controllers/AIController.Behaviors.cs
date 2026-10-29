@@ -16,7 +16,7 @@ public partial class AIController
         if (mode == EnemyAIType.WeakestDefenseShooter && allowMove && retreatAfterShot.Remove(piece) && TryShooterEvade(piece)) return true;
         if (TryCreateExplosivePlan(piece, out var explosive) && TryAttackPlan(piece, explosive, false)) return true;
         if (allowMove && piece.navigate && Mathf.Abs(target.transform.position.y - piece.transform.position.y) > 1f)
-            return EnemyMoveToLadder(piece);
+            return EnemyMoveToLadder(piece, target.transform.position);
 
         if (mode == EnemyAIType.WeakestDefenseShooter)
         {
@@ -37,10 +37,10 @@ public partial class AIController
         {
             if ((crowd || lowTarget) && TryModeSkill(piece, lowTarget ? FindLowHealthSkillTarget(piece) ?? target : target,
                 null, crowd && !lowTarget, false)) return true;
-            if (far && UnityEngine.Random.value < 1f / 3f && TryModeSkill(piece, target, EnemySkillRole.RangedAttack, false, allowMove)) return true;
+            if (far && BattleRandom.Value < 1f / 3f && TryModeSkill(piece, target, EnemySkillRole.RangedAttack, false, allowMove)) return true;
         }
         if (mode == EnemyAIType.DamageHunterMeleeSkill && distance < EnemyBehaviorRules.MaximumRange(piece) * 0.5f &&
-            UnityEngine.Random.value < 1f / 3f &&
+            BattleRandom.Value < 1f / 3f &&
             TryModeSkill(piece, target, EnemySkillRole.MeleeAttack, false, allowMove)) return true;
         if ((mode == EnemyAIType.SkillUser || mode == EnemyAIType.HealingSupport) &&
             TryModeSkill(piece, target, null, false, allowMove)) return true;
@@ -76,7 +76,7 @@ public partial class AIController
                     !piece.unitAttrCenter.HasMana(skill.mpCost)) continue;
                 if (multiOnly && CountSkillHits(piece, target, skill) < 2) continue;
                 if (pass == 0 && !CanExecuteAttack(piece, target, skill)) continue;
-                var plan = new AttackPlan { Target = target, Skill = skill, Action = ActionType.技能, Strategy = piece.ResolveStrategy() };
+                var plan = new AttackPlan { Target = target, Skill = skill, Action = ActionType.Skill, Strategy = piece.ResolveStrategy() };
                 if (TryAttackPlan(piece, plan, pass != 0) || actionAttempted) return true;
             }
         return false;
@@ -109,7 +109,7 @@ public partial class AIController
     private bool TryHealingPriority(EnemyController piece, EnemyStrategy strategy)
     {
         if ((!piece.prioritizeHealing && strategy.Action != EnemyAIType.HealingSupport) || healedThisTurn.Contains(piece) ||
-            piece.availableSkills == null || !CanAfford(piece, ActionType.技能)) return false;
+            piece.availableSkills == null || !CanAfford(piece, ActionType.Skill)) return false;
         if (pendingAttacks.TryGetValue(piece, out var pending) && pending.Support)
         {
             pendingAttacks.Remove(piece);
@@ -128,7 +128,7 @@ public partial class AIController
                 // 自动治疗尚在生效时不重复覆盖，优先把回复机会让给其他伤员。
                 if (skill.buffPacks != null && skill.buffPacks.Any(b => b != null && b.buffType == BuffType.AutoHeal) &&
                     ally.unitAttrCenter.GetBuffStacks(BuffType.AutoHeal) != 0) continue;
-                var plan = new AttackPlan { Target = ally, Skill = skill, Action = ActionType.技能,
+                var plan = new AttackPlan { Target = ally, Skill = skill, Action = ActionType.Skill,
                     Strategy = strategy, Support = true };
                 if (TryAttackPlan(piece, plan) || actionAttempted) return true;
             }

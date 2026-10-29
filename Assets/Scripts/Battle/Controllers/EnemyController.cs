@@ -84,7 +84,7 @@ public partial class EnemyController : PieceController
         if (IsPerformingAction || isDead || !TryGetAttackPosition(targetPc, skill, out var position)) return;
         var targets = BattleScene.Ins.BM.skillManager.GetTargets(this, position, skill);
         if (targets.Count == 0) return;
-        BeginCombatAction(skill, targets, position, ActionType.技能, PieceDisplayState.Skill);
+        BeginCombatAction(skill, targets, position, ActionType.Skill, PieceDisplayState.Skill);
         NotifySkillUsed(skill);
         rangeUI?.CloseRange();
     }
@@ -96,7 +96,7 @@ public partial class EnemyController : PieceController
         Vector3 position = target.transform.position;
         var targets = SkillTargeting.Query(this, skill, position);
         if (skill.target != SkillTarget.Area && !targets.Contains(target)) return;
-        BeginCombatAction(skill, targets, position, ActionType.技能, PieceDisplayState.Skill);
+        BeginCombatAction(skill, targets, position, ActionType.Skill, PieceDisplayState.Skill);
         NotifySkillUsed(skill);
         rangeUI?.CloseRange();
     }
@@ -112,7 +112,7 @@ public partial class EnemyController : PieceController
         var action = _curAtkType;
         var targets = BattleScene.Ins.BM.skillManager.GetTargets(this, position, skill);
         if (targets.Count == 0) return;
-        bool ranged = action == ActionType.远程攻击;
+        bool ranged = action == ActionType.RangedAttack;
         if (ranged && unitAttrCenter.AmmoCount <= 0) return;
         if (ranged) unitAttrCenter.CostAmmo();
         BeginCombatAction(skill, targets, position, action,
@@ -132,12 +132,12 @@ public partial class EnemyController : PieceController
         targets.RemoveAll(target => target != explosive.Piece && !SkillTargeting.IsValid(this, target, skill));
         if (!EnemyAttackPosition.IsAOE(skill)) targets.RemoveAll(target => target != explosive.Piece);
         if (!targets.Contains(explosive.Piece)) return;
-        bool ranged = action == ActionType.远程攻击;
+        bool ranged = action == ActionType.RangedAttack;
         if (ranged && unitAttrCenter.AmmoCount <= 0) return;
         if (ranged) unitAttrCenter.CostAmmo();
-        BeginCombatAction(attack, targets, position, action, action == ActionType.技能 ? PieceDisplayState.Skill :
+        BeginCombatAction(attack, targets, position, action, action == ActionType.Skill ? PieceDisplayState.Skill :
             ranged ? PieceDisplayState.Shoot : PieceDisplayState.Attack);
-        if (action == ActionType.技能) NotifySkillUsed(skill);
+        if (action == ActionType.Skill) NotifySkillUsed(skill);
         rangeUI?.CloseRange();
     }
 

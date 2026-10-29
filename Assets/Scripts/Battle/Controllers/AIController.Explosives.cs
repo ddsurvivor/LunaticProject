@@ -23,22 +23,22 @@ public partial class AIController
             void Consider(SkillPack skill, ActionType action)
             {
                 if (candidate != null || !CanAfford(piece, action)) return;
-                if (action == ActionType.技能 && (skill == null || !piece.unitAttrCenter.HasMana(skill.mpCost))) return;
-                if (action == ActionType.远程攻击 && piece.unitAttrCenter.AmmoCount <= 0 &&
+                if (action == ActionType.Skill && (skill == null || !piece.unitAttrCenter.HasMana(skill.mpCost))) return;
+                if (action == ActionType.RangedAttack && piece.unitAttrCenter.AmmoCount <= 0 &&
                     (piece.unitAttrCenter.MaxAmmoCount <= 0 || piece.unitAttrCenter.CurMovePoint <
-                        ActionCost(action) + ActionCost(ActionType.重新装填))) return;
+                        ActionCost(action) + ActionCost(ActionType.Reload))) return;
                 if (!EnemyExplosiveTargets.CanAttack(piece, explosive, skill)) return;
                 candidate = new AttackPlan { Target = explosive.Piece, Skill = skill, Action = action,
                     Strategy = strategy, Explosive = explosive };
             }
             if ((strategy.Action == EnemyAIType.SkillUser || strategy.Action == EnemyAIType.HealingSupport) && piece.availableSkills != null)
                 foreach (var skill in piece.availableSkills)
-                    if (IsOffensiveSkill(skill)) Consider(skill, ActionType.技能);
+                    if (IsOffensiveSkill(skill)) Consider(skill, ActionType.Skill);
             bool preferRanged = EnemyBehaviorRules.PreferRanged(piece, strategy.Action, distance);
             if (!EnemyBehaviorRules.IsShooter(strategy.Action) &&
-                (strategy.Action != EnemyAIType.NearestAdaptive || !preferRanged)) Consider(piece.pieceData.MeleeAttack, ActionType.近战攻击);
+                (strategy.Action != EnemyAIType.NearestAdaptive || !preferRanged)) Consider(piece.pieceData.MeleeAttack, ActionType.MeleeAttack);
             if (!EnemyBehaviorRules.IsMeleeOnly(strategy.Action) &&
-                (strategy.Action != EnemyAIType.NearestAdaptive || preferRanged)) Consider(piece.pieceData.RangedAttack, ActionType.远程攻击);
+                (strategy.Action != EnemyAIType.NearestAdaptive || preferRanged)) Consider(piece.pieceData.RangedAttack, ActionType.RangedAttack);
             if (candidate == null) continue;
             best = candidate;
             bestCount = count;

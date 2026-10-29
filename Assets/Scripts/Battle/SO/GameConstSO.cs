@@ -62,7 +62,7 @@ public class GameConstSO : SerializedScriptableObject
     /// </summary>
     public static bool CheckRate(int rate)
     {
-        int roll = UnityEngine.Random.Range(1, 101);
+        int roll = BattleRandom.Range(1, 101);
         return roll <= rate;
     }
     
@@ -115,14 +115,14 @@ public class GameConstSO : SerializedScriptableObject
     {
         switch (type)
         {
-            case ActionType.移动:
+            case ActionType.Move:
                 return 2;
 
-            case ActionType.近战攻击:
-            case ActionType.远程攻击:
+            case ActionType.MeleeAttack:
+            case ActionType.RangedAttack:
                 return 3;
 
-            case ActionType.技能:
+            case ActionType.Skill:
                 return 4;
 
             default:

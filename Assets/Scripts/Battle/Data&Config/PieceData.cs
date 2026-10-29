@@ -21,6 +21,8 @@ public class PieceData
     public Dictionary<DamageType, int> attackDic = new();
     [Min(1), LabelText("回合速度")] public float speed = 10f; // 每次速度时钟推进时累加的行动条进度。
     [LabelText("行动条头像")] public Sprite turnPortrait; // 可留空，由速度条回退到立绘或棋子精灵。
+    [LabelText("行动条头像为全身立绘")] public bool turnPortraitIsFullBody;
+    [LabelText("行动条构图"), InlineProperty] public TurnPortraitFraming turnPortraitFraming = new();
     [LabelText("棋子编号")]public int pieceId;
     [LabelText("棋子名称")]public string pieceName;
     [LabelText("生命值")]public int maxHealth;

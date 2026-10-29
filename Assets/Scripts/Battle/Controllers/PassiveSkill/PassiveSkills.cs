@@ -55,7 +55,7 @@ namespace SkillSystem
         {
             if (instigator != owner) return;
 
-            if (Random.value <= TRIGGER_CHANCE)
+            if (BattleRandom.Value <= TRIGGER_CHANCE)
             {
                 BattleScene.Ins.BM.tipTextManager.ShowTip(instigator.transform
                     , $"{data.skillName}");
@@ -106,7 +106,7 @@ namespace SkillSystem
             if (attacker == null) return;
             
             UnitAttrCenter targetUnitAttrCenter = attacker.GetComponent<UnitAttrCenter>();
-            if (Random.value <= TRIGGER_CHANCE)
+            if (BattleRandom.Value <= TRIGGER_CHANCE)
             {
                 BattleScene.Ins.BM.tipTextManager.ShowTip(instigator.transform
                     , $"{data.skillName}");
@@ -148,7 +148,7 @@ namespace SkillSystem
             }
 
             // 2. 概率进行模式识别检定
-            if (Random.value <= CHECK_CHANCE)
+            if (BattleRandom.Value <= CHECK_CHANCE)
             {
                 Debug.Log($"[被动判定] {owner.name} 攻击时触发【进攻分析】，正在进行自身的 [模式识别检定]...");
                 
@@ -181,7 +181,7 @@ namespace SkillSystem
         {
             if (instigator != owner) return;
 
-            if (Random.value <= TRIGGER_CHANCE)
+            if (BattleRandom.Value <= TRIGGER_CHANCE)
             {
                 Debug.Log($"[被动触发] 侦测到宿主 {owner.name} 自身通过了模式识别！【转账拦截】触发：成功拦截并获得 {REWARD_CURRENCY} 标准货币！");
             }
@@ -249,7 +249,7 @@ namespace SkillSystem
         {
             if (instigator != owner) return;
 
-            if (Random.value <= TRIGGER_CHANCE)
+            if (BattleRandom.Value <= TRIGGER_CHANCE)
             {
                 BattleScene.Ins.BM.tipTextManager.ShowTip(instigator.transform
                     , $"{data.skillName}");
@@ -273,7 +273,7 @@ namespace SkillSystem
         {
             if (instigator != owner) return;
 
-            if (Random.value <= TRIGGER_CHANCE)
+            if (BattleRandom.Value <= TRIGGER_CHANCE)
             {
                 Debug.Log($"[被动触发] {owner.name} 释放了主动技能，触发【维护保障】：成功为全队施加 {PROTECT_LAYERS} 层 [防护]！");
             }

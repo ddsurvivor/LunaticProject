@@ -7,6 +7,18 @@ public partial class SkillTooltipUI
     private RectTransform detailsViewport;
     private UnityEngine.UI.ScrollRect detailsScroll;
 
+    /// <summary>供行动菜单判断鼠标是否已进入可滚动详情区域，隐藏时返回 false。</summary>
+    public bool ContainsPointer
+    {
+        get
+        {
+            if (!isActiveAndEnabled) return false;
+            var canvas = GetComponentInParent<Canvas>().rootCanvas;
+            var camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+            return RectTransformUtility.RectangleContainsScreenPoint((RectTransform)transform, Input.mousePosition, camera);
+        }
+    }
+
     private void RefreshLayout(bool reset)
     {
         var root = (RectTransform)transform;
@@ -18,6 +30,11 @@ public partial class SkillTooltipUI
             if (rootFit != null) rootFit.enabled = false;
             nameText.transform.SetParent(root, false);
             tooltipImage.transform.SetParent(root, false);
+            infoText.transform.SetParent(root, false);
+            // 旧卡片背景和角标仍在序列化层级中；统一由根背景与 DetailsOutline 绘制。
+            foreach (Transform child in root)
+                if (child != nameText.transform && child != tooltipImage.transform && child != infoText.transform)
+                    child.gameObject.SetActive(false);
             nameText.transform.localScale = tooltipImage.transform.localScale = Vector3.one;
             foreach (var graphic in GetComponentsInChildren<UnityEngine.UI.Graphic>(true)) graphic.raycastTarget = false;
             var background = GetComponent<UnityEngine.UI.Image>();
@@ -74,7 +91,7 @@ public partial class SkillTooltipUI
         RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, Screen.safeArea.max, camera, out var max);
         float width = Mathf.Min(420, max.x - min.x - 48);
         infoText.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width - 36);
-        float height = Mathf.Min(Mathf.Max(180, infoText.preferredHeight + 100), max.y - min.y - 208);
+        float height = Mathf.Min(Mathf.Max(120, infoText.preferredHeight + 88), max.y - min.y - 208);
         root.anchorMin = root.anchorMax = new Vector2(0.5f, 0.5f);
         root.pivot = new Vector2(0, 1);
         root.sizeDelta = new Vector2(width, height);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -14,6 +14,9 @@ public partial class ClickManager : MonoBehaviour
     private Vector3 _dragStartPos; // 拖动起始位置
 
     private bool _isDragging = false;
+
+    /// <summary>供行动展示判断当前棋子是否仍处于移动目的地选择中。</summary>
+    public bool IsChoosingMove(PieceController piece) => _isDragging && _selectedPiece == piece;
     
 
     Vector3 point = Vector3.zero;
@@ -180,6 +183,7 @@ public partial class ClickManager : MonoBehaviour
     /// <summary>交棒或进入聚能选人前清除选择、移动预览及相关操作 UI。</summary>
     public void ClearTurnSelection()
     {
+        BattleScene.Ins.UM.ClearActionFlow();
         CancelMovementPreview();
         ClearEnemyTargetLines(true);
         _selectedPiece?.CancelSelect();
@@ -363,7 +367,7 @@ public partial class ClickManager : MonoBehaviour
             Debug.Log("停止拖动棋子");
             _isDragging = false;
             BattleScene.Ins.BM.cameraController.SetFollow(_selectedPiece.transform);
-            if (!_selectedPiece.unitAttrCenter.CostMP(ActionType.移动))
+            if (!_selectedPiece.unitAttrCenter.CostMP(ActionType.Move))
             {
                 _rangeUI.CloseRange();
                 return;
@@ -382,7 +386,7 @@ public partial class ClickManager : MonoBehaviour
             _isDragging = false;
             BattleScene.Ins.BM.cameraController.SetFollow(_selectedPiece.transform);
             if (!BattleScene.Ins.BM.moveManager.TryGetPreviewPosition(_selectedPiece.gameObject, out var targetPos) ||
-                !_selectedPiece.unitAttrCenter.CostMP(ActionType.移动))
+                !_selectedPiece.unitAttrCenter.CostMP(ActionType.Move))
             {
                 _rangeUI.CloseRange();
                 return;
@@ -424,7 +428,7 @@ public partial class ClickManager : MonoBehaviour
             lastMovePiece.StopMove();
             
             // 撤回消耗的移动点数
-            int count = GM.Ins.DM.gameConstSO.GetActionPointCost(ActionType.移动);
+            int count = GM.Ins.DM.gameConstSO.GetActionPointCost(ActionType.Move);
             lastMovePiece.unitAttrCenter.AddMP(count);
             lastMovePiece = null;
             BattleScene.Ins.UM.ShowUndoMoveButton(false);

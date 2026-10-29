@@ -75,6 +75,7 @@ public partial class PieceController : MonoBehaviour
     [SerializeField] [ReadOnly] private AttackPack _attackPack; // 当前正在使用的攻击
     protected SkillPack _curAttackPack;
     protected ActionType _curAtkType;
+    private ItemData pendingAttackItem; // 瞄准中的道具，确认合法目标后才提交库存与 AP。
 
     [SerializeField] [ReadOnly] private SkillPack _skillPack; // 当前正在使用的技能
     //[SerializeField] [ReadOnly] private int _damage;
@@ -117,6 +118,7 @@ public partial class PieceController : MonoBehaviour
 
     protected void CancelCombatAction()
     {
+        pendingAttackItem = null;
         combatVersion++;
         if (actionPlayback != null && !actionPlayback.IsDone) pieceDisplay?.StopAnimation();
         actionPlayback = null;
@@ -161,14 +163,14 @@ public partial class PieceController : MonoBehaviour
         //unitAttrCenter.Init();
         /*if (isPlayerPiece)
         {
-            availableActions.Add(ActionType.移动);
-            availableActions.Add(ActionType.近战攻击);
-            availableActions.Add(ActionType.远程攻击);
-            availableActions.Add(ActionType.待机); // 待机
-            //availableActions.Add(ActionType.重新装填); // 装填
-            availableActions.Add(ActionType.技能); // 技能
-            availableActions.Add(ActionType.道具);
-            availableActions.Add(ActionType.警戒指令);
+            availableActions.Add(ActionType.Move);
+            availableActions.Add(ActionType.MeleeAttack);
+            availableActions.Add(ActionType.RangedAttack);
+            availableActions.Add(ActionType.Wait); // 待机
+            //availableActions.Add(ActionType.Reload); // 装填
+            availableActions.Add(ActionType.Skill); // 技能
+            availableActions.Add(ActionType.Item);
+            availableActions.Add(ActionType.GuardOrder);
         }*/
 
         //Debug.Log(_pieceDisplay.name);
@@ -241,6 +243,7 @@ public partial class PieceController : MonoBehaviour
             if (Input.GetMouseButtonDown(1))
             {
                 _isAttacking = false;
+                pendingAttackItem = null;
                 rangeUI.CloseRange();
             }
         }
@@ -341,10 +344,10 @@ public partial class PieceController : MonoBehaviour
     {
         //BattleScene.Ins.UM.infoBox.ShowInfo(this);
         if (!isPlayerPiece) return;
-        PlayAudio(ActionType.移动);
+        PlayAudio(ActionType.Move);
         CheckActionPos();
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
-        _actionListPanel.gameObject.SetActive(true);
+        // 等移动与反应表现全部完成后，由 UIManager 重建可用目录。
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
     }
 
@@ -352,7 +355,7 @@ public partial class PieceController : MonoBehaviour
     {
         if (!isPlayerPiece) return;
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
-        PlayAudio(ActionType.移动);
+        PlayAudio(ActionType.Move);
         //pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
     }
 
@@ -360,7 +363,7 @@ public partial class PieceController : MonoBehaviour
     {
         CheckActionPos();
         CheckArea();
-        _actionListPanel.gameObject.SetActive(true);
+        // 不直接激活已清空绑定的旧菜单；行动展示协调器会在解锁后重新展开。
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
     }
@@ -374,6 +377,7 @@ public partial class PieceController : MonoBehaviour
     {
         Debug.Log("取消选择棋子");
         _isAttacking = false;
+        pendingAttackItem = null;
         _isUsingSkill = false;
         isUsingOrder = false;
         rangeUI?.ShowSelect(false);
@@ -439,12 +443,13 @@ public partial class PieceController : MonoBehaviour
     public void StartNormalAttack(bool range = false)
     {
         if (IsPerformingAction) return;
+        pendingAttackItem = null;
         _isAttacking = true;
         if (!range) // 近战攻击
         {
             _curAttackPack = _pieceData.MeleeAttack;
             if (isPlayerPiece) rangeUI?.ShowSkillRange(_curAttackPack);
-            _curAtkType = ActionType.近战攻击;
+            _curAtkType = ActionType.MeleeAttack;
             // _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Melee)
             //     , DamageType.Melee);
         }
@@ -460,7 +465,7 @@ public partial class PieceController : MonoBehaviour
             //rangeUI?.ShowAttackRange(_pieceData.RangedAttack.rangeValue);
             _curAttackPack = _pieceData.RangedAttack;
             if (isPlayerPiece) rangeUI?.ShowSkillRange(_curAttackPack);
-            _curAtkType = ActionType.远程攻击;
+            _curAtkType = ActionType.RangedAttack;
             // _attackPack = new AttackPack(unitAttrCenter.attr.GetAtk(DamageType.Ranged)
             //     , DamageType.Ranged);
         }
@@ -503,7 +508,7 @@ public partial class PieceController : MonoBehaviour
     {
         if (IsPerformingAction || isDead || !BuffManager.CanTarget(this, target)) return;
         var skill = range ? _pieceData.RangedAttack : _pieceData.MeleeAttack;
-        var action = range ? ActionType.远程攻击 : ActionType.近战攻击;
+        var action = range ? ActionType.RangedAttack : ActionType.MeleeAttack;
         if (skill == null || (range && unitAttrCenter.AmmoCount <= 0)) return;
         var targets = isPlayerPiece ? new List<PieceController> { target }
             : SkillTargeting.Query(this, skill, target.transform.position);
@@ -521,12 +526,18 @@ public partial class PieceController : MonoBehaviour
         var action = _curAtkType;
         var targets = new List<PieceController>(rangeUI.GetCurTargets);
         if (skill == null || (targets.Count == 0 && skill.target != SkillTarget.Area)) return;
-        bool ranged = action == ActionType.远程攻击;
+        bool ranged = action == ActionType.RangedAttack;
         if (ranged && unitAttrCenter.AmmoCount <= 0) return;
         Vector3 position = rangeUI.GetSkillTransform() != null ? rangeUI.GetSkillTransform().position
             : targets.Count > 0 ? targets[0].transform.position : transform.position;
-        // 在动作开始时一次性支付，避免动画播完后才发现行动力不足。
-        if (!unitAttrCenter.CostMP(action)) return;
+        // 道具瞄准不预扣库存；确认时按菜单相同的 Item 费用一次性提交。
+        if (action == ActionType.UseItem)
+        {
+            if (pendingAttackItem == null || !ItemAvailable(pendingAttackItem) ||
+                !unitAttrCenter.TryCostBattleItem(pendingAttackItem.itemName)) return;
+            pendingAttackItem = null;
+        }
+        else if (!unitAttrCenter.CostMP(action)) return;
         if (ranged) unitAttrCenter.CostAmmo();
         _isAttacking = false;
         rangeUI.CloseRange();
@@ -702,13 +713,14 @@ public partial class PieceController : MonoBehaviour
     {
         Debug.Log("重新装填弹药");
         unitAttrCenter.FullAmmo();
-        PlayAudio(ActionType.重新装填);
+        PlayAudio(ActionType.Reload);
         BattleScene.Ins.BM.tipTextManager.ShowReloadAmmo(this.transform);
     }
 
     public void StartSkillAttack(SkillPack skillPack)
     {
         if (IsPerformingAction) return;
+        pendingAttackItem = null;
         if (!unitAttrCenter.HasMana(unitAttrCenter.GetSkillManaCost(skillPack)))
         {
             Debug.Log("能量不足");
@@ -754,7 +766,7 @@ public partial class PieceController : MonoBehaviour
         CheckResult check = CheckResult.None;
         bool recognition = skill.isRecognitionCheck && targets.Count > 0;
         if (recognition) check = BattleScene.Ins.BM.diceCheckManager.ModeRecognitionCheck(this, targets[0]);
-        BeginCombatAction(skill, targets, position, ActionType.技能, PieceDisplayState.Skill,
+        BeginCombatAction(skill, targets, position, ActionType.Skill, PieceDisplayState.Skill,
             check: check, waitForRecognition: recognition);
         NotifySkillUsed(skill);
     }
@@ -845,7 +857,7 @@ public partial class PieceController : MonoBehaviour
     public bool ItemAvailable(ItemData itemData)
     {
         if (itemData == null) return false;
-        if (!unitAttrCenter.HasMP(ActionType.道具)) return false;
+        if (!unitAttrCenter.HasMP(ActionType.Item)) return false;
         switch (itemData.useType)
         {
             case UseType.InBattle:
@@ -872,23 +884,20 @@ public partial class PieceController : MonoBehaviour
         return true;
     }
 
+    /// <summary>战斗道具入口；攻击型仅进入瞄准，其余道具付款成功后生效，取消瞄准不消耗库存。</summary>
     public void UseItem(ItemData itemData)
     {
+        if (IsPerformingAction || isDead || !ItemAvailable(itemData)) return;
         var items = new List<ItemPack>() { new ItemPack(itemData.itemName, 1) };
         if (!unitAttrCenter.HasItem(items)) return;
-        if (!unitAttrCenter.HasMP(ActionType.道具)) return;
-        //BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
-        unitAttrCenter.CostItem(items);
         if (itemData.useType == UseType.ActiveInBattle)
         {
-            // 主动释放技能直接进入技能释放流程
             SkillPack skillPack = GM.Ins.DM.skillPackListSO.GetSkillPack(itemData.skillPack);
-            if (skillPack != null)
-            {
-                StartItemAttack(skillPack);
-                return;
-            }
+            if (skillPack != null) StartItemAttack(itemData, skillPack);
+            return;
         }
+        // 行动状态可能阻断付款；库存和回复效果都必须等待 AP 提交成功。
+        if (!unitAttrCenter.TryCostBattleItem(itemData.itemName)) return;
         switch (itemData.itemName)
         {
             case ItemName.通用作战平台_CW179:
@@ -919,21 +928,14 @@ public partial class PieceController : MonoBehaviour
                 throw new ArgumentOutOfRangeException();
         }
         
-        if (!unitAttrCenter.CostMP(ActionType.道具)) return;
-        //BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
     }
     
-    /// <summary>
-    /// 开始使用道具进行攻击
-    /// </summary>
-    /// <param name="skillPack"></param>
-    private void StartItemAttack(SkillPack skillPack)
+    private void StartItemAttack(ItemData item, SkillPack skillPack)
     {
+        pendingAttackItem = item;
         _isAttacking = true;
         _curAttackPack = skillPack;
-        _curAtkType = ActionType.使用道具;
-        //_isUsingSkill = true;
-        //_skillPack = skillPack;
+        _curAtkType = ActionType.UseItem;
         rangeUI?.ShowSkillRange(_curAttackPack);
     }
 

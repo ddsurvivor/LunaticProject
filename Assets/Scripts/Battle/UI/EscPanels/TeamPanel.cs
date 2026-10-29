@@ -70,7 +70,7 @@ public class TeamPanel : SerializedMonoBehaviour
             headUI.pieceId = id;
             
             // 设置随机血量用于测试
-            float randomHealth = Random.Range(30f, 100f);
+            float randomHealth = BattleRandom.Range(30f, 100f);
             headUI.UpdateHealth(randomHealth, 100f);
             
             pieceHeads[id] = headUI;
@@ -174,7 +174,7 @@ public class TeamPanel : SerializedMonoBehaviour
     {
         foreach (var kvp in pieceHeads)
         {
-            float randomHealth = Random.Range(10f, 100f);
+            float randomHealth = BattleRandom.Range(10f, 100f);
             kvp.Value.UpdateHealth(randomHealth, 100f);
         }
     }

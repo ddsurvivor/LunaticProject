@@ -55,7 +55,9 @@ public class ExplosiveBarrel : MonoBehaviour, IEnemyExplosiveTarget
         if (_hasExploded) return;
         _hasExploded = true;
 
-        DOVirtual.DelayedCall(delayTime, Explode, false);
+        var action = new BattleActionContext(pieceController, skillPack);
+        // 引信回调沿用触发爆炸时的根行动，不继承爆炸发生时其他角色的行动。
+        DOVirtual.DelayedCall(delayTime, () => { using (action.Enter()) Explode(); }, false);
         //Explode();
     }
 

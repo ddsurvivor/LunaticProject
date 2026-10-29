@@ -10,6 +10,19 @@ using UnityEngine.Audio;
 
 public class DataManager : SerializedMonoBehaviour
 {
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<PLAYERPROFILE, object> transientProfiles = new(); // 临时存档的禁写标记随实例回收，不依赖场景或输入控制权。
+
+    /// <summary>将内存副本标记为禁止持久化；标记只针对该实例，不写入JSON，也不影响原存档。</summary>
+    public static void MarkTransientProfile(PLAYERPROFILE profile)
+    {
+        if (profile == null) throw new ArgumentNullException(nameof(profile));
+        transientProfiles.GetValue(profile, _ => new object());
+    }
+
+    /// <summary>判断存档是否仅供内存会话使用，场景重载或外部控制权释放后仍有效。</summary>
+    public static bool IsTransientProfile(PLAYERPROFILE profile) =>
+        profile != null && transientProfiles.TryGetValue(profile, out _);
+
     [OdinSerialize]
     public Dictionary<int, PLAYERPROFILE> playerprofiles = new();
     // 在主线程实际读写时获取路径，避免在 MonoBehaviour 字段初始化阶段调用 Unity API。
@@ -104,7 +117,8 @@ public class DataManager : SerializedMonoBehaviour
 
     public void SaveData(int index)
     {
-        if (BattleScene.Ins != null && BattleScene.Ins.BM.SuppressExternalPresentation) return;
+        if (IsTransientProfile(GM.Ins.PLAYERPROFILE) ||
+            (BattleScene.Ins != null && BattleScene.Ins.BM != null && BattleScene.Ins.BM.SuppressExternalPresentation)) return;
         if (大地图System.instance != null)
             大地图System.instance.CaptureMapState();
         GM.Ins.PLAYERPROFILE.lastSaveTime = System.DateTime.Now;

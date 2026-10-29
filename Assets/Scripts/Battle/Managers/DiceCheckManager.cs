@@ -22,11 +22,11 @@
             int counterAttr = defender.unitAttrCenter.CON;
 
             /*// 投掷3D6
-            int diceSum = Random.Range(1, 7) + Random.Range(1, 7) + Random.Range(1, 7);*/
+            int diceSum = BattleRandom.Range(1, 7) + BattleRandom.Range(1, 7) + BattleRandom.Range(1, 7);*/
             int[] diceResult = new int[3];
             for (int i = 0; i < 3; i++)
             {
-                diceResult[i] = Random.Range(1, 7); // 1-6
+                diceResult[i] = BattleRandom.Range(1, 7); // 1-6
             }
             int diceSum = diceResult[0] + diceResult[1] + diceResult[2];
 

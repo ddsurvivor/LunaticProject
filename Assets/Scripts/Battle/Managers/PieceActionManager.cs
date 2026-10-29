@@ -13,20 +13,20 @@ public class PieceActionManager : MonoBehaviour
     // 如果您更喜欢用勾选框的形式，可以加上 [EnumToggleButtons]
     public List<ActionType> configuredActions = new List<ActionType>()
     {
-        ActionType.移动,
-        ActionType.近战攻击,
-        ActionType.远程攻击,
-        ActionType.道具,
-        ActionType.警戒指令,
-        ActionType.技能,
-        ActionType.待机
+        ActionType.Move,
+        ActionType.MeleeAttack,
+        ActionType.RangedAttack,
+        ActionType.Item,
+        ActionType.GuardOrder,
+        ActionType.Skill,
+        ActionType.Wait
     };
 
     // 当前棋子临时禁用的行动（用于处理战场上的 Debuff，比如缴械、定身）
     private HashSet<ActionType> _tempDisabledActions = new HashSet<ActionType>();
 
     /// <summary>
-    /// 状态控制：临时禁用某行动（例如受到“定身”时传入 ActionType.移动）
+    /// 状态控制：临时禁用某行动（例如受到“定身”时传入 ActionType.Move）
     /// </summary>
     public void DisableActionTemp(ActionType action)
     {

@@ -22,7 +22,7 @@ namespace Lunatic.BattleTesting
         [LabelText("最大行动命令数"), Min(1)] public int maxCommands = 5000;
         [LabelText("最大标准回合数"), Min(1)] public int maxRounds = 300;
         [LabelText("决策间隔（游戏秒）"), Min(0.02f)] public float decisionInterval = 0.15f;
-        [LabelText("报告根目录（留空使用持久化目录）")] public string reportDirectory;
+        [LabelText("报告根目录（留空使用项目tmp）")] public string reportDirectory;
         [LabelText("批处理完成后退出进程")] public bool quitWhenFinished;
         [LabelText("玩家 AI 策略")] public PlayerAutoBattleSettings playerAI = new();
         [ShowInInspector, ReadOnly] public bool IsRunning { get; private set; }
@@ -67,7 +67,7 @@ namespace Lunatic.BattleTesting
             stopRequested = reloading = suiteFailed = false;
             LastReportPath = null;
             suiteId = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N").Substring(0, 8);
-            outputDirectory = Path.Combine(string.IsNullOrWhiteSpace(reportDirectory) ? Path.Combine(Application.persistentDataPath, "BattleBalanceReports") : reportDirectory, suiteId);
+            outputDirectory = Path.Combine(string.IsNullOrWhiteSpace(reportDirectory) ? Path.GetFullPath(Path.Combine(Application.dataPath, "..", "tmp", "BattleBalanceReports")) : reportDirectory, suiteId);
             policySnapshot = JsonConvert.DeserializeObject<PlayerAutoBattleSettings>(JsonConvert.SerializeObject(playerAI)) ?? new PlayerAutoBattleSettings();
             policy = new PlayerAutoBattlePolicy(policySnapshot);
             report = NewReport();
@@ -209,6 +209,8 @@ namespace Lunatic.BattleTesting
         {
             sandboxProfile = JsonConvert.DeserializeObject<PLAYERPROFILE>(JsonConvert.SerializeObject(originalProfile));
             if (sandboxProfile == null) throw new InvalidOperationException("无法创建测试存档副本");
+            // 在替换全局引用前禁止副本落盘，覆盖释放控制权至下一场景接管之间的空档。
+            DataManager.MarkTransientProfile(sandboxProfile);
             profileOwner.PLAYERPROFILE = sandboxProfile;
         }
 

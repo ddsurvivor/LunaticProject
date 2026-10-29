@@ -29,12 +29,12 @@ public partial class PieceController
     internal BattleCommandResult ExecutePlayerCommand(PlayerBattleCommand command)
     {
         var battle = BattleScene.Ins.BM;
-        ActionType requested = command.kind == PlayerBattleCommandKind.Move ? ActionType.移动 : command.kind == PlayerBattleCommandKind.Melee ? ActionType.近战攻击 :
-            command.kind == PlayerBattleCommandKind.Ranged ? ActionType.远程攻击 : command.kind == PlayerBattleCommandKind.Skill ? ActionType.技能 :
-            command.kind == PlayerBattleCommandKind.Reload ? ActionType.重新装填 : command.kind == PlayerBattleCommandKind.Climb ? ActionType.攀爬 : ActionType.待机;
+        ActionType requested = command.kind == PlayerBattleCommandKind.Move ? ActionType.Move : command.kind == PlayerBattleCommandKind.Melee ? ActionType.MeleeAttack :
+            command.kind == PlayerBattleCommandKind.Ranged ? ActionType.RangedAttack : command.kind == PlayerBattleCommandKind.Skill ? ActionType.Skill :
+            command.kind == PlayerBattleCommandKind.Reload ? ActionType.Reload : command.kind == PlayerBattleCommandKind.Climb ? ActionType.Climb : ActionType.Wait;
         bool unlocked = availableActions != null && (availableActions.Contains(requested) ||
-            command.kind == PlayerBattleCommandKind.Reload && availableActions.Contains(ActionType.远程攻击) ||
-            command.kind == PlayerBattleCommandKind.Climb && availableActions.Contains(ActionType.移动));
+            command.kind == PlayerBattleCommandKind.Reload && availableActions.Contains(ActionType.RangedAttack) ||
+            command.kind == PlayerBattleCommandKind.Climb && availableActions.Contains(ActionType.Move));
         if (command.kind != PlayerBattleCommandKind.EndTurn && !unlocked) return BattleCommandResult.Rejected;
         if (float.IsNaN(command.position.x) || float.IsInfinity(command.position.x) || float.IsNaN(command.position.y) || float.IsInfinity(command.position.y) ||
             float.IsNaN(command.position.z) || float.IsInfinity(command.position.z)) return BattleCommandResult.Rejected;
@@ -51,7 +51,7 @@ public partial class PieceController
         if (command.kind == PlayerBattleCommandKind.Reload)
         {
             if (unitAttrCenter.MaxAmmoCount <= 0 || unitAttrCenter.AmmoCount >= unitAttrCenter.MaxAmmoCount) return BattleCommandResult.Rejected;
-            if (!unitAttrCenter.CostMP(ActionType.重新装填)) return PaidFailure();
+            if (!unitAttrCenter.CostMP(ActionType.Reload)) return PaidFailure();
             ReloadAmmo();
             return BattleCommandResult.Executed;
         }
@@ -61,7 +61,7 @@ public partial class PieceController
             if (ladder == null || !ladder.gameObject.activeInHierarchy || ladder.upPos == null || ladder.downPos == null ||
                 Mathf.Min(Vector3.Distance(transform.position, ladder.upPos.position), Vector3.Distance(transform.position, ladder.downPos.position)) > 2f)
                 return BattleCommandResult.Rejected;
-            if (!unitAttrCenter.CostMP(ActionType.攀爬)) return PaidFailure();
+            if (!unitAttrCenter.CostMP(ActionType.Climb)) return PaidFailure();
             ladder.TriggerAction(this);
             return BattleCommandResult.Executed;
         }
@@ -76,7 +76,7 @@ public partial class PieceController
                 float clearance = radius + (other.GetComponent<NavMeshAgent>()?.radius ?? 0.5f);
                 if (Vector3.Distance(other.transform.position, destination) < clearance) return BattleCommandResult.Rejected;
             }
-            if (!unitAttrCenter.CostMP(ActionType.移动)) return PaidFailure();
+            if (!unitAttrCenter.CostMP(ActionType.Move)) return PaidFailure();
             StartDrag();
             CheckFace(destination - transform.position);
             StartMove();
@@ -91,7 +91,7 @@ public partial class PieceController
         Vector3 position = SkillTargeting.ClampPosition(transform.position, command.position, skill.rangeValue);
         var targets = SkillTargeting.Query(this, skill, position);
         if (targets.Count == 0 && skill.target != SkillTarget.Area && skill.target != SkillTarget.Self) return BattleCommandResult.Rejected;
-        var action = special ? ActionType.技能 : ranged ? ActionType.远程攻击 : ActionType.近战攻击;
+        var action = special ? ActionType.Skill : ranged ? ActionType.RangedAttack : ActionType.MeleeAttack;
         if (!(special ? unitAttrCenter.TryCostSkill(skill) : unitAttrCenter.CostMP(action))) return PaidFailure();
         if (ranged) unitAttrCenter.CostAmmo();
         _isAttacking = _isUsingSkill = isUsingOrder = false;

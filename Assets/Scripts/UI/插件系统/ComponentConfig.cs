@@ -182,7 +182,7 @@ public static class ComponentEquipment
     {
         if (attacker == null || attacker.isDead || hits.Count == 0) return;
         var battle = BattleScene.Ins.BM;
-        if (action == ActionType.近战攻击)
+        if (action == ActionType.MeleeAttack)
         {
             if (attacker.availablePassives.Contains(PassiveType.Lash)) attacker.unitAttrCenter.AddMana(3);
             if (attacker.availablePassives.Contains(PassiveType.Implosion))
@@ -198,7 +198,7 @@ public static class ComponentEquipment
                 }
             }
         }
-        if (action != ActionType.技能 || !attacker.availablePassives.Contains(PassiveType.SpiderSilk)) return;
+        if (action != ActionType.Skill || !attacker.availablePassives.Contains(PassiveType.SpiderSilk)) return;
         var affected = new HashSet<PieceController>(hits);
         var candidates = new List<PieceController>();
         var enemies = attacker.isPlayerPiece ? battle.AIController.pieces : battle.PlayerController.pieces;
@@ -208,14 +208,15 @@ public static class ComponentEquipment
                 !affected.Contains(enemy) && !candidates.Contains(enemy)) candidates.Add(enemy);
         for (int i = 0; i < 2 && candidates.Count > 0; i++)
         {
-            int index = UnityEngine.Random.Range(0, candidates.Count);
+            int index = BattleRandom.Range(0, candidates.Count);
             affected.Add(candidates[index]); candidates.RemoveAt(index);
         }
         foreach (var target in affected)
         {
             if (target == null || target.isDead) continue;
             battle.buffManager.AddBuff(target.unitAttrCenter, BuffType.Stun, 2);
-            target.unitAttrCenter.TakeDamage(new AttackPack(15, DamageType.Electric));
+            target.unitAttrCenter.TakeDamage(new AttackPack(15, DamageType.Electric),
+                new BattleDamageSource(BattleDamageKind.Component, attacker, skill));
             battle.characterSkillManager.NotifyTakeDamage(target.gameObject, attacker.gameObject);
             if (target.isDead) battle.characterSkillManager.NotifyKillEnemy(attacker.gameObject, target.gameObject);
         }
@@ -226,7 +227,7 @@ public static class ComponentEquipment
     {
         if (caster == null || caster.isDead || skill == null ||
             !caster.availablePassives.Contains(PassiveType.LongTermInterests)) return;
-        if (UnityEngine.Random.Range(0, 100) < 35)
+        if (BattleRandom.Range(0, 100) < 35)
             caster.unitAttrCenter.AddMana(caster.unitAttrCenter.GetSkillManaCost(skill));
     }
 }

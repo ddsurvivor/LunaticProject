@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-public class UIManager : SerializedMonoBehaviour
+public partial class UIManager : SerializedMonoBehaviour
 {
     public TurnPanel turnPanel;
     public List<GameObject> turnImage;
@@ -47,6 +47,10 @@ public class UIManager : SerializedMonoBehaviour
 
     [SerializeField] private SpeedTimelineUI speedTimelinePrefab;
     private SpeedTimelineUI speedTimeline;
+
+    /// <summary>供角色跟随状态避让当前可见的顶部行动序列；未创建或隐藏时返回 null。</summary>
+    public RectTransform ActionTimelineRect => speedTimeline != null && speedTimeline.gameObject.activeInHierarchy
+        ? (RectTransform)speedTimeline.transform : null;
     /// <summary>为当前战斗创建速度条；已有实例时先销毁，避免重复显示。</summary>
     public void EnableSpeedTimeline(BattleManager battle)
     {
