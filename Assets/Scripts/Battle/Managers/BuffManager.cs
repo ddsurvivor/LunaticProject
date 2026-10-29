@@ -49,12 +49,13 @@ public class BuffManager : MonoBehaviour
         if (unit.pc.isDead || unit.GetBuffStacks(BuffType.Stun) != 0) return false;
         if (unit.GetBuffStacks(BuffType.SpontaneousMemeticAttack) != 0)
         {
-            unit.TakeDamage(new AttackPack(Mathf.CeilToInt(unit.MaxHealth * 0.15f), DamageType.Electric));
+            unit.TakeDamage(new AttackPack(Mathf.CeilToInt(unit.MaxHealth * 0.15f), DamageType.Electric),
+                new BattleDamageSource(BattleDamageKind.ActionEffect, unit.pc));
             if (unit.pc.isDead) return false;
-            if (UnityEngine.Random.Range(0, 100) < 30)
+            if (BattleRandom.Range(0, 100) < 30)
             {
                 BuffType[] states = { BuffType.Disrupt, BuffType.Bind, BuffType.Stun };
-                AddBuff(unit, states[UnityEngine.Random.Range(0, states.Length)]);
+                AddBuff(unit, states[BattleRandom.Range(0, states.Length)]);
             }
         }
         return !unit.pc.isDead && unit.GetBuffStacks(BuffType.Stun) == 0;
@@ -205,7 +206,8 @@ public class BuffManager : MonoBehaviour
                     unit.SetMovePoint(0);
                     break;
                 case BuffType.MemeticRetaliation:
-                    unit.TakeDamage(new AttackPack(Mathf.CeilToInt(unit.MaxHealth * 0.20f), DamageType.Electric));
+                    unit.TakeDamage(new AttackPack(Mathf.CeilToInt(unit.MaxHealth * 0.20f), DamageType.Electric),
+                        new BattleDamageSource(BattleDamageKind.Periodic));
                     break;
                 case BuffType.AutoHeal:
                     // 恢复15%生命值
@@ -215,7 +217,8 @@ public class BuffManager : MonoBehaviour
                 case BuffType.Burn:
                     // 持续掉血
                     int burnDamage = Mathf.Max(1, unit.GetBuffStacks(BuffType.Burn));
-                    unit.TakeDamage(new AttackPack(burnDamage, DamageType.Electric));
+                    unit.TakeDamage(new AttackPack(burnDamage, DamageType.Electric),
+                        new BattleDamageSource(BattleDamageKind.Periodic));
                     RemoveBuff(unit, BuffType.Burn, 3); // 每回合减少3层燃烧效果
                     continue;
                 default:

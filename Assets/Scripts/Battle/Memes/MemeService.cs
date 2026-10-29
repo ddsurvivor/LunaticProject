@@ -33,7 +33,7 @@ public sealed class MemeService
     public MemeService(BattleManager battle, Func<int, bool> rollPercent = null)
     {
         this.battle = battle ?? throw new ArgumentNullException(nameof(battle));
-        resolver = new MemeResolver(rollPercent ?? (chance => UnityEngine.Random.Range(0, 100) < chance));
+        resolver = new MemeResolver(rollPercent ?? (chance => BattleRandom.Range(0, 100) < chance));
     }
 
     /// <summary>注册复杂行为处理器；重复编号会拒绝，防止悄悄替换本场规则。</summary>
@@ -45,10 +45,10 @@ public sealed class MemeService
     }
 
     /// <summary>读取当前装配与固有来源，合并重复词条；不解锁、不占用额外自由槽位。</summary>
-    public MemeActionContext BeginAction(PieceController actor, SkillPack skill, bool isReaction = false)
+    public MemeActionContext BeginAction(PieceController actor, SkillPack skill, bool isReaction = false, bool isPreview = false)
     {
         var sources = new List<MemeSource>();
-        if (actor == null || skill == null) return new MemeActionContext(sources, isReaction);
+        if (actor == null || skill == null) return new MemeActionContext(sources, isReaction, isPreview ? null : new BattleActionContext(actor, skill, isReaction));
         var progress = GM.Ins?.PLAYERPROFILE?.memeProgress;
         var slots = actor.playerData?.memeSlots;
         if (slots != null)
@@ -59,7 +59,7 @@ public sealed class MemeService
         if (actor.playerData != null)
             foreach (var component in ComponentEquipment.Equipped(actor.playerData))
                 AddSources(sources, component.memeIds, MemeSourceKind.Component);
-        return new MemeActionContext(sources, isReaction);
+        return new MemeActionContext(sources, isReaction, isPreview ? null : new BattleActionContext(actor, skill, isReaction));
     }
 
     /// <summary>在一次已命中或已完成支援的目标结算后调用；死亡目标不再接收新状态。</summary>
@@ -73,7 +73,7 @@ public sealed class MemeService
     public IReadOnlyList<MemeAttempt> PreviewTarget(PieceController actor, PieceController target, SkillPack skill,
         CheckResult check = CheckResult.None, bool isReaction = false)
     {
-        return ProcessTarget(actor, target, skill, check, BeginAction(actor, skill, isReaction), true);
+        return ProcessTarget(actor, target, skill, check, BeginAction(actor, skill, isReaction, isPreview: true), true);
     }
 
     /// <summary>当前可控角色确认换装时调用；无变化、无效装配或状态中断均不替换槽位。</summary>

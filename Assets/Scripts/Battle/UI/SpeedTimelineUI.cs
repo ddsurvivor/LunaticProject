@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 /// <summary>附着现有战斗 Canvas 的顶部速度条；头像从右侧0向左侧100移动。</summary>
@@ -7,9 +6,15 @@ public sealed class SpeedTimelineUI : MonoBehaviour
 {
     [SerializeField] private RectTransform track; // 右侧为进度 0，左侧为进度 100。
     [SerializeField] private SpeedTimelineMarkerUI markerTemplate; // 隐藏的头像模板，运行时按棋子复制。
-    [SerializeField] private float laneOffset = 22f; // 双方头像距轨道中心的纵向偏移。
+    [SerializeField] private float laneOffset = 40f; // 双方头像距轨道中心的纵向偏移。
     private BattleManager battle;
     private readonly Dictionary<PieceController, SpeedTimelineMarkerUI> markers = new();
+    private readonly HashSet<PieceController> positionedMarkers = new(); // 新头像首次直接进入安全位置，之后才参与缓动。
+    private readonly List<PieceController> removed = new();
+    private readonly List<PieceController> lanePieces = new();
+    private readonly List<float> lanePositions = new();
+    private readonly Dictionary<int, Sprite> playerPortraits = new();
+    private System.Comparison<PieceController> compareActionOrder;
 
     /// <summary>在战斗 Canvas 下创建并绑定速度条；未指定预制体时从 Resources 加载，缺失则返回 null。</summary>
     public static SpeedTimelineUI Create(Canvas canvas, BattleManager manager, SpeedTimelineUI prefab = null)
@@ -43,12 +48,15 @@ public sealed class SpeedTimelineUI : MonoBehaviour
         }
         var participants = battle.SpeedParticipants();
         // 同步动态参战者，死亡或离场后移除对应头像。
-        foreach (var old in markers.Keys.Where(p => !participants.Contains(p)).ToArray())
+        removed.Clear();
+        foreach (var old in markers.Keys)
+            if (!participants.Contains(old)) removed.Add(old);
+        foreach (var old in removed)
         {
             Destroy(markers[old].Rect.gameObject);
             markers.Remove(old);
+            positionedMarkers.Remove(old);
         }
-        var occupied = new Dictionary<(bool, int), int>();
         foreach (var piece in participants)
         {
             if (!markers.TryGetValue(piece, out var marker))
@@ -56,35 +64,81 @@ public sealed class SpeedTimelineUI : MonoBehaviour
                 marker = Instantiate(markerTemplate, track, false);
                 marker.name = piece.name;
                 marker.gameObject.SetActive(true);
-                var portrait = marker.Portrait;
-                portrait.color = Color.white;
-                portrait.preserveAspect = true;
                 // 优先专用头像，缺失时依次回退角色立绘和棋子精灵。
-                portrait.sprite = piece.pieceData?.turnPortrait;
-                if (portrait.sprite == null && piece.isPlayerPiece)
+                Sprite sprite = piece.pieceData?.turnPortrait;
+                bool fullBody = sprite == null || piece.pieceData.turnPortraitIsFullBody;
+                if (sprite == null && piece.isPlayerPiece)
                 {
                     int id = piece.pieceID;
-                    portrait.sprite = Resources.Load<Sprite>(id > 100 ? "CG/PC0" + (id - 100) + "01" : "CG/PC0" + id + "C1");
+                    if (!playerPortraits.TryGetValue(id, out sprite))
+                    {
+                        sprite = Resources.Load<Sprite>(id > 100 ? "CG/PC0" + (id - 100) + "01" : "CG/PC0" + id + "C1");
+                        playerPortraits[id] = sprite;
+                    }
                 }
-                if (portrait.sprite == null && piece.pieceDisplay != null && piece.pieceDisplay.pieceSpriteRenderer != null)
-                    portrait.sprite = piece.pieceDisplay.pieceSpriteRenderer.sprite;
+                if (sprite == null && piece.pieceDisplay != null && piece.pieceDisplay.pieceSpriteRenderer != null)
+                    sprite = piece.pieceDisplay.pieceSpriteRenderer.sprite;
+                marker.BindPortrait(sprite, fullBody, piece.pieceData?.turnPortraitFraming);
                 markers.Add(piece, marker);
             }
             bool active = battle.ActivePiece == piece;
             marker.SetState(active, piece.isPlayerPiece);
-            float lane = piece.isPlayerPiece ? laneOffset : -laneOffset;
-            float x = -track.rect.width * Mathf.Clamp01(battle.ActionProgress(piece) / 100f);
-            var group = (piece.isPlayerPiece, Mathf.RoundToInt(x / 24)); // 同阵营且位置接近的头像共用避让计数。
-            occupied.TryGetValue(group, out int overlap);
-            occupied[group] = overlap + 1;
-            // 满条/起跑时将同阵营头像扇形展开，避免只看见最后一个棋子。
-            x += overlap * (x < -track.rect.width / 2 ? 18 : -18);
-            x = Mathf.Clamp(x, -track.rect.width, 0);
-            lane += overlap % 2 == 0 ? 0 : 5 * Mathf.Sign(lane);
-            marker.Rect.anchoredPosition = Vector2.Lerp(marker.Rect.anchoredPosition,
-                new Vector2(x, lane), 1 - Mathf.Exp(-20 * Time.unscaledDeltaTime));
             marker.Rect.localScale = Vector3.one * (active ? 1.15f : 1f);
             if (active) marker.Rect.SetAsLastSibling();
         }
+        LayoutLane(participants, true);
+        LayoutLane(participants, false);
     }
+
+    private void LayoutLane(List<PieceController> participants, bool ally)
+    {
+        lanePieces.Clear();
+        lanePositions.Clear();
+        foreach (var piece in participants)
+            if (piece.isPlayerPiece == ally) lanePieces.Add(piece);
+        compareActionOrder ??= battle.CompareActionOrder;
+        // 尚未同步入队的新参战者保持本帧来源次序，不以 InstanceID 代替注册顺序。
+        for (int i = 1; i < lanePieces.Count; i++)
+        {
+            var piece = lanePieces[i];
+            int previous = i - 1;
+            while (previous >= 0 && compareActionOrder(piece, lanePieces[previous]) < 0)
+            {
+                lanePieces[previous + 1] = lanePieces[previous];
+                previous--;
+            }
+            lanePieces[previous + 1] = piece;
+        }
+        if (lanePieces.Count == 0) return;
+        float inset = markerTemplate.Rect.rect.width * 1.15f * 0.5f + 3;
+        float left = -track.rect.width + inset, right = -inset;
+        if (left > right) left = right = -track.rect.width * 0.5f;
+        float spacing = lanePieces.Count > 1 ? Mathf.Min(inset * 2, (right - left) / (lanePieces.Count - 1)) : 0;
+        // 双向挤压在端点内展开相近进度；只调整展示位置，保持真实进度与排序不变。
+        for (int i = 0; i < lanePieces.Count; i++)
+        {
+            float x = Mathf.Clamp(-track.rect.width * Mathf.Clamp01(battle.ActionProgress(lanePieces[i]) / 100f), left, right);
+            lanePositions.Add(i == 0 ? x : Mathf.Max(x, lanePositions[i - 1] + spacing));
+        }
+        lanePositions[lanePositions.Count - 1] = Mathf.Min(right, lanePositions[lanePositions.Count - 1]);
+        for (int i = lanePositions.Count - 2; i >= 0; i--)
+            lanePositions[i] = Mathf.Min(lanePositions[i], lanePositions[i + 1] - spacing);
+        for (int i = 0; i < lanePieces.Count; i++)
+        {
+            var rect = markers[lanePieces[i]].Rect;
+            Vector2 target = new(lanePositions[i], ally ? laneOffset : -laneOffset);
+            Vector2 position = positionedMarkers.Add(lanePieces[i]) ? target
+                : Vector2.Lerp(rect.anchoredPosition, target, 1 - Mathf.Exp(-20 * Time.unscaledDeltaTime));
+            lanePositions[i] = Mathf.Clamp(position.x, left, right);
+        }
+        // 缓动、交棒、增员和窗口缩放均可能压缩间距；每帧重新约束，避免只保证最终位置不重叠。
+        for (int i = 1; i < lanePositions.Count; i++)
+            lanePositions[i] = Mathf.Max(lanePositions[i], lanePositions[i - 1] + spacing);
+        lanePositions[lanePositions.Count - 1] = Mathf.Min(right, lanePositions[lanePositions.Count - 1]);
+        for (int i = lanePositions.Count - 2; i >= 0; i--)
+            lanePositions[i] = Mathf.Min(lanePositions[i], lanePositions[i + 1] - spacing);
+        for (int i = 0; i < lanePieces.Count; i++)
+            markers[lanePieces[i]].Rect.anchoredPosition = new Vector2(lanePositions[i], ally ? laneOffset : -laneOffset);
+    }
+
 }

@@ -61,10 +61,25 @@ public class LadderArea : InteractArea
         piece.GetComponent<NavMeshAgent>().enabled = true;
     }
 
+    /// <summary>AI在确认入口、落点及占用后提交攀爬；Warp失败时保留原位置，不揭示迷雾。</summary>
+    public void TriggerAIAction(PieceController piece, Vector3 landing)
+    {
+        if (piece == null || !isActiveAndEnabled || !ableToTrigger) return;
+        var agent = piece.GetComponent<NavMeshAgent>();
+        if (agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh || !agent.Warp(landing)) return;
+        var fog = Mathf.Abs(landing.y - upPos.position.y) < 1f ? upFogEffect : downFogEffect;
+        if (fog != null)
+        {
+            fog.SetActive(false);
+            BattleScene.Ins.BM.AIController.OnScanFog(fog);
+        }
+        BattleScene.Ins.BM.cameraController.SetFollow(piece.transform);
+    }
+
     public Vector3 GetNearPos(Vector3 pos)
     {
         // 随机的xz偏移量
-        Vector3 offset = new Vector3(Random.Range(-1.5f, 1.5f), 0, Random.Range(-1.5f, 1.5f));
+        Vector3 offset = new Vector3(BattleRandom.Range(-1.5f, 1.5f), 0, BattleRandom.Range(-1.5f, 1.5f));
         
         if (Mathf.Abs(pos.y - upPos.position.y) < 1f)
         {

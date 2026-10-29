@@ -76,6 +76,7 @@ public partial class BattleManager : MonoBehaviour
             AIController.Init();
             ApplySetting(GM.Ins.battleSetting); // 在完成所有棋子初始化以后，更新预设
             _delaySkillPack = null;
+            delayAction = null;
             if(pieceActionManager!=null) pieceActionManager.ApplySettingsToPieces(PlayerController.pieces);
             //StartBattle();
             //gray = Resources.Load<Material>("Materials/Gray");
@@ -103,7 +104,11 @@ public partial class BattleManager : MonoBehaviour
     // 只在真实播放/飞行期间阻止下一动作；不以序列帧数量估算锁定秒数。
     public bool CanInspectEnemyTargets => inBattle && startupPhase == StartupPhase.Active && PlayerController.isInTurn;
 
-    public bool HasCombatPresentation => _isFlankAttacking || HasPendingRecognitionSettlement ||
+    // 回合、AI、输入和聚能交接共用此等待条件，镜头恢复也属于受击表现。
+    public bool HasCombatPresentation => (cameraController != null && cameraController.IsPresentingHit) || HasActionPresentation;
+
+    /// <summary>攻击、受击、死亡和结算仍在播放；不含镜头，供镜头等待而不形成循环依赖。</summary>
+    public bool HasActionPresentation => _isFlankAttacking || HasPendingRecognitionSettlement ||
         HasPresentation(PlayerController.pieces) || HasPresentation(AIController.pieces) || HasPresentation(summonPieces);
 
     private static bool HasPresentation(IEnumerable<PieceController> pieces)
@@ -141,6 +146,7 @@ public partial class BattleManager : MonoBehaviour
         if (attacker == null || skillPack == null || (attacker.isDead && !skillPack.AllowDeadCaster) || targets == null) return;
         List<List<DamageInfo>> damageInfoList = new();
         var memeAction = memeActionContext ?? memeService.BeginAction(attacker, skillPack, isFlank);
+        using var actionScope = memeAction.EnsureAction(attacker, skillPack).Enter();
         var validTargets = SkillTargeting.Filter(attacker, targets, skillPack, targetPos);
         // 每次施法只消费一次攻击被动，全部目标与伤害段共享本次倍率。
         var hostileTarget = validTargets.FirstOrDefault(t => !t.isDead && t.isPlayerPiece != attacker.isPlayerPiece);
@@ -159,7 +165,7 @@ public partial class BattleManager : MonoBehaviour
         foreach (var target in validTargets)
         {
             // 1. 伤害管理器统一处理目标校验、命中、暴击与各段扣血。
-            var settlement = damageManager.ResolveSkillTarget(attacker, target, skillPack, checkResult, isFlank, passiveMultiplier);
+            var settlement = damageManager.ResolveSkillTarget(attacker, target, skillPack, checkResult, isFlank, passiveMultiplier, BattleActionContext.Current);
             var damageInfos = settlement.DamageInfos;
             damageInfoList.Add(damageInfos);
             isCrit |= settlement.IsCritical;
@@ -244,7 +250,7 @@ public partial class BattleManager : MonoBehaviour
 
         // 操作记录系统
         BattleScene.Ins.UM.logPanel.PlayerLogAttack(attacker.pieceData.pieceName,
-            actionType == 0 ? skillPack.skillName : actionType.ToString(),
+            actionType == 0 ? skillPack.skillName : actionType.ToDisplayName(),
             validTargets.Select(t => t.pieceData.pieceName).ToList(),
             damageInfoList
         );
@@ -605,6 +611,8 @@ public partial class BattleManager : MonoBehaviour
         // 锁定Y轴，防止击退造成高度偏差
         finalPos.y = target.transform.position.y;
 
+        // 在安排位移时捕获来源，延迟碰撞沿用原根行动。
+        var collisionSource = new BattleDamageSource(BattleDamageKind.Collision, caster);
         // 执行位移
         target.transform.DOMove(finalPos, 0.2f).SetEase(Ease.OutQuad).OnComplete(() =>
         {
@@ -626,7 +634,7 @@ public partial class BattleManager : MonoBehaviour
                 if (!hitPieces.Contains(target))
                     hitPieces.Add(target);
 
-                TriggerCollisionDamage(hitPieces, hitBackEffect.hitBackDamage);
+                TriggerCollisionDamage(hitPieces, hitBackEffect.hitBackDamage, collisionSource);
             }
         });
     }
@@ -634,12 +642,12 @@ public partial class BattleManager : MonoBehaviour
     /// <summary>
     /// 触发碰撞伤害
     /// </summary>
-    private void TriggerCollisionDamage(List<PieceController> hitPieces, int damage = 10)
+    private void TriggerCollisionDamage(List<PieceController> hitPieces, int damage = 10, BattleDamageSource source = null)
     {
         foreach (var piece in hitPieces)
         {
             // 所有被撞到的棋子都受伤
-            piece.unitAttrCenter.TakeDamage(new AttackPack(damage, DamageType.Melee));
+            piece.unitAttrCenter.TakeDamage(new AttackPack(damage, DamageType.Melee), source ?? new BattleDamageSource(BattleDamageKind.Collision));
             BattleScene.Ins.UM.logPanel.PlayerLog(
                 $"{piece.pieceData.pieceName} 受到碰撞伤害 <color=red>{damage}</color>！");
             Debug.Log($"<color=red>{piece.name} 受到碰撞伤害{damage}！</color>");
@@ -665,6 +673,7 @@ public partial class BattleManager : MonoBehaviour
     // 存储延时技能
     private PieceController _delaySkillCaster;
     private SkillPack _delaySkillPack;
+    private BattleActionContext delayAction; // 注册时捕获根行动，跨回合延迟不读取届时其他角色的上下文。
     private Vector3 _delaySkillTargetPos;
     private GameObject _delaySkillEffectObj;
 
@@ -673,6 +682,7 @@ public partial class BattleManager : MonoBehaviour
     {
         // 存储技能数据，等待回合结束时触发攻击
         Debug.Log($"存储延时技能效果{skillPack.skillName}, 位置{targetPos}，将在回合结束时触发");
+        delayAction = new BattleActionContext(caster, skillPack);
         _delaySkillCaster = caster;
         _delaySkillPack = skillPack;
         _delaySkillTargetPos = targetPos;
@@ -714,9 +724,11 @@ public partial class BattleManager : MonoBehaviour
                     Quaternion.identity);
             }
 
-            PieceSkill(_delaySkillCaster, newTargets, _delaySkillPack, _delaySkillTargetPos, ActionType.技能);
+            using (delayAction?.Enter())
+                PieceSkill(_delaySkillCaster, newTargets, _delaySkillPack, _delaySkillTargetPos, ActionType.Skill);
             if (_delaySkillEffectObj != null) _delaySkillEffectObj.SetActive(false);
             _delaySkillPack = null;
+            delayAction = null;
             _delaySkillCaster = null;
         }
     }
@@ -980,7 +992,7 @@ public partial class BattleManager : MonoBehaviour
             if (normalAttackPack == null) return;
             _isFlankAttacking = true;
             closestPartner.ableStrick = false;
-            flankRoutine = StartCoroutine(FlankAttackRoutine(attacker, closestPartner, target));
+            flankRoutine = StartCoroutine(FlankAttackRoutine(attacker, closestPartner, target, BattleActionContext.Current));
         }
     }
 
@@ -995,7 +1007,7 @@ public partial class BattleManager : MonoBehaviour
         _isFlankAttacking = false;
     }
 
-    private IEnumerator FlankAttackRoutine(PieceController attacker, PieceController partner, PieceController target)
+    private IEnumerator FlankAttackRoutine(PieceController attacker, PieceController partner, PieceController target, BattleActionContext parent)
     {
         try
         {
@@ -1004,11 +1016,15 @@ public partial class BattleManager : MonoBehaviour
                    (partner != null && partner.IsPerformingAction)) yield return null;
             if (partner == null || !partner.isActiveAndEnabled || partner.isDead ||
                 target == null || !target.isActiveAndEnabled || target.isDead) yield break;
-            if (partner.isPlayerPiece) partner.CastNormalAttack(target);
-            else
+            // 仅在同步发起反应时恢复父行动，不能在后续等待动画时占用全局上下文。
+            using (parent?.Enter())
             {
-                partner.StartNormalAttack();
-                ((EnemyController)partner).CastAttackOnTarget(target, isMemeReaction: true);
+                if (partner.isPlayerPiece) partner.CastNormalAttack(target);
+                else
+                {
+                    partner.StartNormalAttack();
+                    ((EnemyController)partner).CastAttackOnTarget(target, isMemeReaction: true);
+                }
             }
             while (partner != null && partner.IsPerformingAction) yield return null;
             tutorialManager.TriggerFirstTutorial(FirstTutorialType.FirstStrick);

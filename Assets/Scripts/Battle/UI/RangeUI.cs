@@ -349,8 +349,23 @@ public class RangeUI : MonoBehaviour
         fanCircle.fillAmount = angle / 360f;
         float halfAngle = angle / 2f;
         fanCircle.transform.localRotation = Quaternion.Euler(90, 0, 180f + halfAngle);
-        fanLine1.transform.localScale = radius * circleRadius * Vector3.one;
-        fanLine2.transform.localScale = radius * circleRadius * Vector3.one;
+        // 只缩窄视觉直边，不改变射程、扇形角度及目标判定；填充保留原色相并降低遮挡。
+        float scale = radius * circleRadius;
+        fanLine1.transform.localScale = new Vector3(scale, scale * 0.3f, scale);
+        fanLine2.transform.localScale = new Vector3(scale, scale * 0.3f, scale);
+        var fill = fanCircle.color;
+        fill.a = 0.22f;
+        fanCircle.color = fill;
+        fanCircle.raycastTarget = false;
+        foreach (var line in new[] { fanLine1, fanLine2 })
+        {
+            var image = line.GetComponent<UnityEngine.UI.Image>();
+            if (image == null) continue;
+            var color = image.color;
+            color.a = 0.65f;
+            image.color = color;
+            image.raycastTarget = false;
+        }
         fanLine1.transform.localRotation = Quaternion.Euler(90, 0, halfAngle + 90);
         fanLine2.transform.localRotation = Quaternion.Euler(90, 0, -halfAngle + 90);
     }

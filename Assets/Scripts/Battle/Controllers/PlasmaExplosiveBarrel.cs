@@ -60,19 +60,23 @@ public class PlasmaExplosiveBarrel : MonoBehaviour, IEnemyExplosiveTarget
     /// </summary>
     public void TriggerPlasmaPulse()
     {
+        var action = new BattleActionContext(pieceController, skillPack);
         if (currentHealth > 1)
         {
             currentHealth--;
             pieceController.unitAttrCenter.SetHealth(1);
             Debug.Log($"{barrelName} 受到伤害，释放电浆脉冲！");
-            DOVirtual.DelayedCall(delay, ExecuteExplosionLogic, false);
+            DOVirtual.DelayedCall(delay, () => { using (action.Enter()) ExecuteExplosionLogic(); }, false);
         }
         else
         {
             DOVirtual.DelayedCall(delay, ()=>
             {
-                ExecuteExplosionLogic();
-                OnDead();
+                using (action.Enter())
+                {
+                    ExecuteExplosionLogic();
+                    OnDead();
+                }
             }, false);
             
         }

@@ -46,12 +46,14 @@ using UnityEngine.UI;
     {
         if(piece.isPlayerPiece== false) return;// 只显示玩家棋子信息
         this.piece = piece;
+        GetComponent<ActionCostPreviewUI>()?.Bind(piece.unitAttrCenter);
         UpdateDisplay();
     }
     
     public void SetPlayer(Player playerData, PieceData pieceData)
     {
         if(playerData == null) return;
+        GetComponent<ActionCostPreviewUI>()?.Bind(null);
         int pieceId = pieceData.pieceId;
         
         string name = "CG/PC0" + pieceId + "C1";
@@ -85,12 +87,12 @@ using UnityEngine.UI;
         int curMana = playerData.curMana;
         manaNumText.text = curMana.ToString();
         manaMaxText.text = "/" + pieceData.maxMana.ToString();
-        float manaPercent = (float)curMana / pieceData.maxMana;
+        float manaPercent = pieceData.maxMana > 0 ? (float)curMana / pieceData.maxMana : 0f;
         manaBar.fillAmount = manaPercent;
         
         int ammo = playerData.curAmmo;
         ammoNumText.text = ammo.ToString();
-        ammoBar.fillAmount = (float)ammo / pieceData.maxAmmoCount;
+        ammoBar.fillAmount = pieceData.maxAmmoCount > 0 ? (float)ammo / pieceData.maxAmmoCount : 0f;
     }
     
     public override void UpdateDisplay()
@@ -133,12 +135,12 @@ using UnityEngine.UI;
         int curMana = piece.unitAttrCenter.ManaPoint;
         manaNumText.text = curMana.ToString();
         manaMaxText.text = "/" + piece.unitAttrCenter.MaxManaPoint.ToString();
-        float manaPercent = (float)curMana / piece.unitAttrCenter.MaxManaPoint;
+        float manaPercent = piece.unitAttrCenter.MaxManaPoint > 0 ? (float)curMana / piece.unitAttrCenter.MaxManaPoint : 0f;
         manaBar.fillAmount = manaPercent;
         
         int ammo = piece.unitAttrCenter.AmmoCount;
         ammoNumText.text = ammo.ToString();
-        ammoBar.fillAmount = (float)ammo / piece.unitAttrCenter.MaxAmmoCount;
+        ammoBar.fillAmount = piece.unitAttrCenter.MaxAmmoCount > 0 ? (float)ammo / piece.unitAttrCenter.MaxAmmoCount : 0f;
         //Debug.Log("Ammo: " + ammo);
         /*for (int i = 0; i < ammoIcons.Count; i++)
         {
@@ -171,54 +173,17 @@ using UnityEngine.UI;
         }
     }
 
-    private List<Coroutine> mpIconBlinkCoroutines = new();
-    // 启动前 count 个 mpIcons 的闪烁
-    public void StartMpIconsBlink(int count=1)
+    /// <summary>兼容旧调用，仅预览当前可用 AP 右侧的指定点数。</summary>
+    public void StartMpIconsBlink(int count = 1)
     {
-        StopMpIconsBlink();
-        List<GameObject> activeIcons = new();
-        //activeIcons.AddRange(mpIcons.FindAll(icon => icon.activeInHierarchy));
-        int total = activeIcons.Count;
-        for (int i = total - count; i < total; i++)
-        {
-            if (i >= 0 && i < total)
-            {
-                var coroutine = StartCoroutine(BlinkIcon(activeIcons[i]));
-                mpIconBlinkCoroutines.Add(coroutine);
-            }
-        }
+        if (actionPointPips != null) actionPointPips.SetPreview(count);
     }
-    // 停止所有 mpIcons 的闪烁
+
+    /// <summary>停止 AP 呼吸并清理本面板的资源消耗预览。</summary>
     public void StopMpIconsBlink()
     {
-        foreach (var coroutine in mpIconBlinkCoroutines)
-        {
-            if (coroutine != null)
-                StopCoroutine(coroutine);
-        }
-        mpIconBlinkCoroutines.Clear();
-
-        // 恢复所有 mpIcons 的正常显示
-        /*foreach (var icon in mpIcons)
-        {
-            var img = icon.GetComponent<Image>();
-            if (img != null)
-                img.color = Color.white;
-        }*/
+        if (actionPointPips != null) actionPointPips.SetPreview(0);
+        var preview = GetComponent<ActionCostPreviewUI>();
+        if (preview != null) preview.Clear();
     }
-
-    // 闪烁协程
-    private IEnumerator BlinkIcon(GameObject icon)
-    {
-        var img = icon.GetComponent<Image>();
-        if (img == null) yield break;
-        bool visible = true;
-        while (true)
-        {
-            img.color = visible ? Color.white : new Color(1, 1, 1, 0.3f);
-            visible = !visible;
-            yield return new WaitForSeconds(0.3f);
-        }
-    }
-    
 }

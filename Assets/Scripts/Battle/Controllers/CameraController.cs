@@ -20,7 +20,14 @@ public class CameraController : MonoBehaviour
     [LabelText("键盘平移速度"), MinValue(0)] public float panSpeed = 20f;
     [LabelText("中键拖动灵敏度"), MinValue(0)] public float dragSensitivity = 1f;
 
-    Sequence shakeTweener;
+    private Sequence shakeTweener;
+    private bool hasPendingFollow;
+    private Transform pendingFollow; // 受击镜头期间最后一次跟随请求，结束后统一应用。
+    private float focusOriginSize;
+    private bool hitTweenFinished;
+    private Transform hitOrigin;
+    /// <summary>受击聚焦及缩放恢复尚未结束；回合调度应等待此状态解除。</summary>
+    public bool IsPresentingHit { get; private set; }
 
     public Camera mainCam;
     public Camera colorCam;
@@ -43,6 +50,8 @@ public class CameraController : MonoBehaviour
     void LateUpdate()
     {
         if (virtualCamera == null || followVCam == null) return;
+        TryCompleteHitFocus();
+        if (IsPresentingHit) { isDragging = false; return; }
         var selectedUI = UnityEngine.EventSystems.EventSystem.current != null
             ? UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject : null;
         if (selectedUI != null && selectedUI.GetComponent<UnityEngine.UI.InputField>() != null)
@@ -113,9 +122,27 @@ public class CameraController : MonoBehaviour
         if (!hasFocus) isDragging = false;
     }
 
-    private void OnDisable() => isDragging = false;
+    private void OnDisable()
+    {
+        isDragging = false;
+        CancelHitFocus();
+        hasPendingFollow = false;
+        pendingFollow = null;
+    }
 
+    /// <summary>统一切换跟随目标；受击表现期间延后执行，避免覆盖受击镜头。</summary>
     public void SetFollow(Transform transform)
+    {
+        if (IsPresentingHit)
+        {
+            hasPendingFollow = true;
+            pendingFollow = transform;
+            return;
+        }
+        ApplyFollow(transform);
+    }
+
+    private void ApplyFollow(Transform transform)
     {
         if (transform == null)
         {
@@ -146,60 +173,79 @@ public class CameraController : MonoBehaviour
     //public float shakeMagnitude;
     public Cinemachine.CinemachineImpulseSource impulse;
 
-    public void FocusTarget(Transform transform, Transform origin = null)
+    /// <summary>聚焦受击目标；镜头与战斗表现全部结束后，由回合流程决定是否恢复行动者。</summary>
+    public void FocusTarget(Transform target, Transform origin = null) => BeginHitFocus(target, origin, false, 1f);
+
+    /// <summary>聚焦受击目标并震动、缩放；完整恢复缩放后才解除回合等待。</summary>
+    public void FocusShake(Transform target, Transform origin = null, float amplitude = 1f) =>
+        BeginHitFocus(target, origin, true, amplitude);
+
+    private void CancelHitFocus()
     {
-        virtualCamera.Priority = 0;
-        followVCam.Priority = 10;
-        followVCam.Follow = transform;
-        DOVirtual.DelayedCall(1.6f, () =>
-        {
-            SetFollow(origin);
-        });
-    }
-    public void FocusShake(Transform transform, Transform origin = null, float amplitude = 1f)
-    {
-        virtualCamera.Priority = 0;
-        followVCam.Priority = 10;
-        followVCam.Follow = transform;
-        //virtualCamera.m_Lens.OrthographicSize = minZoom;
-        float currentSize = followVCam.m_Lens.OrthographicSize;
-        float zoom = minZoom + (maxZoom - minZoom) * 0.2f;
         shakeTweener?.Kill();
+        shakeTweener = null;
+        if (IsPresentingHit && followVCam != null) followVCam.m_Lens.OrthographicSize = focusOriginSize;
+        IsPresentingHit = false;
+        hitTweenFinished = false;
+    }
+
+    private void BeginHitFocus(Transform target, Transform origin, bool shake, float amplitude)
+    {
+        if (!isActiveAndEnabled || target == null || virtualCamera == null || followVCam == null) return;
+        // 连续受击只替换旧任务，保留当前缩放和整段表现开始前的原始尺寸。
+        shakeTweener?.Kill();
+        if (!IsPresentingHit) focusOriginSize = followVCam.m_Lens.OrthographicSize;
+        hitTweenFinished = false;
+        hitOrigin = origin;
+        IsPresentingHit = true;
+        isDragging = false;
+        ApplyFollow(target);
         shakeTweener = DOTween.Sequence();
         shakeTweener.SetUpdate(UpdateType.Normal, false);
-        shakeTweener.Append(DOTween.To(
-            () => followVCam.m_Lens.OrthographicSize,
-            x => followVCam.m_Lens.OrthographicSize = x,
-            zoom,
-            shakeDelay/10f
-        ));
-        shakeTweener.AppendCallback(() =>
+        if (shake)
         {
-            followVCam.Follow = null;
-            // 调用impulse的方法让相机震动
-            if (impulse != null)
+            float zoom = minZoom + (maxZoom - minZoom) * 0.2f;
+            shakeTweener.Append(DOTween.To(() => followVCam.m_Lens.OrthographicSize,
+                x => followVCam.m_Lens.OrthographicSize = x, zoom, shakeDelay / 10f));
+            shakeTweener.AppendCallback(() =>
             {
-                impulse.m_ImpulseDefinition.m_AmplitudeGain = amplitude; // 设置震动强度
+                followVCam.Follow = null;
+                if (impulse == null) return;
+                impulse.m_ImpulseDefinition.m_AmplitudeGain = amplitude;
                 impulse.GenerateImpulse();
-                //Debug.Log("相机震动");
-            }
-        });
-        shakeTweener.AppendInterval(0.8f);
-        shakeTweener.Append(DOTween.To(
-            () => followVCam.m_Lens.OrthographicSize,
-            x => followVCam.m_Lens.OrthographicSize = x,
-            currentSize,
-            shakeDelay)
-        );
-        shakeTweener.AppendInterval(0.5f);
+            });
+            shakeTweener.AppendInterval(0.8f);
+            shakeTweener.Append(DOTween.To(() => followVCam.m_Lens.OrthographicSize,
+                x => followVCam.m_Lens.OrthographicSize = x, focusOriginSize, shakeDelay));
+            shakeTweener.AppendInterval(0.5f);
+        }
+        else
+        {
+            // 普通命中接在暴击后时也平滑回到整段表现的原始尺寸。
+            shakeTweener.Append(DOTween.To(() => followVCam.m_Lens.OrthographicSize,
+                x => followVCam.m_Lens.OrthographicSize = x, focusOriginSize, shakeDelay));
+            shakeTweener.AppendInterval(1.6f);
+        }
         shakeTweener.OnComplete(() =>
         {
-            virtualCamera.Priority = 10;
-            followVCam.Priority = 0;
-            if(origin!= null)
-                SetFollow(origin);
-            else
-                followVCam.Follow = null;
+            shakeTweener = null;
+            hitTweenFinished = true;
+            TryCompleteHitFocus();
         });
     }
+    private void TryCompleteHitFocus()
+    {
+        if (!IsPresentingHit || !hitTweenFinished) return;
+        var battle = BattleScene.Ins != null ? BattleScene.Ins.BM : null;
+        // 必须读取不含镜头的表现状态，否则镜头与回合调度会互相等待。
+        if (battle != null && battle.HasActionPresentation) return;
+        IsPresentingHit = false;
+        hitTweenFinished = false;
+        if (battle != null && battle.SpeedTurnsActive) battle.RestoreCameraAfterHit();
+        else if (battle == null) ApplyFollow(hasPendingFollow ? pendingFollow : hitOrigin);
+        hasPendingFollow = false;
+        pendingFollow = null;
+        hitOrigin = null;
+    }
+
 }

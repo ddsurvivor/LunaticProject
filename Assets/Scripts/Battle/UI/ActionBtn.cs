@@ -1,97 +1,187 @@
+using System;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class ActionBtn : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+/// <summary>行动行的统一表现与输入；分类锁定独立于资源不足禁用。</summary>
+public sealed class ActionBtn : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
 {
     public UnityEngine.UI.Text actionNameText;
     public UnityEngine.UI.Text costText;
-    private UnityEngine.UI.Image outline;
-    private UnityEngine.UI.Text arrow;
-    private bool selected;
+    [SerializeField] private UnityEngine.UI.Button button;
+    [SerializeField] private RectTransform visual;
+    [SerializeField] private CanvasGroup visibility;
+    [SerializeField] private UnityEngine.UI.Image background;
+    [SerializeField] private UnityEngine.UI.Image outline;
+    [SerializeField] private UnityEngine.UI.Image arrow;
+    [SerializeField, Range(1f, 1.15f)] private float hoverScale = 1.06f;
+    [SerializeField, Min(0)] private float hoverScaleDuration = 0.12f;
+    private Func<bool> canUse;
+    private Func<string> title;
+    private Func<ActionResourceCost> queryCost;
+    private Action clicked, entered, exited;
+    private Sequence reveal;
+    private Tween hoverTween;
+    private float scaleTarget = 1f;
+    private bool category;
+    private bool expanded; // 父分类展开锁定，不等同于资源不足禁用。
+    private bool available;
+    private bool hovered;
+    private bool pressed;
+    private bool shown; // 完成本行出现动画后才接收输入。
+    private int lastAP = -1;
 
-    /// <summary>在现有按钮上装配稳定的名称、消耗和箭头列，装饰不拦截射线。</summary>
-    public void Configure(Sprite fill, Sprite border)
+    public bool IsHovered => hovered;
+    public bool IsAvailable => available;
+    public float HoverScaleMultiplier => hoverScale;
+
+    private void Awake()
     {
-        var image = GetComponent<UnityEngine.UI.Image>();
-        if (image == null) image = gameObject.AddComponent<UnityEngine.UI.Image>();
-        image.sprite = fill;
-        image.type = UnityEngine.UI.Image.Type.Sliced;
-        image.color = GameConst.UIColors.Surface;
-        image.raycastTarget = true;
-        var button = GetComponent<UnityEngine.UI.Button>();
-        button.targetGraphic = image;
-        var colors = button.colors;
-        colors.normalColor = Color.white;
-        colors.highlightedColor = GameConst.UIColors.Ally;
-        colors.pressedColor = GameConst.UIColors.Accent;
-        colors.disabledColor = GameConst.UIColors.Disabled;
-        button.colors = colors;
-        foreach (var graphic in GetComponentsInChildren<UnityEngine.UI.Graphic>(true))
-            if (graphic != image) graphic.raycastTarget = false;
-        if (outline == null && transform.Find("MenuRowOutline") != null)
-            outline = transform.Find("MenuRowOutline").GetComponent<UnityEngine.UI.Image>();
-        if (outline == null)
-        {
-            var go = new GameObject("MenuRowOutline", typeof(RectTransform), typeof(UnityEngine.UI.Image));
-            go.transform.SetParent(transform, false);
-            outline = go.GetComponent<UnityEngine.UI.Image>();
-            outline.rectTransform.anchorMin = Vector2.zero;
-            outline.rectTransform.anchorMax = Vector2.one;
-            outline.rectTransform.offsetMin = outline.rectTransform.offsetMax = Vector2.zero;
-        }
-        outline.sprite = border;
-        outline.type = UnityEngine.UI.Image.Type.Sliced;
-        outline.color = GameConst.UIColors.Border;
-        outline.raycastTarget = false;
-        ConfigureText(actionNameText, 12, -86, TextAnchor.MiddleLeft);
-        ConfigureText(costText, 0, -28, TextAnchor.MiddleRight);
-        if (costText != null)
-        {
-            costText.rectTransform.anchorMin = new Vector2(1, 0);
-            costText.rectTransform.anchorMax = Vector2.one;
-            costText.rectTransform.offsetMin = new Vector2(-82, 0);
-        }
-        if (arrow == null && transform.Find("SubmenuArrow") != null)
-            arrow = transform.Find("SubmenuArrow").GetComponent<UnityEngine.UI.Text>();
-        if (arrow == null && actionNameText != null)
-        {
-            arrow = Instantiate(actionNameText, transform, false);
-            arrow.name = "SubmenuArrow";
-            ConfigureText(arrow, 0, -10, TextAnchor.MiddleRight);
-            arrow.text = "›";
-        }
-        SetSubmenu(false);
+        if (button == null) { enabled = false; return; }
+        visual.pivot = new Vector2(0, 0.5f);
+        visual.anchoredPosition = Vector2.zero;
+        button.transition = UnityEngine.UI.Selectable.Transition.None;
+        button.onClick.AddListener(HandleClick);
     }
 
-    private static void ConfigureText(UnityEngine.UI.Text text, float left, float right, TextAnchor alignment)
+    /// <summary>绑定展示与业务回调；不会直接扣费，复用前清除旧预览和动画。</summary>
+    public void Bind(Func<string> label, bool isCategory, Func<bool> usable, Func<ActionResourceCost> cost,
+        Action click, Action enter, Action exit)
     {
-        if (text == null) return;
-        var rect = text.rectTransform;
-        rect.localScale = Vector3.one;
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = new Vector2(left, 0);
-        rect.offsetMax = new Vector2(right, 0);
-        text.fontSize = 18;
-        text.resizeTextForBestFit = false;
-        text.alignment = alignment;
-        text.color = GameConst.UIColors.Text;
-        text.raycastTarget = false;
-        text.horizontalOverflow = HorizontalWrapMode.Wrap;
-        text.verticalOverflow = VerticalWrapMode.Truncate;
+        ResetBinding();
+        title = label;
+        category = isCategory;
+        canUse = usable;
+        queryCost = cost;
+        clicked = click;
+        entered = enter;
+        exited = exit;
+        arrow.gameObject.SetActive(category);
+        costText.gameObject.SetActive(!category);
+        lastAP = -1;
+        Refresh();
     }
 
-    /// <summary>标识当前展开的分类，切换或重开时由菜单同步清除。</summary>
-    public void SetSelected(bool value)
+    /// <summary>按本批次统一时间轴出现；动画只驱动视觉子节点，不干扰布局占位。</summary>
+    public void Reveal(float delay, float duration)
     {
-        selected = value;
-        if (outline != null) outline.color = value ? GameConst.UIColors.Accent : GameConst.UIColors.Border;
+        reveal?.Kill();
+        shown = false;
+        visibility.alpha = 0;
+        visibility.blocksRaycasts = false;
+        visual.anchoredPosition = new Vector2(12, 0);
+        reveal = DOTween.Sequence().SetUpdate(true);
+        reveal.Insert(delay, visibility.DOFade(1, duration).SetEase(Ease.OutCubic));
+        reveal.Insert(delay, visual.DOAnchorPos(Vector2.zero, duration).SetEase(Ease.OutCubic));
+        reveal.OnComplete(() =>
+        {
+            shown = true;
+            visibility.blocksRaycasts = true;
+            reveal = null;
+        });
     }
 
-    public void SetSubmenu(bool value) { if (arrow != null) arrow.gameObject.SetActive(value); }
+    /// <summary>刷新可用性及双语标签；不可用时保留详情悬停，只关闭可操作反馈。</summary>
+    public void Refresh()
+    {
+        if (title == null) return;
+        string text = title();
+        if (actionNameText.text != text) actionNameText.text = text;
+        bool next = canUse != null && canUse();
+        available = next;
+        if (!available) pressed = false;
+        button.interactable = available;
+        if (!category && queryCost != null)
+        {
+            int ap = queryCost().AP;
+            if (ap != lastAP) { costText.text = ap + " AP"; lastAP = ap; }
+        }
+        ApplyState();
+    }
+
+    /// <summary>展开父项保持选中并拒绝再次点击，不使用资源不足的灰色样式。</summary>
+    public void SetExpanded(bool value)
+    {
+        if (value && hovered) ExitHover();
+        expanded = value;
+        pressed = false;
+        arrow.rectTransform.localRotation = Quaternion.Euler(0, 0, value ? -90 : 0);
+        ApplyState();
+    }
+
+    /// <summary>清除复用对象的回调、预览、动画和显示状态。</summary>
+    public void ResetBinding()
+    {
+        ExitHover();
+        reveal?.Kill();
+        reveal = null;
+        hoverTween?.Kill();
+        hoverTween = null;
+        scaleTarget = 1f;
+        title = null;
+        canUse = null;
+        queryCost = null;
+        clicked = entered = exited = null;
+        expanded = hovered = pressed = shown = false;
+        if (visual != null)
+        {
+            visual.anchoredPosition = Vector2.zero;
+            visual.localScale = Vector3.one;
+        }
+        if (visibility != null)
+        {
+            visibility.alpha = 1;
+            visibility.blocksRaycasts = false;
+        }
+        if (arrow != null) arrow.rectTransform.localRotation = Quaternion.identity;
+    }
+
+    private bool Responds => shown && available && !expanded && isActiveAndEnabled;
+    private void HandleClick() { if (Responds) clicked?.Invoke(); }
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (outline != null) outline.color = GameConst.UIColors.Accent;
+        // 详情进入独立于资源可用性，禁用的技能和道具仍可阅读说明。
+        if (!shown || expanded || !isActiveAndEnabled) return;
+        hovered = true;
+        ApplyState();
+        entered?.Invoke();
     }
-    public void OnPointerExit(PointerEventData eventData) => SetSelected(selected);
+    public void OnPointerExit(PointerEventData eventData) => ExitHover();
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (!Responds || eventData.button != PointerEventData.InputButton.Left) return;
+        pressed = true;
+        ApplyState();
+    }
+    public void OnPointerUp(PointerEventData eventData) { pressed = false; ApplyState(); }
+
+    private void ExitHover()
+    {
+        bool wasHovered = hovered;
+        hovered = pressed = false;
+        if (wasHovered) exited?.Invoke();
+        ApplyState();
+    }
+
+    private void ApplyState()
+    {
+        if (background == null) return;
+        bool selected = expanded || pressed;
+        background.color = selected ? GameConst.UIColors.SurfaceInset : hovered && available
+            ? GameConst.UIColors.Surface : GameConst.UIColors.Background;
+        outline.color = selected ? GameConst.UIColors.Accent : hovered && available
+            ? GameConst.UIColors.Ally : available ? GameConst.UIColors.Border : GameConst.UIColors.Disabled;
+        actionNameText.color = available ? GameConst.UIColors.Text : GameConst.UIColors.TextMuted;
+        costText.color = available ? GameConst.UIColors.Ally : GameConst.UIColors.Disabled;
+        arrow.color = expanded ? GameConst.UIColors.Accent : available ? GameConst.UIColors.Text : GameConst.UIColors.Disabled;
+        float target = available && hovered && !expanded ? hoverScale : 1f;
+        if (!Mathf.Approximately(scaleTarget, target))
+        {
+            scaleTarget = target;
+            hoverTween?.Kill();
+            hoverTween = visual.DOScale(target, hoverScaleDuration).SetEase(Ease.OutCubic).SetUpdate(true);
+        }
+    }
+
+    private void OnDisable() => ResetBinding();
 }

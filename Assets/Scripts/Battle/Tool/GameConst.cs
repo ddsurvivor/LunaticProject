@@ -35,7 +35,7 @@ public static class GameConst
     
     public static bool CheckRate(int rate)
     {
-        int roll = UnityEngine.Random.Range(1, 101);
+        int roll = BattleRandom.Range(1, 101);
         return roll <= rate;
     }
 }

@@ -3,13 +3,12 @@ using System;
 /// <summary>暗骰伤害规则；实战和预览共用确定性计算入口。</summary>
 public static class DamageCalculator
 {
-    private static readonly Random Random = new Random();
     public const int MinDice = 4;
     public const int MaxDice = 24;
 
     public static int Roll4D6()
     {
-        return Random.Next(1, 7) + Random.Next(1, 7) + Random.Next(1, 7) + Random.Next(1, 7);
+        return BattleRandom.Range(1, 7) + BattleRandom.Range(1, 7) + BattleRandom.Range(1, 7) + BattleRandom.Range(1, 7);
     }
 
     public static int CalculateActualDamage(int atk, int def, bool isCrit, int critMultiplierPct)

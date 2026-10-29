@@ -57,9 +57,9 @@ namespace Lunatic.BattleTesting
                 }
             if (best != null) return best;
             if (enemies.Count > 0 && actor.unitAttrCenter.AmmoCount == 0 && actor.unitAttrCenter.MaxAmmoCount > 0 &&
-                actor.pieceData?.rangedAtk != null && Allowed(actor, ActionType.远程攻击) && CanPay(actor, ActionType.重新装填))
+                actor.pieceData?.rangedAtk != null && Allowed(actor, ActionType.RangedAttack) && CanPay(actor, ActionType.Reload))
                 return Decision(PlayerBattleCommandKind.Reload, actor.transform.position, "空弹匣装填");
-            if (Allowed(actor, ActionType.移动) && CanPay(actor, ActionType.移动) && actor.unitAttrCenter.GetBuffStacks(BuffType.Bind) == 0)
+            if (Allowed(actor, ActionType.Move) && CanPay(actor, ActionType.Move) && actor.unitAttrCenter.GetBuffStacks(BuffType.Bind) == 0)
             {
                 var movement = ChooseMove(battle, actor, enemies, previousMoveOrigin);
                 if (movement != null) return movement;
@@ -70,7 +70,7 @@ namespace Lunatic.BattleTesting
         private void ConsiderAttack(BattleManager battle, PieceController actor, SkillPack skill, PlayerBattleCommandKind kind,
             List<PieceController> enemies, ref PlayerAutoBattleDecision best)
         {
-            var action = kind == PlayerBattleCommandKind.Skill ? ActionType.技能 : kind == PlayerBattleCommandKind.Ranged ? ActionType.远程攻击 : ActionType.近战攻击;
+            var action = kind == PlayerBattleCommandKind.Skill ? ActionType.Skill : kind == PlayerBattleCommandKind.Ranged ? ActionType.RangedAttack : ActionType.MeleeAttack;
             if (skill == null || !EnemyBehaviorRules.IsOffensive(skill) || !Allowed(actor, action) || !CanPay(actor, action)) return;
             var aims = enemies.Select(p => p.transform.position).ToList();
             if (EnemyAttackPosition.IsAOE(skill))
@@ -110,7 +110,7 @@ namespace Lunatic.BattleTesting
 
         private void ConsiderHealing(BattleManager battle, PieceController actor, SkillPack skill, ref PlayerAutoBattleDecision best)
         {
-            if (!Allowed(actor, ActionType.技能) || !CanPay(actor, ActionType.技能)) return;
+            if (!Allowed(actor, ActionType.Skill) || !CanPay(actor, ActionType.Skill)) return;
             foreach (var ally in battle.PlayerController.pieces)
             {
                 if (ally == null || !ally.gameObject.activeInHierarchy || !EnemyBehaviorRules.BelowHealth(ally, settings.healBelow)) continue;
@@ -134,7 +134,7 @@ namespace Lunatic.BattleTesting
                     if (ladder == null || ladder.upPos == null || ladder.downPos == null) continue;
                     Vector3 near = Vector3.Distance(actor.transform.position, ladder.upPos.position) < Vector3.Distance(actor.transform.position, ladder.downPos.position)
                         ? ladder.upPos.position : ladder.downPos.position;
-                    if (Vector3.Distance(actor.transform.position, near) <= 2f && CanPay(actor, ActionType.攀爬))
+                    if (Vector3.Distance(actor.transform.position, near) <= 2f && CanPay(actor, ActionType.Climb))
                         return new PlayerAutoBattleDecision { command = new PlayerBattleCommand { kind = PlayerBattleCommandKind.Climb, ladder = ladder }, reason = "通过梯子接近其他层敌人" };
                     goals.Add((near, "接近梯子"));
                 }

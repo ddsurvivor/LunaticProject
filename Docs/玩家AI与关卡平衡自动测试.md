@@ -34,7 +34,7 @@
 
 每局完成后重载同一战斗场景，使用相同的初始玩家存档副本；种子依次为 `baseSeed + 局序号（从0开始）`。编辑器支持直接重载未加入 Build Settings 的场景；构建运行时需将被测场景加入 Build Settings。
 
-测试过程中替换 `GM.PLAYERPROFILE` 为深拷贝，并让玩家棋子引用该副本；道具消耗、掉落和教程标记只作用于副本。测试结束恢复原存档引用。接管期间不执行正式胜负奖励、退出剧情场景或 `DataManager.SaveData` 写入。
+测试过程中替换 `GM.PLAYERPROFILE` 为深拷贝，并让玩家棋子引用该副本；道具消耗、掉落和教程标记只作用于副本。测试结束恢复原存档引用。测试副本通过 `DataManager.MarkTransientProfile` 标记为仅供内存使用；即使释放输入、切场景或等待下一局接管，`SaveData` 也不会将该副本写入正式存档。标记不进入JSON，原存档实例不受影响。接管期间不执行正式胜负奖励或退出剧情场景。
 
 停止测试不会回滚当前场景已经发生的移动、伤害或动画。若要继续手动调试，可在当前状态接管；若要重新测试同一起点，应重新载入场景。不要把正在运行的战斗状态当作已经还原的初始关卡。
 
@@ -42,7 +42,7 @@
 
 ## 报告
 
-默认目录：`Application.persistentDataPath/BattleBalanceReports/<批次时间与ID>/`。Inspector 可指定其他报告根目录。
+默认目录：项目根目录 `tmp/BattleBalanceReports/<批次时间与ID>/`；构建中为程序目录下的 `tmp/BattleBalanceReports/`。Inspector 可指定报告根目录；本项目验收统一指定根目录 `tmp/` 内的位置，报告不入Git。
 
 | 文件 | 内容 |
 | --- | --- |
@@ -61,13 +61,13 @@
 构建程序可直接使用：
 
 ```powershell
-& '.\Game.exe' -battle-balance -battle-balance-runs 20 -battle-balance-seed 1000 -battle-balance-report 'D:\BattleReports' -battle-balance-quit
+& '.\Game.exe' -battle-balance -battle-balance-runs 20 -battle-balance-seed 1000 -battle-balance-report 'D:\GitHub\LunaticProject\tmp\BattleReports' -battle-balance-quit
 ```
 
 Unity 编辑器可以通过静态批处理入口打开关卡并进入 Play Mode：
 
 ```powershell
-& '<Unity安装路径>\Editor\Unity.exe' -batchmode -projectPath 'D:\GitHub\LunaticProject' -executeMethod Lunatic.BattleTesting.Editor.BattleBalanceMenu.RunFromCommandLine -battle-balance -battle-balance-scene 'Assets/Scenes/你的战斗场景.unity' -battle-balance-runs 20 -battle-balance-seed 1000 -battle-balance-report 'D:\BattleReports' -battle-balance-quit -logFile 'D:\BattleReports\unity.log'
+& '<Unity安装路径>\Editor\Unity.exe' -batchmode -projectPath 'D:\GitHub\LunaticProject' -executeMethod Lunatic.BattleTesting.Editor.BattleBalanceMenu.RunFromCommandLine -battle-balance -battle-balance-scene 'Assets/Scenes/你的战斗场景.unity' -battle-balance-runs 20 -battle-balance-seed 1000 -battle-balance-report 'D:\GitHub\LunaticProject\tmp\BattleReports' -battle-balance-quit -logFile 'D:\GitHub\LunaticProject\tmp\BattleReports\unity.log'
 ```
 
 不要额外传 `-quit`，否则编辑器可能在测试完成前退出。编辑器实例不能与另一个打开同一项目的实例并行运行。正式胜利/失败都是有效样本，退出码为 0；超时、卡住、取消或基础设施失败返回 2。运行构建需要在启动场景中正常初始化战斗。
@@ -92,3 +92,19 @@ Unity 编辑器可以通过静态批处理入口打开关卡并进入 Play Mode�
 `tmp/Tests/BattleRegression/Run.ps1` 可直接通过 PowerShell + .NET 8 执行，不需要 Agent 或 Unity 编辑器。它链接正式策略、命令、目标查询、扣费及伤害代码，测试独占控制、非法/锁定命令、单次扣费、异常中断、聚能结束隔离、装填/移动/回复/AOE 选择、正式伤害击杀和 JSON/CSV 报告。导航和动画使用替身。
 
 完整宿主、Unity 场景重载、真实动画/物理和存档生命周期仍需按上述 Play Mode 流程验收；这些不能仅凭 .NET 回归认定已经通过。
+
+
+### 2026-10-29 B06 宿主与存档隔离核查
+
+- 修复：原SaveData仅根据当前BattleManager的外部控制权禁写，重载交接时副本可能落盘。现在在安装每局副本前用弱引用表标记该实例，SaveData在场景缺失/未接管时仍拒绝写入；副本回收后标记随之回收，不污染原档或序列化数据。默认报告迁至项目tmp，正式代码不依赖临时测试类型。
+- 定向证据：`tmp/BattleHost/B06-20261029/` 的 `save-before.log` 使用修改前SaveData方法复现无场景交接空档仍调用写入（预期0、实际1）；`tests.log` 的21项检查链接实际Runner/报告类及提取的DataManager方法，覆盖深拷贝、模拟两局胜败及递增种子、退出/禁用、重载中取消、场景变更、卡住/超时、暂停、写报告失败、控制权/玩家引用/随机状态恢复和默认路径。副本禁写检查用写入计数替身，不读写用户实际存档。
+- 编译：Unity2021项目引用离线编译返回0，包含Runner与报告类；存在既有警告。未执行构建，不代表完整Editor导入或Play Mode通过。
+- 真实运行受阻：本项目Unity2021进程5756仍运行；CLI无Pipeline实例且进程检查不完整，CLI更新检查网络失败。Computer Use定位到带未保存标记的PR2BATTLE窗口，首次读取提示窗口最小化，恢复时返回 `computer-use request timed out: activate_window`。未进入Play、保存场景、关闭用户编辑器或启动第二个同项目实例。
+- B06保持受阻：真实场景连续重载、真实胜败/卡住/取消、动画/导航、Console及原存档文件哈希前后对照未执行。没有采集真实关卡胜率，临时报告仅供宿主回归，不可作平衡数据。恢复可操作窗口后，以相同初始局面、种子1000/1001先跑两局，将报告写入tmp；另跑取消与卡住样本，并核对正式存档目录运行前后的文件清单和哈希、GM及棋子原引用、控制权与随机状态。
+
+
+### 2026-10-29 B06真实验收完成
+
+隔离项目在Unity2021真实Play完成种子1000/1001两局重载，每局12秒/9命令均得到Timeout；另以正式胜败入口验证Victory/Defeat回调，并验证Stalled、取消和禁用。存档引用/内容、Unity随机状态、输入控制权均恢复；测试副本释放控制权后调用真实SaveData仍无文件变化。原正式存档目录54文件清单与哈希不变。B06标为宿主、重载与隔离范围完成，21项替身回归也重新通过。
+
+受控胜败不代表自然通关，Timeout样本不作为胜率或数值过难结论；未执行平衡长测或构建。旧受阻记录保留历史事实，本轮通过tmp隔离副本解决运行路径。详见[联合验收](战斗系统B01-B08验收记录.md)，运行报告在 `tmp/Acceptance/B01-B08-20261029/runtime/` 及后续runtime2/runtime4目录。

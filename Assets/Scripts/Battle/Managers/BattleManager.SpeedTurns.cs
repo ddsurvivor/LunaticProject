@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -14,11 +14,28 @@ public partial class BattleManager
     public bool SpeedTurnsActive { get; private set; }
     /// <summary>返回速度条显示进度；当前行动者固定显示 100，其余读取队列进度。</summary>
     public float ActionProgress(PieceController piece) => piece == ActivePiece ? 100 : (float)speedQueue.Progress(piece);
+    /// <summary>速度条只读排序入口；当前行动者优先，其余使用真实队列的就绪顺序及稳定注册次序。</summary>
+    public int CompareActionOrder(PieceController a, PieceController b)
+    {
+        if (a == b) return 0;
+        if (a == ActivePiece) return -1;
+        if (b == ActivePiece) return 1;
+        return speedQueue.CompareDisplayOrder(a, b);
+    }
     /// <summary>统一校验玩家能否操作该棋子，包含回合归属、AP、控制状态及动作等待限制。</summary>
     public bool CanControlPiece(PieceController piece) => SpeedTurnsActive && inBattle &&
         !BurstInputPending && PlayerController.isInTurn && piece != null && piece == ActivePiece &&
         IsSpeedParticipant(piece) && !piece.cantControl && !piece.isIdle && piece.unitAttrCenter.CurMovePoint > 0 &&
         !HasCombatPresentation && !moveManager.IsMoving;
+
+    /// <summary>受击表现结束后，仅在当前棋子仍可继续行动时恢复其镜头；交棒由调度器聚焦下一位。</summary>
+    public void RestoreCameraAfterHit()
+    {
+        if (!SpeedTurnsActive || !inBattle || finishPieceTurn || BurstInputPending ||
+            (PlayerController.isBursting && cancelBurst) || !IsSpeedParticipant(ActivePiece) ||
+            ActivePiece.isIdle || ActivePiece.cantControl || ActivePiece.unitAttrCenter.CurMovePoint <= 0) return;
+        cameraController.SetFollow(ActivePiece.transform);
+    }
 
     /// <summary>判断棋子能否参与速度调度；排除死亡、未激活及尚未唤醒的敌人。</summary>
     public static bool IsSpeedParticipant(PieceController piece) => piece != null &&
@@ -51,13 +68,15 @@ public partial class BattleManager
 
     private void StopSpeedTurns()
     {
-        ResetBurstInterruption();
+        // 先撤销输入和活动者，再恢复额外 AP；清理回调不能在停止过程中重新发出合法命令。
         SpeedTurnsActive = false;
-        if (speedRoutine != null) StopCoroutine(speedRoutine);
+        var routine = speedRoutine;
         speedRoutine = null;
         ActivePiece = null;
         if (PlayerController != null) PlayerController.isInTurn = false;
         if (AIController != null) AIController.isInTurn = false;
+        ResetBurstInterruption();
+        if (routine != null) StopCoroutine(routine);
     }
 
     private IEnumerator SpeedTurnRoutine()
@@ -98,6 +117,9 @@ public partial class BattleManager
             if (!inBattle || !SpeedTurnsActive) yield break;
             buffManager.ProcessBuffs(next.unitAttrCenter);
             if (!inBattle) yield break;
+            // 回合开始的持续伤害也可能触发受击；结束后再聚焦行动者并开放控制。
+            while (inBattle && HasCombatPresentation) yield return null;
+            if (!inBattle || !SpeedTurnsActive) yield break;
             if (IsSpeedParticipant(next))
             {
                 cameraController.SetFollow(next.transform);

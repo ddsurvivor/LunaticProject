@@ -12,7 +12,7 @@ public enum DamageType
     [LabelText("火种")]Electric = 3,// 电子
 }
 // 编写静态扩展类
-public static class EnumExtensions
+public static partial class EnumExtensions
 {
     public static string ToChinese(this DamageType type)
     {
@@ -112,25 +112,24 @@ public static class EnumExtensions
 /// <summary>
 /// 棋子行动类型
 /// </summary>
+[Newtonsoft.Json.JsonConverter(typeof(ActionTypeJsonConverter))]
 public enum ActionType
 {
-    移动 = 1,// 移动
-    近战攻击 = 2,// 攻击
-    远程攻击 = 3,// 远程攻击
-    重新装填 = 4,// 装填
-    扫描 = 6,// 扫描
-    解除束缚 = 7,// 解除束缚
-    攀爬 = 8,// 攀爬
-    技能 = 10,// 技能
-    道具 = 11,// 道具
-    交互 = 12,// 交互
-    轨道轰炸 = 13,// 轨道轰炸
-    对话 = 14,// 对话
-    警戒指令 = 15,// 指令
-    
-    待机 = 20,// 待机
-    
-    使用道具 = 30,// 使用道具
+    [LabelText("移动"), System.Runtime.Serialization.EnumMember(Value = "移动")] Move = 1,
+    [LabelText("近战攻击"), System.Runtime.Serialization.EnumMember(Value = "近战攻击")] MeleeAttack = 2,
+    [LabelText("远程攻击"), System.Runtime.Serialization.EnumMember(Value = "远程攻击")] RangedAttack = 3,
+    [LabelText("重新装填"), System.Runtime.Serialization.EnumMember(Value = "重新装填")] Reload = 4,
+    [LabelText("扫描"), System.Runtime.Serialization.EnumMember(Value = "扫描")] Scan = 6,
+    [LabelText("解除束缚"), System.Runtime.Serialization.EnumMember(Value = "解除束缚")] ReleaseBind = 7,
+    [LabelText("攀爬"), System.Runtime.Serialization.EnumMember(Value = "攀爬")] Climb = 8,
+    [LabelText("技能"), System.Runtime.Serialization.EnumMember(Value = "技能")] Skill = 10,
+    [LabelText("道具"), System.Runtime.Serialization.EnumMember(Value = "道具")] Item = 11,
+    [LabelText("交互"), System.Runtime.Serialization.EnumMember(Value = "交互")] Interact = 12,
+    [LabelText("轨道轰炸"), System.Runtime.Serialization.EnumMember(Value = "轨道轰炸")] OrbitalStrike = 13,
+    [LabelText("对话"), System.Runtime.Serialization.EnumMember(Value = "对话")] Talk = 14,
+    [LabelText("警戒指令"), System.Runtime.Serialization.EnumMember(Value = "警戒指令")] GuardOrder = 15,
+    [LabelText("待机"), System.Runtime.Serialization.EnumMember(Value = "待机")] Wait = 20,
+    [LabelText("使用道具"), System.Runtime.Serialization.EnumMember(Value = "使用道具")] UseItem = 30,
 }
 
 // 棋子属性种类

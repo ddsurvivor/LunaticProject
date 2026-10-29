@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -179,7 +179,7 @@ public partial class AIController : PlayerController
         if (TryCreateExplosivePlan(aiPiece, out var explosivePlan) &&
             (TryAttackPlan(aiPiece, explosivePlan) || actionAttempted)) return true;
         if (aiPiece.navigate && Mathf.Abs(target.transform.position.y - aiPiece.transform.position.y) > 1f)
-            return EnemyMoveToLadder(aiPiece);
+            return EnemyMoveToLadder(aiPiece, target.transform.position);
 
         // 3. 射击型先开火，再寻找安全的侧向/斜向撤离点。
         if (strategy.Action == EnemyAIType.Shoot)
@@ -207,7 +207,7 @@ public partial class AIController : PlayerController
         {
             Target = target,
             Skill = ranged ? piece.pieceData.RangedAttack : piece.pieceData.MeleeAttack,
-            Action = ranged ? ActionType.远程攻击 : ActionType.近战攻击,
+            Action = ranged ? ActionType.RangedAttack : ActionType.MeleeAttack,
             Strategy = piece.ResolveStrategy()
         };
     }
@@ -222,7 +222,7 @@ public partial class AIController : PlayerController
             {
                 if (!IsOffensiveSkill(skill) || !piece.unitAttrCenter.HasMana(skill.mpCost)) continue;
                 if (pass == 0 && !CanExecuteAttack(piece, target, skill)) continue;
-                var plan = new AttackPlan { Target = target, Skill = skill, Action = ActionType.技能,
+                var plan = new AttackPlan { Target = target, Skill = skill, Action = ActionType.Skill,
                     Strategy = piece.ResolveStrategy() };
                 if (TryAttackPlan(piece, plan) || actionAttempted) return true;
             }
@@ -234,8 +234,8 @@ public partial class AIController : PlayerController
     {
         if (plan.Skill == null) return false;
         if (plan.Explosive != null && !EnemyExplosiveTargets.CanAttack(piece, plan.Explosive, plan.Skill)) return false;
-        if (plan.Action == ActionType.技能 && !piece.unitAttrCenter.HasMana(plan.Skill.mpCost)) return false;
-        bool needsReload = plan.Action == ActionType.远程攻击 && piece.unitAttrCenter.AmmoCount <= 0;
+        if (plan.Action == ActionType.Skill && !piece.unitAttrCenter.HasMana(plan.Skill.mpCost)) return false;
+        bool needsReload = plan.Action == ActionType.RangedAttack && piece.unitAttrCenter.AmmoCount <= 0;
         if (needsReload && piece.unitAttrCenter.MaxAmmoCount <= 0) return false;
         if (!allowMove && needsReload && EnemyBehaviorRules.ShouldFlee(piece)) return false;
 
@@ -243,10 +243,10 @@ public partial class AIController : PlayerController
         if (plan.Explosive != null || (plan.Support ? CanExecuteSupport(piece, plan.Target, plan.Skill) : CanExecutePlan(piece, plan)))
         {
             if (needsReload)
-                return SpendAction(piece, ActionType.重新装填, () => piece.ReloadAmmo());
+                return SpendAction(piece, ActionType.Reload, () => piece.ReloadAmmo());
             return SpendAction(piece, plan.Action, () =>
             {
-                if (plan.Action == ActionType.技能)
+                if (plan.Action == ActionType.Skill)
                 {
                     if (!piece.unitAttrCenter.HasMana(plan.Skill.mpCost)) return;
                     piece.StartSkillAttack(plan.Skill);
@@ -257,7 +257,7 @@ public partial class AIController : PlayerController
                 }
                 else
                 {
-                    piece.StartNormalAttack(plan.Action == ActionType.远程攻击);
+                    piece.StartNormalAttack(plan.Action == ActionType.RangedAttack);
                     if (plan.Explosive != null) piece.CastOnExplosive(plan.Explosive, plan.Skill, plan.Action);
                     else piece.CastAttackOnTarget(plan.Target);
                 }
@@ -272,8 +272,8 @@ public partial class AIController : PlayerController
 
         // 预留施放和必要装填费用，避免移动后没有资源完成计划。
         if (!allowMove || !CanAfford(piece, plan.Action) || !CanMove(piece)) return false;
-        int reserved = ActionCost(plan.Action) + (needsReload ? ActionCost(ActionType.重新装填) : 0);
-        int moves = (piece.unitAttrCenter.CurMovePoint - reserved) / Mathf.Max(1, ActionCost(ActionType.移动));
+        int reserved = ActionCost(plan.Action) + (needsReload ? ActionCost(ActionType.Reload) : 0);
+        int moves = (piece.unitAttrCenter.CurMovePoint - reserved) / Mathf.Max(1, ActionCost(ActionType.Move));
         if (moves <= 0) return false;
         var candidates = FindPositions(piece, plan.Target.transform.position, plan.Skill.rangeValue,
             moves * piece.unitAttrCenter.MoveRange, p => CanAttackFrom(p, plan.Target, plan.Skill) &&
@@ -325,7 +325,7 @@ public partial class AIController : PlayerController
 
     private static bool CanMove(EnemyController piece)
     {
-        return CanAfford(piece, ActionType.移动) && piece.unitAttrCenter.MoveRange > MinimumMove &&
+        return CanAfford(piece, ActionType.Move) && piece.unitAttrCenter.MoveRange > MinimumMove &&
             piece.unitAttrCenter.GetBuffStacks(BuffType.Bind) == 0;
     }
 
@@ -393,7 +393,7 @@ public partial class AIController : PlayerController
         float moveRange = piece.unitAttrCenter.MoveRange;
         float initialSafety = ChaseSafety(origin);
         float initialEdge = NavMesh.FindClosestEdge(origin, out var originEdge, agent.areaMask) ? originEdge.distance : 0f;
-        float phase = UnityEngine.Random.Range(0f, 360f / PositionSamples);
+        float phase = BattleRandom.Range(0f, 360f / PositionSamples);
         for (int ring = 1; ring <= 3; ring++)
         {
             for (int i = 0; i < PositionSamples; i++)
@@ -464,7 +464,7 @@ public partial class AIController : PlayerController
     {
         for (int i = candidates.Count - 1; i > 0; i--)
         {
-            int index = UnityEngine.Random.Range(0, i + 1);
+            int index = BattleRandom.Range(0, i + 1);
             (candidates[i], candidates[index]) = (candidates[index], candidates[i]);
         }
     }
@@ -475,7 +475,7 @@ public partial class AIController : PlayerController
         var movement = BattleScene.Ins.BM.moveManager;
         if (!movement.TryGetAIMoveDestination(piece.gameObject, goal, piece.unitAttrCenter.MoveRange,
             out var destination, out _, true) || IsOccupied(piece, destination)) return false;
-        return SpendAction(piece, ActionType.移动, () =>
+        return SpendAction(piece, ActionType.Move, () =>
         {
             Vector3 origin = piece.transform.position;
             float length = movement.ExecuteMove(piece.gameObject,
@@ -485,7 +485,7 @@ public partial class AIController : PlayerController
             previousPositions[piece] = origin;
             piece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
             piece.CheckFace(destination - origin);
-            piece.PlayAudio(ActionType.移动);
+            piece.PlayAudio(ActionType.Move);
         });
     }
 
@@ -496,14 +496,21 @@ public partial class AIController : PlayerController
         else TryApproach(aiPiece, targetPos, range);
     }
 
-    private bool EnemyMoveToLadder(EnemyController aiPiece)
+    private bool EnemyMoveToLadder(EnemyController aiPiece, Vector3 target)
     {
-        LadderArea ladder = mapController?.GetLadder(aiPiece.transform.position);
-        if (ladder == null || !CanMove(aiPiece)) return false;
-        Vector3 target = ladder.GetNearPos(aiPiece.transform.position);
-        if (Vector3.Distance(target, aiPiece.transform.position) < 2f)
-            return SpendAction(aiPiece, ActionType.攀爬, () => ladder.TriggerAction(aiPiece));
-        return TryApproach(aiPiece, target, 0f);
+        if (mapController == null || !CanMove(aiPiece)) return false;
+        var agent = aiPiece.GetComponent<NavMeshAgent>();
+        if (!mapController.TryGetLadder(agent, target, out var ladder, out var entrance, out float distance)) return false;
+        if (distance <= MapController.LadderReach &&
+            mapController.TryGetLadderLanding(agent, ladder, target, out var landing) && !IsOccupied(aiPiece, landing))
+            return SpendAction(aiPiece, ActionType.Climb, () =>
+            {
+                // 费用结算会触发状态效果，提交位移前再次确认路径与落点没有失效。
+                if (mapController.TryGetLadderLanding(agent, ladder, target, out var currentLanding) &&
+                    !IsOccupied(aiPiece, currentLanding)) ladder.TriggerAIAction(aiPiece, currentLanding);
+            });
+        // 沿已经验证的入口路径前进，下一次决策重新选路，不随机偏移到墙后或错误楼层。
+        return TryMoveTo(aiPiece, entrance);
     }
 
     /// <summary>

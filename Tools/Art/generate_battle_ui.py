@@ -110,7 +110,7 @@ print('Generated',len(assets),'sprites;',len(records),'source images sampled')
 # 使用交付素材合成精确布局，供程序按色板与锚点复现。
 canvas=Image.new('RGBA',(1920,1080),'#0D151C');dd=ImageDraw.Draw(canvas)
 def txt(x,y,s,n=22,c='#EEE6CF'): ImageDraw.Draw(canvas).text((x,y),s,font=font(n),fill=c)
-def sprite(name,box,color):
+def sprite(name,box,color,angle=0):
     x,y,w,h=box;im=Image.open(OUT/(name+'.png')).convert('RGBA')
     a=next(a for a in assets if a['name']==name);l,b,r,t=a['border']
     if any(a['border']) and w>l+r and h>t+b:
@@ -122,7 +122,7 @@ def sprite(name,box,color):
         im=patch
     else: im=im.resize((w,h),Image.Resampling.LANCZOS)
     from PIL import ImageColor
-    rgba=ImageColor.getcolor(color,'RGBA');im.putalpha(im.getchannel('A').point(lambda a:a*rgba[3]//255));tint=Image.new('RGBA',im.size,rgba);tint.putalpha(im.getchannel('A'));canvas.alpha_composite(tint,(x,y))
+    rgba=ImageColor.getcolor(color,'RGBA');im.putalpha(im.getchannel('A').point(lambda a:a*rgba[3]//255));tint=Image.new('RGBA',im.size,rgba);tint.putalpha(im.getchannel('A'));canvas.alpha_composite(tint.rotate(angle),(x,y))
 def panel(x,y,w,h):
     sprite('PanelFill',(x,y,w,h),'#11181EEF');sprite('PanelOutline',(x,y,w,h),'#A59177')
 def ap(x,y,used,total=3):
@@ -172,21 +172,22 @@ for bottom,height,color in [(94,12,'#7DC59E'),(55,8,'#4AC3D5'),(14,8,'#E7A533')]
     sprite('BarFill',(242,1080-24-bottom-height,238,height),color)
 # 按棋子位置展开一级列表，技能二级菜单沿所选行展开。
 menu_x,menu_y=968,490
-menu_width,row_height,row_step=230,44,46
-actions=[('移动','1 AP'),('近战攻击','1 AP'),('远程攻击','1 AP'),('技能','›'),('道具','›'),('警戒指令','›'),('待机','全部 AP')]
+menu_width,row_height,row_step=230,44,50
+actions=[('移动','1 AP'),('攻击',None),('技能',None),('道具',None),('警戒指令',None),('待机','全部 AP')]
 def menu(selected=False):
-    panel(menu_x-4,menu_y-4,menu_width+8,len(actions)*row_step+8)
     for i,(label,cost) in enumerate(actions):
-        y=menu_y+i*row_step;col='#E7A533' if selected and i==3 else '#A59177'
+        y=menu_y+i*row_step;col='#E7A533' if selected and i==2 else '#A59177'
         sprite('MenuRowFill',(menu_x,y,menu_width,row_height),'#243042F5');sprite('MenuRowOutline',(menu_x,y,menu_width,row_height),col)
-        txt(menu_x+18,y+7,label,20,'#EEE6CF' if not(selected and i==3) else '#E7A533');txt(menu_x+148,y+10,cost,15,col)
-        if selected and i==3:sprite('Selector',(menu_x+3,y+13,14,14),'#E7A533')
+        txt(menu_x+18,y+7,label,20,'#EEE6CF' if not(selected and i==2) else '#E7A533')
+        if cost is None:sprite('Selector',(menu_x+198,y+13,18,18),col,-90 if selected and i==2 else 0)
+        else:txt(menu_x+148,y+10,cost,15,col)
+        if selected and i==2:sprite('Selector',(menu_x+3,y+13,14,14),'#E7A533')
 menu(False)
 txt(1410,938,'棋子身边展开两级菜单',20);txt(1410,978,'技能详情固定左上角',20,'#A3ABAF')
 canvas.convert('RGB').save(DOC/'BattleActions.png')
 menu(True)
 for i,(name,cost) in enumerate([('脉冲射击','2 AP'),('穿透射击','2 AP'),('战术支援','3 AP')]):
-    x=menu_x+menu_width+8;y=menu_y+3*row_step+i*row_step;col='#E7A533' if i==0 else '#A59177'
+    x=menu_x+menu_width+8;y=menu_y+2*row_step+row_height//2-3*row_step//2+i*row_step;col='#E7A533' if i==0 else '#A59177'
     sprite('MenuRowFill',(x,y,menu_width,row_height),'#243042F5');sprite('MenuRowOutline',(x,y,menu_width,row_height),col);txt(x+18,y+7,name,20,col);txt(x+154,y+10,cost,15,col)
 # 悬停技能时详情固定左上角，离开时隐藏；点击后关闭两级菜单进入瞄准。
 panel(32,176,456,286);txt(56,194,'技能详情 / 脉冲射击',25,'#E7A533');txt(56,242,'消耗 2 AP  ·  射程 4 格',21);txt(56,282,'范围与伤害读取实际技能配置',21);txt(56,328,'对目标范围内敌人造成伤害。',20);txt(56,398,'技能悬停详情 · 左上固定',18,'#A3ABAF')

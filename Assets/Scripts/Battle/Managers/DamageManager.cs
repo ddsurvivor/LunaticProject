@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>由 BattleManager 持有，统一技能伤害结算与只读预览。</summary>
@@ -13,6 +13,7 @@ public sealed class DamageManager
         public bool HitAttack;
         public bool IsCritical;
         public readonly List<DamageInfo> DamageInfos = new();
+        public readonly List<BattleDamageResult> DamageResults = new(); // 只记录实际进入生命提交的段，不包含屏障吸收。
     }
 
     public sealed class Preview
@@ -37,12 +38,15 @@ public sealed class DamageManager
         public int Total;
     }
 
+    /// <summary>结算单个目标；显式行动上下文可供多目标共享，返回请求伤害展示及各段实际生命损失。</summary>
     public Settlement ResolveSkillTarget(PieceController attacker, PieceController target,
-        SkillPack skill, CheckResult checkResult = CheckResult.None, bool isFlank = false, float passiveMultiplier = 1f)
+        SkillPack skill, CheckResult checkResult = CheckResult.None, bool isFlank = false, float passiveMultiplier = 1f, BattleActionContext action = null)
     {
         var result = new Settlement();
         // 1. 校验目标，读取掩体、屏障与命中规则。
         if (!CanAffect(attacker, target, skill)) return result;
+        action ??= BattleActionContext.Current ?? new BattleActionContext(attacker, skill, isFlank);
+        using var actionScope = action.Enter();
         if (skill.attackPacks.Count > 0 && attacker.isPlayerPiece != target.isPlayerPiece)
             battle.buffManager.OnAttacked(attacker, target);
         Context context = CreateContext(attacker, target, skill, checkResult, isFlank);
@@ -51,13 +55,13 @@ public sealed class DamageManager
             ObjectPool.Ins.GenerateObject(ItemType.SHIELD, target.transform.position, Quaternion.identity);
 
         // 2. 仅实战掷骰；每个目标独立暴击，避免暴击传给后续目标。
-        if (context.HitRate < 100 && UnityEngine.Random.Range(1, 101) > context.HitRate)
+        if (context.HitRate < 100 && BattleRandom.Range(1, 101) > context.HitRate)
         {
             target.pieceDisplay.ChangeDisplayState(PieceDisplayState.Dodge, true, -1f);
             battle.tipTextManager.ShowMiss(target.transform);
             return result;
         }
-        result.IsCritical = context.MustCrit || UnityEngine.Random.Range(1, 101) <= attacker.unitAttrCenter.critRate;
+        result.IsCritical = context.MustCrit || BattleRandom.Range(1, 101) <= attacker.unitAttrCenter.critRate;
 
         // 3. 各段使用统一公式；实战才提交聚能累计、扣血和受击事件。
         foreach (var pack in skill.attackPacks)
@@ -73,7 +77,8 @@ public sealed class DamageManager
                 battle.buffManager.AbsorbAttack(target.unitAttrCenter, damage);
                 continue;
             }
-            target.unitAttrCenter.TakeDamage(new AttackPack(damage, pack.damageType, result.IsCritical));
+            result.DamageResults.Add(target.unitAttrCenter.TakeDamage(new AttackPack(damage, pack.damageType, result.IsCritical),
+                new BattleDamageSource(BattleDamageKind.Skill, attacker, skill, action)));
             bool killed = target.isDead;
             battle.characterSkillManager.NotifyTakeDamage(target.gameObject, attacker.gameObject);
             if (killed && attacker.isPlayerPiece != target.isPlayerPiece)

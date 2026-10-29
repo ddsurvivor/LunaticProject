@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using Newtonsoft.Json;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace SteamReviewSupport
 {
@@ -13,6 +14,7 @@ namespace SteamReviewSupport
         private string saveDirectory;
         private UnityEngine.UI.Text helpText;
         private GameObject helpPanel;
+        private bool showHelp = true; // 保留 AVG 内手动切换的显示偏好。
         private string status = "Starting review support...";
 
         /// <summary>在编辑器 Play Mode 或 Windows Development Player 首场景 Awake 前安装审核档；无需场景挂载。</summary>
@@ -48,9 +50,14 @@ namespace SteamReviewSupport
 
         private void Update()
         {
+            if (SceneManager.GetActiveScene().name != "AVG") return;
             if (!Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.RightControl)) return;
             if (!Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.RightAlt)) return;
-            if (DigitPressed(1)) helpPanel.SetActive(!helpPanel.activeSelf);
+            if (DigitPressed(1))
+            {
+                showHelp = !showHelp;
+                RefreshSceneVisibility();
+            }
             if (catalog == null) return;
             try
             {
@@ -75,6 +82,22 @@ namespace SteamReviewSupport
                 Report("Review action failed: " + exception.Message);
                 Debug.LogException(exception);
             }
+        }
+
+        private void OnEnable() => SceneManager.activeSceneChanged += OnActiveSceneChanged;
+
+        private void OnDisable()
+        {
+            SceneManager.activeSceneChanged -= OnActiveSceneChanged;
+            if (helpPanel != null) helpPanel.SetActive(false);
+        }
+
+        private void OnActiveSceneChanged(Scene previous, Scene current) => RefreshSceneVisibility();
+
+        private void RefreshSceneVisibility()
+        {
+            // 常驻对象随场景切换收起，避免 AVG 调试界面及入口侵入战斗。
+            if (helpPanel != null) helpPanel.SetActive(showHelp && SceneManager.GetActiveScene().name == "AVG");
         }
 
         private static bool DigitPressed(int digit)
@@ -143,6 +166,7 @@ namespace SteamReviewSupport
             helpText.raycastTarget = false;
             helpText.supportRichText = false;
             RefreshHelp();
+            RefreshSceneVisibility();
         }
 
         private void RefreshHelp()

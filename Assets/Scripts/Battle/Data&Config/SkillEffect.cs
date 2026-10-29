@@ -56,7 +56,8 @@ public class SelfExplosionEffect : SkillEffectBase
     {
         // 对自身造成伤害
         int selfDamage = 100; // 示例伤害值，可以根据需要调整
-        attacker.unitAttrCenter.TakeDamage(new AttackPack(selfDamage,DamageType.Ranged));
+        attacker.unitAttrCenter.TakeDamage(new AttackPack(selfDamage,DamageType.Ranged),
+            new BattleDamageSource(BattleDamageKind.SelfDamage, attacker));
     }
 }
 

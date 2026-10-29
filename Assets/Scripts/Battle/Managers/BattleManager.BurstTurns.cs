@@ -9,6 +9,10 @@ public partial class BattleManager
     private bool burstConfirmed; // 玩家已确认本次角色名单。
     private bool cancelBurst; // 取消选人或在当前动作完成后提前退出。
     private bool burstUsedThisTurn; // 被插入聚能的普通回合不抵扣本次冷却。
+    private int burstInterruptionVersion; // 停止或重新初始化后，旧协程不得再写入当前战斗。
+    private PieceController burstActor; // 正持有额外 AP 的角色；停止协程时也必须显式归还。
+    private int burstActorAP; // 进入该角色额外行动前的普通 AP。
+    private bool burstActorIdle; // 进入该角色额外行动前的普通待机状态。
     /// <summary>是否正在选择聚能角色；此时世界点击仅处理选人。</summary>
     public bool IsChoosingBurst { get; private set; }
     /// <summary>是否已请求聚能或正在选人；为 true 时暂停普通玩家输入和 AI 决策。</summary>
@@ -64,9 +68,30 @@ public partial class BattleManager
 
     private IEnumerator BurstInterruption(PieceController interrupted)
     {
+        int version = burstInterruptionVersion;
+        var routine = BurstInterruptionRoutine(interrupted, version);
+        bool finished = false;
+        try
+        {
+            while (routine.MoveNext()) yield return routine.Current;
+            finished = true;
+        }
+        finally
+        {
+            (routine as System.IDisposable)?.Dispose();
+            // 异常使调度器退出时释放控制状态；主动停止已在入口中清理，不再重复结束新战斗。
+            if (version == burstInterruptionVersion && (!finished || !inBattle || !SpeedTurnsActive)) StopSpeedTurns();
+        }
+    }
+
+    private bool IsBurstInterruptionCurrent(int version) =>
+        version == burstInterruptionVersion && SpeedTurnsActive && inBattle;
+
+    private IEnumerator BurstInterruptionRoutine(PieceController interrupted, int version)
+    {
         // 等待在途攻击与移动结算，避免切换控制权时丢失伤害回调。
-        while (inBattle && (HasCombatPresentation || moveManager.IsMoving)) yield return null;
-        if (!inBattle || !burstRequested || !PlayerController.ableBurst) yield break;
+        while (IsBurstInterruptionCurrent(version) && (HasCombatPresentation || moveManager.IsMoving)) yield return null;
+        if (!IsBurstInterruptionCurrent(version) || !burstRequested || !PlayerController.ableBurst) yield break;
         burstRequested = false;
         IsChoosingBurst = true;
         burstConfirmed = cancelBurst = false;
@@ -76,11 +101,12 @@ public partial class BattleManager
         selectedBurstActors.Clear();
         BattleScene.Ins.UM.logPanel.PlayerLog("聚能：点击我方棋子选择/取消，可选多名，每名消耗50。再次点击聚能确认，右键取消。");
         PlayerController.RefreshBurstUI();
-        while (inBattle && !cancelBurst && !burstConfirmed) yield return null;
+        while (IsBurstInterruptionCurrent(version) && !cancelBurst && !burstConfirmed) yield return null;
+        if (!IsBurstInterruptionCurrent(version)) yield break;
         // 提交前重新校验名单，支付成功后才开启额外行动。
         selectedBurstActors.RemoveAll(p => !CanJoinBurst(p));
         IsChoosingBurst = false;
-        if (!inBattle) yield break;
+        if (!IsBurstInterruptionCurrent(version)) yield break;
         if (cancelBurst || !PlayerController.SpendBurst(selectedBurstActors.Count))
         {
             ClearBurstSelection();
@@ -93,45 +119,46 @@ public partial class BattleManager
 
         burstUsedThisTurn = true;
         PlayerController.EnterBurstMode();
+        if (!IsBurstInterruptionCurrent(version)) yield break;
         SetBurstActorColors();
         // 额外行动段不消耗行动条，也不重复触发该棋子的普通回合/Buff持续时间。
         foreach (var actor in selectedBurstActors.ToArray())
         {
-            if (cancelBurst || !inBattle) break;
+            if (cancelBurst || !IsBurstInterruptionCurrent(version)) break;
             if (!CanJoinBurst(actor)) continue;
-            int savedAP = actor.unitAttrCenter.CurMovePoint; // 退出额外行动后恢复的普通 AP。
-            bool savedIdle = actor.isIdle; // 额外行动不改变普通回合的待机状态。
-            ActivePiece = actor;
-            actor.isIdle = false;
-            actor.unitAttrCenter.FullMovePoint();
-            orderManager?.ClearForPiece(actor);
-            PlayerController.isInTurn = true;
-            cameraController.SetFollow(actor.transform);
-            BattleScene.Ins.CM.SelectActivePiece(actor);
+            burstActor = actor;
+            burstActorAP = actor.unitAttrCenter.CurMovePoint;
+            burstActorIdle = actor.isIdle;
             try
             {
+                ActivePiece = actor;
+                actor.isIdle = false;
+                actor.unitAttrCenter.FullMovePoint();
+                if (!IsBurstInterruptionCurrent(version)) yield break;
+                orderManager?.ClearForPiece(actor);
+                PlayerController.isInTurn = true;
+                cameraController.SetFollow(actor.transform);
+                BattleScene.Ins.CM.SelectActivePiece(actor);
+                if (!IsBurstInterruptionCurrent(version)) yield break;
                 yield return null;
-                while (inBattle && !cancelBurst && CanJoinBurst(actor) && !actor.isIdle && actor.unitAttrCenter.CurMovePoint > 0)
+                while (IsBurstInterruptionCurrent(version) && !cancelBurst && CanJoinBurst(actor) && !actor.isIdle && actor.unitAttrCenter.CurMovePoint > 0)
                     yield return null;
+                if (!IsBurstInterruptionCurrent(version)) yield break;
                 PlayerController.isInTurn = false;
-                while (inBattle && (HasCombatPresentation || moveManager.IsMoving)) yield return null;
-                if (inBattle && _delaySkillCaster == actor) HandleDelaySkill();
-                while (inBattle && (HasCombatPresentation || moveManager.IsMoving)) yield return null;
+                while (IsBurstInterruptionCurrent(version) && (HasCombatPresentation || moveManager.IsMoving)) yield return null;
+                if (IsBurstInterruptionCurrent(version) && _delaySkillCaster == actor) HandleDelaySkill();
+                while (IsBurstInterruptionCurrent(version) && (HasCombatPresentation || moveManager.IsMoving)) yield return null;
             }
             finally
             {
                 // 离开该角色的额外行动段时归还普通行动状态，避免额外 AP 泄漏。
-                if (actor != null)
-                {
-                    actor.CancelSelect();
-                    if (!actor.isDead) actor.unitAttrCenter.SetMovePoint(savedAP);
-                    actor.isIdle = savedIdle;
-                }
+                if (version == burstInterruptionVersion) RestoreBurstActor();
             }
         }
+        if (!IsBurstInterruptionCurrent(version)) yield break;
         RestoreBurstActorColors();
         ClearBurstSelection();
-        if (!inBattle) yield break;
+        if (!IsBurstInterruptionCurrent(version)) yield break;
         PlayerController.EndBurstMode();
         ActivePiece = interrupted;
         PlayerController.isInTurn = playerTurn;
@@ -150,6 +177,21 @@ public partial class BattleManager
     {
         foreach (var piece in selectedBurstActors) if (piece != null) piece.CancelSelect();
         selectedBurstActors.Clear();
+    }
+
+    private void RestoreBurstActor()
+    {
+        var actor = burstActor;
+        int savedAP = burstActorAP;
+        bool savedIdle = burstActorIdle;
+        int version = burstInterruptionVersion;
+        // 先移交快照所有权，显式停止与协程 finally 可以任意先后执行，但只能恢复一次。
+        burstActor = null;
+        if (actor == null) return;
+        actor.CancelSelect();
+        if (version != burstInterruptionVersion) return;
+        if (!actor.isDead) actor.unitAttrCenter.SetMovePoint(savedAP);
+        actor.isIdle = savedIdle;
     }
 
     private void SetBurstActorColors()
@@ -177,12 +219,19 @@ public partial class BattleManager
 
     private void ResetBurstInterruption()
     {
+        burstInterruptionVersion++;
         burstRequested = IsChoosingBurst = burstConfirmed = false;
         cancelBurst = true;
         burstUsedThisTurn = false;
+        RestoreBurstActor();
         RestoreBurstActorColors();
         ClearBurstSelection();
-        if (PlayerController != null) PlayerController.isBursting = false;
+        if (PlayerController != null)
+        {
+            PlayerController.isBursting = false;
+            PlayerController.totalDamage = 0;
+            PlayerController.burstTarget = null;
+        }
         ShowBurstGray(false);
     }
 }
