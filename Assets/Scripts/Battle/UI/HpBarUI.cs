@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,6 +16,10 @@ public class HpBarUI : MonoBehaviour
     public List<GameObject> mpIcons;
 
 
+    /// <summary>统一头顶读取的伤害预览快照；剩余血量按最大生命归一化，关闭或停用即失效。</summary>
+    public bool HasDamagePreview { get; private set; }
+    public float PreviewAfterMaximum { get; private set; }
+    public float PreviewAfterMinimum { get; private set; }
     private float currentHpPercent = 1f; // 当前血量百分比
 
     private float shadowSpeed = 1.2f; // 拖影血条的动画速度
@@ -26,6 +30,8 @@ public class HpBarUI : MonoBehaviour
     
     public void FullHp()
     {
+        StopAnimations();
+        HasDamagePreview = false;
         currentHpPercent = 1f;
         hpBarFill.fillAmount = 1f;
         shadowFill.fillAmount = 1f;
@@ -38,6 +44,8 @@ public class HpBarUI : MonoBehaviour
     }
     public void UpdateHpBar(float precent)
     {
+        HasDamagePreview = false;
+        hpBarFill.DOKill();
         gameObject.SetActive(true);
         shadowTweener?.Kill(); // 结束当前的拖影动画
         hpBarAlphaTweener?.Kill();
@@ -60,6 +68,8 @@ public class HpBarUI : MonoBehaviour
         gameObject.SetActive(true);
         if (preDamageFillYellow != null) preDamageFillYellow.gameObject.SetActive(false);
         float afterDamagePercent = Mathf.Clamp01(currentHpPercent - damagePercent);
+        HasDamagePreview = true;
+        PreviewAfterMaximum = PreviewAfterMinimum = afterDamagePercent;
 
         // 立即显示预伤害血条
         preDamageFill.fillAmount = afterDamagePercent;
@@ -67,7 +77,7 @@ public class HpBarUI : MonoBehaviour
 
         // 让本体血条透明度循环渐变
         hpBarAlphaTweener?.Kill();
-        hpBarAlphaTweener = hpBarAlphaTweener = hpBarRenderer
+        hpBarAlphaTweener = hpBarRenderer
             .DOFade(0.5f, 1f)
             .SetLoops(-1, LoopType.Yoyo)
             .SetEase(Ease.InOutSine);;
@@ -82,6 +92,7 @@ public class HpBarUI : MonoBehaviour
             return;
         }
         ShowPreDamage((float)preview.MaxDamage / maxHealth);
+        PreviewAfterMinimum = Mathf.Clamp01(currentHpPercent - (float)preview.MinDamage / maxHealth);
 
         // 2. 红色显示最大伤害后的血量，黄色显示最小伤害后的血量。
         if (preDamageFillYellow != null)
@@ -93,6 +104,7 @@ public class HpBarUI : MonoBehaviour
 
     public void ClosePreDamage()
     {
+        HasDamagePreview = false;
         hpBarAlphaTweener?.Kill();
         SetHpBarAlpha(1f);
         preDamageFill.gameObject.SetActive(false);
@@ -110,6 +122,16 @@ public class HpBarUI : MonoBehaviour
         }
     }
     
+    private void OnDisable() => StopAnimations();
+    private void StopAnimations()
+    {
+        HasDamagePreview = false;
+        shadowTweener?.Kill();
+        hpBarAlphaTweener?.Kill();
+        if (hpBarFill != null) hpBarFill.DOKill();
+        SetHpBarAlpha(1f);
+    }
+
     public void UpdateMpIcons(int mpCount)
     {
         for (int i = 0; i < mpIcons.Count; i++)

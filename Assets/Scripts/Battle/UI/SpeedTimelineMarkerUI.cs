@@ -32,6 +32,7 @@ public sealed class SpeedTimelineMarkerUI : MonoBehaviour
     private Rect cachedContentRect;
     private float cachedZoom, cachedFraction;
     private Vector2 cachedOffset;
+    private UnityEngine.UI.Text overflowText; // 满条后的额外进度，避免挤压布局隐藏真实数值。
     private static readonly System.Collections.Generic.Dictionary<Sprite, Rect> boundsCache = new();
 
     /// <summary>供预制体生成器绑定头像、独立裁切窗口、缺图提示和蒙版外的状态装饰。</summary>
@@ -133,5 +134,36 @@ public sealed class SpeedTimelineMarkerUI : MonoBehaviour
     {
         factionAccent.color = ally ? new Color(0.38f, 0.75f, 0.85f) : new Color(0.9f, 0.4f, 0.36f);
         activeHighlight.SetActive(active);
+    }
+
+    /// <summary>显示超过满条的真实进度；当前行动者按调度器提供的显示进度处理。</summary>
+    public void SetOverflow(float progress)
+    {
+        if (progress <= 100f)
+        {
+            if (overflowText != null) overflowText.gameObject.SetActive(false);
+            return;
+        }
+        if (overflowText == null)
+        {
+            var label = new GameObject("OverflowProgress", typeof(RectTransform), typeof(CanvasRenderer), typeof(UnityEngine.UI.Text));
+            label.transform.SetParent(transform, false);
+            overflowText = label.GetComponent<UnityEngine.UI.Text>();
+            overflowText.font = missingPortrait != null ? missingPortrait.font : Resources.GetBuiltinResource<Font>("Arial.ttf");
+            overflowText.fontSize = 14;
+            overflowText.fontStyle = FontStyle.Bold;
+            overflowText.alignment = TextAnchor.MiddleCenter;
+            overflowText.color = Color.white;
+            overflowText.raycastTarget = false;
+            var rect = overflowText.rectTransform;
+            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(64, 20);
+            rect.anchoredPosition = new Vector2(0, 22);
+            var shadow = label.AddComponent<UnityEngine.UI.Shadow>();
+            shadow.effectColor = Color.black;
+            shadow.effectDistance = new Vector2(1, -1);
+        }
+        overflowText.gameObject.SetActive(true);
+        overflowText.text = progress.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture);
     }
 }

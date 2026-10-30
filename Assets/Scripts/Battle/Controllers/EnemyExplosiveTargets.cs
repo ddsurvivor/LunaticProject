@@ -50,7 +50,7 @@ public static class EnemyExplosiveTargets
         // 环境目标通常与敌人同阵营，仅本次攻击允许命中它，不改变技能资产。
         var attack = skill.WithTarget(SkillTarget.All);
         if (!SkillTargeting.IsValid(enemy, barrel, attack) ||
-            Vector3.Distance(enemy.transform.position, barrel.transform.position) > skill.rangeValue) return false;
+            !BattleRangeRules.CanReach(enemy, skill, enemy.transform.position, barrel.transform.position)) return false;
         if (!SkillTargeting.Query(enemy, attack, barrel.transform.position).Contains(barrel)) return false;
         var damage = BattleScene.Ins?.BM?.damageManager?.PreviewSkill(enemy, barrel, attack);
         return damage != null && damage.HitRate > 0 && damage.Total.MaxDamage > 0;

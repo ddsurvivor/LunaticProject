@@ -52,9 +52,18 @@ public partial class EnemyController : PieceController
 
     public override void Dead()
     {
+        if (HasQueuedBurstDeath) return;
+        MemeState.ClearNetworkLinks();
         BattleScene.Ins?.BM?.timedMemeStatuses.ClearForPiece(this);
         CancelCombatAction();
         StopHitShake();
+        isActived = false;
+        if (DeferBurstDeath(CompleteEnemyDeath)) return;
+        CompleteEnemyDeath();
+    }
+
+    private void CompleteEnemyDeath()
+    {
         BattleScene.Ins.TM.RequestHitStop();
         Debug.Log($"{this.name} 死亡");
         OnDead?.Invoke();
@@ -65,11 +74,7 @@ public partial class EnemyController : PieceController
             CheckDrop();
             if (!deadNotDelete)
             {
-                pieceDisplay.pieceSpriteRenderer.DOFade(0f, 0.8f).OnComplete(() =>
-                {
-                    this.gameObject.SetActive(false);
-                    BattleScene.Ins.BM.PlayerCheckWin();
-                }).SetUpdate(UpdateType.Normal);
+                BattleScene.Ins.BM.FadeDeadPiece(this);
             }
             else
             {

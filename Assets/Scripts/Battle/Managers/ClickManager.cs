@@ -24,14 +24,10 @@ public partial class ClickManager : MonoBehaviour
     [LabelText("拖动方式移动")]
     public bool dragMove;
     
-    // 记录上一次的移动位置
-    private PieceController lastMovePiece;
-    private Vector3 lastStartPos;
-    
 
     private void Update()
     {
-        if (BattleScene.Ins.BM.HasExternalPlayerControl || MemeLoadoutPanel.IsOpen) return;
+        if (BattleScene.Ins.TM.IsPaused || BattleScene.Ins.BM.HasExternalPlayerControl || MemeLoadoutPanel.IsOpen) return;
         // 聚能选人优先接管世界点击，避免同时触发普通选择或移动。
         if (BattleScene.Ins.BM.IsChoosingBurst)
         {
@@ -181,23 +177,25 @@ public partial class ClickManager : MonoBehaviour
     }
 
     /// <summary>交棒或进入聚能选人前清除选择、移动预览及相关操作 UI。</summary>
-    public void ClearTurnSelection()
+    public void ClearTurnSelection() => ClearSelection(true);
+
+    private void ClearSelection(bool clearMoveUndo)
     {
         BattleScene.Ins.UM.ClearActionFlow();
         CancelMovementPreview();
         ClearEnemyTargetLines(true);
         _selectedPiece?.CancelSelect();
         _selectedPiece = null;
-        lastMovePiece = null;
+        if (clearMoveUndo) BattleScene.Ins.BM.ClearMoveUndo();
         BattleScene.Ins.UM.ShowUndoMoveButton(false);
         BattleScene.Ins.UM.pieceActionListPanel.HidePanel();
         BattleScene.Ins.UM.pieceInfoPanel.StopMpIconsBlink();
     }
 
-    /// <summary>清除旧选择后选中可操作的当前行动者；不满足控制条件时只清理旧状态。</summary>
+    /// <summary>刷新当前行动者选择并保留本行动段撤销；交棒必须先调用 ClearTurnSelection。</summary>
     public void SelectActivePiece(PieceController piece)
     {
-        ClearTurnSelection();
+        ClearSelection(false);
         if (!BattleScene.Ins.BM.CanControlPiece(piece)) return;
         _selectedPiece = piece;
         piece.OnSelect();
@@ -333,6 +331,13 @@ public partial class ClickManager : MonoBehaviour
             return;
         }
 
+        float currentRange = _selectedPiece.unitAttrCenter.MoveRange;
+        if (!Mathf.Approximately(_dragRange, currentRange))
+        {
+            _dragRange = currentRange;
+            _rangeUI.ShowCircleRange(_dragStartPos, _dragRange);
+        }
+
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit[] hits = Physics.RaycastAll(ray);
 
@@ -354,10 +359,11 @@ public partial class ClickManager : MonoBehaviour
             offset = offset.normalized * _dragRange;
             point = _dragStartPos + offset;
         }
-        _rangeUI.UpdateMove(point);
-        
-        // move manager同步更新路径
-        BattleScene.Ins.BM.moveManager.PreviewMove(_selectedPiece.gameObject, point, _dragRange);
+        var movement = BattleScene.Ins.BM.moveManager;
+        movement.PreviewMove(_selectedPiece.gameObject, point, _dragRange);
+        bool valid = movement.TryGetPreviewPosition(_selectedPiece.gameObject, out var destination);
+        _rangeUI.ShowMoveIcon(valid);
+        if (valid) _rangeUI.UpdateMove(destination);
     }
 
     private void StopDrag()
@@ -380,6 +386,7 @@ public partial class ClickManager : MonoBehaviour
 
     public void ClickMovePoint()
     {
+        if (!BattleScene.Ins.BM.CanControlPiece(_selectedPiece)) return;
         if (_selectedPiece != null)
         {
             Debug.Log("停止拖动棋子");
@@ -393,11 +400,6 @@ public partial class ClickManager : MonoBehaviour
             }
             _selectedPiece.CheckFace(targetPos - _dragStartPos);
             _selectedPiece.StartMove();
-            // 记录并显示撤回
-            lastMovePiece = _selectedPiece;
-            lastStartPos = _dragStartPos;
-            BattleScene.Ins.UM.ShowUndoMoveButton(
-                _selectedPiece.unitAttrCenter.GetBuffStacks(BuffType.SpontaneousMemeticAttack) == 0);
             var piece = _selectedPiece;
             // piece.transform.DOMove(targetPos, 1.0f).OnComplete(() =>
             // {
@@ -418,20 +420,6 @@ public partial class ClickManager : MonoBehaviour
     /// </summary>
     public void CancelMove()
     {
-        if (!BattleScene.Ins.BM.CanControlPiece(lastMovePiece)) return;
-        if (lastMovePiece != null && (lastMovePiece.isDead ||
-            lastMovePiece.unitAttrCenter.GetBuffStacks(BuffType.SpontaneousMemeticAttack) != 0)) return;
-        if (lastMovePiece != null)
-        {
-            // 撤回上一次的移动
-            lastMovePiece.transform.position = lastStartPos;
-            lastMovePiece.StopMove();
-            
-            // 撤回消耗的移动点数
-            int count = GM.Ins.DM.gameConstSO.GetActionPointCost(ActionType.Move);
-            lastMovePiece.unitAttrCenter.AddMP(count);
-            lastMovePiece = null;
-            BattleScene.Ins.UM.ShowUndoMoveButton(false);
-        }
+        BattleScene.Ins.BM.TryUndoMove();
     }
 }

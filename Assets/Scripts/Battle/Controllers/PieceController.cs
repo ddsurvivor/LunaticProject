@@ -40,6 +40,9 @@ public partial class PieceController : MonoBehaviour
 
     public Player playerData;
 
+    public int BattleLifeVersion { get; private set; } // Init后旧延迟回调不得影响复用棋子。
+    private bool burstDeathQueued;
+    protected bool HasQueuedBurstDeath => burstDeathQueued;
     private MemeUnitState memeState;
     /// <summary>当前战斗的模因暴露与抗性；棋子重新初始化时清除。</summary>
     public MemeUnitState MemeState => memeState ??= new MemeUnitState();
@@ -152,12 +155,16 @@ public partial class PieceController : MonoBehaviour
 
     private void OnDestroy()
     {
+        MemeState.ClearNetworkLinks();
         passiveManager?.UnregisterPiece(gameObject);
         BattleScene.Ins?.BM?.timedMemeStatuses.ClearForPiece(this);
     }
 
     public void Init(PlayerController player, PieceData pieceData = null)
     {
+        BattleScene.Ins?.BM?.ReleaseExplosiveBody(transform);
+        BattleLifeVersion++;
+        burstDeathQueued = false;
         BattleScene.Ins?.BM?.timedMemeStatuses.ClearForPiece(this);
         MemeState.Reset();
         CancelCombatAction();
@@ -234,6 +241,7 @@ public partial class PieceController : MonoBehaviour
 
     private void Update()
     {
+        if (BattleScene.Ins != null && BattleScene.Ins.TM != null && BattleScene.Ins.TM.IsPaused) return;
         if (BattleScene.Ins != null && BattleScene.Ins.BM.HasExternalPlayerControl) return;
         if (BattleScene.Ins != null && BattleScene.Ins.BM.HasCombatPresentation) return;
         if (cantControl) return;
@@ -395,27 +403,24 @@ public partial class PieceController : MonoBehaviour
     }
 
 
-    private bool CheckActionPos()
+    /// <summary>撤销只刷新交互与表现，不重放治疗区、陷阱或到达回调。</summary>
+    internal void RefreshAfterMoveUndo()
+    {
+        _curCaverSlot = null;
+        CheckActionPos(false);
+        pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
+        BattleScene.Ins.UM.OnPieceStateChance(this);
+        BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
+    }
+
+    private bool CheckActionPos(bool applyEffects = true)
     {
         bool result = false;
+        _curCaverSlot = null;
         interactAreas.Clear();
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, 3f);
         foreach (var collider in hitColliders)
         {
-            CaverSlot caverSlot = collider.transform.GetComponent<CaverSlot>();
-            if (caverSlot != null && !caverSlot.isFull) // 掩体判定规则
-            {
-                // 取消吸附机制
-                //caverSlot.AddToSlot(transform);
-                _curCaverSlot = caverSlot;
-                // 播放掩体特效
-                SpriteEffectPlayer shieldEffect
-                    = ObjectPool.Ins.GenerateObject(ItemType.SHIELD, transform.position
-                            , Quaternion.identity)
-                        .GetComponent<SpriteEffectPlayer>();
-                result = true;
-            }
-
             InteractArea interactArea = collider.transform.GetComponent<InteractArea>();
             if (interactArea != null)
             {
@@ -431,8 +436,9 @@ public partial class PieceController : MonoBehaviour
             }
 
             HealArea healArea = collider.transform.GetComponent<HealArea>();
-            if (healArea != null)
+            if (healArea != null && applyEffects)
             {
+                BattleScene.Ins.BM.ClearMoveUndo();
                 healArea.AddBuffToUnit(this);
             }
         }
@@ -536,8 +542,7 @@ public partial class PieceController : MonoBehaviour
         if (skill == null || (targets.Count == 0 && skill.target != SkillTarget.Area)) return;
         bool ranged = action == ActionType.RangedAttack;
         if (ranged && unitAttrCenter.AmmoCount <= 0) return;
-        Vector3 position = rangeUI.GetSkillTransform() != null ? rangeUI.GetSkillTransform().position
-            : targets.Count > 0 ? targets[0].transform.position : transform.position;
+        Vector3 position = rangeUI.SelectionPosition;
         // 道具瞄准不预扣库存；确认时按菜单相同的 Item 费用一次性提交。
         if (action == ActionType.UseItem)
         {
@@ -677,10 +682,16 @@ public partial class PieceController : MonoBehaviour
 
     public void Hurt()
     {
+        var battle = BattleScene.Ins.BM;
+        if (!isPlayerPiece && battle.PlayerController.isBursting &&
+            battle.TryDeferBurstEffect(this, () => { if (!isDead) Hurt(); }))
+        {
+            pieceDisplay?.FreezeBurstFirstFrame(PieceDisplayState.Hit);
+            return;
+        }
         BattleScene.Ins.TM.RequestHitStop();
         OnHurt?.Invoke();
         Debug.Log($"{this.name} 受伤");
-        // 聚能期间仍完整播放受击；延迟表现队列另行实现，不能用循环受击冒充冻结。
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Hit, true);
 
         // TODO: 根据受伤的数值改变振动的强度
@@ -695,9 +706,27 @@ public partial class PieceController : MonoBehaviour
 
     public virtual void Dead()
     {
+        if (HasQueuedBurstDeath) return;
+        MemeState.ClearNetworkLinks();
         BattleScene.Ins?.BM?.timedMemeStatuses.ClearForPiece(this);
         CancelCombatAction();
         StopHitShake();
+        if (DeferBurstDeath(CompleteDeath)) return;
+        CompleteDeath();
+    }
+
+    /// <summary>死亡立即撤销行动与状态，死亡事件及表现排到聚能释放期；同一生命只登记一次。</summary>
+    protected bool DeferBurstDeath(Action complete)
+    {
+        if (burstDeathQueued) return true;
+        if (!BattleScene.Ins.BM.TryDeferBurstEffect(this, () => { burstDeathQueued = false; complete(); })) return false;
+        burstDeathQueued = true;
+        pieceDisplay?.FreezeBurstFirstFrame(PieceDisplayState.Death);
+        return true;
+    }
+
+    private void CompleteDeath()
+    {
         BattleScene.Ins.TM.RequestHitStop();
         Debug.Log($"{this.name} 死亡");
         OnDead?.Invoke();
@@ -760,15 +789,14 @@ public partial class PieceController : MonoBehaviour
         {
             if (atkPos == null || !unitAttrCenter.TryCostSkill(skill)) return;
             NotifySkillUsed(skill);
-            BattleScene.Ins.BM.RestoreDelaySkill(this, skill, atkPos.position);
+            BattleScene.Ins.BM.RestoreDelaySkill(this, skill, rangeUI.SelectionPosition);
             _isUsingSkill = false;
             rangeUI.CloseRange();
             return;
         }
         var targets = new List<PieceController>(rangeUI.GetCurTargets);
         if (targets.Count == 0 && skill.target != SkillTarget.Area && skill.target != SkillTarget.Self) return;
-        Vector3 position = atkPos != null ? atkPos.position
-            : targets.Count > 0 ? targets[0].transform.position : transform.position;
+        Vector3 position = rangeUI.SelectionPosition;
         if (!unitAttrCenter.TryCostSkill(skill)) return;
         _isUsingSkill = false;
         rangeUI.CloseRange();

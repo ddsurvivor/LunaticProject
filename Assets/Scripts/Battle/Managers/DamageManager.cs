@@ -27,6 +27,7 @@ public sealed class DamageManager
     {
         public PieceController Attacker, Target;
         public CaverSlot Cover;
+        public int CoverReduction; // 本次目标结算共用的配置减伤，预览使用同一公式。
         public int HitRate;
         public bool BarrierBlocked, IsBursting, IsFlank, MustCrit;
         public float RecognitionModifier, PassiveMultiplier;
@@ -45,6 +46,8 @@ public sealed class DamageManager
         var result = new Settlement();
         // 1. 校验目标，读取掩体、屏障与命中规则。
         if (!CanAffect(attacker, target, skill)) return result;
+        if (battle.PlayerController.isBursting && !battle.IsBurstActor(attacker) && skill.attackPacks.Count > 0 &&
+            battle.TryDeferBurstEffect(attacker, () => ResolveSkillTarget(attacker, target, skill, checkResult, isFlank, passiveMultiplier, action))) return result;
         action ??= BattleActionContext.Current ?? new BattleActionContext(attacker, skill, isFlank);
         using var actionScope = action.Enter();
         if (skill.attackPacks.Count > 0 && BattleRelations.CanAttack(attacker, target))
@@ -80,9 +83,14 @@ public sealed class DamageManager
             result.DamageResults.Add(target.unitAttrCenter.TakeDamage(new AttackPack(damage, pack.damageType, result.IsCritical),
                 new BattleDamageSource(BattleDamageKind.Skill, attacker, skill, action)));
             bool killed = target.isDead;
-            battle.characterSkillManager.NotifyTakeDamage(target.gameObject, attacker.gameObject);
-            if (killed && attacker.isPlayerPiece != target.isPlayerPiece)
-                battle.characterSkillManager.NotifyKillEnemy(attacker.gameObject, target.gameObject);
+            System.Action notify = () =>
+            {
+                if (attacker == null || target == null) return;
+                battle.characterSkillManager.NotifyTakeDamage(target.gameObject, attacker.gameObject);
+                if (killed && attacker.isPlayerPiece != target.isPlayerPiece)
+                    battle.characterSkillManager.NotifyKillEnemy(attacker.gameObject, target.gameObject);
+            };
+            if (!battle.PlayerController.isBursting || !battle.TryDeferBurstEffect(target, notify, action)) notify();
             if (target is EnemyController enemy) enemy.AddDamageRecord(attacker, damage);
             if (damage > 0) result.DamageInfos.Add(new DamageInfo(damage, pack.damageType.ToChinese(), result.IsCritical));
         }
@@ -160,11 +168,14 @@ public sealed class DamageManager
     {
         var context = new Context
         {
-            Attacker = attacker, Target = target, PassiveMultiplier = 1f, Cover = battle.CheckCoverObstruction(attacker, target),
+            Attacker = attacker, Target = target, PassiveMultiplier = 1f,
+            Cover = skill.attackPacks.Count > 0 ? battle.CheckCoverObstruction(attacker, target) : null,
             IsBursting = battle.IsBurstActor(attacker), IsFlank = isFlank,
             BarrierBlocked = skill.attackPacks.Count > 0
                 && target.unitAttrCenter.GetBuffStacks(BuffType.SlowingField) != 0
         };
+        context.CoverReduction = context.Cover != null
+            ? GM.Ins.DM.gameConstSO.GetCoverDamageReduction(context.Cover.Level) : 0;
         bool guaranteed = context.IsBursting || skill.target is SkillTarget.EnemyAll
             or SkillTarget.All or SkillTarget.Self or SkillTarget.AllyBody or SkillTarget.Ally;
         context.HitRate = guaranteed ? 100 : Mathf.Clamp(Mathf.FloorToInt(
@@ -172,7 +183,7 @@ public sealed class DamageManager
             + (skill.target is SkillTarget.Enemy or SkillTarget.FarthestEnemy
                 ? attacker.unitAttrCenter.buffAttrDic[BuffAttrType.SingleTargetHitRate] : 0f)
             - target.unitAttrCenter.buffAttrDic[BuffAttrType.EvasionRate]
-            - (context.Cover != null ? context.Cover.evadeChance : 0)), 0, 100);
+            - (context.Cover != null ? GM.Ins.DM.gameConstSO.CoverEvasionBonus : 0)), 0, 100);
         SetRecognition(ref context, skill, check);
         return context;
     }
@@ -195,8 +206,8 @@ public sealed class DamageManager
         // 1. 技能威力 + 对应类型攻击力 + 通用攻击力 + 克制加伤，再应用掩体和护甲修正。
         int damage = pack.damage + attacker.attr.GetAtk(pack.damageType)
             + attacker.ATK + attacker.attr.GetAddDamage(target.elementType);
-        if (context.Cover != null && context.Cover.damageReduction > 0)
-            damage = (int)(damage * (100 - context.Cover.damageReduction) / 100f);
+        if (context.CoverReduction > 0)
+            damage = (int)(damage * (100 - context.CoverReduction) / 100f);
         int armor = target.attr.GetArmor(pack.damageType);
         if (pack.damageType == DamageType.Melee)
             armor = (int)(armor * Mathf.Max(0f, target.buffAttrDic[BuffAttrType.MeleeArmorPercent]) / 100f);

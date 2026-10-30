@@ -12,32 +12,33 @@ public class BattleFinishPanel : MonoBehaviour
     //public GameObject exitButton;
 
 
+    /// <summary>显示结果和只读胜利奖励预告；本入口不发放奖励。</summary>
     public void ShowPanel(bool win, FinishDrop drop =null, int exp = 0)
     {
         gameObject.SetActive(true);
-        titleText.text = win ? "Victory!" : "Defeat!";
+        titleText.text = win ? "战斗胜利" : "战斗失败";
         descriptionText.text = win ? "战斗胜利" : "战斗失败";
         if (win)
         {
             continueButton.SetActive(true);
-            retryButton.SetActive(false);
+            retryButton.SetActive(true);
             //exitButton.SetActive(true);
         }
         else
         {
-            continueButton.SetActive(false);
+            continueButton.SetActive(true);
             retryButton.SetActive(true);
             //exitButton.SetActive(true);
         }
 
-        if (drop != null)
+        if (win && drop != null)
         {
-            descriptionText.text += "\n" + drop.dropSummary;
+            descriptionText.text += "\n" + drop.PreviewSummary();
         }
 
-        if (exp > 0)
+        if (win && exp > 0)
         {
-            descriptionText.text += $"\n全体获得了{exp}点经验值";
+            descriptionText.text += $"\n全体经验：{exp}（离开战斗时结算）";
         }
     }
 }

@@ -13,7 +13,7 @@ public partial class PieceController
         {
             var normal = ranged ? pieceData.RangedAttack : pieceData.MeleeAttack;
             if (normal == null || normal.target != SkillTarget.Enemy || normal.rangeType != RangeType.Circle ||
-                ranged && unitAttrCenter.AmmoCount <= 0 || Vector3.Distance(transform.position, target.transform.position) > normal.rangeValue) continue;
+                ranged && unitAttrCenter.AmmoCount <= 0 || !BattleRangeRules.CanReach(this, normal, transform.position, target.transform.position)) continue;
             var skill = normal.WithTarget(SkillTarget.Ally);
             if (!SkillTargeting.Query(this, skill, target.transform.position).Contains(target)) continue;
             var preview = battle.damageManager.PreviewSkill(this, target, skill);

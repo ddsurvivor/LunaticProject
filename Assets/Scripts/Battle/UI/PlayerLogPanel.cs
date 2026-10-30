@@ -160,11 +160,77 @@ public class PlayerLogPanel : MonoBehaviour
         AddEntry(message);
     }
 
+    private UnityEngine.UI.ScrollRect logScroll;
+    /// <summary>在原日志文本位置接入滚动视口，长日志可查看，不遮挡其他消息区。</summary>
+    public void EnsureScrolling()
+    {
+        if (logScroll != null || logDisplayText == null) return;
+        var old = logDisplayText.rectTransform;
+        logScroll = GetComponentInChildren<UnityEngine.UI.ScrollRect>(true);
+        if (logScroll == null)
+        {
+            var root = new GameObject("LogScroll", typeof(RectTransform), typeof(UnityEngine.UI.ScrollRect));
+            root.transform.SetParent(transform, false);
+            logScroll = root.GetComponent<UnityEngine.UI.ScrollRect>();
+        }
+        var rect = (RectTransform)logScroll.transform;
+        if (rect != transform)
+        {
+            rect.SetParent(transform, false);
+            rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one;
+            rect.offsetMin = new Vector2(12, 24); rect.offsetMax = new Vector2(-12, -12);
+            rect.localScale = Vector3.one;
+        }
+        var viewport = logScroll.viewport;
+        if (viewport == null)
+        {
+            var node = new GameObject("Viewport", typeof(RectTransform), typeof(UnityEngine.UI.Image), typeof(UnityEngine.UI.Mask));
+            node.transform.SetParent(rect, false); viewport = (RectTransform)node.transform;
+            node.GetComponent<UnityEngine.UI.Image>().color = new Color(0, 0, 0, .01f);
+            node.GetComponent<UnityEngine.UI.Mask>().showMaskGraphic = false;
+        }
+        viewport.anchorMin = Vector2.zero; viewport.anchorMax = Vector2.one;
+        viewport.offsetMin = viewport.offsetMax = Vector2.zero;
+        var content = logScroll.content;
+        if (content == null)
+        {
+            var node = new GameObject("Content", typeof(RectTransform));
+            node.transform.SetParent(viewport, false); content = (RectTransform)node.transform;
+        }
+        content.anchorMin = new Vector2(0, 1); content.anchorMax = Vector2.one;
+        content.pivot = new Vector2(.5f, 1); content.sizeDelta = Vector2.zero;
+        content.localScale = Vector3.one;
+        var layout = content.GetComponent<UnityEngine.UI.VerticalLayoutGroup>();
+        if (layout == null) layout = content.gameObject.AddComponent<UnityEngine.UI.VerticalLayoutGroup>();
+        layout.childControlWidth = layout.childControlHeight = true;
+        layout.childForceExpandWidth = true; layout.childForceExpandHeight = false;
+        var fitter = content.GetComponent<UnityEngine.UI.ContentSizeFitter>();
+        if (fitter == null) fitter = content.gameObject.AddComponent<UnityEngine.UI.ContentSizeFitter>();
+        fitter.horizontalFit = UnityEngine.UI.ContentSizeFitter.FitMode.Unconstrained;
+        fitter.verticalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
+        var oldFitter = old.GetComponent<UnityEngine.UI.ContentSizeFitter>();
+        if (oldFitter != null) oldFitter.enabled = false;
+        old.SetParent(content, false); old.gameObject.SetActive(true); old.localScale = Vector3.one;
+        logDisplayText.enabled = true; logDisplayText.fontSize = 18; logDisplayText.lineSpacing = 2f;
+        logDisplayText.resizeTextForBestFit = false; logDisplayText.alignment = TextAnchor.UpperLeft;
+        logDisplayText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        logDisplayText.verticalOverflow = VerticalWrapMode.Overflow; logDisplayText.raycastTarget = false;
+        logScroll.content = content; logScroll.viewport = viewport;
+        logScroll.horizontal = false; logScroll.vertical = true;
+        logScroll.movementType = UnityEngine.UI.ScrollRect.MovementType.Clamped;
+        logScroll.scrollSensitivity = 24;
+    }
+
+    /// <summary>新场或离场时清空本场日志，不修改任何战斗与奖励状态。</summary>
+    public void ClearLog() { logEntries.Clear(); RefreshUI(); }
+
+    public int EntryCount => logEntries.Count;
+
     // --- 内部逻辑 ---
 
     private void AddEntry(string entry)
     {
-        if (logEntries.Count >= maxLogLines)
+        while (logEntries.Count >= Mathf.Max(1, maxLogLines))
         {
             logEntries.RemoveAt(0);
         }
@@ -183,7 +249,13 @@ public class PlayerLogPanel : MonoBehaviour
             sb.AppendLine(log);
         }
 
+        bool followLatest = logScroll == null || logScroll.verticalNormalizedPosition < .05f;
         logDisplayText.text = sb.ToString();
+        if (logScroll != null && followLatest)
+        {
+            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(logScroll.content);
+            logScroll.verticalNormalizedPosition = 0;
+        }
     }
 
     private string GetColoredText(string text, Color color)

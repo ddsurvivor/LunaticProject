@@ -8,7 +8,7 @@ public class NotificationItem : MonoBehaviour
     [SerializeField]private ItemGetPanel panel;
     private System.Action<NotificationItem> onCompleteCallback;
 
-    // 初始化并开始播放动画（针对 ItemPack）
+    /// <summary>复用池中面板显示物品，取消前一次动画及回收回调。</summary>
     public void Initialize(ItemPack itemPack, System.Action<NotificationItem> onComplete)
     {
         //canvasGroup = GetComponent<CanvasGroup>();
@@ -17,12 +17,13 @@ public class NotificationItem : MonoBehaviour
         StartSequence(onComplete);
     }
 
-    // 初始化并开始播放动画（针对 ComponentData）
+    /// <summary>复用池中面板显示组件，取消前一次动画及回收回调。</summary>
     public void Initialize(ComponentData componentData, System.Action<NotificationItem> onComplete)
     {
         panel.ShowPanel(componentData);
         StartSequence(onComplete);
     }
+    /// <summary>复用经验面板显示属性变化，回收前不拦截世界输入。</summary>
     public void Initialize(string characterName, string expAmount, System.Action<NotificationItem> onComplete)
     {
         gameObject.SetActive(true);
@@ -42,6 +43,10 @@ public class NotificationItem : MonoBehaviour
 
     private void StartSequence(System.Action<NotificationItem> onComplete)
     {
+        StopAllCoroutines();
+        canvasGroup = canvasGroup != null ? canvasGroup : GetComponent<CanvasGroup>();
+        canvasGroup.blocksRaycasts = false; canvasGroup.interactable = false;
+        foreach (var graphic in GetComponentsInChildren<UnityEngine.UI.Graphic>(true)) graphic.raycastTarget = false;
         onCompleteCallback = onComplete;
         gameObject.SetActive(true);
         StartCoroutine(AnimateRoutine());
@@ -73,7 +78,9 @@ public class NotificationItem : MonoBehaviour
         }
 
         // 4. 动画结束，触发回收
+        var callback = onCompleteCallback;
         gameObject.SetActive(false);
-        onCompleteCallback?.Invoke(this);
+        callback?.Invoke(this);
     }
+    private void OnDisable() { StopAllCoroutines(); onCompleteCallback = null; }
 }

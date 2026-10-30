@@ -36,6 +36,33 @@ public class GameConstSO : SerializedScriptableObject
     [SerializeField, LabelText("敌人使用技能概率(%)")]
     private int enemySkillRate = 35;
     public int EnemySkillRate => enemySkillRate;
+
+    [SerializeField, LabelText("重开战斗时重掷种子")]
+    private bool rerollBattleSeedOnRestart; // 默认沿用首局种子，重新部署不保留上局消耗。
+    public bool RerollBattleSeedOnRestart => rerollBattleSeedOnRestart;
+
+    [Header("掩体")]
+    [SerializeField, LabelText("掩体保护距离"), Min(0f)]
+    private float coverProtectionDistance = 2f; // 目标脚点到射线命中实体表面的最大距离。
+    [SerializeField, LabelText("掩体闪避百分点"), Range(0, 100)]
+    private int coverEvasionBonus = 20;
+    [SerializeField, LabelText("一级掩体减伤 %"), Range(0, 100)]
+    private int coverLevelOneReduction = 20;
+    [SerializeField, LabelText("二级掩体减伤 %"), Range(0, 100)]
+    private int coverLevelTwoReduction = 35;
+    [SerializeField, LabelText("三级掩体减伤 %"), Range(0, 100)]
+    private int coverLevelThreeReduction = 50;
+
+    public float CoverProtectionDistance => Mathf.Max(0f, coverProtectionDistance);
+    public int CoverEvasionBonus => Mathf.Clamp(coverEvasionBonus, 0, 100);
+
+    [SerializeField, LabelText("高打低最小高度差"), Min(0.01f)]
+    private float highGroundHeightThreshold = 1f; // 用户确认：至少高出一世界单位，包含等于边界。
+    public float HighGroundHeightThreshold => Mathf.Max(0.01f, highGroundHeightThreshold);
+
+    /// <summary>按场景掩体等级读取全局减伤；未配置的旧场景沿一级处理。</summary>
+    public int GetCoverDamageReduction(int level) => Mathf.Clamp(level <= 1 ? coverLevelOneReduction
+        : level == 2 ? coverLevelTwoReduction : coverLevelThreeReduction, 0, 100);
     #endregion
     
     // 夹击伤害倍率

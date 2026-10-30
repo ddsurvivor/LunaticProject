@@ -68,6 +68,7 @@ public class BuffManager : MonoBehaviour
     {
         if (unit == null || unit.pc == null || unit.pc.isDead || stack == 0 || stack < -1 ||
             !Enum.IsDefined(typeof(BuffType), buff)) return;
+        BattleScene.Ins.BM.ClearMoveUndo();
         var existingBuff = unit.buffStates.Find(b => b.buffType == buff);
         if (existingBuff != null)
         {
@@ -107,6 +108,7 @@ public class BuffManager : MonoBehaviour
             }
 
 
+            BattleScene.Ins.BM.ClearMoveUndo();
             existingBuff.stacks = stack == -1 ? 0 : Mathf.Max(0, existingBuff.stacks - stack);
             if (existingBuff.stacks == 0 && existingBuff.sources.Count == 0)
             {
@@ -129,7 +131,7 @@ public class BuffManager : MonoBehaviour
             unit.buffStates.Add(state);
             ApplyBuff(buff, unit);
         }
-        state.sources.Add(source);
+        if (state.sources.Add(source)) BattleScene.Ins.BM.ClearMoveUndo();
         RefreshEnemyBuffs(unit);
     }
 
@@ -137,6 +139,7 @@ public class BuffManager : MonoBehaviour
     {
         var state = unit?.buffStates.Find(b => b.buffType == buff);
         if (state == null || !state.sources.Remove(source)) return;
+        BattleScene.Ins.BM.ClearMoveUndo();
         if (state.stacks == 0) RemoveBuff(unit, buff, -1);
         RefreshEnemyBuffs(unit);
     }

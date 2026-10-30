@@ -9,6 +9,7 @@
         // 与 PieceInfoPanel 共用 BuffCell 的图标和层数显示
         [SerializeField] private RectTransform buffRoot;
         [SerializeField] private BuffCell buffCellPrefab;
+        public RectTransform BuffRoot => buffRoot;
         private readonly List<BuffCell> buffCells = new();
         
         // 受击信息显示组件

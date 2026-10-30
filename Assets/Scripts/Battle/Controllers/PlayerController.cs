@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -106,24 +106,20 @@ public class PlayerController : SerializedMonoBehaviour
         RefreshBurstUI();
     }
 
-    /// <summary>开启聚能状态、重置累计伤害并播放入场表现；选人、支付和额外 AP 由调度器负责。</summary>
+    /// <summary>开启聚能并冻结本场引信/爆炸物，重置累计伤害与入场表现；选人、支付和额外AP由调度器负责。</summary>
     public void EnterBurstMode()
     {
         isBursting = true;
+        BattleScene.Ins.BM.FreezeBurstWorld();
         totalDamage = 0;
         burstTarget = null;
         BattleScene.Ins.BM.ShowBurstGray(true);
-        var flash = BattleScene.Ins.UM.burstStart;
-        if (flash != null)
-        {
-            flash.DOKill(); flash.color = Color.white; flash.gameObject.SetActive(true);
-            flash.DOFade(0f, 0.5f).SetDelay(0.2f).OnComplete(() => flash.gameObject.SetActive(false));
-        }
+        BattleScene.Ins.UM.ShowBurstNotice(true);
         GM.Ins.AM.PlayAudio(AudioCueType.ChargeStart);
         RefreshBurstUI();
     }
 
-    /// <summary>退出聚能并开始冷却、恢复灰度表现；保留未花费能量，非聚能状态下不处理。</summary>
+    /// <summary>退出聚能、开始冷却并启动延期释放；调度器须等待释放结束后恢复控制，保留未花费能量。</summary>
     public void EndBurstMode()
     {
         if (!isBursting) return;
@@ -132,14 +128,10 @@ public class PlayerController : SerializedMonoBehaviour
         totalDamage = 0;
         burstTarget = null;
         BattleScene.Ins.BM.ShowBurstGray(false);
-        var flash = BattleScene.Ins.UM.burstEnd;
-        if (flash != null)
-        {
-            flash.DOKill(); flash.color = Color.white; flash.gameObject.SetActive(true);
-            flash.DOFade(0f, 0.5f).OnComplete(() => flash.gameObject.SetActive(false));
-        }
+        BattleScene.Ins.UM.ShowBurstNotice(false);
         GM.Ins.AM.PlayAudio(AudioCueType.ChargeExit);
         RefreshBurstUI();
+        BattleScene.Ins.BM.ReleaseBurstEffects();
     }
 
     /// <summary>同步聚能槽、按钮可用状态与选人/退出/冷却文字。</summary>

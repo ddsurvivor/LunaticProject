@@ -81,7 +81,7 @@ public sealed class BattleDeploymentController : MonoBehaviour
                 SetStatus($"{PieceName(piece)}：{error}，请调整后开始战斗。");
                 return false;
             }
-        SetStatus("按住鼠标左键拖拽棋子，在绿色区域内松开部署；右键或 Esc 取消拖拽。");
+        SetStatus("按住鼠标左键拖拽棋子，在部署区域内松开部署；右键或 Esc 取消拖拽。");
         return true;
     }
 
@@ -284,9 +284,9 @@ public sealed class BattleDeploymentController : MonoBehaviour
         var panel = new GameObject("DeploymentPanel", typeof(RectTransform), typeof(UnityEngine.UI.Image));
         var rect = (RectTransform)panel.transform;
         rect.SetParent(overlay.transform, false);
-        rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0);
-        rect.pivot = new Vector2(0.5f, 0);
-        rect.anchoredPosition = new Vector2(0, 24);
+        rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 1);
+        rect.pivot = new Vector2(0.5f, 1);
+        rect.anchoredPosition = new Vector2(0, -24);
         rect.sizeDelta = new Vector2(1000, 100);
         panel.GetComponent<UnityEngine.UI.Image>().color = new Color(0.04f, 0.07f, 0.09f, 0.96f);
         statusText = Text(rect, "Instruction", font, new Vector2(20, 12), new Vector2(-220, -12));

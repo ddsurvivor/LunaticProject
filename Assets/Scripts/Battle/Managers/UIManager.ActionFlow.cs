@@ -56,6 +56,8 @@ public partial class UIManager
 
     private void LateUpdate()
     {
+        UpdateMessageLanes();
+        if (BattleScene.Ins != null && BattleScene.Ins.TM.IsPaused) return;
         if (MemeLoadoutPanel.IsOpen) return;
         if (actionActor == null)
         {
@@ -90,5 +92,5 @@ public partial class UIManager
         if (battle.CanControlPiece(actor)) scene.CM.SelectActivePiece(actor);
     }
 
-    private void OnDisable() => ClearActionFlow();
+    private void OnDisable() { ClearTransientMessages(); ClearActionFlow(); }
 }

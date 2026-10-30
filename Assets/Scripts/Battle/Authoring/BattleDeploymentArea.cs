@@ -12,6 +12,8 @@ public sealed class BattleDeploymentArea : BattlePlaceable
     [LabelText("地面高度容差")] [MinValue(0.05f)] public float heightTolerance = 0.4f;
     private SpriteRenderer visual;
     private bool deploymentVisible;
+    private LineRenderer fallbackOutline;
+    private Material fallbackMaterial; // 无区域图片的运行时部署边界，由本组件释放。
 
     protected override void ApplyParameters()
     {
@@ -28,7 +30,25 @@ public sealed class BattleDeploymentArea : BattlePlaceable
         deploymentVisible = visible;
         if (visual == null) visual = GetComponentInChildren<SpriteRenderer>(true);
         if (visual != null) visual.enabled = visible;
+        if (visible && sprite == null && fallbackOutline == null)
+        {
+            fallbackOutline = gameObject.AddComponent<LineRenderer>();
+            fallbackMaterial = BattleRangeStyle.CreateMaterial();
+            var outlineColor = color;
+            outlineColor.a = 0.95f;
+            BattleRangeStyle.Configure(fallbackOutline, fallbackMaterial, outlineColor);
+            fallbackOutline.widthMultiplier = 0.12f;
+            fallbackOutline.useWorldSpace = false;
+            fallbackOutline.loop = true;
+            fallbackOutline.positionCount = 4;
+            fallbackOutline.SetPositions(new[] { new Vector3(-size.x / 2, .15f, -size.y / 2),
+                new Vector3(size.x / 2, .15f, -size.y / 2), new Vector3(size.x / 2, .15f, size.y / 2),
+                new Vector3(-size.x / 2, .15f, size.y / 2) });
+        }
+        if (fallbackOutline != null) fallbackOutline.enabled = visible && sprite == null;
     }
+
+    private void OnDestroy() { if (fallbackMaterial != null) Destroy(fallbackMaterial); }
 
     public bool Contains(Vector3 worldPosition, float radius = 0)
     {

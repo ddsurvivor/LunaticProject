@@ -59,7 +59,7 @@ public static class SkillTargeting
             return SkillTargeting.Filter(caster, new[] { caster }, skill, caster.transform.position);
         var candidates = new List<PieceController>();
         Vector3 origin = caster.transform.position;
-        Vector3 selection = ClampPosition(origin, targetPosition, skill.rangeValue);
+        Vector3 selection = BattleRangeRules.ClampPosition(caster, skill, targetPosition);
         Vector3 center = selection;
         Vector3 forward = targetPosition - origin;
         forward.y = 0;
@@ -87,6 +87,8 @@ public static class SkillTargeting
         {
             var piece = collider.GetComponentInParent<PieceController>();
             if (piece == null) continue;
+            if (skill.rangeType == RangeType.Circle &&
+                !BattleRangeRules.CanReach(caster, skill, origin, piece.transform.position)) continue;
             if (skill.rangeType == RangeType.Fan)
             {
                 Vector3 dir = piece.transform.position - origin;
@@ -145,7 +147,7 @@ public static class SkillTargeting
     public static bool IsValid(PieceController caster, PieceController target, SkillPack skill)
     {
         return skill != null && (!BattleRelations.IsOffensive(skill) || BattleRelations.CanInitiateAttack(caster)) && IsValid(caster, target, skill.target, skill.AllowDeadCaster) &&
-            (!skill.layerSkill || Mathf.Abs(caster.transform.position.y - target.transform.position.y) <= 0.1f);
+            (!skill.layerSkill || Mathf.Abs(caster.transform.position.y - target.transform.position.y) <= BattleRangeRules.SameLayerTolerance);
     }
 
     public static bool IsValid(PieceController caster, PieceController target, SkillTarget targetType, bool allowDeadCaster = false)

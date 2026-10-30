@@ -94,6 +94,8 @@ public partial class BattleManager
     {
         if (!isActiveAndEnabled || !inBattle || startupPhase != StartupPhase.Introduction) return;
         startupPhase = StartupPhase.Active;
+        GM.Ins.BeginBattleRules(this);
+        if (!SuppressExternalPresentation) BattleScene.Ins.UM.battleStartUIPanel?.PlayBattleStartAnimation(1f);
         battleDialogueManager?.TriggerBattleStart();
         // 对话触发器也可能要求退出/重新初始化场景。
         if (isActiveAndEnabled && inBattle && startupPhase == StartupPhase.Active) PlayerStart();

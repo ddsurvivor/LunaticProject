@@ -70,7 +70,7 @@ public partial class AIController
     private static bool TryBehaviorCast(PieceController actor, PieceController target, SkillPack skill, PlayerBattleCommandKind kind)
     {
         if (skill == null || target == null || kind == PlayerBattleCommandKind.Skill && !actor.SkillAvailable(skill) ||
-            !SkillTargeting.IsValid(actor, target, skill) || Vector3.Distance(actor.transform.position, target.transform.position) > skill.rangeValue ||
+            !SkillTargeting.IsValid(actor, target, skill) || !BattleRangeRules.CanReach(actor, skill, actor.transform.position, target.transform.position) ||
             !SkillTargeting.Query(actor, skill, target.transform.position).Contains(target)) return false;
         return actor.ExecutePlayerCommand(new PlayerBattleCommand { kind = kind, skill = skill, position = target.transform.position }) != BattleCommandResult.Rejected;
     }

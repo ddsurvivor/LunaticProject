@@ -31,6 +31,7 @@ public sealed class SteamAchievements : MonoBehaviour
     public static void Unlock(string apiName)
     {
         if (string.IsNullOrWhiteSpace(apiName)) return;
+        if (GM.Ins != null && GM.Ins.DeferBattleAchievement(apiName)) return;
 #if !DISABLESTEAMWORKS
         if (instance == null)
             instance = new GameObject(nameof(SteamAchievements)).AddComponent<SteamAchievements>();

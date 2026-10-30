@@ -12,8 +12,9 @@ public sealed class BattleObstacle : BattlePlaceable
     [LabelText("图片颜色")] public Color tint = Color.white;
     [LabelText("图片倾角")] [Range(0, 90)] public float spriteTilt = 45;
     [LabelText("作为掩体")] public bool providesCover = true;
-    [LabelText("掩体闪避率 %")] [Range(0, 100)] public int evadeChance = 20;
-    [LabelText("掩体减伤 %")] [Range(0, 100)] public int damageReduction = 20;
+    [LabelText("掩体等级")] [Range(1, 3)] public int coverLevel = 1;
+    [HideInInspector] public int evadeChance = 20; // 兼容旧场景，规则数值统一由 GameConstSO 提供。
+    [HideInInspector] public int damageReduction = 20;
 
     protected override void ApplyParameters()
     {
@@ -33,9 +34,9 @@ public sealed class BattleObstacle : BattlePlaceable
             SpriteRotation(spriteTilt), SpriteSize(sprite, size.x, size.y), tint);
 
         var cover = GetComponent<CaverSlot>();
-        cover.evadeChance = providesCover ? evadeChance : 0;
-        cover.damageReduction = providesCover ? damageReduction : 0;
-        // 现有掩体判定通过 isFull 过滤，无点位的纯障碍不会授予掩体效果。
+        cover.providesCover = providesCover;
+        cover.coverLevel = Mathf.Clamp(coverLevel, 1, 3);
+        // 槽位仅供旧场景站位兼容，是否提供掩体由开关决定。
         var point = Child("CoverPoint");
         point.localPosition = new Vector3(0, 0, -size.z * 0.5f - 0.75f);
         cover.slotTransforms = providesCover ? new[] { point } : new Transform[0];

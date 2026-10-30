@@ -18,8 +18,6 @@ public partial class BattleManager
     /// <summary>是否已请求聚能或正在选人；为 true 时暂停普通玩家输入和 AI 决策。</summary>
     public bool BurstInputPending => burstRequested || IsChoosingBurst;
     private readonly List<PieceController> selectedBurstActors = new(); // 选择顺序即额外行动顺序。
-    private readonly Dictionary<SpriteRenderer, Material> burstOriginalMaterials = new(); // 退出时恢复的共享材质。
-    private readonly List<Material> burstMaterials = new(); // 本次聚能创建并负责销毁的彩色材质副本。
     public int SelectedBurstCount => selectedBurstActors.Count;
     /// <summary>判断角色是否参与当前聚能，供命中、伤害和附加效果结算使用。</summary>
     public bool IsBurstActor(PieceController piece) => PlayerController.isBursting && selectedBurstActors.Contains(piece);
@@ -27,6 +25,7 @@ public partial class BattleManager
     /// <summary>聚能按钮入口：依当前状态请求发动、确认选人、撤销请求或提前结束。</summary>
     public void OnBurstButton()
     {
+        if (BattleScene.Ins.TM.IsPaused) return;
         if (!SpeedTurnsActive || !inBattle || ActivePiece == null) return;
         if (PlayerController.isBursting) { cancelBurst = true; return; }
         if (burstRequested) { burstRequested = false; PlayerController.RefreshBurstUI(); return; }
@@ -49,6 +48,7 @@ public partial class BattleManager
     /// <summary>选人期间切换一名合格我方角色；新增人数不能超过当前能量可支付人数。</summary>
     public void ToggleBurstActor(PieceController piece)
     {
+        if (BattleScene.Ins.TM.IsPaused) return;
         if (!IsChoosingBurst || !CanJoinBurst(piece)) return;
         if (selectedBurstActors.Remove(piece)) piece.CancelSelect();
         else if (selectedBurstActors.Count < PlayerController.AffordableBurstActors)
@@ -56,6 +56,7 @@ public partial class BattleManager
             selectedBurstActors.Add(piece);
             piece.OnSelect();
         }
+        RefreshBurstVisuals();
         PlayerController.RefreshBurstUI();
     }
 
@@ -94,6 +95,7 @@ public partial class BattleManager
         if (!IsBurstInterruptionCurrent(version) || !burstRequested || !PlayerController.ableBurst) yield break;
         burstRequested = false;
         IsChoosingBurst = true;
+        ShowBurstGray(true);
         burstConfirmed = cancelBurst = false;
         bool playerTurn = PlayerController.isInTurn, enemyTurn = AIController.isInTurn; // 退出选人或聚能时恢复的输入归属。
         PlayerController.isInTurn = AIController.isInTurn = false;
@@ -110,6 +112,7 @@ public partial class BattleManager
         if (cancelBurst || !PlayerController.SpendBurst(selectedBurstActors.Count))
         {
             ClearBurstSelection();
+            ShowBurstGray(false);
             PlayerController.isInTurn = playerTurn;
             AIController.isInTurn = enemyTurn;
             if (playerTurn) BattleScene.Ins.CM.SelectActivePiece(interrupted);
@@ -160,6 +163,8 @@ public partial class BattleManager
         ClearBurstSelection();
         if (!IsBurstInterruptionCurrent(version)) yield break;
         PlayerController.EndBurstMode();
+        while (IsBurstInterruptionCurrent(version) && HasPendingBurstRelease) yield return null;
+        if (!IsBurstInterruptionCurrent(version)) yield break;
         ActivePiece = interrupted;
         PlayerController.isInTurn = playerTurn;
         AIController.isInTurn = enemyTurn;
@@ -181,6 +186,7 @@ public partial class BattleManager
 
     private void RestoreBurstActor()
     {
+        ClearMoveUndo();
         var actor = burstActor;
         int savedAP = burstActorAP;
         bool savedIdle = burstActorIdle;
@@ -194,31 +200,12 @@ public partial class BattleManager
         actor.isIdle = savedIdle;
     }
 
-    private void SetBurstActorColors()
-    {
-        // 使用独立副本取消灰度，避免修改共享材质影响未选中的角色。
-        foreach (var actor in selectedBurstActors)
-        {
-            var renderer = actor.pieceDisplay?.pieceSpriteRenderer;
-            if (renderer == null || renderer.sharedMaterial == null) continue;
-            burstOriginalMaterials[renderer] = renderer.sharedMaterial;
-            var material = new Material(renderer.sharedMaterial);
-            material.DisableKeyword("GREYSCALE_ON");
-            renderer.sharedMaterial = material;
-            burstMaterials.Add(material);
-        }
-    }
-
-    private void RestoreBurstActorColors()
-    {
-        foreach (var pair in burstOriginalMaterials) if (pair.Key != null) pair.Key.sharedMaterial = pair.Value;
-        burstOriginalMaterials.Clear();
-        foreach (var material in burstMaterials) if (material != null) Destroy(material);
-        burstMaterials.Clear();
-    }
+    private void SetBurstActorColors() => RefreshBurstVisuals();
+    private void RestoreBurstActorColors() => RestoreBurstVisuals();
 
     private void ResetBurstInterruption()
     {
+        ClearBurstEffects();
         burstInterruptionVersion++;
         burstRequested = IsChoosingBurst = burstConfirmed = false;
         cancelBurst = true;

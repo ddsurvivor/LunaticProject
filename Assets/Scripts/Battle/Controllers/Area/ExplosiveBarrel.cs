@@ -31,8 +31,13 @@ public class ExplosiveBarrel : MonoBehaviour, IEnemyExplosiveTarget
     public bool CanBeTriggered => !_hasExploded && pieceController != null && !pieceController.isDead && gameObject.activeInHierarchy;
     public int CountThreatenedPlayers() => CanBeTriggered
         ? EnemyExplosiveTargets.CountPlayers(pieceController, transform.position, explosionRadius, effectLayer, skillPack) : 0;
-    private void OnEnable() => EnemyExplosiveTargets.Active.Add(this);
-    private void OnDisable() => EnemyExplosiveTargets.Active.Remove(this);
+    private void OnEnable() { _hasExploded = false; EnemyExplosiveTargets.Active.Add(this); }
+    private void OnDisable()
+    {
+        EnemyExplosiveTargets.Active.Remove(this);
+        BattleScene.Ins?.BM?.CancelWorldEffects(this);
+        BattleScene.Ins?.BM?.ReleaseExplosiveBody(transform);
+    }
 
     public void Start()
     {
@@ -44,7 +49,7 @@ public class ExplosiveBarrel : MonoBehaviour, IEnemyExplosiveTarget
                 maxHealth = 2,
             });
             GetComponent<UnitAttrCenter>().Init();
-            highlightEffect.transform.localScale = explosionRadius*offset*Vector3.one;
+            if (highlightEffect != null) highlightEffect.transform.localScale = explosionRadius*offset*Vector3.one;
         }
     }
     /// <summary>
@@ -57,7 +62,7 @@ public class ExplosiveBarrel : MonoBehaviour, IEnemyExplosiveTarget
 
         var action = new BattleActionContext(pieceController, skillPack);
         // 引信回调沿用触发爆炸时的根行动，不继承爆炸发生时其他角色的行动。
-        DOVirtual.DelayedCall(delayTime, () => { using (action.Enter()) Explode(); }, false);
+        BattleScene.Ins.BM.ScheduleWorldEffect(this, delayTime, Explode, action);
         //Explode();
     }
 
@@ -77,11 +82,11 @@ public class ExplosiveBarrel : MonoBehaviour, IEnemyExplosiveTarget
         BattleScene.Ins.BM.PieceSkill(pieceController, targetPieces, skillPack.WithDeadCaster(), transform.position);
         
         // 播放音效
-        AudioSource.PlayClipAtPoint(skillPack.skillSound, Camera.main.transform.position);
+        if (skillPack.skillSound != null) AudioSource.PlayClipAtPoint(skillPack.skillSound, Camera.main.transform.position);
         
         // 6. 最后销毁桶本身（或者更换为残骸模型）
         //Destroy(gameObject);
-        if(selfDestroy) DOVirtual.DelayedCall(0.8f, () => gameObject.SetActive(false));
+        if(selfDestroy) BattleScene.Ins.BM.ScheduleWorldEffect(this, 0.8f, () => gameObject.SetActive(false));
         Debug.Log($"{barrelName} 爆炸，影响了 {targetPieces.Count} 个目标");
     }
 
@@ -90,7 +95,7 @@ public class ExplosiveBarrel : MonoBehaviour, IEnemyExplosiveTarget
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, explosionRadius);
-        highlightEffect.transform.localScale = explosionRadius*offset*Vector3.one;
+        if (highlightEffect != null) highlightEffect.transform.localScale = explosionRadius*offset*Vector3.one;
     }
 
     private void OnMouseEnter()

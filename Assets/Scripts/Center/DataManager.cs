@@ -132,7 +132,7 @@ public class DataManager : SerializedMonoBehaviour
 
     public void SaveData(int index)
     {
-        if (IsTransientProfile(GM.Ins.PLAYERPROFILE) ||
+        if (GM.Ins.HasBattleSession || IsTransientProfile(GM.Ins.PLAYERPROFILE) ||
             (BattleScene.Ins != null && BattleScene.Ins.BM != null && BattleScene.Ins.BM.SuppressExternalPresentation)) return;
         if (大地图System.instance != null)
             大地图System.instance.CaptureMapState();

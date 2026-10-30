@@ -72,10 +72,12 @@ public partial class BattleManager : MonoBehaviour
         ResetBattleStartup();
         try
         {
+            GM.Ins.BeginBattleSession(this);
             inBattle = true;
             LastOutcome = BattleOutcome.None;
             _turnNumber = 0;
             _timedMemeStatuses?.ClearAll();
+            ClearNetworkConnections();
             characterSkillManager.ClearAllRegistry();
             PlayerController.Init();
             AIController.Init();
@@ -107,13 +109,13 @@ public partial class BattleManager : MonoBehaviour
     }
 
     // 只在真实播放/飞行期间阻止下一动作；不以序列帧数量估算锁定秒数。
-    public bool CanInspectEnemyTargets => inBattle && startupPhase == StartupPhase.Active && PlayerController.isInTurn;
+    public bool CanInspectEnemyTargets => inBattle && !BattleScene.Ins.TM.IsPaused && startupPhase == StartupPhase.Active && PlayerController.isInTurn;
 
     // 回合、AI、输入和聚能交接共用此等待条件，镜头恢复也属于受击表现。
-    public bool HasCombatPresentation => (cameraController != null && cameraController.IsPresentingHit) || HasActionPresentation;
+    public bool HasCombatPresentation => HasPendingBurstRelease || (cameraController != null && cameraController.IsPresentingHit) || HasActionPresentation;
 
     /// <summary>攻击、受击、死亡和结算仍在播放；不含镜头，供镜头等待而不形成循环依赖。</summary>
-    public bool HasActionPresentation => HasPendingBattleReactions || HasPendingRecognitionSettlement ||
+    public bool HasActionPresentation => deathFades.Count > 0 || HasPendingBattleReactions || HasPendingRecognitionSettlement ||
         HasPresentation(PlayerController.pieces) || HasPresentation(AIController.pieces) || HasPresentation(summonPieces);
 
     private static bool HasPresentation(IEnumerable<PieceController> pieces)
@@ -149,6 +151,12 @@ public partial class BattleManager : MonoBehaviour
         float? preparedPassiveMultiplier = null)
     {
         if (attacker == null || skillPack == null || BattleRelations.IsOffensive(skillPack) && !BattleRelations.CanInitiateAttack(attacker) || (attacker.isDead && !skillPack.AllowDeadCaster) || targets == null) return;
+        if (PlayerController.isBursting && !IsBurstActor(attacker) && skillPack.attackPacks.Count > 0)
+        {
+            var capturedTargets = new List<PieceController>(targets);
+            if (TryDeferBurstEffect(attacker, () => PieceSkill(attacker, capturedTargets, skillPack, targetPos,
+                actionType, checkResult, isFlank, memeActionContext, preparedPassiveMultiplier))) return;
+        }
         List<List<DamageInfo>> damageInfoList = new();
         var memeAction = memeActionContext ?? memeService.BeginAction(attacker, skillPack, isFlank);
         using var actionScope = memeAction.EnsureAction(attacker, skillPack).Enter();
@@ -262,14 +270,15 @@ public partial class BattleManager : MonoBehaviour
         );
         if (validTargets.Count > 0)
         {
-            if (isCrit)
+            var cameraTarget = validTargets[0];
+            System.Action focus = () =>
             {
-                BattleScene.Ins.BM.cameraController.FocusShake(validTargets[0].transform,attacker.transform);
-            }
-            else
-            {
-                BattleScene.Ins.BM.cameraController.FocusTarget(validTargets[0].transform,attacker.transform);
-            }
+                if (cameraTarget == null || attacker == null) return;
+                if (isCrit) cameraController.FocusShake(cameraTarget.transform, attacker.transform);
+                else cameraController.FocusTarget(cameraTarget.transform, attacker.transform);
+            };
+            // 敌方受击首帧冻结时，命中镜头也须随表现释放，不能独占当前聚能输入。
+            if (!PlayerController.isBursting || cameraTarget.isPlayerPiece || !TryDeferBurstEffect(cameraTarget, focus)) focus();
         }
 
         // 处理聚能充能效果，多段伤害只充能一次
@@ -290,6 +299,11 @@ public partial class BattleManager : MonoBehaviour
 
     public void PlayerCheckWin()
     {
+        if (BurstEffectsDeferred)
+        {
+            if (PlayerController.pieces.All(p => p == null || p.isDead) || AIController.pieces.All(p => p == null || p.isDead)) cancelBurst = true;
+            return;
+        }
         // 检查敌方是否全灭
         bool allEnemyDead = true;
         foreach (var piece in AIController.pieces)
@@ -337,58 +351,18 @@ public partial class BattleManager : MonoBehaviour
         }
     }
 
+    /// <summary>记录一次胜利并显示结果；掉落和经验留待玩家离场时提交。</summary>
     public void PlayerWin()
     {
         if (ObserveBattleOutcome(BattleOutcome.PlayerVictory)) return;
-        BattleScene.Ins?.CM?.ClearEnemyTargetLineInteraction();
-        CancelBattleStartup();
-        inBattle = false;
-        AIController.isInTurn = false;
-        // 敌方棋子全灭，玩家胜利
-        //BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家胜利！");
-        // 处理胜利事件
-        if (finishDrop != null) finishDrop.DropItems();
-        if (finishExp > 0)
-        {
-            foreach (var player in GM.Ins.PLAYERPROFILE.player)
-            {
-                if (player != null && player.HP > 0)
-                {
-                    player.AccessAttribute(22, AttrOp.Add, finishExp);
-                }
-            }
-        }
-
-        BattleScene.Ins.UM.battleStartUIPanel.PlayBattleStartAnimation(1);
-
-        DOVirtual.DelayedCall(1.0f
-            , () =>
-            {
-                OnClickQuitBattle();
-                //BattleScene.Ins.UM.battleFinishPanel.ShowPanel(true, finishDrop, finishExp);
-            });
-        PlayerController.EndBurstMode(); // 结束聚能状态
-        // 延迟后退出战斗
-        //DOVirtual.DelayedCall(1.0f, () => { BattleScene.Ins.BM.OnClickQuitBattle(); });
+        PresentBattleOutcome(true);
     }
 
+    /// <summary>记录一次失败并停止调度，提供重试和主菜单出口。</summary>
     public void PlayerLoss()
     {
         if (ObserveBattleOutcome(BattleOutcome.PlayerDefeat)) return;
-        BattleScene.Ins?.CM?.ClearEnemyTargetLineInteraction();
-        CancelBattleStartup();
-        inBattle = false;
-        AIController.isInTurn = false;
-        Debug.Log("我方棋子全灭，玩家失败");
-        // 我方棋子全灭，玩家失败
-        BattleScene.Ins.UM.battleLossPanel.gameObject.SetActive(true);
-        //BattleScene.Ins.UM.battleFinishPanel.ShowPanel(false);
-        //BattleScene.Ins.UM.turnPanel.ShowTurnChange("玩家失败！");
-        // 激活重新开始按钮
-        if (BattleScene.Ins.UM.restartButton != null)
-        {
-            BattleScene.Ins.UM.restartButton.gameObject.SetActive(true);
-        }
+        PresentBattleOutcome(false);
     }
 
     public void ApplySKillEffect(SkillPack skillPack, PieceController caster = null
@@ -557,6 +531,8 @@ public partial class BattleManager : MonoBehaviour
     private void HitBackEffect(HitBackEffect hitBackEffect, PieceController caster = null,
         PieceController target = null, Vector3 targetPos = default)
     {
+        if (PlayerController.isBursting && target != null &&
+            TryDeferBurstEffect(target, () => HitBackEffect(hitBackEffect, caster, target, targetPos))) return;
         if (!CanReact(target) || caster == null || target.ableMove == false) return;
         if (pieceDisplacements.TryGetValue(target, out var previousDisplacement)) previousDisplacement.Kill();
 
@@ -780,24 +756,12 @@ public partial class BattleManager : MonoBehaviour
     //         Debug.Log("设置灰色滤镜: " + option);
     //     }
     // }
-    /// <summary>切换现有双方共享材质的聚能灰度；仅影响使用这些材质的对象。</summary>
+    /// <summary>用渲染器实例副本覆盖场景灰度，选中角色保留彩色；退出恢复原材质且不改共享资产。</summary>
     public void ShowBurstGray(bool option)
     {
-        // 把 gray材质上的shader里的GREYSCALE_ON属性打开，所有使用这个材质的图片就会变灰
-        foreach (var material in new[] { gray, grayEnemy })
-        {
-            if (material == null) continue;
-            if (option)
-            {
-                material.EnableKeyword("GREYSCALE_ON");
-            }
-            else
-            {
-                material.DisableKeyword("GREYSCALE_ON");
-            }
-
-            //Debug.Log("设置灰色滤镜: " + option);
-        }
+        if (!option) { RestoreBurstVisuals(); return; }
+        burstGrayVisible = true;
+        RefreshBurstVisuals();
     }
 
     // 或者在程序退出时
@@ -911,46 +875,17 @@ public partial class BattleManager : MonoBehaviour
     }
 
 
-    // ===== 掩体判定 ========== //
-    /// <summary>
-    /// 判定掩体是否在攻击射线上生效
-    /// </summary>
-    /// <param name="attacker">攻击者</param>
-    /// <param name="target">被攻击者</param>
-    /// <returns>返回有效的掩体脚本，若未被遮挡则返回 null</returns>
-    public CaverSlot CheckCoverObstruction(PieceController attacker, PieceController target)
-    {
-        // 1. 基础判定：目标当前是否有掩体引用
-        if (target.CurCaverSlot == null) return null;
-
-        // 2. 射线路径计算（从发射点到目标点，稍微抬高 y 轴模拟射击线）
-        Vector3 start = attacker.transform.position + Vector3.up * 1.2f;
-        Vector3 end = target.transform.position + Vector3.up * 1.2f;
-        Vector3 direction = end - start;
-        float distance = direction.magnitude;
-
-        // 3. 使用 RaycastAll 获取路径上所有的碰撞体（解决被其他物体遮挡的问题）
-        RaycastHit[] hits = Physics.RaycastAll(start, direction.normalized, distance);
-
-        foreach (var hit in hits)
-        {
-            // 判定击中的物体是否为目标关联的那个掩体
-            if (hit.collider.gameObject == target.CurCaverSlot.gameObject)
-            {
-                // 找到匹配掩体，返回脚本
-                return target.CurCaverSlot;
-            }
-        }
-
-        return null;
-    }
-
+    /// <summary>读取攻击射线及保护距离内的最高等级掩体，与预览和 AI 共用；不依赖槽位绑定。</summary>
+    public CaverSlot CheckCoverObstruction(PieceController attacker, PieceController target) =>
+        attacker == null ? null : BattleCoverQuery.Find(attacker.transform.position, target);
 
     // ===== 夹击判定 ========== //
 
     /// <summary>命中后排队判定夹击；等待实际落点与碰撞后选择最近队友，同根同队友同目标只反应一次。</summary>
     public void CheckFlankAttack(PieceController attacker, PieceController target)
     {
+        if (PlayerController.isBursting && attacker != null &&
+            TryDeferBurstEffect(attacker, () => CheckFlankAttack(attacker, target))) return;
         if (flankReactionExecuting || !CanReact(attacker) || !CanReact(target) ||
             !BattleRelations.CanAttack(attacker, target)) return;
         var parent = BattleActionContext.Current ?? new BattleActionContext(attacker);
@@ -1032,6 +967,7 @@ public partial class BattleManager : MonoBehaviour
         startupRequested = false;
         CancelBattleReactions();
         _timedMemeStatuses?.ClearAll();
+        ClearNetworkConnections();
     }
 
     /// <summary>
@@ -1044,12 +980,18 @@ public partial class BattleManager : MonoBehaviour
     }
 
 
-    // ===== Test ======//
+    /// <summary>胜利继续入口：校验返回场景、一次性提交奖励，再保存继承状态并进入原离场流程。</summary>
     public void OnClickQuitBattle()
     {
+        if (leavingBattle || LastOutcome != BattleOutcome.PlayerVictory || GM.Ins == null || !GM.Ins.CanLoadScene("Playing")) return;
+        leavingBattle = true;
+        CommitBattleRewards();
+        BattleScene.Ins.UM.PrepareBattleTransition();
+
         CancelBattleStartup();
         CancelBattleReactions();
         _timedMemeStatuses?.ClearAll();
+        ClearNetworkConnections();
         // 保存所有棋子状态保存到存档内
         if (GM.Ins.pieceHPInherit)
         {

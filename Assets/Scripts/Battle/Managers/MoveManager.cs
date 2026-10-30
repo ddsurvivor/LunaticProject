@@ -7,9 +7,6 @@ public class MoveManager : MonoBehaviour
 {
     [Header("引用对象")] [SerializeField] private LineRenderer pathRenderer; // 全局公用的路径渲染器
 
-    [Header("性能优化参数")] [SerializeField]
-    private float mouseMoveThreshold = 0.2f; // 鼠标世界坐标变化超过该距离时，才重新计算路径
-
     private NavMeshPath tempPath;
     private Vector3 lastValidPreviewPosition; // 记录上一次成功渲染的有效目标点
 
@@ -21,6 +18,7 @@ public class MoveManager : MonoBehaviour
     public PieceController MovingPiece => isTracking && agent != null ? agent.GetComponent<PieceController>() : null;
     private GameObject previewPawn;
     private bool hasValidMovePreview;
+    private Material pathMaterial; // 路径独占的运行时深度材质。
 
     public bool TryGetPreviewPosition(GameObject pawnObject, out Vector3 position)
     {
@@ -31,6 +29,11 @@ public class MoveManager : MonoBehaviour
     private void Awake()
     {
         tempPath = new NavMeshPath();
+        if (pathRenderer != null)
+        {
+            pathMaterial = BattleRangeStyle.CreateMaterial();
+            BattleRangeStyle.Configure(pathRenderer, pathMaterial, BattleRangeStyle.Move);
+        }
     }
 
     private void Update()
@@ -46,10 +49,10 @@ public class MoveManager : MonoBehaviour
         }
         if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDestinationDistance() &&
             (!agent.hasPath || agent.velocity.sqrMagnitude <= 2f))
-            FinishMovement();
+            FinishMovement(true);
     }
 
-    private void FinishMovement()
+    private void FinishMovement(bool reached = false)
     {
         var finishedPiece = agent != null ? agent.GetComponent<PieceController>() : null;
         var callback = onReachDestination;
@@ -59,6 +62,7 @@ public class MoveManager : MonoBehaviour
         ResetPreviewState();
         if (finishedPiece != null) BattleScene.Ins.BM.orderManager.OnUnityMoveEnd(finishedPiece);
         callback?.Invoke();
+        BattleScene.Ins.BM.CompleteUndoableMove(finishedPiece, reached);
     }
 
     /*/// <summary>
@@ -99,7 +103,6 @@ public class MoveManager : MonoBehaviour
     }*/
 
     
-    private Vector3 lastMousePreviewPosition; // 专门用于存储上一次鼠标的原始悬停位置（用于性能防抖）
 
 
     /// <summary>
@@ -117,13 +120,13 @@ public class MoveManager : MonoBehaviour
             previewPawn = pawnObject;
         }
         pathRenderer.gameObject.SetActive(true);
-        if (hasValidMovePreview && Vector3.Distance(hoverPosition, lastMousePreviewPosition) < mouseMoveThreshold) return;
-        lastMousePreviewPosition = hoverPosition;
+        // 同一鼠标位置下，移动预算、起点和动态障碍变化也必须重查。
         var navigation = pawnObject.GetComponent<NavMeshAgent>();
         tempPath ??= new NavMeshPath();
         hasValidMovePreview = false;
         if (navigation == null || maxDistance <= 0f ||
-            !NavMesh.CalculatePath(navigation.transform.position, hoverPosition, NavMesh.AllAreas, tempPath) ||
+            !NavMesh.CalculatePath(navigation.transform.position, hoverPosition,
+                new NavMeshQueryFilter { agentTypeID = navigation.agentTypeID, areaMask = navigation.areaMask }, tempPath) ||
             tempPath.status != NavMeshPathStatus.PathComplete || tempPath.corners.Length < 2)
         {
             lastValidPreviewPosition = Vector3.positiveInfinity;
@@ -267,8 +270,8 @@ public class MoveManager : MonoBehaviour
             new System.Collections.Generic.List<Vector3>();
 
         float accumulatedDistance = 0f;
-        // 放入起点（同样垫高 0.05m 规避闪烁）
-        croppedCorners.Add(path.corners[0] + Vector3.up * 0.05f);
+        // 放入起点（同样垫高 0.08m 规避闪烁）
+        croppedCorners.Add(path.corners[0] + Vector3.up * 0.08f);
 
         Vector3 finalPoint = path.corners[0];
 
@@ -287,14 +290,14 @@ public class MoveManager : MonoBehaviour
 
                 // 线性插值精准算出临界点的 3D 坐标
                 finalPoint = Vector3.Lerp(start, end, percent);
-                croppedCorners.Add(finalPoint + Vector3.up * 0.05f);
+                croppedCorners.Add(finalPoint + Vector3.up * 0.08f);
                 break; // 已经达到最大距离，立刻切断循环
             }
 
             // 没超限，正常塞入拐点
             accumulatedDistance += segmentLength;
             finalPoint = end;
-            croppedCorners.Add(end + Vector3.up * 0.05f);
+            croppedCorners.Add(end + Vector3.up * 0.08f);
         }
 
         // 将裁剪完的顶点数组一次性推给 LineRenderer
@@ -304,15 +307,12 @@ public class MoveManager : MonoBehaviour
         return finalPoint; // 返回这个截断点，用于更新实体移动目标
     }
 
-    /// <summary>
-    /// 【别忘了修改重置函数】切换棋子时，把鼠标记录一并重置
-    /// </summary>
+    /// <summary>切换棋子或取消移动时清除落点、路径及导航优先级。</summary>
     public void ResetPreviewState()
     {
         hasValidMovePreview = false;
         previewPawn = null;
         lastValidPreviewPosition = Vector3.positiveInfinity;
-        lastMousePreviewPosition = Vector3.positiveInfinity; // 新增重置
         RestoreAllMovementPriorities();
         ClearPathLine();
     }
@@ -448,6 +448,7 @@ public class MoveManager : MonoBehaviour
         agent = movingAgent;
         onReachDestination = onMoveComplete;
         isTracking = true;
+        BattleScene.Ins.BM.StartUndoableMove(pawnObject.GetComponent<PieceController>(), target);
         movementDeadline = Time.time + Mathf.Max(3f, length / Mathf.Max(0.1f, agent.speed) * 3f + 2f);
         BattleScene.Ins.BM.orderManager.OnUnitMoveStart(pawnObject.GetComponent<PieceController>());
         return length;
@@ -516,6 +517,11 @@ public class MoveManager : MonoBehaviour
         return true;
     }
 
+    private void OnDestroy()
+    {
+        if (pathMaterial != null) Destroy(pathMaterial);
+    }
+
     #region 内部辅助方法（计算长度与渲染）
 
     private float CalculatePathLength(NavMeshPath path)
@@ -538,7 +544,7 @@ public class MoveManager : MonoBehaviour
         pathRenderer.positionCount = path.corners.Length;
         for (int i = 0; i < path.corners.Length; i++)
         {
-            pathRenderer.SetPosition(i, path.corners[i] + Vector3.up * 0.05f);
+            pathRenderer.SetPosition(i, path.corners[i] + Vector3.up * 0.08f);
         }
     }
 

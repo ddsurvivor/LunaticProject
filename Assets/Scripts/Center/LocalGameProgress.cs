@@ -21,6 +21,7 @@ public static class LocalGameProgress
     /// <summary>将全局通关状态写入 JSON；不依赖当前剧情存档槽。</summary>
     public static void MarkGameFinished()
     {
+        if (GM.Ins != null && GM.Ins.DeferBattleGameFinished()) return;
         var data = Load();
         if (data == null || data.hasFinishedGame) return;
         data.hasFinishedGame = true;

@@ -50,7 +50,8 @@ public class PieceDisplay : SerializedMonoBehaviour
     private bool pendingReaction;
     private PieceDisplayState pendingReactionState;
     private bool pendingReactionReturns;
-    public bool IsPlayingOneShot => playback != null && !playback.Loop && !playback.IsDone;
+    public bool BurstFrozen { get; private set; }
+    public bool IsPlayingOneShot => !BurstFrozen && playback != null && !playback.Loop && !playback.IsDone;
     private bool IsAction => state == PieceDisplayState.Attack || state == PieceDisplayState.Shoot || state == PieceDisplayState.Skill;
 
     /// <summary>
@@ -127,6 +128,7 @@ public class PieceDisplay : SerializedMonoBehaviour
 
     private void Update()
     {
+        if (BurstFrozen) return;
         var current = playback;
         if (current == null || current.IsDone || Time.deltaTime <= 0f) return;
         current.Elapsed += Time.deltaTime;
@@ -179,8 +181,25 @@ public class PieceDisplay : SerializedMonoBehaviour
         pieceSpriteRenderer.transform.localScale = scale;
     }
 
+    /// <summary>冻结受击/死亡首帧，不占用一次性播放锁；逻辑回调由聚能队列持有。</summary>
+    public void FreezeBurstFirstFrame(PieceDisplayState next)
+    {
+        if (BurstFrozen && state == PieceDisplayState.Death && next != PieceDisplayState.Death) return;
+        StartPlayback(next, GetFrames(next, 0), next != PieceDisplayState.Death, null, null, -1);
+        BurstFrozen = true;
+    }
+
+    /// <summary>清理取消的聚能首帧，避免对象池复用后继续冻结。</summary>
+    public void CancelBurstFreeze()
+    {
+        if (!BurstFrozen) return;
+        StopAnimation();
+        ChangeDisplayState(PieceDisplayState.Idle);
+    }
+
     public void StopAnimation()
     {
+        BurstFrozen = false;
         RestoreDodgePosition();
         if (playback != null && !playback.IsDone)
         {

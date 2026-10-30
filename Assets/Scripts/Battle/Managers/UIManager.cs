@@ -61,28 +61,21 @@ public partial class UIManager : SerializedMonoBehaviour
         if (canvas != null) speedTimeline = SpeedTimelineUI.Create(canvas.rootCanvas, battle, speedTimelinePrefab);
     }
 
+    public BattleOverheadStatusLayer OverheadStatuses { get; private set; }
+
+    /// <summary>初始化行动、头顶状态、结果窗口与消息区；沿用现有场景引用。</summary>
     public void Init()
     {
         if (endTurnButton != null) endTurnButton.gameObject.SetActive(false);
         //teamPanel.gameObject.SetActive(true);
         //teamPanel.Init();
         pieceActionListPanel.Init();
+        OverheadStatuses = BattleOverheadStatusLayer.Ensure(this);
+        InitializeWindows();
+        InitializeMessageLanes();
     }
 
-    private void Update()
-    {
-        if (Input.anyKeyDown)
-        {
-            foreach (var o in keyPanelDic)
-            {
-                if (Input.GetKeyDown(o.Key))
-                {
-                    o.Value.SetActive(true);
-                }
-            }
-        }
-    }
-
+    private void Update() { HandleWindowKeys(); }
 
     public void ShowBurstReady(bool option)
     {
@@ -120,27 +113,20 @@ public partial class UIManager : SerializedMonoBehaviour
         pieceInfoPanel.OnSelectPiece(pc);
     }
 
-    public void PopSkillName(string skillName)
-    {
-        if (string.IsNullOrWhiteSpace(skillName)) return;
-        skillNamText.text = skillName;
-        skillNameDisplay.gameObject.SetActive(true);
-        Sequence seq = DOTween.Sequence();
-        seq.SetUpdate(true);
-        seq.Append(skillNameDisplay.DOMoveX(120, 0.3f));
-        seq.AppendInterval(1f);
-        seq.Append(skillNameDisplay.DOMoveX(-120, 0.3f));
-    }
+    /// <summary>技能提示按顺序进入独立消息区，不覆盖正在显示的提示。</summary>
+    public void PopSkillName(string skillName) { EnqueueNotice(skillName); }
 
+    /// <summary>恢复最初战前快照并重开到部署；胜败窗口和暂停重开共用。</summary>
     public void OnClickRestartButton()
     {
-        // 重新加载当前场景
-        GM.Ins.ReloadCurrentScene();
+        GM.Ins.RestartBattle();
     }
 
+    /// <summary>沿现有主菜单出口离开，先清理本场窗口、暂停和临时消息。</summary>
     public void OnClickQuit()
     {
-        // 加载开始场景
+        if (!GM.Ins.CanLoadScene("StartScene")) return;
+        PrepareBattleTransition();
         GM.Ins.LoadScene("StartScene");
     }
 
@@ -178,17 +164,12 @@ public partial class UIManager : SerializedMonoBehaviour
         seq.Append(imgRect.DOLocalMoveY(0, 0.3f));
     }
     
+    /// <summary>将检定结果排入消息区，关闭旧叠加图片。</summary>
     public void ShowCheckResult(bool success)
     {
-        // 显示检定结果对应图片，并进行淡入淡出
-        Image img = success ? checkSuccess : checkFail;
-        img.color = new Color(img.color.r, img.color.g, img.color.b, 0);
-        img.gameObject.SetActive(true);
-        Sequence seq = DOTween.Sequence();
-        seq.Append(img.DOFade(1, 0.2f));
-        seq.AppendInterval(1f);
-        seq.Append(img.DOFade(0, 0.5f));
-        seq.OnComplete(() => img.gameObject.SetActive(false));
+        if (checkSuccess != null) checkSuccess.gameObject.SetActive(false);
+        if (checkFail != null) checkFail.gameObject.SetActive(false);
+        EnqueueNotice(success ? "检定成功" : "检定失败");
     }
 
     public void ShowItemGet(ItemPack itemPack)

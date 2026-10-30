@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class TimeManager : MonoBehaviour
 {
@@ -10,7 +11,10 @@ public class TimeManager : MonoBehaviour
     private float normalTimeScale;
     private float hitScale = 1f;
     private float remainingDuration;
-    public bool IsPaused { get; private set; }
+    private readonly HashSet<UnityEngine.Object> pauseOwners = new HashSet<UnityEngine.Object>(); // 每个窗口独立持有暂停。
+    private bool manualPause;
+    /// <summary>包含显式暂停和所有窗口持有者的合并暂停状态。</summary>
+    public bool IsPaused => manualPause || pauseOwners.Count > 0;
     public bool IsHitStopped => remainingDuration > 0f;
 
     private void Awake()
@@ -32,23 +36,42 @@ public class TimeManager : MonoBehaviour
 
     private void Update()
     {
+        bool wasPaused = IsPaused;
+        pauseOwners.RemoveWhere(owner => owner == null);
+        if (wasPaused && !IsPaused) ApplyTimeScale(IsHitStopped ? hitScale : normalTimeScale);
         if (IsPaused || !IsHitStopped) return;
         remainingDuration = Mathf.Max(0f, remainingDuration - Time.unscaledDeltaTime);
         if (!IsHitStopped) ApplyTimeScale(normalTimeScale);
     }
 
-    public void PauseTime()
+    /// <summary>兼容显式暂停；窗口应使用独立持有者接口，避免相互解除暂停。</summary>
+    public void PauseTime() { manualPause = true; ApplyTimeScale(0f); }
+
+    /// <summary>仅解除显式暂停，不解除其他窗口持有的暂停。</summary>
+    public void ResumeTime() { manualPause = false; ApplyTimeScale(IsPaused ? 0f : IsHitStopped ? hitScale : normalTimeScale); }
+
+    /// <summary>窗口独占持有暂停；重复申请同一持有者不叠加。</summary>
+    public void AcquirePause(UnityEngine.Object owner)
     {
-        if (IsPaused) return;
-        IsPaused = true;
+        if (owner == null) return;
+        pauseOwners.Add(owner);
         ApplyTimeScale(0f);
     }
 
-    public void ResumeTime()
+    /// <summary>窗口关闭只释放自己的暂停，保留命中停顿及其他窗口状态。</summary>
+    public void ReleasePause(UnityEngine.Object owner)
     {
-        if (!IsPaused) return;
-        IsPaused = false;
-        ApplyTimeScale(IsHitStopped ? hitScale : normalTimeScale);
+        pauseOwners.Remove(owner);
+        ApplyTimeScale(IsPaused ? 0f : IsHitStopped ? hitScale : normalTimeScale);
+    }
+
+    /// <summary>离开本场景前清理全部暂停与命中停顿，恢复正常时间及物理步长。</summary>
+    public void ResetTime()
+    {
+        pauseOwners.Clear();
+        manualPause = false;
+        remainingDuration = 0f;
+        if (originalFixedDeltaTime > 0f) ApplyTimeScale(normalTimeScale);
     }
 
     private void ApplyTimeScale(float scale)
@@ -59,10 +82,5 @@ public class TimeManager : MonoBehaviour
             ? originalFixedDeltaTime * scale / normalTimeScale : originalFixedDeltaTime;
     }
 
-    private void OnDisable()
-    {
-        remainingDuration = 0f;
-        IsPaused = false;
-        if (originalFixedDeltaTime > 0f) ApplyTimeScale(normalTimeScale);
-    }
+    private void OnDisable() { ResetTime(); }
 }

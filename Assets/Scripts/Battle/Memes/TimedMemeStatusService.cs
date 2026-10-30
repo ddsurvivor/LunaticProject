@@ -63,6 +63,7 @@ public sealed class TimedMemeStatusService
         if (!states.TryGetValue(target, out var list)) states.Add(target, list = new List<TimedMemeStatus>());
         var status = list.Find(s => s.HandlerId == effect.handlerId);
         if (status == null) list.Add(status = new TimedMemeStatus { HandlerId = effect.handlerId });
+        BattleScene.Ins?.BM?.ClearMoveUndo();
         status.Revision++;
         status.MemeId = context.Meme.id;
         status.RemainingTurns = effect.durationTurns;
@@ -179,6 +180,7 @@ public sealed class TimedMemeStatusService
     private void Remove(PieceController target, TimedMemeStatus status, bool recovered)
     {
         if (!states.TryGetValue(target, out var list) || !list.Remove(status)) return;
+        BattleScene.Ins?.BM?.ClearMoveUndo();
         if (recovered && (status.HandlerId == HeatHandler || status.HandlerId == DragonHandler))
             target.MemeState.SetResistance(status.MemeId, Math.Max(50, target.MemeState.GetResistance(status.MemeId)));
         RefreshState(target, list);

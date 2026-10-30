@@ -102,8 +102,10 @@ public partial class ClickManager
             if (enemyAttackRangeUI != null) enemyAttackRangeUI.gameObject.SetActive(false);
             return;
         }
-        float radius = enemy.pieceData.RangedAttack?.rangeValue ?? 0f;
-        if (radius <= 0f) radius = enemy.pieceData.MeleeAttack?.rangeValue ?? 0f;
+        var attack = enemy.pieceData.RangedAttack;
+        if (attack == null || attack.rangeValue <= 0f) attack = enemy.pieceData.MeleeAttack;
+        float radius = BattleRangeRules.CastRange(enemy, attack,
+            _selectedPiece != null ? _selectedPiece.transform.position : enemy.transform.position);
         if (radius <= 0f)
         {
             if (enemyAttackRangeUI != null) enemyAttackRangeUI.gameObject.SetActive(false);

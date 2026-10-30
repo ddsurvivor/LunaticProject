@@ -60,7 +60,7 @@ public class SelfRevive : MonoBehaviour
             }
         }
 
-        DOVirtual.DelayedCall(0.5f, () =>
+        BattleScene.Ins.BM.ScheduleWorldEffect(this, 0.5f, () =>
         {
             piece.pieceDisplay.PlayFrame(deadSpriteList, () =>
             {
@@ -71,6 +71,6 @@ public class SelfRevive : MonoBehaviour
                     BattleScene.Ins.BM.PlayerCheckWin();
                 });
             });
-        },false);
+        });
     }
 }

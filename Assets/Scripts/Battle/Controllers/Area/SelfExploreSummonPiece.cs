@@ -14,6 +14,13 @@ public class SelfExploreSummonPiece : MonoBehaviour
     [Header("自爆兵属性")]
     private float moveRange = 20.0f;      // 单次回合最大移动距离
     private float explodeRange = 5f;   // 自爆触发范围
+    private bool explosionQueued; // 自爆一旦触发，重复回调不能再登记爆炸。
+    private void OnEnable() => explosionQueued = false;
+    private void OnDisable()
+    {
+        BattleScene.Ins?.BM?.CancelWorldEffects(this);
+        BattleScene.Ins?.BM?.ReleaseExplosiveBody(transform);
+    }
     private bool isActionFinished = false;
     public PieceController pieceController;
     
@@ -152,6 +159,14 @@ public class SelfExploreSummonPiece : MonoBehaviour
     /// </summary>
     private void TriggerExplosion(GameObject target)
     {
+        if (explosionQueued) return;
+        explosionQueued = true;
+        if (BattleScene.Ins.BM.TryDeferBurstEffect(this, CompleteExplosion)) { FinishAction(); return; }
+        CompleteExplosion();
+    }
+
+    private void CompleteExplosion()
+    {
         Debug.Log($"{gameObject.name} 触发了自爆！");
 
         // 1. 【动画控制】触发死亡/自爆动画
@@ -181,17 +196,14 @@ public class SelfExploreSummonPiece : MonoBehaviour
         BattleScene.Ins.BM.PieceSkill(pieceController, targetPieces,skillPack);
         
         // TODO: 2. 播放爆炸特效和音效
-        AudioSource.PlayClipAtPoint(skillPack.skillSound, Camera.main.transform.position);
+        if (skillPack.skillSound != null) AudioSource.PlayClipAtPoint(skillPack.skillSound, Camera.main.transform.position);
         ObjectPool.Ins.GenerateObject(
             skillPack.skillVFXType,
             transform.position + Vector3.up * 3f, Quaternion.identity);
 
         // 3. 释放/销毁自身
         //Destroy(gameObject);
-        DOVirtual.DelayedCall(1f, () =>
-        {
-            gameObject.SetActive(false);
-        });
+        BattleScene.Ins.BM.ScheduleWorldEffect(this, 1f, () => gameObject.SetActive(false));
         //BattleScene.Ins.BM.summonPieces.Remove(this.pieceController);
 
         // 4. 重点：因为物体被销毁了，立刻标记结束，防止协程因等待不到布尔值而卡死

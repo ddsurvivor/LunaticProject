@@ -105,9 +105,9 @@ public class NotificationManager : MonoBehaviour
         }
         
         // 如果 10 个不够用（比如瞬间获得极多道具），动态扩容
-        GameObject go = Instantiate(panelPrefab, container);
+        GameObject go = Instantiate(exp ? expPanelPrefab : panelPrefab, container);
         NotificationItem newItem = go.GetComponent<NotificationItem>();
-        pool.Add(newItem);
+        targetPool.Add(newItem);
         return newItem;
     }
 
@@ -177,9 +177,27 @@ public class NotificationManager : MonoBehaviour
 
     #endregion
 
+    public int PendingNotificationCount => dataQueue.Count;
+    public int ActiveNotificationCount => pool.FindAll(x => x != null && x.gameObject.activeSelf).Count +
+        expPool.FindAll(x => x != null && x.gameObject.activeSelf).Count;
+
+    /// <summary>清空本场通知及池中动画；关闭、重试或离场后不继续播放旧消息。</summary>
+    public void ClearNotifications()
+    {
+        StopAllCoroutines();
+        isProcessingQueue = false;
+        dataQueue.Clear();
+        foreach (var item in pool) if (item != null) item.gameObject.SetActive(false);
+        foreach (var item in expPool) if (item != null) item.gameObject.SetActive(false);
+    }
+
+    private void OnEnable() { TryStartQueue(); }
+    private void OnDisable() { ClearNotifications(); }
+    private void OnDestroy() { if (Instance == this) Instance = null; }
+
     private void TryStartQueue()
     {
-        if (!isProcessingQueue && dataQueue.Count > 0)
+        if (isActiveAndEnabled && !isProcessingQueue && dataQueue.Count > 0)
         {
             StartCoroutine(ProcessQueueRoutine());
         }
@@ -191,6 +209,8 @@ public class NotificationManager : MonoBehaviour
 
         while (dataQueue.Count > 0)
         {
+            while (ActiveNotificationCount >= 3 || (BattleScene.Ins != null && BattleScene.Ins.TM.IsPaused))
+                yield return null;
             NotificationData data = dataQueue.Dequeue();
             NotificationItem uiItem = GetPooledItem(data.type == NotificationType.Exp);
 

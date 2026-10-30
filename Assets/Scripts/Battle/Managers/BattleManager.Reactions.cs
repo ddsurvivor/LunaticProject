@@ -33,6 +33,7 @@ public partial class BattleManager
         if (parent.ReactionDepth >= Mathf.Max(1, maxReactionDepth) ||
             chain.Count >= Mathf.Max(1, maxReactionEvents) || reactions.Count >= Mathf.Max(1, maxReactionEvents) ||
             !chain.Keys.Add(key)) return false;
+        ClearMoveUndo();
         chain.Count++;
         reactions.Enqueue(new ReactionRequest { Parent = parent, Resolve = resolve });
         if (reactionRoutine == null) reactionRoutine = StartCoroutine(DrainReactions());
@@ -76,6 +77,9 @@ public partial class BattleManager
     public bool QueueOrderReaction(UnitOrderState state, PieceController target, BattleActionContext parent)
     {
         if (state?.guard == null || target == null || !BattleRelations.CanAttack(state.guard, target)) return false;
+        ClearMoveUndo();
+        if (PlayerController.isBursting && TryDeferBurstEffect(state.guard,
+            () => { state.reactionQueued = QueueOrderReaction(state, target, parent); }, parent)) return true;
         return EnqueueReaction($"order:{state.guard.GetInstanceID()}:{target.GetInstanceID()}", parent,
             () => ResolveOrderReaction(state, target));
     }

@@ -11,11 +11,12 @@ public partial class AIController
     private bool TryDesignAttack(EnemyController piece, PieceController target, EnemyStrategy strategy, bool allowMove)
     {
         var mode = strategy.Action;
-        float distance = Vector3.Distance(piece.transform.position, target.transform.position);
-        bool far = distance > EnemyBehaviorRules.MaximumRange(piece) * 0.5f;
+        float distance = BattleRangeRules.Distance(piece.transform.position, target.transform.position);
+        bool far = distance > EnemyBehaviorRules.MaximumRange(piece, target.transform.position) * 0.5f;
         if (mode == EnemyAIType.WeakestDefenseShooter && allowMove && retreatAfterShot.Remove(piece) && TryShooterEvade(piece)) return true;
         if (TryCreateExplosivePlan(piece, out var explosive) && TryAttackPlan(piece, explosive, false)) return true;
-        if (allowMove && piece.navigate && Mathf.Abs(target.transform.position.y - piece.transform.position.y) > 1f)
+        if (allowMove && piece.navigate && Mathf.Abs(target.transform.position.y - piece.transform.position.y) > 1f &&
+            !CanUseCurrentLayerAttack(piece, target))
             return EnemyMoveToLadder(piece, target.transform.position);
 
         if (mode == EnemyAIType.WeakestDefenseShooter)
@@ -39,13 +40,13 @@ public partial class AIController
                 null, crowd && !lowTarget, false)) return true;
             if (far && BattleRandom.Value < 1f / 3f && TryModeSkill(piece, target, EnemySkillRole.RangedAttack, false, allowMove)) return true;
         }
-        if (mode == EnemyAIType.DamageHunterMeleeSkill && distance < EnemyBehaviorRules.MaximumRange(piece) * 0.5f &&
+        if (mode == EnemyAIType.DamageHunterMeleeSkill && distance < EnemyBehaviorRules.MaximumRange(piece, target.transform.position) * 0.5f &&
             BattleRandom.Value < 1f / 3f &&
             TryModeSkill(piece, target, EnemySkillRole.MeleeAttack, false, allowMove)) return true;
         if ((mode == EnemyAIType.SkillUser || mode == EnemyAIType.HealingSupport) &&
             TryModeSkill(piece, target, null, false, allowMove)) return true;
 
-        bool ranged = EnemyBehaviorRules.PreferRanged(piece, mode, distance);
+        bool ranged = EnemyBehaviorRules.PreferRanged(piece, mode, distance, target.transform.position);
         if (EnemyBehaviorRules.IsMeleeOnly(mode)) ranged = false;
         if (mode == EnemyAIType.Shoot) ranged = true;
         if (mode == EnemyAIType.DamageHunterAOE && crowd)
@@ -159,16 +160,18 @@ public partial class AIController
         return SkillTargeting.Query(piece, skill, target.transform.position).Contains(target);
     }
 
+    private static bool CanUseCurrentLayerAttack(EnemyController piece, PieceController target)
+    {
+        if (EnemyBehaviorRules.IsMeleeOnly(piece.ResolveStrategy().Action)) return false;
+        if (piece.unitAttrCenter.AmmoCount > 0 && CanExecuteAttack(piece, target, piece.pieceData?.RangedAttack)) return true;
+        return piece.availableSkills != null && piece.availableSkills.Any(skill => IsOffensiveSkill(skill) &&
+            piece.unitAttrCenter.HasMana(skill.mpCost) && CanExecuteAttack(piece, target, skill));
+    }
+
     private static bool NeedsClearShot(EnemyController piece) => piece.ResolveStrategy().Action == EnemyAIType.WeakestDefenseShooter;
 
-    private static bool CoverObstructsFrom(Vector3 origin, PieceController target)
-    {
-        if (target == null || target.CurCaverSlot == null) return false;
-        Vector3 direction = target.transform.position - origin;
-        foreach (var hit in Physics.RaycastAll(origin + Vector3.up * 1.2f, direction.normalized, direction.magnitude))
-            if (hit.collider.gameObject == target.CurCaverSlot.gameObject) return true;
-        return false;
-    }
+    private static bool CoverObstructsFrom(Vector3 origin, PieceController target) =>
+        BattleCoverQuery.Find(origin, target) != null;
 
     private static bool CanExecutePlan(EnemyController piece, AttackPlan plan) =>
         (!NeedsClearShot(piece) || !CoverObstructsFrom(piece.transform.position, plan.Target)) &&

@@ -60,7 +60,7 @@ public static class EnemyAttackPosition
         bool bestIncludesPreferred = false;
         foreach (var sample in samples)
         {
-            Vector3 aim = SkillTargeting.ClampPosition(origin, sample, skill.rangeValue);
+            Vector3 aim = BattleRangeRules.ClampPosition(caster, skill, sample);
             int count = 0, friendlyCount = 0;
             bool includesPreferred = false;
             foreach (var hit in SkillTargeting.Query(caster, skill, aim))

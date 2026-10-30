@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
     using Sirenix.OdinInspector;
     using Sirenix.Serialization;
 
-    public class GM: MonoSingleton<GM>
+    public partial class GM: MonoSingleton<GM>
     {
         // 战斗切换
         [ReadOnly]
@@ -41,6 +41,7 @@ using UnityEngine.SceneManagement;
             // 临时使用全新游戏存档
             PLAYERPROFILE = new PLAYERPROFILE();
             PLAYERPROFILE.新游戏初始化数值();
+            SceneManager.sceneLoaded += OnBattleSessionSceneLoaded;
             DebugBattleScene();
         }
 
@@ -90,6 +91,8 @@ using UnityEngine.SceneManagement;
         public void StartBattle(string sceneName, string storyAfterBattle, int setting = 0)
         {
             if (!CanLoadScene(sceneName)) return;
+            IsTransitioning = true;
+            FinishBattleSession(false);
             if (大地图System.instance != null && 大地图System.instance.剧情 != null)
             {
                 大地图System.instance.剧情.EndReadingStory();
@@ -102,8 +105,6 @@ using UnityEngine.SceneManagement;
             AM.StopAll();
             PlayingSystem.特殊剧情 = "";
             bool hasIntro = 大地图System.instance != null && 大地图System.instance.battleStartUIPanel != null;
-            // 在播放入场动画前锁定，防止延迟期间反复点击创建多个切换请求。
-            IsTransitioning = true;
             if (hasIntro) 大地图System.instance.battleStartUIPanel.PlayBattleStartAnimation(1f);
             StartCoroutine(TransitionRoutine(sceneName, true, "", hasIntro ? 0.7f : 0f));
         }
@@ -122,6 +123,7 @@ using UnityEngine.SceneManagement;
         {
             if (!CanLoadScene(sceneName)) return;
             IsTransitioning = true;
+            FinishBattleSession(true);
             StartCoroutine(TransitionRoutine(sceneName, false, storyAfterBattle));
         }
 
@@ -129,9 +131,10 @@ using UnityEngine.SceneManagement;
         {
             if (string.IsNullOrWhiteSpace(sceneName)) sceneName = "Playing";
             if (!CanLoadScene(sceneName)) return;
+            IsTransitioning = true;
+            FinishBattleSession(false);
             endLog = "";
             battleScene = "";
-            IsTransitioning = true;
             bool isBattle = sceneName.IndexOf("BATTLE", StringComparison.OrdinalIgnoreCase) >= 0 ||
                             sceneName.IndexOf("Boss", StringComparison.OrdinalIgnoreCase) >= 0;
             StartCoroutine(TransitionRoutine(sceneName, isBattle, ""));
@@ -139,6 +142,7 @@ using UnityEngine.SceneManagement;
 
         public void ReloadCurrentScene()
         {
+            if (BattleScene.Ins != null) { RestartBattle(); return; }
             string sceneName = SceneManager.GetActiveScene().name;
             if (!CanLoadScene(sceneName)) return;
             IsTransitioning = true;

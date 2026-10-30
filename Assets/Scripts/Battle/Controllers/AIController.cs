@@ -94,6 +94,7 @@ public partial class AIController : PlayerController
 
     public void Update()
     {
+        if (BattleScene.Ins != null && BattleScene.Ins.TM != null && BattleScene.Ins.TM.IsPaused) return;
         var battle = BattleScene.Ins.BM;
         if (UpdateBehaviorControl(battle)) return;
         if (battle.BurstInputPending || !isInTurn || !battle.SpeedTurnsActive || battle.HasCombatPresentation || battle.moveManager.IsMoving) return;
@@ -179,7 +180,8 @@ public partial class AIController : PlayerController
 
         if (TryCreateExplosivePlan(aiPiece, out var explosivePlan) &&
             (TryAttackPlan(aiPiece, explosivePlan) || actionAttempted)) return true;
-        if (aiPiece.navigate && Mathf.Abs(target.transform.position.y - aiPiece.transform.position.y) > 1f)
+        if (aiPiece.navigate && Mathf.Abs(target.transform.position.y - aiPiece.transform.position.y) > 1f &&
+            !CanUseCurrentLayerAttack(aiPiece, target))
             return EnemyMoveToLadder(aiPiece, target.transform.position);
 
         // 3. 射击型先开火，再寻找安全的侧向/斜向撤离点。
@@ -276,8 +278,8 @@ public partial class AIController : PlayerController
         int reserved = ActionCost(plan.Action) + (needsReload ? ActionCost(ActionType.Reload) : 0);
         int moves = (piece.unitAttrCenter.CurMovePoint - reserved) / Mathf.Max(1, ActionCost(ActionType.Move));
         if (moves <= 0) return false;
-        var candidates = FindPositions(piece, plan.Target.transform.position, plan.Skill.rangeValue,
-            moves * piece.unitAttrCenter.MoveRange, p => CanAttackFrom(p, plan.Target, plan.Skill) &&
+        var candidates = FindPositions(piece, plan.Target.transform.position, BattleRangeRules.CastRange(piece, plan.Skill, plan.Target.transform.position),
+            moves * piece.unitAttrCenter.MoveRange, p => CanAttackFrom(piece, p, plan.Target, plan.Skill) &&
                 (plan.Support || !NeedsClearShot(piece) || !CoverObstructsFrom(p, plan.Target)));
         if (candidates.Count == 0) return false;
 
@@ -300,19 +302,14 @@ public partial class AIController : PlayerController
         return EnemyBehaviorRules.IsOffensive(skill);
     }
 
-    private static bool CanAttackFrom(Vector3 position, PieceController target, SkillPack skill)
-    {
-        if (target == null || skill == null) return false;
-        if (skill.layerSkill && Mathf.Abs(position.y - target.transform.position.y) > 0.1f) return false;
-        float distance = Vector3.Distance(position, target.transform.position);
-        return distance <= skill.rangeValue && (skill.rangeType != RangeType.Fan || distance >= 1f);
-    }
+    private static bool CanAttackFrom(PieceController caster, Vector3 position, PieceController target, SkillPack skill) =>
+        target != null && BattleRangeRules.CanReach(caster, skill, position, target.transform.position);
 
     private static bool CanExecuteAttack(EnemyController piece, PieceController target, SkillPack skill)
     {
         if (piece.maximizeAOETargets && EnemyAttackPosition.IsAOE(skill))
             return EnemyAttackPosition.TryFind(piece, target, skill, out _);
-        return CanAttackFrom(piece.transform.position, target, skill);
+        return target != null && SkillTargeting.Query(piece, skill, target.transform.position).Contains(target);
     }
 
     private static bool IsValidTarget(EnemyController piece, PieceController target)

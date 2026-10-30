@@ -13,10 +13,17 @@
         private Dictionary<Transform, Transform> piecesDic = new();
         public GameObject highlightEffect;
         
-        [LabelText("闪避率%")]public int evadeChance = 20; // 闪避率
-        [LabelText("减伤百分比%")]public int damageReduction = 20; // 减伤率
+        [LabelText("作为掩体")] public bool providesCover = true;
+        [LabelText("掩体等级"), Range(1, 3)] public int coverLevel = 1; // 旧场景没有该字段时沿一级处理。
+        [HideInInspector] public int evadeChance = 20; // 保留旧序列化字段，效果改用 GameConstSO。
+        [HideInInspector] public int damageReduction = 20; // 保留旧序列化字段，效果改用等级配置。
+
+        public int Level => Mathf.Clamp(coverLevel, 1, 3);
+        /// <summary>只读判断实体是否提供掩体；搭建组件的纯障碍开关优先。</summary>
+        public bool ProvidesCover => isActiveAndEnabled && providesCover &&
+            (GetComponent<BattleObstacle>() == null || GetComponent<BattleObstacle>().providesCover);
         
-        public bool isFull => piecesDic.Values.Count >= slotTransforms.Length;
+        public bool isFull => slotTransforms == null || piecesDic.Values.Count >= slotTransforms.Length;
 
         public void AddToSlot(Transform target)
         {
@@ -29,10 +36,7 @@
                 {
                     piecesDic[slotTransform] = target;
                     target.position = slotTransform.position;
-                    // 添加buff，减伤、加闪避
-                    UnitAttrCenter unit = target.GetComponent<UnitAttrCenter>();
-                    BattleScene.Ins.BM.buffManager.AddBuffSource(unit, BuffType.Shield, this);
-                    BattleScene.Ins.BM.buffManager.AddBuffSource(unit, BuffType.Conceal, this);
+                    // 槽位只兼容旧站位接口，保护效果由攻击射线查询，不能重复授予 Buff。
                     return;
                 }
             }

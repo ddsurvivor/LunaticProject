@@ -6,7 +6,6 @@ public sealed class SpeedTimelineUI : MonoBehaviour
 {
     [SerializeField] private RectTransform track; // 右侧为进度 0，左侧为进度 100。
     [SerializeField] private SpeedTimelineMarkerUI markerTemplate; // 隐藏的头像模板，运行时按棋子复制。
-    [SerializeField] private float laneOffset = 40f; // 双方头像距轨道中心的纵向偏移。
     private BattleManager battle;
     private readonly Dictionary<PieceController, SpeedTimelineMarkerUI> markers = new();
     private readonly HashSet<PieceController> positionedMarkers = new(); // 新头像首次直接进入安全位置，之后才参与缓动。
@@ -47,6 +46,9 @@ public sealed class SpeedTimelineUI : MonoBehaviour
             return;
         }
         var participants = battle.SpeedParticipants();
+        // 人数超过轨道容量时缩小头像，仍为当前者预留放大与间隔。
+        float markerScale = Mathf.Clamp((track.rect.width / Mathf.Max(1, participants.Count) - 6f)
+            / Mathf.Max(1f, markerTemplate.Rect.rect.width * 1.15f), 0.05f, 1f);
         // 同步动态参战者，死亡或离场后移除对应头像。
         removed.Clear();
         foreach (var old in markers.Keys)
@@ -83,19 +85,18 @@ public sealed class SpeedTimelineUI : MonoBehaviour
             }
             bool active = battle.ActivePiece == piece;
             marker.SetState(active, piece.isPlayerPiece);
-            marker.Rect.localScale = Vector3.one * (active ? 1.15f : 1f);
+            marker.SetOverflow(battle.ActionProgress(piece));
+            marker.Rect.localScale = Vector3.one * markerScale * (active ? 1.15f : 1f);
             if (active) marker.Rect.SetAsLastSibling();
         }
-        LayoutLane(participants, true);
-        LayoutLane(participants, false);
+        LayoutLane(participants, markerScale);
     }
 
-    private void LayoutLane(List<PieceController> participants, bool ally)
+    private void LayoutLane(List<PieceController> participants, float markerScale)
     {
         lanePieces.Clear();
         lanePositions.Clear();
-        foreach (var piece in participants)
-            if (piece.isPlayerPiece == ally) lanePieces.Add(piece);
+        lanePieces.AddRange(participants);
         compareActionOrder ??= battle.CompareActionOrder;
         // 尚未同步入队的新参战者保持本帧来源次序，不以 InstanceID 代替注册顺序。
         for (int i = 1; i < lanePieces.Count; i++)
@@ -110,7 +111,7 @@ public sealed class SpeedTimelineUI : MonoBehaviour
             lanePieces[previous + 1] = piece;
         }
         if (lanePieces.Count == 0) return;
-        float inset = markerTemplate.Rect.rect.width * 1.15f * 0.5f + 3;
+        float inset = markerTemplate.Rect.rect.width * markerScale * 1.15f * 0.5f + 3;
         float left = -track.rect.width + inset, right = -inset;
         if (left > right) left = right = -track.rect.width * 0.5f;
         float spacing = lanePieces.Count > 1 ? Mathf.Min(inset * 2, (right - left) / (lanePieces.Count - 1)) : 0;
@@ -126,7 +127,7 @@ public sealed class SpeedTimelineUI : MonoBehaviour
         for (int i = 0; i < lanePieces.Count; i++)
         {
             var rect = markers[lanePieces[i]].Rect;
-            Vector2 target = new(lanePositions[i], ally ? laneOffset : -laneOffset);
+            Vector2 target = new(lanePositions[i], 0);
             Vector2 position = positionedMarkers.Add(lanePieces[i]) ? target
                 : Vector2.Lerp(rect.anchoredPosition, target, 1 - Mathf.Exp(-20 * Time.unscaledDeltaTime));
             lanePositions[i] = Mathf.Clamp(position.x, left, right);
@@ -138,7 +139,7 @@ public sealed class SpeedTimelineUI : MonoBehaviour
         for (int i = lanePositions.Count - 2; i >= 0; i--)
             lanePositions[i] = Mathf.Min(lanePositions[i], lanePositions[i + 1] - spacing);
         for (int i = 0; i < lanePieces.Count; i++)
-            markers[lanePieces[i]].Rect.anchoredPosition = new Vector2(lanePositions[i], ally ? laneOffset : -laneOffset);
+            markers[lanePieces[i]].Rect.anchoredPosition = new Vector2(lanePositions[i], 0);
     }
 
 }

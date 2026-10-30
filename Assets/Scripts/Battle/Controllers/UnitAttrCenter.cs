@@ -292,6 +292,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     {
         if (pc == null || (previousHealth == _curHealth &&
             (previousMaxHealth < 0 || previousMaxHealth == _maxHealth))) return;
+        BattleScene.Ins?.BM?.ClearMoveUndo();
         BattleScene.Ins?.BM?.characterSkillManager?.NotifyHpChanged(pc.gameObject, _curHealth, _maxHealth);
     }
     /// <summary>每次有效生命伤害提交后发送一次结果；观察者不得再次扣除本次伤害，屏障全吸收不发送。</summary>
@@ -306,12 +307,20 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         source ??= new BattleDamageSource(BattleDamageKind.Unknown);
         if (pc.isDead || attackPack.damage < 0)
             return new BattleDamageResult(pc, source, attackPack.damage, _curHealth, _curHealth, true);
+        var battle = BattleScene.Ins.BM;
+        if (battle.PlayerController.isBursting &&
+            (source.Kind == BattleDamageKind.Unknown || source.Kind == BattleDamageKind.Component || source.Kind == BattleDamageKind.Collision ||
+             source.Kind == BattleDamageKind.Skill && !battle.IsBurstActor(source.Action.Actor)) &&
+            battle.TryDeferBurstEffect(this, () => TakeDamage(attackPack, source), source.Action))
+            return new BattleDamageResult(pc, source, attackPack.damage, _curHealth, _curHealth, true);
+        battle.ClearMoveUndo();
         using var sourceScope = source.Action.Enter();
         // 1. 负数不作为伤害处理；零伤害命中仍继续播放受击反馈。
         int previousHealth = _curHealth;
         _curHealth -= attackPack.damage;
         // 2. 所有有效命中都显示伤害跳字，包括 0。
-        BattleScene.Ins.BM.tipTextManager.ShowDamage(transform, attackPack.damage, attackPack.isCritical);
+        System.Action showDamage = () => battle.tipTextManager.ShowDamage(transform, attackPack.damage, attackPack.isCritical);
+        if (pc.isPlayerPiece || !battle.PlayerController.isBursting || !battle.TryDeferBurstEffect(this, showDamage, source.Action)) showDamage();
         if (_curHealth <= 0) _curHealth = 0;
         // 在生命变化回调与死亡事件前固定本段结果，嵌套被动不能篡改这次实际掉血。
         var result = new BattleDamageResult(pc, source, attackPack.damage, previousHealth, _curHealth);
@@ -341,12 +350,10 @@ public class UnitAttrCenter : SerializedMonoBehaviour
             
             // 3. 零伤害保留受击动画和特效，但不发送生命值变化通知。
 
-            ObjectPool.Ins.GenerateObject(
-                attackPack.damageType == DamageType.Melee
-                    ? ItemType.KINETIC_ATTACK
-                    : ItemType.ENERGY_ATTACK,
-                this.transform.position + Vector3.up * 5f
-                , Quaternion.identity);
+            System.Action impact = () => ObjectPool.Ins.GenerateObject(
+                attackPack.damageType == DamageType.Melee ? ItemType.KINETIC_ATTACK : ItemType.ENERGY_ATTACK,
+                transform.position + Vector3.up * 5f, Quaternion.identity);
+            if (pc.isPlayerPiece || !battle.PlayerController.isBursting || !battle.TryDeferBurstEffect(this, impact, source.Action)) impact();
         }
 
         BattleScene.Ins.UM.OnPieceStateChance(pc);
@@ -390,6 +397,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         int costPoint = GM.Ins.DM.gameConstSO.GetActionPointCost(actionType);
         if (_curMovePoint >= costPoint)
         {
+            BattleScene.Ins.BM.RecordMovePayment(pc, actionType, costPoint);
             _curMovePoint -= costPoint;
             BattleScene.Ins.UM.NotifyActionCommitted(pc);
             if (costPoint > 0 && actionType != ActionType.Wait && !BattleScene.Ins.BM.timedMemeStatuses.BeforePaidAction(pc)) return false;
@@ -412,6 +420,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         if (pc.isDead || GetBuffStacks(BuffType.Stun) != 0) return false;
         if (_curMovePoint >= costPoint)
         {
+            BattleScene.Ins.BM.ClearMoveUndo();
             _curMovePoint -= costPoint;
             BattleScene.Ins.UM.NotifyActionCommitted(pc);
             if (costPoint > 0 && activeAction && !BattleScene.Ins.BM.timedMemeStatuses.BeforePaidAction(pc)) return false;

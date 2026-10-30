@@ -25,13 +25,19 @@ public class PlasmaExplosiveBarrel : MonoBehaviour, IEnemyExplosiveTarget
 
     public PieceController pieceController;
     private bool _isDead = false;
+    private bool deathPending; // 最后一段脉冲只登记一次，防止释放前重复触发。
 
     public PieceController Piece => pieceController;
     public bool CanBeTriggered => !_isDead && pieceController != null && !pieceController.isDead && gameObject.activeInHierarchy;
     public int CountThreatenedPlayers() => CanBeTriggered
         ? EnemyExplosiveTargets.CountPlayers(pieceController, transform.position, explosionRadius, effectLayer, skillPack) : 0;
-    private void OnEnable() => EnemyExplosiveTargets.Active.Add(this);
-    private void OnDisable() => EnemyExplosiveTargets.Active.Remove(this);
+    private void OnEnable() { _isDead = deathPending = false; currentHealth = maxHealth; EnemyExplosiveTargets.Active.Add(this); }
+    private void OnDisable()
+    {
+        EnemyExplosiveTargets.Active.Remove(this);
+        BattleScene.Ins?.BM?.CancelWorldEffects(this);
+        BattleScene.Ins?.BM?.ReleaseExplosiveBody(transform);
+    }
 
     private void Start()
     {
@@ -60,24 +66,23 @@ public class PlasmaExplosiveBarrel : MonoBehaviour, IEnemyExplosiveTarget
     /// </summary>
     public void TriggerPlasmaPulse()
     {
+        if (_isDead || deathPending) return;
         var action = new BattleActionContext(pieceController, skillPack);
         if (currentHealth > 1)
         {
             currentHealth--;
             pieceController.unitAttrCenter.SetHealth(1);
             Debug.Log($"{barrelName} 受到伤害，释放电浆脉冲！");
-            DOVirtual.DelayedCall(delay, () => { using (action.Enter()) ExecuteExplosionLogic(); }, false);
+            BattleScene.Ins.BM.ScheduleWorldEffect(this, delay, ExecuteExplosionLogic, action);
         }
         else
         {
-            DOVirtual.DelayedCall(delay, ()=>
+            deathPending = true;
+            BattleScene.Ins.BM.ScheduleWorldEffect(this, delay, () =>
             {
-                using (action.Enter())
-                {
-                    ExecuteExplosionLogic();
-                    OnDead();
-                }
-            }, false);
+                ExecuteExplosionLogic();
+                OnDead();
+            }, action);
             
         }
     }
@@ -100,11 +105,11 @@ public class PlasmaExplosiveBarrel : MonoBehaviour, IEnemyExplosiveTarget
 
             // 获取动画长度并延迟销毁/失活
             float animLength = plasmaAnimator.GetCurrentAnimatorStateInfo(0).length;
-            DOVirtual.DelayedCall(animLength, () => gameObject.SetActive(false));
+            BattleScene.Ins.BM.ScheduleWorldEffect(this, animLength, () => gameObject.SetActive(false));
         }
         else
         {
-            gameObject.SetActive(false);
+            BattleScene.Ins.BM.ScheduleWorldEffect(this, 0, () => gameObject.SetActive(false));
         }
     }
 

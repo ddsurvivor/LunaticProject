@@ -3,6 +3,8 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+public enum SkillReachKind { Auto, Melee, Ranged }
+
 [System.Serializable]
 public class SkillPack
 {
@@ -32,6 +34,7 @@ public class SkillPack
     public SkillTarget target;// 作用目标
     public RangeType rangeType;// 作用范围类型
     public float rangeValue;// 范围半径
+    [LabelText("攻击距离类型")] public SkillReachKind reachKind; // Auto 兼容旧技能；可显式区分远程技能/道具与近战。
     [ShowIf("@this.rangeType == RangeType.Fan")]public float rangeAgle;// 范围角度（仅扇形范围有效）
     [ShowIf("@this.rangeType == RangeType.Grenade")]public float explodeRadius;// 爆炸半径（仅爆炸范围有效）
     [ShowIf("@this.rangeType == RangeType.Arc")] public float arcWeight;// 弧线宽度

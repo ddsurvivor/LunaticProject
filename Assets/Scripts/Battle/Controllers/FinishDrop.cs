@@ -18,6 +18,19 @@ public class FinishDrop : MonoBehaviour
     [LabelText("掉落信息汇总")]
     [ReadOnly]
     public string dropSummary = "";
+    /// <summary>只读掉落预告，不写库存、不投随机数，也不依赖已经发放的汇总文本。</summary>
+    public string PreviewSummary()
+    {
+        var summary = new StringBuilder();
+        foreach (var item in dropList) summary.AppendLine($"{item.itemName} × {item.itemNum}");
+        foreach (int id in dropCompIds)
+        {
+            var component = GM.Ins.DM.componentConfig.GetData(id);
+            summary.AppendLine(component != null ? $"组件：{component.itemName}" : $"组件 ID：{id}");
+        }
+        return summary.ToString();
+    }
+
     public void DropItems()
     {
         StringBuilder sb = new StringBuilder();

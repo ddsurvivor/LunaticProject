@@ -8,10 +8,22 @@ public sealed class ActionPointPipsUI : MonoBehaviour
     [SerializeField] private List<UnityEngine.UI.Image> points = new();
     [SerializeField] private Sprite filledSprite;
     [SerializeField] private Sprite emptySprite;
+    public Sprite FilledSprite => filledSprite;
+    public Sprite EmptySprite => emptySprite;
     private int previewCount;
     private int lastCurrent = -1;
     private int lastMaximum = -1;
     private readonly List<UnityEngine.UI.Image> spentEffects = new();
+
+    /// <summary>运行时共享展示使用现有图形种子；不改写预制体或其他面板的点数配置。</summary>
+    public void Configure(UnityEngine.UI.Image seed, Sprite filled, Sprite empty)
+    {
+        ResetPresentation();
+        points.Clear();
+        if (seed != null) points.Add(seed);
+        filledSprite = filled;
+        emptySprite = empty;
+    }
 
     /// <summary>刷新当前可用点和容量；负容量按零处理，超出容量的当前值截断。</summary>
     public void SetPoints(int current, int maximum)

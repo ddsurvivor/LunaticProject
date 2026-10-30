@@ -43,6 +43,7 @@ public partial class PieceController
             ? BattleCommandResult.Interrupted : BattleCommandResult.Rejected;
         if (command.kind == PlayerBattleCommandKind.EndTurn)
         {
+            battle.ClearMoveUndo();
             unitAttrCenter.SetMovePoint(0);
             isIdle = true;
             if (!battle.IsBurstActor(this)) battle.ChangeTurn();
@@ -88,7 +89,7 @@ public partial class PieceController
         if (!special && !ranged && command.kind != PlayerBattleCommandKind.Melee) return BattleCommandResult.Rejected;
         var skill = special ? command.skill : ranged ? pieceData?.RangedAttack : pieceData?.MeleeAttack;
         if (skill == null || BattleRelations.IsOffensive(skill) && !BattleRelations.CanInitiateAttack(this) || special && !availableSkills.Contains(skill) || ranged && unitAttrCenter.AmmoCount <= 0) return BattleCommandResult.Rejected;
-        Vector3 position = SkillTargeting.ClampPosition(transform.position, command.position, skill.rangeValue);
+        Vector3 position = BattleRangeRules.ClampPosition(this, skill, command.position);
         var targets = SkillTargeting.Query(this, skill, position);
         if (targets.Count == 0 && skill.target != SkillTarget.Area && skill.target != SkillTarget.Self) return BattleCommandResult.Rejected;
         var action = special ? ActionType.Skill : ranged ? ActionType.RangedAttack : ActionType.MeleeAttack;
