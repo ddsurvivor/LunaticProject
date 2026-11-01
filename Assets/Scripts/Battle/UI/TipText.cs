@@ -51,7 +51,7 @@ public class TipText : MonoBehaviour
         playing = true;
         gameObject.SetActive(true);
     }
-    private void Update() => AdvanceAnimation(Time.deltaTime);
+    private void Update() => AdvanceAnimation(Time.unscaledDeltaTime);
     internal void AdvanceAnimation(float deltaTime)
     {
         if (!IsPlaying) return;

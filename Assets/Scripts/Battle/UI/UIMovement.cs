@@ -40,7 +40,7 @@ public class UIMovement : MonoBehaviour
         {
             // 使用 Incremental 模式实现无缝旋转
             _rotateTween = transform.DOLocalRotate(rotationSpeed, 1f, RotateMode.FastBeyond360)
-                .SetRelative(true)
+                .SetRelative(true).SetUpdate(true)
                 .SetEase(Ease.Linear)
                 .SetLoops(-1, LoopType.Incremental);
         }
@@ -50,14 +50,14 @@ public class UIMovement : MonoBehaviour
         {
             // 基于当前的 localPosition 进行偏移
             _floatTween = transform.DOLocalMoveY(transform.localPosition.y + floatDistance, floatDuration)
-                .SetEase(floatEase)
+                .SetEase(floatEase).SetUpdate(true)
                 .SetLoops(-1, LoopType.Yoyo);
         }
 
         if (enableFlicker)
         {
             _flickerTween = targetRenderer.DOFade(0f, flickerDuration)
-                .SetEase(Ease.InOutSine)
+                .SetEase(Ease.InOutSine).SetUpdate(true)
                 .SetLoops(-1, LoopType.Yoyo);
         }
     }

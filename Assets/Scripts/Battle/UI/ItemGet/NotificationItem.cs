@@ -59,20 +59,20 @@ public class NotificationItem : MonoBehaviour
         float elapsed = 0;
         while (elapsed < 0.2f)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             canvasGroup.alpha = Mathf.Lerp(0, 1, elapsed / 0.2f);
             yield return null;
         }
         canvasGroup.alpha = 1;
 
         // 2. 停留展示 (1.5秒)
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSecondsRealtime(1.5f);
 
         // 3. 淡出 (0.3秒)
         elapsed = 0;
         while (elapsed < 0.3f)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             canvasGroup.alpha = Mathf.Lerp(1, 0, elapsed / 0.3f);
             yield return null;
         }

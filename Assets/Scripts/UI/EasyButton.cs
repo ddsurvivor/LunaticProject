@@ -66,7 +66,7 @@ public class EasyButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
         }
         if (holdTime!=0 && isHolding)
         {
-            timer += Time.deltaTime;
+            timer += Time.unscaledDeltaTime;
             if (timer > holdTime)
             {
                 OnBtnHold.Invoke();
@@ -83,7 +83,7 @@ public class EasyButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
         if (withAnim)
         {
             transform.DOScale(0.8f*btnScale, 0.2f)
-                .SetEase(Ease.InOutElastic).OnComplete(()=>OnBtnDown.Invoke());
+                .SetEase(Ease.InOutElastic).SetUpdate(true).OnComplete(()=>OnBtnDown.Invoke());
         }
         else
         {
@@ -96,7 +96,7 @@ public class EasyButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
 
         if (withAnim)
         {
-            transform.DOScale(btnScale, 0.2f).SetEase(Ease.InOutElastic).OnComplete(()=>
+            transform.DOScale(btnScale, 0.2f).SetEase(Ease.InOutElastic).SetUpdate(true).OnComplete(()=>
             {
                 OnBtnClick?.Invoke();
                 OnBtnUp?.Invoke();

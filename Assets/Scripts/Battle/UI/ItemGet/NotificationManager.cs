@@ -235,7 +235,7 @@ public class NotificationManager : MonoBehaviour
             }
 
             // 等待一小段时间再弹出下一个，避免瞬间重叠显得突兀
-            yield return new WaitForSeconds(spawnInterval);
+            yield return new WaitForSecondsRealtime(spawnInterval);
         }
 
         isProcessingQueue = false;

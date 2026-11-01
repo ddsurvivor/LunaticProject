@@ -48,6 +48,12 @@ public partial class UIManager : SerializedMonoBehaviour
     [SerializeField] private SpeedTimelineUI speedTimelinePrefab;
     private SpeedTimelineUI speedTimeline;
 
+    [Header("战斗快进与设置")]
+    [SerializeField] private SettingPanel battleSettingsPrefab;
+    [SerializeField] private KeyCode fastForwardKey = KeyCode.Space; // 仅配置战斗快捷键，None 禁用。
+    [SerializeField, Min(0.01f)] private float fastForwardHoldThreshold = .25f; // 真实秒数，达到阈值后临时快进。
+    private BattleTimeControls timeControls;
+
     /// <summary>供角色跟随状态避让当前可见的顶部行动序列；未创建或隐藏时返回 null。</summary>
     public RectTransform ActionTimelineRect => speedTimeline != null && speedTimeline.gameObject.activeInHierarchy
         ? (RectTransform)speedTimeline.transform : null;
@@ -73,6 +79,11 @@ public partial class UIManager : SerializedMonoBehaviour
         OverheadStatuses = BattleOverheadStatusLayer.Ensure(this);
         InitializeWindows();
         InitializeMessageLanes();
+        if (timeControls == null)
+        {
+            var canvas = pieceInfoPanel.GetComponentInParent<Canvas>().rootCanvas;
+            timeControls = BattleTimeControls.Create(canvas, this, battleSettingsPrefab, fastForwardKey, fastForwardHoldThreshold);
+        }
     }
 
     private void Update() { HandleWindowKeys(); }
@@ -158,7 +169,7 @@ public partial class UIManager : SerializedMonoBehaviour
         //turnImage[index].SetActive(true);
         RectTransform imgRect = turnImage[index].GetComponent<RectTransform>();
         
-        Sequence seq = DOTween.Sequence();
+        Sequence seq = DOTween.Sequence().SetUpdate(true);
         seq.Append(imgRect.DOLocalMoveY(-110, 0.3f));
         seq.AppendInterval(1f);
         seq.Append(imgRect.DOLocalMoveY(0, 0.3f));

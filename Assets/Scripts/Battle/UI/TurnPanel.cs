@@ -13,7 +13,7 @@ public class TurnPanel: MonoBehaviour
             gameObject.SetActive(true);
             turnText.rectTransform
                 .DOLocalMove(Vector3.right*100f, 1f)
-                .From()
+                .From().SetUpdate(true)
                 .OnComplete(()=>gameObject.SetActive(false));
         }
     }

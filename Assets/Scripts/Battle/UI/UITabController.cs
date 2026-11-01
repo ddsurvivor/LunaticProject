@@ -142,7 +142,7 @@ public class UITabController : MonoBehaviour
                     {
                         indicatorProgress = value;
                         UpdateIndicatorPosition();
-                    }, 1f, duration).SetEase(easeType).SetTarget(indicatorBox);
+                    }, 1f, duration).SetEase(easeType).SetUpdate(true).SetTarget(indicatorBox);
                 }
             }
         }

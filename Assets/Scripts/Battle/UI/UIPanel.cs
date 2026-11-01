@@ -83,7 +83,7 @@ public class UIPanel : MonoBehaviour
 
     public void Close()
     {
-        canvasGroup.DOFade(0f, T(0.18f))
+        canvasGroup.DOFade(0f, T(0.18f)).SetUpdate(true)
             .OnComplete(() => gameObject.SetActive(false));
     }
 
@@ -104,7 +104,7 @@ public class UIPanel : MonoBehaviour
         }*/
 
         // Phase 1 · 弹出
-        var seq = DOTween.Sequence();
+        var seq = DOTween.Sequence().SetUpdate(true);
         seq.Append(_rt.DOScale(_originalScale, T(0.28f)).SetEase(Ease.OutBack));
         seq.Join(_rt.DOAnchorPos(_originalAnchoredPos, T(0.28f)).SetEase(Ease.OutCubic));
         //seq.Join(canvasGroup.DOFade(1f, T(0.28f)));
@@ -116,7 +116,7 @@ public class UIPanel : MonoBehaviour
             yield return StartCoroutine(
                 DecodeText(txt, _originalStrings[txt],
                            ticks: 10, intervalSec: T(0.055f)));
-            yield return new WaitForSeconds(T(0.04f));
+            yield return new WaitForSecondsRealtime(T(0.04f));
         }*/
 
         canvasGroup.interactable   = true;
@@ -131,7 +131,7 @@ public class UIPanel : MonoBehaviour
             int resolved = Mathf.FloorToInt((float)i / ticks * real.Length);
             txt.text = real.Substring(0, resolved)
                      + RandomString(real.Length - resolved);
-            yield return new WaitForSeconds(intervalSec);
+            yield return new WaitForSecondsRealtime(intervalSec);
         }
         txt.text = real;
     }

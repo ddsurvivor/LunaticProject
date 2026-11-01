@@ -34,7 +34,7 @@ internal sealed class HealthBarFillAnimation
         shadow.fillAmount = Mathf.Max(shadow.fillAmount, Mathf.Max(previousFill, target));
         if (!Mathf.Approximately(shadow.fillAmount, target))
             tween = shadow.DOFillAmount(target, 1.2f).SetDelay(0.15f)
-                .SetEase(Ease.OutQuad).SetUpdate(false);
+                .SetEase(Ease.OutQuad).SetUpdate(true);
     }
 
     public void Reset()

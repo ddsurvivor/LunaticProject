@@ -55,10 +55,10 @@ public class HpBarUI : MonoBehaviour
         currentHpPercent = precent;
 
         // 直接更新血条填充部分
-        hpBarFill.DOFillAmount(currentHpPercent, barSpeed);
+        hpBarFill.DOFillAmount(currentHpPercent, barSpeed).SetUpdate(true);
 
         // 启动拖影动画Dotween
-        shadowTweener = shadowFill.DOFillAmount(currentHpPercent, shadowSpeed).SetEase(Ease.OutQuad);
+        shadowTweener = shadowFill.DOFillAmount(currentHpPercent, shadowSpeed).SetEase(Ease.OutQuad).SetUpdate(true);
         preDamageFill.gameObject.SetActive(false);
         if (preDamageFillYellow != null) preDamageFillYellow.gameObject.SetActive(false);
     }
@@ -80,7 +80,7 @@ public class HpBarUI : MonoBehaviour
         hpBarAlphaTweener = hpBarRenderer
             .DOFade(0.5f, 1f)
             .SetLoops(-1, LoopType.Yoyo)
-            .SetEase(Ease.InOutSine);;
+            .SetEase(Ease.InOutSine).SetUpdate(true);
     }
 
     public void ShowPreDamage(DamagePreviewResult preview, int maxHealth)

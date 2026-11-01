@@ -122,6 +122,7 @@ public partial class UIManager
     public void ShowBattleResult(bool win, FinishDrop drop, int exp)
     {
         InitializeWindows();
+        BattleScene.Ins.TM.SetFastForward(false);
         ClosePauseWindows();
         ClearActionFlow();
         ClearTransientMessages();

@@ -48,6 +48,7 @@ public partial class BattleManager
     {
         if (LastOutcome != BattleOutcome.None) return true;
         if (DeferBurstOutcome(outcome)) return true;
+        BattleScene.Ins.TM.SetFastForward(false);
         CancelBattleReactions();
         _timedMemeStatuses?.ClearAll();
         ClearNetworkConnections();

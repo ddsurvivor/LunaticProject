@@ -136,7 +136,7 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
             if (!keyTriggered)
             {
                 isKeyHolding = true;
-                currentKeyHoldTime += Time.deltaTime;
+                currentKeyHoldTime += Time.unscaledDeltaTime;
 
                 // 表现层：按住时让高亮/按下贴图显现
                 if (pressedImage != null) pressedImage.gameObject.SetActive(true);
@@ -203,7 +203,7 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
         {
             // 否则维持原有的鼠标悬停填充逻辑（松开键盘后，进度条会通过 MoveTowards 丝滑地退回 0）
             float targetFill = isHovered ? 1f : 0f;
-            fillImage.fillAmount = Mathf.MoveTowards(fillImage.fillAmount, targetFill, fillSpeed * Time.deltaTime);
+            fillImage.fillAmount = Mathf.MoveTowards(fillImage.fillAmount, targetFill, fillSpeed * Time.unscaledDeltaTime);
         }
     }
 
@@ -219,7 +219,7 @@ public class CustomAdvancedButton : MonoBehaviour, IPointerEnterHandler, IPointe
         Vector3 targetScale = shouldScale ? originalScale * pressedScale : originalScale;
 
         // 使用 Vector3.MoveTowards 实现平滑的线性缩放过渡
-        transform.localScale = Vector3.MoveTowards(transform.localScale, targetScale, scaleSpeed * Time.deltaTime);
+        transform.localScale = Vector3.MoveTowards(transform.localScale, targetScale, scaleSpeed * Time.unscaledDeltaTime);
     }
 
     /// <summary>
