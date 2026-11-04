@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-/// <summary>本场统一头顶展示：屏幕安全区、行动条避让、拥挤排布与分页详情，全部只读。</summary>
+/// <summary>本场统一头顶展示：固定跟随棋子头顶，提供只读状态和分页详情。</summary>
 public sealed class BattleOverheadStatusLayer : MonoBehaviour
 {
     private BattleManager battle;
@@ -10,7 +10,6 @@ public sealed class BattleOverheadStatusLayer : MonoBehaviour
     private Canvas canvas;
     private Font font;
     private readonly Dictionary<PieceController, PieceOverheadStatusUI> views = new();
-    private readonly List<Rect> occupied = new(); // 本帧已占用的屏幕区域，避免标签相互遮挡。
     private readonly Dictionary<CanvasGroup, (float alpha, bool blocks, bool interactable)> legacyGroups = new();
     private readonly List<CanvasGroup> ownedGroups = new();
     private RectTransform details;
@@ -52,10 +51,9 @@ public sealed class BattleOverheadStatusLayer : MonoBehaviour
             {
                 var old = views[key];
                 CloseDetails(old);
-                if (old != null) { if (old.Link != null) Destroy(old.Link.gameObject); Destroy(old.gameObject); }
+                if (old != null) Destroy(old.gameObject);
                 views.Remove(key);
             }
-        var candidates = new List<PieceOverheadStatusUI>();
         foreach (var piece in pieces)
         {
             if (piece == null) continue;
@@ -65,120 +63,41 @@ public sealed class BattleOverheadStatusLayer : MonoBehaviour
                 go.transform.SetParent(transform, false);
                 view = go.AddComponent<PieceOverheadStatusUI>();
                 view.Initialize(this, piece, font);
-                var link = PieceOverheadStatusUI.Box("Link", transform, 0, 0, 1, 1).gameObject.AddComponent<UnityEngine.UI.Image>();
-                link.color = new Color(.7f, .85f, .9f, .45f); link.raycastTarget = false;
-                link.rectTransform.pivot = new Vector2(0, .5f);
-                link.transform.SetAsFirstSibling(); view.Link = link;
                 views.Add(piece, view);
             }
             HideLegacy(piece);
-            if (!CanShow(piece)) { view.Hide(); continue; }
+            if (!CanShow(piece, view.HeadPosition)) { view.Hide(); continue; }
             view.gameObject.SetActive(true);
             view.transform.localScale = Vector3.one / Mathf.Max(.01f, canvas.scaleFactor);
             view.Refresh(battle);
-            candidates.Add(view);
+            Place(view);
         }
         if (ui.pieceStatePanel != null && ui.pieceStatePanel.upRoot != null) Conceal(ui.pieceStatePanel.upRoot.gameObject);
-        occupied.Clear();
-        Reserve(ui.ActionTimelineRect);
-        Reserve(ui.NoticeRect);
-        if (ui.notificationManager != null && ui.notificationManager.ActiveNotificationCount > 0) Reserve(ui.NotificationRect);
-        if (ui.logPanel != null) Reserve(ui.logPanel.transform as RectTransform);
-        if (ui.pieceInfoPanel != null && ui.pieceInfoPanel.gameObject.activeInHierarchy) ReserveGraphics(ui.pieceInfoPanel.transform);
-        if (ui.burstButton != null && ui.burstButton.gameObject.activeInHierarchy) Reserve((RectTransform)ui.burstButton.transform);
-        candidates.Sort((a, b) => Priority(a.Piece).CompareTo(Priority(b.Piece)) != 0
-            ? Priority(a.Piece).CompareTo(Priority(b.Piece)) : a.Piece.GetInstanceID().CompareTo(b.Piece.GetInstanceID()));
-        foreach (var view in candidates) Place(view);
         RefreshDetails();
     }
 
-    private int Priority(PieceController piece) => piece == battle.ActivePiece ? 0 : piece.isPlayerPiece ? 1 : 2;
-    private bool CanShow(PieceController piece)
+    private bool CanShow(PieceController piece, Vector3 head)
     {
         if (!battle.IsBattleRunning || (!battle.SpeedTurnsActive && !battle.IsDeploying) || MemeLoadoutPanel.IsOpen ||
             piece.unitAttrCenter == null || piece.isDead || !piece.gameObject.activeInHierarchy || Camera.main == null) return false;
         if (piece is EnemyController enemy && !enemy.isActived) return false;
         var renderer = piece.pieceDisplay?.pieceSpriteRenderer;
         if (renderer != null && (!renderer.enabled || !renderer.gameObject.activeInHierarchy)) return false;
-        var head = Head(piece);
         var point = Camera.main.WorldToScreenPoint(head);
         if (point.z <= 0 || point.x < 0 || point.x > Screen.width || point.y < 0 || point.y > Screen.height) return false;
         return piece.isPlayerPiece || !Physics.Linecast(Camera.main.transform.position, head, LayerMask.GetMask("Wall"), QueryTriggerInteraction.Ignore);
     }
-    private static Vector3 Head(PieceController piece)
-    {
-        var sprite = piece.pieceDisplay?.pieceSpriteRenderer;
-        return sprite != null ? new Vector3(sprite.bounds.center.x, sprite.bounds.max.y, sprite.bounds.center.z) : piece.transform.position + Vector3.up * 2;
-    }
-
     private void Place(PieceOverheadStatusUI view)
     {
-        var projected = (Vector2)Camera.main.WorldToScreenPoint(Head(view.Piece));
-        var safe = Screen.safeArea;
-        safe = Rect.MinMaxRect(safe.xMin + 8, safe.yMin + 8, safe.xMax - 8, safe.yMax - 8);
-        float width = PieceOverheadStatusUI.Width, height = view.Height;
-        // 优先贴近本体，再在安全区内分层错开；无空位时隐藏低优先级标签，不覆盖其他标签。
-        for (int row = 0; row < 8; row++)
-            for (int column = 0; column < 7; column++)
-            {
-                int side = column == 0 ? 0 : (column + 1) / 2 * (column % 2 == 1 ? -1 : 1);
-                float x = Mathf.Clamp(projected.x - width / 2 + side * (width + 6), safe.xMin, Mathf.Max(safe.xMin, safe.xMax - width));
-                float y = Mathf.Clamp(projected.y + 12 + (row % 2 == 0 ? row / 2 : -(row + 1) / 2) * (height + 6), safe.yMin, Mathf.Max(safe.yMin, safe.yMax - height));
-                var candidate = new Rect(x, y, width, height);
-                bool overlaps = false;
-                foreach (var other in occupied) if (candidate.Overlaps(other)) { overlaps = true; break; }
-                if (overlaps) continue;
-                occupied.Add(new Rect(x - 2, y - 2, width + 4, height + 4));
-                SetScreenPosition(view.Rect, new Vector2(x + width / 2, y));
-                var end = new Vector2(x + width / 2, y);
-                var link = view.Link.rectTransform;
-                link.gameObject.SetActive(Vector2.Distance(projected, end) > 30);
-                link.localScale = Vector3.one / Mathf.Max(.01f, canvas.scaleFactor);
-                SetScreenPosition(link, projected);
-                link.sizeDelta = new Vector2(Vector2.Distance(projected, end), 1);
-                link.localRotation = Quaternion.Euler(0, 0, Mathf.Atan2(end.y - projected.y, end.x - projected.x) * Mathf.Rad2Deg);
-                return;
-            }
-        view.Hide();
+        var projected = (Vector2)Camera.main.WorldToScreenPoint(view.HeadPosition);
+        // 始终位于本体正上方，不因拥挤、HUD 或屏幕边界改变棋子标签的位置。
+        SetScreenPosition(view.Rect, projected + Vector2.up * 12f);
     }
     private void SetScreenPosition(RectTransform rect, Vector2 point)
     {
         var camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
         if (RectTransformUtility.ScreenPointToWorldPointInRectangle((RectTransform)rect.parent, point, camera, out var world)) rect.position = world;
     }
-    private void Reserve(RectTransform rect)
-    {
-        if (rect == null || !rect.gameObject.activeInHierarchy) return;
-        var corners = new Vector3[4]; rect.GetWorldCorners(corners);
-        var camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
-        var min = RectTransformUtility.WorldToScreenPoint(camera, corners[0]);
-        var max = RectTransformUtility.WorldToScreenPoint(camera, corners[2]);
-        if (max.x - min.x < Screen.width * .9f && max.y - min.y < Screen.height * .9f)
-            occupied.Add(Rect.MinMaxRect(min.x - 6, min.y - 6, max.x + 6, max.y + 6));
-    }
-
-    private void ReserveGraphics(Transform root)
-    {
-        bool found = false;
-        Vector2 min = Vector2.positiveInfinity, max = Vector2.negativeInfinity;
-        var camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
-        var corners = new Vector3[4];
-        // 部分旧面板根矩形覆盖整个Canvas，只用实际绘制的图形确定占位。
-        foreach (var graphic in root.GetComponentsInChildren<UnityEngine.UI.Graphic>(false))
-        {
-            if (!graphic.enabled || graphic.color.a <= 0) continue;
-            graphic.rectTransform.GetWorldCorners(corners);
-            foreach (var corner in corners)
-            {
-                var point = RectTransformUtility.WorldToScreenPoint(camera, corner);
-                min = Vector2.Min(min, point); max = Vector2.Max(max, point);
-            }
-            found = true;
-        }
-        if (found && max.x - min.x < Screen.width * .9f && max.y - min.y < Screen.height * .9f)
-            occupied.Add(Rect.MinMaxRect(min.x - 6, min.y - 6, max.x + 6, max.y + 6));
-    }
-
     private void HideLegacy(PieceController piece)
     {
         if (piece is EnemyController enemy && enemy.enemyCanvas != null)

@@ -17,10 +17,18 @@ namespace SteamReviewSupport
         private bool showHelp = true; // 保留 AVG 内手动切换的显示偏好。
         private string status = "Starting review support...";
 
-        /// <summary>在编辑器 Play Mode 或 Windows Development Player 首场景 Awake 前安装审核档；无需场景挂载。</summary>
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        /// <summary>仅进入 AVG 审核场景时安装审核档，正式启动流程不创建调试入口或写入审核存档。</summary>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Bootstrap()
         {
+            SceneManager.sceneLoaded -= OnReviewSceneLoaded;
+            SceneManager.sceneLoaded += OnReviewSceneLoaded;
+            OnReviewSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
+        }
+
+        private static void OnReviewSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (scene.name != "AVG" || FindObjectOfType<ReviewBuildRuntime>() != null) return;
             var root = new GameObject("SteamReviewSupport");
             DontDestroyOnLoad(root);
             root.AddComponent<ReviewBuildRuntime>().Initialize();
@@ -37,6 +45,7 @@ namespace SteamReviewSupport
                     if (Resources.Load<TextAsset>("Story/" + entry.script) == null)
                         throw new InvalidDataException("Missing story: " + entry.script);
                 int installed = ReviewSaveStore.Install(sourceDirectory, saveDirectory, catalog, false);
+                if (installed > 0 && GM.Ins != null && GM.Ins.DM != null) GM.Ins.DM.LoadData();
                 Report($"Ready. Installed {installed} missing review saves. Existing saves preserved.");
             }
             catch (Exception exception)

@@ -7,7 +7,21 @@ public sealed class PieceOverheadStatusUI : MonoBehaviour
     public PieceController Piece { get; private set; }
     public IReadOnlyList<BattleStatusEntry> Entries => entries;
     public RectTransform Rect => (RectTransform)transform;
-    internal UnityEngine.UI.Image Link;
+    private int headLife = -1;
+    private float headHeight; // 每次棋子初始化固定一次头顶高度，不跟随序列帧边界变化。
+    internal Vector3 HeadPosition
+    {
+        get
+        {
+            if (headLife != Piece.BattleLifeVersion)
+            {
+                headLife = Piece.BattleLifeVersion;
+                var sprite = Piece.pieceDisplay?.pieceSpriteRenderer;
+                headHeight = sprite != null ? Mathf.Max(.1f, sprite.bounds.max.y - Piece.transform.position.y) : 2f;
+            }
+            return Piece.transform.position + Vector3.up * headHeight;
+        }
+    }
     private BattleOverheadStatusLayer layer;
     private UnityEngine.UI.Text title, healthText, resources;
     private UnityEngine.UI.Image bar, shadow, minimumPreview, maximumPreview;
@@ -111,7 +125,6 @@ public sealed class PieceOverheadStatusUI : MonoBehaviour
     internal void Hide()
     {
         if (gameObject.activeSelf) gameObject.SetActive(false);
-        if (Link != null) Link.gameObject.SetActive(false);
         layer?.CloseDetails(this);
     }
     private void OnDisable() { healthAnimation.Reset(); if (pips != null) pips.ResetPresentation(); }

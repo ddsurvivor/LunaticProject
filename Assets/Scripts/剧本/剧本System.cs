@@ -152,6 +152,7 @@ public partial class 剧本System : MonoBehaviour
         进度条.normalizedPosition = new Vector2(0, -1f);
     }
 
+    /// <summary>跳过一行正文并保留其指令副作用；选项和控制行交回正常推进入口。</summary>
     public void SkipNext()
     {
         if (isWaitingForChoice || 已储存剧本 == null || 已阅读 >= 已储存剧本.Length - 1)
@@ -162,20 +163,32 @@ public partial class 剧本System : MonoBehaviour
             (!string.IsNullOrEmpty(当前事件) && 当前事件.Contains(Center.Command_Choice)))
             return;
 
-        已阅读++;
+        var script = 已储存剧本;
+        int line = 已阅读;
+        // 检定、变量及奖励仍按原顺序执行，否则后续 IF 会缺少分支依据。
+        进行指令(当前事件);
+        if (已储存剧本 == script && 已阅读 == line && isActiveAndEnabled && !IsReaderHiding &&
+            !isWaitingForChoice && !GM.Ins.IsTransitioning)
+            已阅读++;
     }
 
+    /// <summary>跳过正文但保留剧情指令，遇到选项或场景切换时停止。</summary>
     public void OnClickSkip(int num = 0)
     {
-        if (IsReaderHiding || isWaitingForChoice || 已储存剧本 == null || 已阅读 >= 已储存剧本.Length) return;
+        if (!isActiveAndEnabled || IsReaderHiding || isWaitingForChoice || GM.Ins.IsTransitioning ||
+            已储存剧本 == null || 已阅读 >= 已储存剧本.Length) return;
         StopAutoPlay();//停止自动播放
         Debug.Log($"跳过{已储存剧本.Length - 已阅读}条剧本，遇到选项时停止");
         GM.Ins.AM.播放音效("Key");
         int skipCount = 已储存剧本.Length - 已阅读 - num;
         for (int i = 0; i < skipCount; i++)
         {
+            var previousScript = 已储存剧本;
             int previousLine = 已阅读;
             SkipNext();
+            // 跳转已经显示了新剧本首句，旧循环不能继续消费新剧本或重复执行离场指令。
+            if (已储存剧本 != previousScript || !isActiveAndEnabled || IsReaderHiding ||
+                isWaitingForChoice || GM.Ins.IsTransitioning) return;
             if (已阅读 == previousLine) break;
         }
 

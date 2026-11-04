@@ -31,6 +31,9 @@ public static class BattleRangeStyle
         line.useWorldSpace = true;
         line.widthMultiplier = 0.045f;
         line.startColor = line.endColor = color;
+        // 地板也是透明精灵，默认排序层的运行时绘线会被其覆盖；沿用原范围节点的战场 UI 排序。
+        line.sortingLayerName = "BGUI";
+        line.sortingOrder = 20;
         line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         line.receiveShadows = false;
         line.numCornerVertices = 3;

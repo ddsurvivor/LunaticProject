@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class StartMenu : MonoBehaviour
 {
-    public string startLevelName;
+    public string startLevelName = "OPCG";
 
     public SavePanel savePanel;
 
@@ -30,13 +30,17 @@ public class StartMenu : MonoBehaviour
         if (finishedCG != null) finishedCG.SetActive(finished);
     }
 
+    /// <summary>创建全新档案并进入片头；转场期间忽略重复点击，不写入已有存档。</summary>
     public void OnClickStart()
     {
-        if (!GM.Ins.CanLoadScene(string.IsNullOrWhiteSpace(startLevelName) ? "Playing" : startLevelName)) return;
+        string sceneName = string.IsNullOrWhiteSpace(startLevelName) ? "OPCG" : startLevelName;
+        if (!GM.Ins.CanLoadScene(sceneName)) return;
         // 返回标题后再开始游戏也必须创建全新档案，不能沿用上一次读档的数据。
         GM.Ins.PLAYERPROFILE = new PLAYERPROFILE();
         GM.Ins.PLAYERPROFILE.新游戏初始化数值();
-        GM.Ins.LoadPlayingScene(startLevelName);
+        PlayingSystem.特殊剧情 = "";
+        GM.Ins.battleSetting = 0;
+        GM.Ins.LoadPlayingScene(sceneName);
     }
 
     public void OnClickSet()
