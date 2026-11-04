@@ -180,6 +180,7 @@ public partial class BattleManager : MonoBehaviour
             // 1. 伤害管理器统一处理目标校验、命中、暴击与各段扣血。
             var settlement = damageManager.ResolveSkillTarget(attacker, target, skillPack, checkResult, isFlank, passiveMultiplier, BattleActionContext.Current);
             var damageInfos = settlement.DamageInfos;
+            int actualHealthLoss = (int)System.Math.Min(int.MaxValue, settlement.DamageResults.Sum(r => (long)r.HpLoss)); // 碰撞仅使用本次直接伤害实际扣除的生命，不含过量或被动伤害。
             damageInfoList.Add(damageInfos);
             isCrit |= settlement.IsCritical;
             if (settlement.HitAttack && BattleRelations.CanAttack(attacker, target)) hitTargets.Add(target);
@@ -229,7 +230,7 @@ public partial class BattleManager : MonoBehaviour
 
             // 处理附加效果
             ApplySKillEffect(skillPack, attacker, target, targetPos);
-            ApplyAddEffect(skillPack, attacker, target, targetPos);
+            ApplyAddEffect(skillPack, attacker, target, targetPos, actualHealthLoss);
             if (skillPack.memeCureTags != MemeCureTag.None) timedMemeStatuses.TryCure(target, skillPack.memeCureTags);
             if (IsBurstActor(attacker)) // 聚能状态下所有攻击附加击退效果
             {
@@ -244,8 +245,7 @@ public partial class BattleManager : MonoBehaviour
                         new HitBackEffect
                         {
                             dis = dis
-                            , hitBackDamage = (int)(damageInfos.Sum(d => d.damageValue) * 0.4f)
-                        }, attacker, target, targetPos);
+                        }, attacker, target, targetPos, actualHealthLoss);
                 }
             }
 
@@ -446,15 +446,9 @@ public partial class BattleManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 每个目标都要处理的技能附加效果（如击退）
-    /// </summary>
-    /// <param name="skillPack"></param>
-    /// <param name="caster"></param>
-    /// <param name="target"></param>
-    /// <param name="targetPos"></param>
+    /// <summary>逐目标处理附加效果；击退携带本次直接伤害的实际生命损失。</summary>
     private void ApplyAddEffect(SkillPack skillPack, PieceController caster = null
-        , PieceController target = null, Vector3 targetPos = default)
+        , PieceController target = null, Vector3 targetPos = default, int actualHealthLoss = 0)
     {
         if (skillPack.additionalEffects == null || skillPack.additionalEffects.Count == 0)
         {
@@ -466,7 +460,7 @@ public partial class BattleManager : MonoBehaviour
             switch (effectBase)
             {
                 case HitBackEffect hitBackEffect:
-                    HitBackEffect(hitBackEffect, caster, target, targetPos);
+                    HitBackEffect(hitBackEffect, caster, target, targetPos, actualHealthLoss);
                     break;
                 case ShootFxEffect shootFxEffect:
                     shootFxEffect.ApplyEffect(caster, targetPos);
@@ -486,53 +480,14 @@ public partial class BattleManager : MonoBehaviour
         }
     }
 
-    /*/// <summary>
-    /// 击退效果
-    /// </summary>
-    /// <param name="hitBackEffect"></param>
-    /// <param name="caster"></param>
-    /// <param name="target"></param>
-    /// <param name="targetPos"></param>
+
+
+    /// <summary>沿现有导航规则击退；碰撞基数捕获本次实际生命损失，聚能延期时保留该快照。</summary>
     private void HitBackEffect(HitBackEffect hitBackEffect, PieceController caster = null,
-        PieceController target = null, Vector3 targetPos = default)
-    {
-        if (target == null || target.ableMove == false) return;
-
-        Vector3 dir = (target.transform.position - caster.transform.position);
-        dir.y = 0;
-        dir.Normalize();
-
-        // 调用提取出的算法函数
-        MoveResult moveResult = CalculateValidMovePos(target.transform.position, dir
-            , hitBackEffect.dis, target.gameObject);
-
-        // 锁定Y轴，防止击退造成高度偏差
-        Vector3 finalPos = moveResult.FinalPosition;
-        finalPos.y = target.transform.position.y;
-
-        // 执行位移
-        target.transform.DOMove(finalPos, 0.2f).SetEase(Ease.OutQuad).OnComplete(() =>
-        {
-            if (moveResult.IsCollided)
-            {
-                // 将自身加入伤害列表，处理碰撞反馈
-                if (!moveResult.HitPieces.Contains(target))
-                    moveResult.HitPieces.Add(target);
-
-                TriggerCollisionDamage(moveResult.HitPieces, hitBackEffect.hitBackDamage);
-            }
-        });
-    }*/
-
-
-    /// <summary>
-    /// 【NavMesh优化版】击退效果
-    /// </summary>
-    private void HitBackEffect(HitBackEffect hitBackEffect, PieceController caster = null,
-        PieceController target = null, Vector3 targetPos = default)
+        PieceController target = null, Vector3 targetPos = default, int actualHealthLoss = 0)
     {
         if (PlayerController.isBursting && target != null &&
-            TryDeferBurstEffect(target, () => HitBackEffect(hitBackEffect, caster, target, targetPos))) return;
+            TryDeferBurstEffect(target, () => HitBackEffect(hitBackEffect, caster, target, targetPos, actualHealthLoss))) return;
         if (!CanReact(target) || caster == null || target.ableMove == false) return;
         if (pieceDisplacements.TryGetValue(target, out var previousDisplacement)) previousDisplacement.Kill();
 
@@ -593,7 +548,7 @@ public partial class BattleManager : MonoBehaviour
         finalPos.y = target.transform.position.y;
 
         // 在安排位移时捕获来源，延迟碰撞沿用原根行动。
-        var collisionSource = new BattleDamageSource(BattleDamageKind.Collision, caster);
+        var collision = new BattleCollisionImpact(actualHealthLoss, new BattleDamageSource(BattleDamageKind.Collision, caster));
         int version = reactionVersion;
         Tween displacement = null;
         displacement = target.transform.DOMove(finalPos, 0.2f).SetEase(Ease.OutQuad).OnComplete(() =>
@@ -609,15 +564,14 @@ public partial class BattleManager : MonoBehaviour
 
             if (isCollided)
             {
-                // 初始化或获取伤害列表
-                var hitPieces = moveResult.HitPieces ??
-                                new System.Collections.Generic.List<PieceController>();
-
-                // 将自身加入伤害列表，处理碰撞反馈
-                if (!hitPieces.Contains(target))
-                    hitPieces.Add(target);
-
-                TriggerCollisionDamage(hitPieces, hitBackEffect.hitBackDamage, collisionSource);
+                // 路径在首次碰撞处停止，只结算移动者和首个被撞棋子；撞墙时仅结算移动者。
+                var obstacle = moveResult.HitPieces?.FirstOrDefault(p => p != null && p != target);
+                foreach (var result in collision.Apply(target, obstacle))
+                {
+                    if (result.Ignored) continue;
+                    BattleScene.Ins.UM.logPanel.PlayerLog(
+                        $"{result.Target.pieceData.pieceName} 受到碰撞伤害 <color=red>{collision.Damage}</color>！");
+                }
             }
         }).OnKill(() =>
         {
@@ -631,22 +585,6 @@ public partial class BattleManager : MonoBehaviour
         });
         displacements.Add(displacement);
         pieceDisplacements[target] = displacement;
-    }
-
-    /// <summary>
-    /// 触发碰撞伤害
-    /// </summary>
-    private void TriggerCollisionDamage(List<PieceController> hitPieces, int damage = 10, BattleDamageSource source = null)
-    {
-        foreach (var piece in hitPieces)
-        {
-            if (!CanReact(piece)) continue;
-            // 所有仍存活的碰撞参与者沿用原碰撞基数。
-            piece.unitAttrCenter.TakeDamage(new AttackPack(damage, DamageType.Melee), source ?? new BattleDamageSource(BattleDamageKind.Collision));
-            BattleScene.Ins.UM.logPanel.PlayerLog(
-                $"{piece.pieceData.pieceName} 受到碰撞伤害 <color=red>{damage}</color>！");
-            Debug.Log($"<color=red>{piece.name} 受到碰撞伤害{damage}！</color>");
-        }
     }
 
 

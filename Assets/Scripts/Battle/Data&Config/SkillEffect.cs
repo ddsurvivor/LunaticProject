@@ -16,8 +16,8 @@ public class HitBackEffect : SkillEffectBase
 {
     [LabelText("击退距离")]
     public float dis;// 击退距离
-    [LabelText("碰撞伤害")]
-    public int hitBackDamage;// 击退伤害
+    [HideInInspector]
+    public int hitBackDamage; // 仅保留旧资产字段；碰撞现按本次实际生命损失的40%计算。
 }
 
 // 生成设计特效的特殊技能
