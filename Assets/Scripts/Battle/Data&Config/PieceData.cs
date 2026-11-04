@@ -28,7 +28,7 @@ public class PieceData
     [LabelText("生命值")]public int maxHealth;
     [LabelText("行动力")]public int maxMovePoint;
     [LabelText("移动范围")]public float moveRange;
-    [LabelText("技能库")] public SkillPackListSO skillLibrary;
+    [NonSerialized, OdinSerialize, LabelText("技能库")] public SkillPackListSO skillLibrary; // 由 Odin 保存引用，避免 Unity 的旧内嵌列表覆盖迁移后的绑定。
     [LabelText("近战技能"), ValueDropdown(nameof(SkillChoices))] public string meleeSkillId;
     [LabelText("远程技能"), ValueDropdown(nameof(SkillChoices))] public string rangedSkillId;
     [LabelText("初始主动技能"), ValueDropdown(nameof(SkillChoices))] public List<string> initialSkillIds = new();
