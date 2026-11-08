@@ -68,6 +68,12 @@ public partial class UIManager : SerializedMonoBehaviour
     }
 
     public BattleOverheadStatusLayer OverheadStatuses { get; private set; }
+    [SerializeField] private PieceOverheadStatusUI overheadStatusPrefab;
+    /// <summary>头顶通用模板可指定 prefab 变体；为空时使用 Resources/UI/PieceOverheadStatus。</summary>
+    public PieceOverheadStatusUI OverheadStatusPrefab => overheadStatusPrefab;
+    /// <summary>当前可见的快进/设置区域，供头顶卡片避让。</summary>
+    public RectTransform TimeControlsRect => timeControls != null && timeControls.gameObject.activeInHierarchy
+        ? (RectTransform)timeControls.transform : null;
 
     /// <summary>初始化行动、头顶状态、结果窗口与消息区；沿用现有场景引用。</summary>
     public void Init()
@@ -119,6 +125,7 @@ public partial class UIManager : SerializedMonoBehaviour
     /// <param name="pc"></param>
     public void OnPieceStateChance(PieceController pc)
     {
+        if (pc is RangeBarrier) return;
         pieceStatePanel.OpenPanel(pc);
         pieceStatePanel.UpdateDisplay();
         pieceInfoPanel.OnSelectPiece(pc);
@@ -147,10 +154,22 @@ public partial class UIManager : SerializedMonoBehaviour
     /// <param name="t"></param>
     public void StartLog(string t)
     {
-        logSystem.gameObject.SetActive(true);
+        BattleScene.Ins.BM.battleDialogueManager.StartLog(t);
+    }
+
+    /// <summary>由对话管理器显示本关共享阅读器，不再次分发触发事件。</summary>
+    internal void ShowDialogue(string t)
+    {
+        if (UnityEngine.EventSystems.EventSystem.current != null)
+            UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+        logSystem.ShowReader();
+        logSystem.transform.SetAsLastSibling();
         logSystem.设置新剧本(t);
         logSystem.Next();
     }
+
+    /// <summary>战斗剧情沿用已经初始化的设置入口。</summary>
+    public void OpenDialogueSettings() => timeControls?.OpenSettings();
 
     public void OnTurnStart()
     {

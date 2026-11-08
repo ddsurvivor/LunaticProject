@@ -43,6 +43,8 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     private int _tempShield;
 
     [SerializeField] [ReadOnly] private float _moveRange;
+    /// <summary>尚未应用百分比Buff与行为状态的基础移动范围，供临时属性按比例取值。</summary>
+    internal float BaseMoveRange => _moveRange;
     public float MoveRange => Mathf.Max(0f, _moveRange) *
         (buffAttrDic.TryGetValue(BuffAttrType.MoveRangePercent, out float percent)
             ? Mathf.Max(0f, percent) / 100f : 1f) * (pc != null ? pc.MemeState.TimedMoveMultiplier : 1f);
@@ -290,7 +292,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
     private void NotifyHealthChanged(int previousHealth, int previousMaxHealth = -1)
     {
-        if (pc == null || (previousHealth == _curHealth &&
+        if (pc == null || pc is RangeBarrier || (previousHealth == _curHealth &&
             (previousMaxHealth < 0 || previousMaxHealth == _maxHealth))) return;
         BattleScene.Ins?.BM?.ClearMoveUndo();
         BattleScene.Ins?.BM?.characterSkillManager?.NotifyHpChanged(pc.gameObject, _curHealth, _maxHealth);
@@ -301,11 +303,11 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     /// <summary>兼容旧伤害入口；未提供来源时标记Unknown，仍只提交一次伤害。</summary>
     public void TakeDamage(AttackPack attackPack) => TakeDamage(attackPack, new BattleDamageSource(BattleDamageKind.Unknown));
 
-    /// <summary>提交有来源的伤害并返回实际生命损失；负伤害和死亡目标不发送结果事件。</summary>
+    /// <summary>提交有来源的伤害并返回实际生命损失；负伤害、死亡或正在完成真死的目标不发送结果事件。</summary>
     public BattleDamageResult TakeDamage(AttackPack attackPack, BattleDamageSource source)
     {
         source ??= new BattleDamageSource(BattleDamageKind.Unknown);
-        if (pc.isDead || attackPack.damage < 0)
+        if (pc.isDead || attackPack.damage < 0 || pc.GetComponent<SelfRevive>()?.IsCompletingTrueDeath == true)
             return new BattleDamageResult(pc, source, attackPack.damage, _curHealth, _curHealth, true);
         var battle = BattleScene.Ins.BM;
         if (battle.PlayerController.isBursting &&
@@ -324,11 +326,11 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         if (_curHealth <= 0) _curHealth = 0;
         // 在生命变化回调与死亡事件前固定本段结果，嵌套被动不能篡改这次实际掉血。
         var result = new BattleDamageResult(pc, source, attackPack.damage, previousHealth, _curHealth);
-        BattleScene.Ins.BM.timedMemeStatuses.OnDamageCommitted(result);
+        if (!(pc is RangeBarrier)) BattleScene.Ins.BM.timedMemeStatuses.OnDamageCommitted(result);
         UpdateHpBar();
         NotifyHealthChanged(previousHealth);
         // 按真实掉血充能，放在死亡分支前以覆盖致死伤害，零伤害不计入。
-        if (pc.isPlayerPiece && _curHealth < previousHealth)
+        if (pc.isPlayerPiece && !(pc is RangeBarrier) && _curHealth < previousHealth)
             BattleScene.Ins.BM.PlayerController.ChargeBurst(GameConst.hurtBurstCharge);
         if (_curHealth <= 0)
         {
@@ -542,10 +544,10 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     public bool TryCostSkill(SkillPack skill)
     {
         int manaCost = GetSkillManaCost(skill);
-        if (skill == null || BattleRelations.IsOffensive(skill) && !BattleRelations.CanInitiateAttack(pc) || !HasMana(manaCost) ||
+        if (skill == null || !BarrierEmitter.CanUse(pc, skill) || BattleRelations.IsOffensive(skill) && !BattleRelations.CanInitiateAttack(pc) || !HasMana(manaCost) ||
             !TryGetItemCosts(skill.consumeItems, out var costs) || !HasItemCosts(costs)) return false;
         // CostMP 内部处理死亡、眩晕、行动点校验以及行动触发的 Buff。
-        if (!CostMP(ActionType.Skill)) return false;
+        if (!(skill.skillEffects.Contains(SkillEffect.RangeBarrier) ? CostMP(GetSkillAPCost(skill), true) : CostMP(ActionType.Skill))) return false;
         _manaPoint -= manaCost;
         CommitItemCosts(costs);
         BattleScene.Ins.UM.OnPieceStateChance(pc);
@@ -553,6 +555,10 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     }
 
     public int GetSkillManaCost(SkillPack skill) => ComponentEquipment.ManaCost(pc?.playerData, skill);
+
+    /// <summary>技能菜单、AI及扣费共用AP费用；群体护盾固定2AP，其他技能沿用全局配置。</summary>
+    public int GetSkillAPCost(SkillPack skill) => skill?.skillEffects?.Contains(SkillEffect.RangeBarrier) == true
+        ? 2 : GM.Ins.DM.gameConstSO.GetActionPointCost(ActionType.Skill);
 
     // 换装仅调整属性差值，不重置生命、能量、弹药、行动点或 Buff。
     public void RefreshPlayerAttributes(int[] previous, int[] current)

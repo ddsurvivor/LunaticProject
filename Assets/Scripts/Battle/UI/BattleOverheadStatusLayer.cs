@@ -9,15 +9,32 @@ public sealed class BattleOverheadStatusLayer : MonoBehaviour
     private UIManager ui;
     private Canvas canvas;
     private Font font;
+    private PieceOverheadStatusUI viewTemplate; // 所有棋子使用同一正式 prefab，布局调整保留在资产中。
     private readonly Dictionary<PieceController, PieceOverheadStatusUI> views = new();
+    private readonly HashSet<PieceController> pieces = new();
+    private readonly List<PieceController> staleViews = new();
+    private readonly Vector3[] corners = new Vector3[4];
+    private readonly List<Rect> hudBounds = new(2); // 同帧各卡片共用顶部HUD边界，仅记录可见区域。
     private readonly Dictionary<CanvasGroup, (float alpha, bool blocks, bool interactable)> legacyGroups = new();
     private readonly List<CanvasGroup> ownedGroups = new();
     private RectTransform details;
     private UnityEngine.UI.Text detailsText, pageText;
     private PieceOverheadStatusUI detailOwner;
     private int page;
-    internal Sprite FillSprite { get; private set; }
     public IReadOnlyDictionary<PieceController, PieceOverheadStatusUI> Views => views;
+
+    /// <summary>从正式资源模板创建敌我通用视图；必要绑定缺失时返回 null，不回退到代码生成布局。</summary>
+    public PieceOverheadStatusUI CreateView(PieceController piece, Transform parent = null, PieceOverheadStatusUI template = null)
+    {
+        template = template != null ? template : piece is RangeBarrier
+            ? Resources.Load<PieceOverheadStatusUI>("UI/RangeBarrierStatus") : viewTemplate;
+        if (template == null || piece == null) return null;
+        var view = Instantiate(template, parent != null ? parent : transform, false);
+        view.name = "Status_" + piece.GetInstanceID();
+        if (view.Initialize(this, piece, font)) return view;
+        Destroy(view.gameObject);
+        return null;
+    }
 
     /// <summary>绑定当前场景的原Canvas和字体；初始化重复调用时沿用同一个展示层。</summary>
     public static BattleOverheadStatusLayer Ensure(UIManager ui)
@@ -33,8 +50,14 @@ public sealed class BattleOverheadStatusLayer : MonoBehaviour
         rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one; rect.offsetMin = rect.offsetMax = Vector2.zero;
         var layer = go.AddComponent<BattleOverheadStatusLayer>();
         layer.ui = ui; layer.canvas = rootCanvas; layer.battle = BattleScene.Ins.BM;
+        layer.viewTemplate = ui.OverheadStatusPrefab != null ? ui.OverheadStatusPrefab : Resources.Load<PieceOverheadStatusUI>("UI/PieceOverheadStatus");
+        if (layer.viewTemplate == null || !layer.viewTemplate.HasTemplateBindings)
+        {
+            Debug.LogError("缺少有效的 Resources/UI/PieceOverheadStatus prefab，无法显示头顶状态。", ui);
+            Destroy(go);
+            return null;
+        }
         layer.font = ui.pieceInfoPanel.pieceName.font;
-        layer.FillSprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, Texture2D.whiteTexture.width, Texture2D.whiteTexture.height), Vector2.one * .5f);
         layer.BuildDetails();
         return layer;
     }
@@ -42,27 +65,32 @@ public sealed class BattleOverheadStatusLayer : MonoBehaviour
     private void LateUpdate()
     {
         if (battle == null || canvas == null) return;
-        var pieces = new HashSet<PieceController>(battle.PlayerController.pieces);
+        pieces.Clear();
+        pieces.UnionWith(battle.PlayerController.pieces);
         pieces.UnionWith(battle.AIController.pieces);
         pieces.UnionWith(battle.summonPieces);
+        pieces.UnionWith(battle.RangeBarriers);
         foreach (var explosive in EnemyExplosiveTargets.Active) if (explosive.Piece != null) pieces.Add(explosive.Piece);
-        foreach (var key in new List<PieceController>(views.Keys))
-            if (key == null || !pieces.Contains(key))
-            {
-                var old = views[key];
-                CloseDetails(old);
-                if (old != null) Destroy(old.gameObject);
-                views.Remove(key);
-            }
+        staleViews.Clear();
+        foreach (var key in views.Keys)
+            if (key == null || !pieces.Contains(key)) staleViews.Add(key);
+        foreach (var key in staleViews)
+        {
+            var old = views[key];
+            CloseDetails(old);
+            if (old != null) Destroy(old.gameObject);
+            views.Remove(key);
+        }
+        hudBounds.Clear();
+        CacheHudBounds(ui.ActionTimelineRect);
+        CacheHudBounds(ui.TimeControlsRect);
         foreach (var piece in pieces)
         {
             if (piece == null) continue;
             if (!views.TryGetValue(piece, out var view))
             {
-                var go = new GameObject("Status_" + piece.GetInstanceID(), typeof(RectTransform));
-                go.transform.SetParent(transform, false);
-                view = go.AddComponent<PieceOverheadStatusUI>();
-                view.Initialize(this, piece, font);
+                view = CreateView(piece);
+                if (view == null) continue;
                 views.Add(piece, view);
             }
             HideLegacy(piece);
@@ -72,7 +100,16 @@ public sealed class BattleOverheadStatusLayer : MonoBehaviour
             view.Refresh(battle);
             Place(view);
         }
-        if (ui.pieceStatePanel != null && ui.pieceStatePanel.upRoot != null) Conceal(ui.pieceStatePanel.upRoot.gameObject);
+        if (ui.pieceStatePanel != null)
+        {
+            if (ui.pieceStatePanel.upRoot != null) Conceal(ui.pieceStatePanel.upRoot.gameObject);
+            // 部分旧场景把资源条放在 upRoot 外，统一隐藏，避免与紧凑模板重复叠在模型上。
+            ConcealBar(ui.pieceStatePanel.healthBar);
+            ConcealBar(ui.pieceStatePanel.healthShadowBar);
+            ConcealBar(ui.pieceStatePanel.manaBar);
+            Conceal(ui.pieceStatePanel.mpText);
+            Conceal(ui.pieceStatePanel.ammoText);
+        }
         RefreshDetails();
     }
 
@@ -90,8 +127,58 @@ public sealed class BattleOverheadStatusLayer : MonoBehaviour
     private void Place(PieceOverheadStatusUI view)
     {
         var projected = (Vector2)Camera.main.WorldToScreenPoint(view.HeadPosition);
-        // 始终位于本体正上方，不因拥挤、HUD 或屏幕边界改变棋子标签的位置。
-        SetScreenPosition(view.Rect, projected + Vector2.up * 12f);
+        SetScreenPosition(view.Rect, projected + view.HeadOffset);
+        var bounds = ScreenBounds(view.Rect);
+        var safe = Screen.safeArea;
+        var offset = Vector2.zero;
+        if (view.ConstrainToScreen)
+        {
+            offset.x = bounds.xMin < safe.xMin ? safe.xMin - bounds.xMin : bounds.xMax > safe.xMax ? safe.xMax - bounds.xMax : 0;
+            offset.y = bounds.yMin < safe.yMin ? safe.yMin - bounds.yMin : bounds.yMax > safe.yMax ? safe.yMax - bounds.yMax : 0;
+            bounds.position += offset;
+        }
+        // 边缘卡片保持完整，并让出速度条和快进区域；不改变棋子世界坐标。
+        if (view.AvoidTopHud)
+            foreach (var hud in hudBounds)
+            {
+                if (!bounds.Overlaps(hud)) continue;
+                // 优先横向避开顶部HUD，避免向下挤压时把血条重新盖到头脸上。
+                float left = hud.xMin - 8f - bounds.xMax;
+                float right = hud.xMax + 8f - bounds.xMin;
+                bool leftFits = CanShiftBesideHud(bounds, left, safe);
+                bool rightFits = CanShiftBesideHud(bounds, right, safe);
+                if (leftFits || rightFits)
+                {
+                    float horizontal = leftFits && (!rightFits || Mathf.Abs(left) <= Mathf.Abs(right)) ? left : right;
+                    offset.x += horizontal;
+                    bounds.x += horizontal;
+                    continue;
+                }
+                float down = hud.yMin - 8f - bounds.yMax;
+                offset.y += down;
+                bounds.y += down;
+            }
+        SetScreenPosition(view.Rect, projected + view.HeadOffset + offset);
+    }
+
+    private bool CanShiftBesideHud(Rect bounds, float horizontal, Rect safe)
+    {
+        bounds.x += horizontal;
+        if (bounds.xMin < safe.xMin || bounds.xMax > safe.xMax) return false;
+        foreach (var hud in hudBounds)
+            if (bounds.Overlaps(hud)) return false;
+        return true;
+    }
+
+    private void CacheHudBounds(RectTransform rect) { if (rect != null) hudBounds.Add(ScreenBounds(rect)); }
+
+    private Rect ScreenBounds(RectTransform rect)
+    {
+        rect.GetWorldCorners(corners);
+        var camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+        var min = RectTransformUtility.WorldToScreenPoint(camera, corners[0]);
+        var max = RectTransformUtility.WorldToScreenPoint(camera, corners[2]);
+        return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
     }
     private void SetScreenPosition(RectTransform rect, Vector2 point)
     {
@@ -112,6 +199,14 @@ public sealed class BattleOverheadStatusLayer : MonoBehaviour
         if (group == null) { group = go.AddComponent<CanvasGroup>(); ownedGroups.Add(group); }
         if (!legacyGroups.ContainsKey(group)) legacyGroups.Add(group, (group.alpha, group.blocksRaycasts, group.interactable));
         group.alpha = 0; group.blocksRaycasts = false; group.interactable = false;
+    }
+    private void Conceal(UnityEngine.UI.Graphic graphic)
+    {
+        if (graphic != null) Conceal(graphic.gameObject);
+    }
+    private void ConcealBar(UnityEngine.UI.Image image)
+    {
+        if (image != null) Conceal(image.transform.parent != null ? image.transform.parent.gameObject : image.gameObject);
     }
 
     /// <summary>打开状态完整分页；溢出只收起头顶单元，不丢弃条目。</summary>
@@ -178,6 +273,5 @@ public sealed class BattleOverheadStatusLayer : MonoBehaviour
     private void OnDestroy()
     {
         foreach (var group in ownedGroups) if (group != null) Destroy(group);
-        if (FillSprite != null) Destroy(FillSprite);
     }
 }

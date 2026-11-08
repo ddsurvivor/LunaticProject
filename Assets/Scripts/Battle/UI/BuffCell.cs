@@ -1,11 +1,13 @@
 using UnityEngine;
 
-/// <summary>共享状态单元；缺图时用文字回退，不依赖每个词条都有专用美术。</summary>
+/// <summary>共享状态单元；普通面板缺图时文字回退，头顶模式仅显示图标和层数。</summary>
 public class BuffCell : MonoBehaviour
 {
     public UnityEngine.UI.Image icon;
     public UnityEngine.UI.Text countText;
     public UnityEngine.UI.Text nameText;
+    [SerializeField] private bool iconsOnly;
+    [SerializeField] private Sprite fallbackIcon;
     private UnityEngine.UI.Text fallback;
 
     /// <summary>兼容旧Buff面板，保留层数/永久和屏障生命含义。</summary>
@@ -18,10 +20,18 @@ public class BuffCell : MonoBehaviour
             ? state.barrierHealth.ToString() : state.stacks < 0 ? "∞" : state.stacks.ToString(), "", sprite));
     }
 
-    /// <summary>显示只读条目；有图时显示图标，缺图仍保留名称和数值。</summary>
+    /// <summary>显示只读条目；按模板选择名称/数值或紧凑图标/层数，缺图保留对应回退。</summary>
     public void SetEntry(BattleStatusEntry entry)
     {
         if (entry == null) return;
+        if (iconsOnly)
+        {
+            if (icon != null) { icon.sprite = entry.Icon != null ? entry.Icon : fallbackIcon; icon.enabled = icon.sprite != null; }
+            if (nameText != null) nameText.gameObject.SetActive(false);
+            if (fallback != null) fallback.gameObject.SetActive(false);
+            if (countText != null) { countText.text = entry.StackLabel; countText.gameObject.SetActive(!string.IsNullOrEmpty(entry.StackLabel)); }
+            return;
+        }
         if (icon != null) { icon.sprite = entry.Icon; icon.enabled = entry.Icon != null; }
         if (countText != null) { countText.text = entry.Value; countText.gameObject.SetActive(true); }
         if (nameText != null) nameText.text = entry.Name;

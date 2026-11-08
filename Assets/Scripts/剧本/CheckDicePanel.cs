@@ -6,6 +6,9 @@ using DG.Tweening;
 
 public class CheckDicePanel : MonoBehaviour
 {
+    private bool UseUnscaledTime => GetComponentInParent<剧本System>()?.UseUnscaledTime == true;
+    private object WaitForDiceSeconds(float seconds) => UseUnscaledTime
+        ? (object)new WaitForSecondsRealtime(seconds) : new WaitForSeconds(seconds);
     public bool IsRolling { get; private set; }
     private void OnDisable()
     {
@@ -84,7 +87,7 @@ public class CheckDicePanel : MonoBehaviour
             }
 
             timer += rollSpeed;
-            yield return new WaitForSeconds(rollSpeed);
+            yield return WaitForDiceSeconds(rollSpeed);
         }
 
         // 显示最终结果
@@ -124,7 +127,7 @@ public class CheckDicePanel : MonoBehaviour
             ShowCheckResult(isSuccess);
         }
         IsRolling = false;
-        yield return new WaitForSeconds(closeDelay);
+        yield return WaitForDiceSeconds(closeDelay);
         // 关闭界面
         gameObject.SetActive(false);
     }
@@ -135,7 +138,7 @@ public class CheckDicePanel : MonoBehaviour
         Image img = success ? checkSuccess : checkFail;
         img.color = new Color(img.color.r, img.color.g, img.color.b, 0);
         img.gameObject.SetActive(true);
-        Sequence seq = DOTween.Sequence();
+        Sequence seq = DOTween.Sequence().SetUpdate(UseUnscaledTime);
         seq.Append(img.DOFade(1, 0.2f));
         seq.AppendInterval(1f);
         seq.Append(img.DOFade(0, 0.5f));

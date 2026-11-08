@@ -37,7 +37,7 @@ public partial class 剧本System
         Tweener tween = target is RectTransform rect
             ? rect.DOShakeAnchorPos(duration, strength, vibrato)
             : target.DOShakePosition(duration, strength, vibrato);
-        shakeTween = tween;
+        shakeTween = tween.SetUpdate(UseUnscaledTime);
         tween.OnUpdate(() =>
         {
             if (target == null) return;
@@ -630,7 +630,7 @@ public partial class 剧本System
                 }
                 FULLCG.transform.parent.gameObject.SetActive(true);
                 FULLCG.color = new Color(1, 1, 1, 0);
-                Sequence sequence = DOTween.Sequence().SetTarget(FULLCG);
+                Sequence sequence = DOTween.Sequence().SetTarget(FULLCG).SetUpdate(UseUnscaledTime);
                 sequence.Append(FULLCG.DOFade(1f, fadeTime));
                 sequence.AppendInterval(duration);
                 sequence.Append(FULLCG.DOFade(0f, fadeTime));
@@ -657,7 +657,7 @@ public partial class 剧本System
                 HALFCG.sprite = sprite;
                 HALFCG.transform.parent.gameObject.SetActive(true);
                 HALFCG.color = new Color(1, 1, 1, 0);
-                Sequence sequence = DOTween.Sequence();
+                Sequence sequence = DOTween.Sequence().SetUpdate(UseUnscaledTime);
                 sequence.Append(HALFCG.DOFade(1f, fadeTime));
             }
 

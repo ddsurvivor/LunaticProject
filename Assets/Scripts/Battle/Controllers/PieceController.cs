@@ -136,8 +136,17 @@ public partial class PieceController : MonoBehaviour
     /// <summary>仅供战斗反应队列中止其持有的在途攻击，取消弹道及尚未提交的命中。</summary>
     internal void CancelBattleReaction() => CancelCombatAction();
 
+    /// <summary>破盾停机立即取消尚未提交的攻击并停止导航，已结算的伤害不回滚。</summary>
+    internal void InterruptForShutdown()
+    {
+        CancelCombatAction();
+        var navigation = GetComponent<UnityEngine.AI.NavMeshAgent>();
+        if (navigation != null && navigation.isActiveAndEnabled && navigation.isOnNavMesh) navigation.ResetPath();
+    }
+
     protected virtual void OnDisable()
     {
+        ReleaseSummonRegistration();
         CancelCombatAction();
         StopHitShake();
         _isAttacking = _isUsingSkill = false;
@@ -155,6 +164,7 @@ public partial class PieceController : MonoBehaviour
 
     private void OnDestroy()
     {
+        ReleaseSummonRegistration();
         MemeState.ClearNetworkLinks();
         passiveManager?.UnregisterPiece(gameObject);
         BattleScene.Ins?.BM?.timedMemeStatuses.ClearForPiece(this);
@@ -162,14 +172,16 @@ public partial class PieceController : MonoBehaviour
 
     public void Init(PlayerController player, PieceData pieceData = null)
     {
+        ReleaseSummonRegistration();
         BattleScene.Ins?.BM?.ReleaseExplosiveBody(transform);
         BattleLifeVersion++;
+        GetComponent<SelfRevive>()?.ResetForReuse();
         burstDeathQueued = false;
         BattleScene.Ins?.BM?.timedMemeStatuses.ClearForPiece(this);
         MemeState.Reset();
         CancelCombatAction();
         StopHitShake();
-        pieceDisplay?.StopAnimation();
+        pieceDisplay?.ResetForReuse();
         passiveManager = BattleScene.Ins?.BM?.characterSkillManager;
         passiveManager?.UnregisterPiece(gameObject);
         this.player = player;
@@ -680,7 +692,8 @@ public partial class PieceController : MonoBehaviour
         fx.transform.rotation = Quaternion.Euler(45, -45, angle + 90f);
     }
 
-    public void Hurt()
+    /// <summary>棋子受击表现入口，特殊独立耐久目标可覆盖以避免角色受击动画。</summary>
+    public virtual void Hurt()
     {
         var battle = BattleScene.Ins.BM;
         if (!isPlayerPiece && battle.PlayerController.isBursting &&
@@ -772,6 +785,7 @@ public partial class PieceController : MonoBehaviour
 
     public bool SkillAvailable(SkillPack skillPack)
     {
+        if (!BarrierEmitter.CanUse(this, skillPack)) return false;
         if (!unitAttrCenter.HasMana(unitAttrCenter.GetSkillManaCost(skillPack))) return false;
         if (!unitAttrCenter.HasItem(skillPack.consumeItems)) return false;
         return true;
@@ -1009,10 +1023,7 @@ public partial class PieceController : MonoBehaviour
         foreach (var passive in componentPassives) availablePassives.Remove(passive);
         componentPassives.Clear();
         RefreshConfiguredSkills();
-        var attributes = ReadPlayerAttributes();
-        if (componentPlayerAttributes != null && playerData != null)
-            unitAttrCenter.RefreshPlayerAttributes(componentPlayerAttributes, attributes);
-        componentPlayerAttributes = attributes;
+        RefreshPlayerAttributeBonuses();
         foreach (var data in ComponentEquipment.Equipped(playerData))
         {
             if (data.effectType == ComponentEffect.PassiveEffect && data.passiveType != PassiveType.None &&
@@ -1031,6 +1042,16 @@ public partial class PieceController : MonoBehaviour
             }
         }
         _isUsingSkill = false;
+        if (BattleScene.Ins?.UM != null) BattleScene.Ins.UM.OnPieceStateChance(this);
+    }
+
+    /// <summary>按当前有效属性差值刷新战斗数值，不补满资源、不取消正在执行的动作。</summary>
+    internal void RefreshPlayerAttributeBonuses()
+    {
+        var attributes = ReadPlayerAttributes();
+        if (componentPlayerAttributes != null && playerData != null)
+            unitAttrCenter.RefreshPlayerAttributes(componentPlayerAttributes, attributes);
+        componentPlayerAttributes = attributes;
         if (BattleScene.Ins?.UM != null) BattleScene.Ins.UM.OnPieceStateChance(this);
     }
 

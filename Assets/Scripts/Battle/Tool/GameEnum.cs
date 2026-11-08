@@ -224,6 +224,7 @@ public enum EnemyAIType
 
 public enum EnemySkillRole
 {
+    [LabelText("群体护盾")] RangeBarrier = 4,
     [LabelText("自动识别")] Auto = 0,
     [LabelText("远程攻击技能")] RangedAttack = 1,
     [LabelText("近战攻击技能")] MeleeAttack = 2,
@@ -277,6 +278,7 @@ public enum RangeType
 
 public enum SkillEffect
 {
+    RangeBarrier = 5,
     HealArea = 1,// 区域治疗
     Blink = 2,// 瞬移
     SpaceBomb = 3,// 轨道轰炸

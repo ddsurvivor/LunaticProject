@@ -75,6 +75,7 @@ public partial class BattleManager : MonoBehaviour
             GM.Ins.BeginBattleSession(this);
             inBattle = true;
             LastOutcome = BattleOutcome.None;
+            pendingCurrencyReward = 0;
             _turnNumber = 0;
             _timedMemeStatuses?.ClearAll();
             ClearNetworkConnections();
@@ -116,7 +117,7 @@ public partial class BattleManager : MonoBehaviour
 
     /// <summary>攻击、受击、死亡和结算仍在播放；不含镜头，供镜头等待而不形成循环依赖。</summary>
     public bool HasActionPresentation => deathFades.Count > 0 || HasPendingBattleReactions || HasPendingRecognitionSettlement ||
-        HasPresentation(PlayerController.pieces) || HasPresentation(AIController.pieces) || HasPresentation(summonPieces);
+        HasPresentation(PlayerController.pieces) || HasPresentation(AIController.pieces) || HasPresentation(summonPieces) || HasPresentation(RangeBarriers);
 
     private static bool HasPresentation(IEnumerable<PieceController> pieces)
     {
@@ -422,6 +423,9 @@ public partial class BattleManager : MonoBehaviour
                     /*caster.transform.position =
                         targetPos + new Vector3(-1.5f, 0, -1.5f);*/
                     break;
+                case SkillEffect.RangeBarrier:
+                    caster?.GetComponent<BarrierEmitter>()?.Deploy();
+                    break;
                 case SkillEffect.HealArea:
                     Debug.Log("生成治疗区");
                     // 直接范围回血
@@ -491,53 +495,10 @@ public partial class BattleManager : MonoBehaviour
         if (!CanReact(target) || caster == null || target.ableMove == false) return;
         if (pieceDisplacements.TryGetValue(target, out var previousDisplacement)) previousDisplacement.Kill();
 
-        // 获取目标棋子的 NavMeshAgent
         NavMeshAgent agent = target.GetComponent<NavMeshAgent>();
-
-        // 计算击退方向
-        Vector3 dir = (target.transform.position - caster.transform.position);
-        dir.y = 0;
-        dir.Normalize();
-
-        // 理论上的理想击退终点
-        Vector3 desiredEndPos = target.transform.position + dir * hitBackEffect.dis;
-
-        Vector3 finalPos = desiredEndPos;
-        bool hitWall = false;
-
-        // =================【核心优化：NavMesh 环境碰撞拦截】=================
-        // NavMesh.Raycast 会沿着网格表面“扫射”，如果中途遇到烘焙的边缘/墙体，会返回 true
-        if (NavMesh.Raycast(target.transform.position, desiredEndPos, out NavMeshHit navHit
-                , NavMesh.AllAreas))
-        {
-            // 预撞墙！将终点精准截断在墙面边缘
-            finalPos = navHit.position;
-            hitWall = true;
-        }
-        else
-        {
-            // 如果没撞墙，为了保险起见（防止终点稍微悬空），在终点处向下安全采样一次网格点
-            if (NavMesh.SamplePosition(desiredEndPos, out NavMeshHit sampleHit, 1.0f
-                    , NavMesh.AllAreas))
-            {
-                finalPos = sampleHit.position;
-            }
-        }
-
-        // =================【核心优化：与原有角色碰撞算法融合】=================
-        // 此时根据 NavMesh 算出的安全距离，重新限制你原本的角色间寻路/碰撞算法
-        float allowedDis = Vector3.Distance(target.transform.position, finalPos);
-        MoveResult moveResult = CalculateValidMovePos(target.transform.position, dir, allowedDis
-            , target.gameObject);
-
-        // 最终位置取双重保险：谁近听谁的（防止穿墙，也防止穿人）
-        if (Vector3.Distance(target.transform.position, moveResult.FinalPosition) < allowedDis)
-        {
-            finalPos = moveResult.FinalPosition;
-        }
-
-        // 综合碰撞判定：撞了烘焙墙体 OR 撞了其他角色棋子
-        bool isCollided = hitWall || moveResult.IsCollided;
+        MoveResult moveResult = QueryKnockback(caster, target, hitBackEffect.dis);
+        Vector3 finalPos = moveResult.FinalPosition;
+        bool isCollided = moveResult.IsCollided;
 
         // =================【核心优化：防止 Agent 与 Tween 打架】=================
         // 在用 DOTween 强行平移前，必须关闭 Agent 避障与定位，否则会发生剧烈抖动或无法位移
@@ -734,7 +695,7 @@ public partial class BattleManager : MonoBehaviour
     /// <param name="selfObj">调用者自身，用于排除碰撞</param>
     /// <returns>包含终点和碰撞信息的 MoveResult</returns>
     public MoveResult CalculateValidMovePos(Vector3 origin, Vector3 direction, float maxDistance
-        , GameObject selfObj, bool ignorePieces = false)
+        , GameObject selfObj, bool ignorePieces = false, bool logCollisions = true)
     {
         MoveResult result = new MoveResult(origin);
         float step = 0.5f;
@@ -768,7 +729,7 @@ public partial class BattleManager : MonoBehaviour
                         }
                     }
 
-                    Debug.Log($"检测到碰撞: {wallHit.collider.name} at {wallHit.point}");
+                    if (logCollisions) Debug.Log($"检测到碰撞: {wallHit.collider.name} at {wallHit.point}");
 
                     // 记录碰撞并计算最终停留点（向后微调 0.2f 避免模型穿插）
                     //result.FinalPosition = wallHit.point - direction * 0.2f;
@@ -835,36 +796,8 @@ public partial class BattleManager : MonoBehaviour
     {
         if (!CanReact(attacker) || !CanReact(target) || !BattleRelations.CanAttack(attacker, target)) yield break;
 
-        // 获取攻击者的队友列表
-        IEnumerable<PieceController> teammates = SpeedParticipants().Where(p => BattleRelations.CanSupport(attacker, p));
-
-        PieceController closestPartner = null;
-        float minDistance = float.MaxValue; // 初始化一个极大值用于比对
-
-        foreach (var partner in teammates)
-        {
-            // 排除：自身、空引用、已死亡的队友
-            if (partner == attacker || !CanReact(partner) || !BattleRelations.CanAttack(partner, target) || partner.pieceData.MeleeAttack == null) continue;
-            if (!partner.ableStrick) continue; // 排除：无法夹击的队友
-
-            // 如果是敌方单位，还需确保其已激活
-            if (partner is EnemyController enemy && !enemy.isActived) continue;
-
-            // 1. 判定目标是否在该队友的攻击范围内
-            if (IsTargetInAttackRange(partner, target))
-            {
-                // 2. 计算该队友与【受击目标】之间的物理距离
-                float currentDistance =
-                    Vector3.Distance(partner.transform.position, target.transform.position);
-
-                // 3. 筛选出距离最近的队友
-                if (currentDistance < minDistance)
-                {
-                    minDistance = currentDistance;
-                    closestPartner = partner;
-                }
-            }
-        }
+        PieceController closestPartner = FindFlankPartner(attacker, target, target.transform.position);
+        float minDistance = closestPartner != null ? Vector3.Distance(closestPartner.transform.position, target.transform.position) : 0;
 
         // ====== 循环结束后，只有最近的那个队友触发夹击 ======
         if (closestPartner != null)
@@ -906,15 +839,7 @@ public partial class BattleManager : MonoBehaviour
         CancelBattleReactions();
         _timedMemeStatuses?.ClearAll();
         ClearNetworkConnections();
-    }
-
-    /// <summary>
-    /// 辅助方法：判定目标棋子是否在指定棋子的攻击范围内
-    /// </summary>
-    private bool IsTargetInAttackRange(PieceController checker, PieceController target)
-    {
-        float distance = Vector3.Distance(checker.transform.position, target.transform.position);
-        return distance <= checker.pieceData.MeleeAttack.rangeValue;
+        ClearSummonRegistry();
     }
 
 
@@ -957,9 +882,13 @@ public partial class BattleManager : MonoBehaviour
     // 所有召唤物依次行动
     private IEnumerator SummonsActionPhaseRoutine()
     {
-        foreach (var summon in summonPieces)
+        // 行动中可能回收或再次召唤；快照同时保存生命版本，避免旧迭代驱动复用后的新棋子。
+        var snapshot = summonPieces.Where(p => p != null).Distinct()
+            .Select(p => new { Piece = p, Life = p.BattleLifeVersion }).ToArray();
+        foreach (var entry in snapshot)
         {
-            if (summon != null && summon.gameObject.activeInHierarchy)
+            var summon = entry.Piece;
+            if (summon != null && summon.gameObject.activeInHierarchy && summon.BattleLifeVersion == entry.Life && summonPieces.Contains(summon))
             {
                 SelfExploreSummonPiece summonPiece = summon.GetComponent<SelfExploreSummonPiece>();
                 if (summonPiece != null)

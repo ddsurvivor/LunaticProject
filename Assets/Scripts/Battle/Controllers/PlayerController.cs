@@ -18,8 +18,9 @@ public class PlayerController : SerializedMonoBehaviour
     [ShowInInspector, ReadOnly] public float burstCharge => burstGauge.Charge;
     [ShowInInspector, ReadOnly] public float maxBurstCharge => burstGauge.Capacity;
     [ShowInInspector, ReadOnly] public int BurstCooldown => burstGauge.Cooldown; // 剩余普通棋子回合数。
-    [Range(0, 3), LabelText("动力脊等级（待设施系统接入）")] public int powerSpineLevel;
-    [LabelText("强制使用序章聚能容量")] public bool forceDefaultBurstCapacity;
+    [ReadOnly, LabelText("动力脊等级（读取存档）")] public int powerSpineLevel;
+    [LabelText("关卡聚能类型（未指定时读取目录）")] public BattleBurstStageKind burstStageKind;
+    [LabelText("强制使用序章/教学基础聚能")] public bool forceDefaultBurstCapacity;
     public bool ableBurst => burstGauge.Ready && !isBursting;
     public int AffordableBurstActors => burstGauge.AffordableActors;
 
@@ -34,11 +35,12 @@ public class PlayerController : SerializedMonoBehaviour
     [FoldoutGroup("事件")] public UnityEvent OnTurnStart;
     [FoldoutGroup("事件")] public UnityEvent OnTurnEnd;
 
-    /// <summary>初始化我方棋子及本场聚能资源；按章节和动力脊配置确定容量。</summary>
+    /// <summary>初始化我方棋子及聚能资源；读取档案动力脊等级，序章/教学按明确关卡配置使用基础数值。</summary>
     public virtual void Init()
     {
         OnInit.Invoke();
-        burstGauge.Reset(powerSpineLevel, forceDefaultBurstCapacity || GM.Ins.PLAYERPROFILE.chapterNumber == 0);
+        powerSpineLevel = BattleBurstProgression.Initialize(burstGauge, GM.Ins?.PLAYERPROFILE?.powerSpineProgress,
+            gameObject.scene.name, burstStageKind, forceDefaultBurstCapacity);
         UpdateBurstBar(true);
         foreach (var piece in pieces)
         {

@@ -71,7 +71,7 @@ public partial class 剧本System
         SetCGLogChoiceVisibility(false);
         if (replacingCG && previousFadeOut > 0f)
         {
-            var sequence = DOTween.Sequence().SetTarget(FULLCG);
+            var sequence = DOTween.Sequence().SetTarget(FULLCG).SetUpdate(UseUnscaledTime);
             sequence.Append(FULLCG.DOFade(0f, previousFadeOut));
             sequence.AppendCallback(() => ApplyCGLogSprite(texture, fadeInTime > 0f ? 0f : 1f));
             if (fadeInTime > 0f) sequence.Append(FULLCG.DOFade(1f, fadeInTime));
@@ -80,7 +80,7 @@ public partial class 剧本System
         else
         {
             ApplyCGLogSprite(texture, fadeInTime > 0f ? 0f : 1f);
-            if (fadeInTime > 0f) cgLogTransition = FULLCG.DOFade(1f, fadeInTime);
+            if (fadeInTime > 0f) cgLogTransition = FULLCG.DOFade(1f, fadeInTime).SetUpdate(UseUnscaledTime);
         }
     }
 
@@ -164,7 +164,7 @@ public partial class 剧本System
             var retiringSprite = cgLogSprite;
             cgLogSprite = null;
             cgLogFadingOut = true;
-            cgLogTransition = FULLCG.DOFade(0f, cgLogFadeOutTime)
+            cgLogTransition = FULLCG.DOFade(0f, cgLogFadeOutTime).SetUpdate(UseUnscaledTime)
                 .OnComplete(() =>
                 {
                     if (cgLogImageLayer != null) cgLogImageLayer.gameObject.SetActive(false);

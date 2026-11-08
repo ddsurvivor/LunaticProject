@@ -18,6 +18,7 @@ public class PieceDisplay : SerializedMonoBehaviour
     
     // 棋子图片控制脚本，有一个SpriteRenderer用于显示棋子图片
     public SpriteRenderer pieceSpriteRenderer;
+    [LabelText("头顶 UI 锚点")] public Transform overheadAnchor; // 随棋子预制体保存，按不同身高手动调整。
     // 所有美术资源现已全部统一为 List<Sprite> 序列帧
     public List<Sprite> idleSprite;
     public List<Sprite> moveSprite;
@@ -50,9 +51,24 @@ public class PieceDisplay : SerializedMonoBehaviour
     private bool pendingReaction;
     private PieceDisplayState pendingReactionState;
     private bool pendingReactionReturns;
+    private bool capturedOpacity;
+    private float initialOpacity; // 首次初始化时的预制体透明度，复用时保留原有美术配置。
     public bool BurstFrozen { get; private set; }
     public bool IsPlayingOneShot => !BurstFrozen && playback != null && !playback.Loop && !playback.IsDone;
     private bool IsAction => state == PieceDisplayState.Attack || state == PieceDisplayState.Shoot || state == PieceDisplayState.Skill;
+
+    /// <summary>棋子初始化时停止上一生命的动画及淡出，恢复首次初始化的精灵透明度。</summary>
+    public void ResetForReuse()
+    {
+        StopAnimation();
+        if (pieceSpriteRenderer == null) return;
+        var color = pieceSpriteRenderer.color;
+        if (!capturedOpacity) { initialOpacity = color.a; capturedOpacity = true; }
+        // 旧死亡淡出必须先取消，避免重新初始化后仍回写透明度或停用棋子。
+        pieceSpriteRenderer.DOKill();
+        color.a = initialOpacity;
+        pieceSpriteRenderer.color = color;
+    }
 
     /// <summary>
     /// 保留旧调用签名和序列帧数据。一次性动画的正 duration 仅表示播完回待机，

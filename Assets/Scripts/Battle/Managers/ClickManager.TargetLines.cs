@@ -30,6 +30,7 @@ public partial class ClickManager
     public void ClearEnemyTargetLineInteraction()
     {
         CancelMovementPreview();
+        if (outcomePreview != null) { Destroy(outcomePreview.gameObject); outcomePreview = null; }
         ClearEnemyTargetLines(true);
     }
 

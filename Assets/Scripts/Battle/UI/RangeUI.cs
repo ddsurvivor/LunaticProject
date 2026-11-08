@@ -39,6 +39,10 @@ public partial class RangeUI : MonoBehaviour
     private List<PieceController> _curTargets = new();
     /// <summary>确认行动前重新查询当前目标，避免死亡或离场单位沿用旧高亮快照。</summary>
     public List<PieceController> GetCurTargets { get { RefreshTargets(); return _curTargets; } }
+    /// <summary>当前选中顺序的只读快照入口；目标回调中读取不会递归触发范围刷新。</summary>
+    public IReadOnlyList<PieceController> PreviewTargets => _curTargets;
+    /// <summary>当前瞄准技能；关闭范围时为 null，供只读战果提示使用。</summary>
+    public SkillPack PreviewSkill => _curSkillPack;
     private SkillPack _curSkillPack;
 
     public bool isPlayerRange = false;
@@ -213,14 +217,16 @@ public partial class RangeUI : MonoBehaviour
 
     private void ApplyTargets(List<PieceController> newTargets)
     {
-        foreach (var piece in _curTargets)
+        var previous = _curTargets;
+        _curTargets = newTargets;
+        foreach (var piece in previous)
             if (piece != null && !newTargets.Contains(piece)) piece.ShowHighlight(false);
         foreach (var piece in newTargets)
         {
             piece.ShowHighlight(true);
-            if (!_curTargets.Contains(piece)) piece.OnBeTarget(_owner, _curSkillPack);
+            // 共享护盾耐久和目标顺序可能变化，即使目标未变也刷新只读伤害预览。
+            piece.OnBeTarget(_owner, _curSkillPack);
         }
-        _curTargets = newTargets;
     }
 
     private void OnDisable()

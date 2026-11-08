@@ -151,12 +151,14 @@ public partial class ClickManager : MonoBehaviour
         {
             SetHoveredPiece(null);
             ClearEnemyTargetLines();
+            if (outcomePreview != null) outcomePreview.gameObject.SetActive(false);
             return;
         }
         bool overUI = UnityEngine.EventSystems.EventSystem.current != null &&
             UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
         SetHoveredPiece(overUI ? null : FindPieceUnderPointer());
         UpdateTargetLinePresentation();
+        UpdateOutcomePreview();
     }
 
     private PieceController FindPieceUnderPointer()

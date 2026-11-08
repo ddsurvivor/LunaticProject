@@ -146,6 +146,7 @@ Transform:
   - {fileID: 8867645642584952975}
   - {fileID: 4489428511845377683}
   - {fileID: 7342720454029018619}
+  - {fileID: 14790048838300955}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -345,25 +346,13 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: buffStates
-      Entry: 7
-      Data: 7|System.Collections.Generic.List`1[[BuffState, Assembly-CSharp]], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
     - Name: buffAttrDic
       Entry: 7
-      Data: 8|System.Collections.Generic.Dictionary`2[[BuffAttrType, Assembly-CSharp],[System.Single,
+      Data: 7|System.Collections.Generic.Dictionary`2[[BuffAttrType, Assembly-CSharp],[System.Single,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 9|System.Collections.Generic.EnumEqualityComparer`1[[BuffAttrType, Assembly-CSharp]],
+      Data: 8|System.Collections.Generic.EnumEqualityComparer`1[[BuffAttrType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -399,6 +388,7 @@ MonoBehaviour:
   critDamageRate: 0
   ATK: 0
   CON: 0
+  buffStates: []
   hpBarFill: {fileID: 6538654166261986026}
   hpBarUI: {fileID: 0}
   OnDead:
@@ -439,6 +429,7 @@ MonoBehaviour:
       Entry: 8
       Data: 
   pieceSpriteRenderer: {fileID: 1142199792870587360}
+  overheadAnchor: {fileID: 14790048838300955}
   idleSprite:
   - {fileID: 21300000, guid: ab955d86836f0bd4c999facdf3fa36bf, type: 3}
   - {fileID: 21300000, guid: e95fe8d343a264b4a9a20037c0e98f80, type: 3}
@@ -481,18 +472,44 @@ MonoBehaviour:
   _actionListPanel: {fileID: 0}
   pieceDisplay: {fileID: 3583487980011262596}
   _pieceData:
+    memeBodyType: 0
+    memeTargetTags: []
+    innateMemeIds:
+    permanentMemeImmunities:
+    speed: 10
+    turnPortrait: {fileID: 0}
+    turnPortraitIsFullBody: 0
+    turnPortraitFraming:
+      useOverride: 0
+      useFullSpriteRect: 0
+      contentRect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1
+        height: 1
+      zoom: 1
+      offset: {x: 0, y: 0}
+      upperBodyFraction: 0.42
     pieceId: 0
     pieceName: 
     maxHealth: 0
     maxMovePoint: 0
     moveRange: 0
+    meleeSkillId:
+    rangedSkillId:
+    initialSkillIds: []
     meleeAtk:
+      skillId:
       skillName: 
+      memeIds:
+      enemySkillRole: 0
       description: 
       mpCost: 0
       target: 0
       rangeType: 0
       rangeValue: 0
+      reachKind: 0
       rangeAgle: 0
       explodeRadius: 0
       arcWeight: 0
@@ -503,6 +520,7 @@ MonoBehaviour:
       attackPacks: []
       atkTimes: 1
       buffPacks: []
+      memeCureTags: 0
       skillEffects: 
       skillSound: {fileID: 0}
       consumeItems: []
@@ -511,12 +529,16 @@ MonoBehaviour:
       layerSkill: 0
       isRecognitionCheck: 0
     rangedAtk:
+      skillId:
       skillName: 
+      memeIds:
+      enemySkillRole: 0
       description: 
       mpCost: 0
       target: 0
       rangeType: 0
       rangeValue: 0
+      reachKind: 0
       rangeAgle: 0
       explodeRadius: 0
       arcWeight: 0
@@ -527,6 +549,7 @@ MonoBehaviour:
       attackPacks: []
       atkTimes: 1
       buffPacks: []
+      memeCureTags: 0
       skillEffects: 
       skillSound: {fileID: 0}
       consumeItems: []
@@ -547,7 +570,12 @@ MonoBehaviour:
     passiveSkillTypes: 
     weaponIcon: {fileID: 0}
     orderProfiles: []
+  turnSpeedOverride: 0
   playerData:
+    skills:
+      initialized: 0
+      learned: []
+      equipped: []
     pieceId: 0
     curHealth: 0
     curAmmo: 0
@@ -556,6 +584,7 @@ MonoBehaviour:
     spriteName: 
     normalSlots: 000000000000000000000000
     weaponSlots: 0000000000000000
+    memeSlots: 0000000000000000
   pieceID: 1002
   player: {fileID: 0}
   isPlayerPiece: 0
@@ -566,12 +595,16 @@ MonoBehaviour:
     damageType: 0
     isCritical: 0
   _skillPack:
+    skillId:
     skillName: 
+    memeIds:
+    enemySkillRole: 0
     description: 
     mpCost: 0
     target: 0
     rangeType: 0
     rangeValue: 0
+    reachKind: 0
     rangeAgle: 0
     explodeRadius: 0
     arcWeight: 0
@@ -582,6 +615,7 @@ MonoBehaviour:
     attackPacks: []
     atkTimes: 1
     buffPacks: []
+    memeCureTags: 0
     skillEffects: 
     skillSound: {fileID: 0}
     consumeItems: []
@@ -614,11 +648,25 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   outlineEffect: {fileID: 0}
+  level: 1
   enemyAIType: 2
   isActived: 1
   navigate: 0
   enemyCanvas: {fileID: 7997717618187452530}
   tagetLine: {fileID: 1801879068671572641}
+  targetStrategy: 0
+  strategyRules: []
+  maximizeAOETargets: 1
+  attackExplosives: 0
+  healthPriority: 0
+  fragilePriority: 0
+  defenseType: 2
+  prioritizeHealing: 1
+  isBoss: 0
+  retreatWhenLowHealth: 1
+  retreatHealthRatio: 0.3
+  healHealthRatio: 0.5
+  executeHealthRatio: 0.3
 --- !u!195 &2389389656634051147
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1311,6 +1359,37 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &6211551060460130914
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 14790048838300955}
+  m_Layer: 0
+  m_Name: OverheadAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &14790048838300955
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6211551060460130914}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.4489403, y: 6.9260926, z: 4.1911902}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1457925912296907158}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6546501257783729953
 GameObject:
   m_ObjectHideFlags: 0

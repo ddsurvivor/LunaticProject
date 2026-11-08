@@ -1,0 +1,608 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d83cab7850bb44988ec24a8ce4a2be01, type: 3}
+  m_Name: ObeliskSkills
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: skillPacks
+      Entry: 7
+      Data: 0|System.Collections.Generic.List`1[[SkillPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 3
+    - Name: 
+      Entry: 7
+      Data: 1|SkillPack, Assembly-CSharp
+    - Name: skillId
+      Entry: 1
+      Data: obelisk_melee
+    - Name: skillName
+      Entry: 1
+      Data: "\u65B9\u5C16\u7891\xB7\u673A\u68B0\u649E\u51FB"
+    - Name: memeIds
+      Entry: 7
+      Data: 2|System.Collections.Generic.List`1[[System.Int32, mscorlib]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: enemySkillRole
+      Entry: 3
+      Data: 0
+    - Name: description
+      Entry: 1
+      Data: "\u4E34\u65F6\u6218\u6597\u914D\u7F6E\uFF1B\u540E\u7EED\u5E73\u8861\u8C03\u6574\u4EE5\u68CB\u5B50\u76EE\u5F55\u548C\u6280\u80FD\u5E93\u4E3A\u51C6\u3002"
+    - Name: mpCost
+      Entry: 3
+      Data: 0
+    - Name: target
+      Entry: 3
+      Data: 1
+    - Name: rangeType
+      Entry: 3
+      Data: 1
+    - Name: rangeValue
+      Entry: 4
+      Data: 1.8
+    - Name: reachKind
+      Entry: 3
+      Data: 1
+    - Name: rangeAgle
+      Entry: 4
+      Data: 0
+    - Name: explodeRadius
+      Entry: 4
+      Data: 0
+    - Name: arcWeight
+      Entry: 4
+      Data: 0
+    - Name: arcCenterDis
+      Entry: 4
+      Data: 0
+    - Name: skillVFXType
+      Entry: 3
+      Data: 0
+    - Name: isRotate
+      Entry: 5
+      Data: false
+    - Name: bulletVFXType
+      Entry: 3
+      Data: 0
+    - Name: attackPacks
+      Entry: 7
+      Data: 3|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 4|AttackPack, Assembly-CSharp
+    - Name: damage
+      Entry: 3
+      Data: 8
+    - Name: damageType
+      Entry: 3
+      Data: 1
+    - Name: isCritical
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: atkTimes
+      Entry: 3
+      Data: 1
+    - Name: buffPacks
+      Entry: 7
+      Data: 5|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: memeCureTags
+      Entry: 3
+      Data: 0
+    - Name: skillEffects
+      Entry: 7
+      Data: 6|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: skillSound
+      Entry: 6
+      Data: 
+    - Name: consumeItems
+      Entry: 7
+      Data: 7|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: animationIndex
+      Entry: 3
+      Data: 0
+    - Name: isDelaySkill
+      Entry: 5
+      Data: false
+    - Name: layerSkill
+      Entry: 5
+      Data: false
+    - Name: isRecognitionCheck
+      Entry: 5
+      Data: false
+    - Name: additionalEffects
+      Entry: 7
+      Data: 8|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 9|SkillPack, Assembly-CSharp
+    - Name: skillId
+      Entry: 1
+      Data: obelisk_ranged
+    - Name: skillName
+      Entry: 1
+      Data: "\u65B9\u5C16\u7891\xB7\u70ED\u80FD\u8109\u51B2"
+    - Name: memeIds
+      Entry: 7
+      Data: 10|System.Collections.Generic.List`1[[System.Int32, mscorlib]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: enemySkillRole
+      Entry: 3
+      Data: 0
+    - Name: description
+      Entry: 1
+      Data: "\u4E34\u65F6\u6218\u6597\u914D\u7F6E\uFF1B\u540E\u7EED\u5E73\u8861\u8C03\u6574\u4EE5\u68CB\u5B50\u76EE\u5F55\u548C\u6280\u80FD\u5E93\u4E3A\u51C6\u3002"
+    - Name: mpCost
+      Entry: 3
+      Data: 0
+    - Name: target
+      Entry: 3
+      Data: 1
+    - Name: rangeType
+      Entry: 3
+      Data: 1
+    - Name: rangeValue
+      Entry: 4
+      Data: 7
+    - Name: reachKind
+      Entry: 3
+      Data: 2
+    - Name: rangeAgle
+      Entry: 4
+      Data: 0
+    - Name: explodeRadius
+      Entry: 4
+      Data: 0
+    - Name: arcWeight
+      Entry: 4
+      Data: 0
+    - Name: arcCenterDis
+      Entry: 4
+      Data: 0
+    - Name: skillVFXType
+      Entry: 3
+      Data: 0
+    - Name: isRotate
+      Entry: 5
+      Data: false
+    - Name: bulletVFXType
+      Entry: 3
+      Data: 0
+    - Name: attackPacks
+      Entry: 7
+      Data: 11|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 7
+      Data: 12|AttackPack, Assembly-CSharp
+    - Name: damage
+      Entry: 3
+      Data: 12
+    - Name: damageType
+      Entry: 3
+      Data: 2
+    - Name: isCritical
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: atkTimes
+      Entry: 3
+      Data: 1
+    - Name: buffPacks
+      Entry: 7
+      Data: 13|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: memeCureTags
+      Entry: 3
+      Data: 0
+    - Name: skillEffects
+      Entry: 7
+      Data: 14|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: skillSound
+      Entry: 6
+      Data: 
+    - Name: consumeItems
+      Entry: 7
+      Data: 15|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: animationIndex
+      Entry: 3
+      Data: 0
+    - Name: isDelaySkill
+      Entry: 5
+      Data: false
+    - Name: layerSkill
+      Entry: 5
+      Data: false
+    - Name: isRecognitionCheck
+      Entry: 5
+      Data: false
+    - Name: additionalEffects
+      Entry: 7
+      Data: 16|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 17|SkillPack, Assembly-CSharp
+    - Name: skillId
+      Entry: 1
+      Data: obelisk_range_barrier
+    - Name: skillName
+      Entry: 1
+      Data: "\u7FA4\u4F53\u62A4\u76FE"
+    - Name: memeIds
+      Entry: 7
+      Data: 18|System.Collections.Generic.List`1[[System.Int32, mscorlib]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: enemySkillRole
+      Entry: 3
+      Data: 4
+    - Name: description
+      Entry: 1
+      Data: "\u6D88\u80172AP\uFF0C\u65E0\u51B7\u5374\u3002\u751F\u6210\u968F\u8EAB\u534A\u5F848\u7403\u5F62\u62A4\u76FE\uFF0C\u8010\u4E4540\uFF1B\u4EC5\u62E6\u622A\u5916\u5230\u5185\u653B\u51FB\uFF0C\u7834\u76FE\u6EA2\u51FA\u7A7F\u900F\u3002\u5DF2\u6709\u62A4\u76FE\u65F6\u4E0D\u80FD\u91CD\u590D\u65BD\u653E\uFF1B\u4E0D\u963B\u6321\u6301\u7EED\u4F24\u5BB3\u3002\u62A4\u76FE\u88AB\u51FB\u7834\u540E\uFF0C\u81EA\u8EAB\u505C\u673A2\u4E2A\u666E\u901A\u56DE\u5408\uFF0C\u671F\u95F4\u4E0D\u80FD\u884C\u52A8\u4E14\u6CBB\u7597\u5149\u73AF\u6682\u505C\u3002"
+    - Name: mpCost
+      Entry: 3
+      Data: 0
+    - Name: target
+      Entry: 3
+      Data: 3
+    - Name: rangeType
+      Entry: 3
+      Data: 1
+    - Name: rangeValue
+      Entry: 4
+      Data: 0
+    - Name: reachKind
+      Entry: 3
+      Data: 0
+    - Name: rangeAgle
+      Entry: 4
+      Data: 0
+    - Name: explodeRadius
+      Entry: 4
+      Data: 0
+    - Name: arcWeight
+      Entry: 4
+      Data: 0
+    - Name: arcCenterDis
+      Entry: 4
+      Data: 0
+    - Name: skillVFXType
+      Entry: 3
+      Data: 0
+    - Name: isRotate
+      Entry: 5
+      Data: false
+    - Name: bulletVFXType
+      Entry: 3
+      Data: 0
+    - Name: attackPacks
+      Entry: 7
+      Data: 19|System.Collections.Generic.List`1[[AttackPack, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: atkTimes
+      Entry: 3
+      Data: 1
+    - Name: buffPacks
+      Entry: 7
+      Data: 20|System.Collections.Generic.List`1[[BuffPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: memeCureTags
+      Entry: 3
+      Data: 0
+    - Name: skillEffects
+      Entry: 7
+      Data: 21|System.Collections.Generic.List`1[[SkillEffect, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 3
+      Data: 5
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: skillSound
+      Entry: 6
+      Data: 
+    - Name: consumeItems
+      Entry: 7
+      Data: 22|System.Collections.Generic.List`1[[ItemPack, Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: animationIndex
+      Entry: 3
+      Data: 0
+    - Name: isDelaySkill
+      Entry: 5
+      Data: false
+    - Name: layerSkill
+      Entry: 5
+      Data: false
+    - Name: isRecognitionCheck
+      Entry: 5
+      Data: false
+    - Name: additionalEffects
+      Entry: 7
+      Data: 23|System.Collections.Generic.List`1[[SkillEffectBase, Assembly-CSharp]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+  skillPacks:
+  - skillId: obelisk_melee
+    skillName: "\u65B9\u5C16\u7891\xB7\u673A\u68B0\u649E\u51FB"
+    memeIds: 
+    enemySkillRole: 0
+    description: "\u4E34\u65F6\u6218\u6597\u914D\u7F6E\uFF1B\u540E\u7EED\u5E73\u8861\u8C03\u6574\u4EE5\u68CB\u5B50\u76EE\u5F55\u548C\u6280\u80FD\u5E93\u4E3A\u51C6\u3002"
+    mpCost: 0
+    target: 1
+    rangeType: 1
+    rangeValue: 1.8
+    reachKind: 1
+    rangeAgle: 0
+    explodeRadius: 0
+    arcWeight: 0
+    arcCenterDis: 0
+    skillVFXType: 0
+    isRotate: 0
+    bulletVFXType: 0
+    attackPacks:
+    - damage: 8
+      damageType: 1
+      isCritical: 0
+    atkTimes: 1
+    buffPacks: []
+    memeCureTags: 0
+    skillEffects: 
+    skillSound: {fileID: 0}
+    consumeItems: []
+    animationIndex: 0
+    isDelaySkill: 0
+    layerSkill: 0
+    isRecognitionCheck: 0
+  - skillId: obelisk_ranged
+    skillName: "\u65B9\u5C16\u7891\xB7\u70ED\u80FD\u8109\u51B2"
+    memeIds: 
+    enemySkillRole: 0
+    description: "\u4E34\u65F6\u6218\u6597\u914D\u7F6E\uFF1B\u540E\u7EED\u5E73\u8861\u8C03\u6574\u4EE5\u68CB\u5B50\u76EE\u5F55\u548C\u6280\u80FD\u5E93\u4E3A\u51C6\u3002"
+    mpCost: 0
+    target: 1
+    rangeType: 1
+    rangeValue: 7
+    reachKind: 2
+    rangeAgle: 0
+    explodeRadius: 0
+    arcWeight: 0
+    arcCenterDis: 0
+    skillVFXType: 0
+    isRotate: 0
+    bulletVFXType: 0
+    attackPacks:
+    - damage: 12
+      damageType: 2
+      isCritical: 0
+    atkTimes: 1
+    buffPacks: []
+    memeCureTags: 0
+    skillEffects: 
+    skillSound: {fileID: 0}
+    consumeItems: []
+    animationIndex: 0
+    isDelaySkill: 0
+    layerSkill: 0
+    isRecognitionCheck: 0
+  - skillId: obelisk_range_barrier
+    skillName: "\u7FA4\u4F53\u62A4\u76FE"
+    memeIds: 
+    enemySkillRole: 4
+    description: "\u6D88\u80172AP\uFF0C\u65E0\u51B7\u5374\u3002\u751F\u6210\u968F\u8EAB\u534A\u5F848\u7403\u5F62\u62A4\u76FE\uFF0C\u8010\u4E4540\uFF1B\u4EC5\u62E6\u622A\u5916\u5230\u5185\u653B\u51FB\uFF0C\u7834\u76FE\u6EA2\u51FA\u7A7F\u900F\u3002\u5DF2\u6709\u62A4\u76FE\u65F6\u4E0D\u80FD\u91CD\u590D\u65BD\u653E\uFF1B\u4E0D\u963B\u6321\u6301\u7EED\u4F24\u5BB3\u3002\u62A4\u76FE\u88AB\u51FB\u7834\u540E\uFF0C\u81EA\u8EAB\u505C\u673A2\u4E2A\u666E\u901A\u56DE\u5408\uFF0C\u671F\u95F4\u4E0D\u80FD\u884C\u52A8\u4E14\u6CBB\u7597\u5149\u73AF\u6682\u505C\u3002"
+    mpCost: 0
+    target: 3
+    rangeType: 1
+    rangeValue: 0
+    reachKind: 0
+    rangeAgle: 0
+    explodeRadius: 0
+    arcWeight: 0
+    arcCenterDis: 0
+    skillVFXType: 0
+    isRotate: 0
+    bulletVFXType: 0
+    attackPacks: []
+    atkTimes: 1
+    buffPacks: []
+    memeCureTags: 0
+    skillEffects: 05000000
+    skillSound: {fileID: 0}
+    consumeItems: []
+    animationIndex: 0
+    isDelaySkill: 0
+    layerSkill: 0
+    isRecognitionCheck: 0

@@ -12,7 +12,7 @@ public sealed class BurstGauge
     public int AffordableActors => (int)(Charge / ActorCost);
     public bool Ready => Cooldown == 0 && Charge >= ActorCost;
 
-    /// <summary>按动力脊等级 0–3 初始化并清空能量与冷却；序章强制使用未升级数值。</summary>
+    /// <summary>按动力脊等级 0–3 初始化并清空能量与冷却；序章/教学规则强制使用未升级数值。</summary>
     public void Reset(int level, bool prologue)
     {
         level = prologue ? 0 : Math.Max(0, Math.Min(3, level));

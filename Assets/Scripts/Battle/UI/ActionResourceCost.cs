@@ -22,6 +22,7 @@ public readonly struct ActionResourceCost
     {
         var attr = piece.unitAttrCenter;
         return new ActionResourceCost(action == ActionType.Wait ? attr.CurMovePoint
+            : action == ActionType.Skill && skill != null ? attr.GetSkillAPCost(skill)
             : GM.Ins.DM.gameConstSO.GetActionPointCost(action),
             action == ActionType.Skill && skill != null ? attr.GetSkillManaCost(skill) : 0,
             action == ActionType.RangedAttack ? 1 : 0);

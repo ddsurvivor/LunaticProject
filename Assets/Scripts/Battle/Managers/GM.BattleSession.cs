@@ -115,6 +115,8 @@ public partial class GM
 
     private static void QuiesceBattleScene(BattleScene scene)
     {
+        // 离场前撤销运行时被动，避免常驻工作档案继续携带临时属性来源。
+        scene.BM.characterSkillManager.ClearAllRegistry();
         // 重载有淡出空档，先停用旧场景全部对象，阻止弹道、引信及单位回调污染恢复后的存档。
         foreach (var root in scene.gameObject.scene.GetRootGameObjects()) root.SetActive(false);
     }

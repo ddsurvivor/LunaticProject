@@ -355,11 +355,11 @@ public partial class 剧本System : MonoBehaviour
             case 1: // 仅淡入
                 targetimg.sprite = sprite;
                 targetimg.color = new Color(1, 1, 1, 0);
-                targetimg.DOFade(1f, duration);
+                targetimg.DOFade(1f, duration).SetUpdate(UseUnscaledTime);
                 break;
 
             case 2: // 仅淡出
-                targetimg.DOFade(0f, duration).OnComplete(() =>
+                targetimg.DOFade(0f, duration).SetUpdate(UseUnscaledTime).OnComplete(() =>
                 {
                     targetimg.sprite = sprite;
                     targetimg.color = new Color(1, 1, 1, 1);
@@ -367,10 +367,10 @@ public partial class 剧本System : MonoBehaviour
                 break;
 
             case 3: // 淡出后淡入（默认）
-                targetimg.DOFade(0f, duration / 2).OnComplete(() =>
+                targetimg.DOFade(0f, duration / 2).SetUpdate(UseUnscaledTime).OnComplete(() =>
                 {
                     targetimg.sprite = sprite;
-                    targetimg.DOFade(1f, duration / 2);
+                    targetimg.DOFade(1f, duration / 2).SetUpdate(UseUnscaledTime);
                 });
                 break;
         }
@@ -382,7 +382,7 @@ public partial class 剧本System : MonoBehaviour
         logText.color = new Color(logText.color.r, logText.color.g, logText.color.b, 0f); // 初始透明度为0
         logText.gameObject.SetActive(true);
         logText.text = str;
-        Sequence fadeTweener = DOTween.Sequence();
+        Sequence fadeTweener = DOTween.Sequence().SetUpdate(UseUnscaledTime);
         //fadeTweener.AppendInterval(startDelay);
         fadeTweener.Append(logText.DOFade(1f, fadeDuration).SetEase(Ease.Linear));
         fadeTweener.AppendInterval(displayDuration);

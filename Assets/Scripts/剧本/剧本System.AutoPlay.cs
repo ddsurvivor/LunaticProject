@@ -135,7 +135,7 @@ public partial class 剧本System
         float delay = isFastForward
             ? Mathf.Max(0.1f, settings != null ? settings.fastForwardInterval : fastForwardDelay)
             : Mathf.Max(0f, settings != null ? settings.autoPlayDelay : normalDelay);
-        autoPlayElapsed += Time.deltaTime;
+        autoPlayElapsed += UseUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
         if (autoPlayElapsed >= delay)
         {
             autoPlayElapsed = 0f;

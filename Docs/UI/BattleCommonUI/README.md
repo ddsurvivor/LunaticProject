@@ -1,4 +1,8 @@
+用户最新决定（2026-11-05）：B35剩余面板跳过，保留已完成U14/U15模板，后续转入B36；以下阶段记录保留历史状态。
+
 # 战斗通用 UI 设计
+
+2026-11-05：本页保留原 BattleCommonUI 交付与布局记录；B34/B35 当前以 AVG 原有素材为统一基准，旧边框不作为新面板基准。正式入口、复用现状与迁移顺序见[战斗 UI 面板清单与复用矩阵](BattleUIPanelInventory.md)。
 
 ## 交付
 
@@ -97,6 +101,10 @@ SceneBackdrop 已添加到 PieceInfo 最底层：520×336，位置 (-10,-10)，#
 预览接入当前角色实际跟随状态 `Assets/Prefab/UI/PieceStatePanel.prefab`，并同步左下 PieceInfo；AP 使用当前可用点右侧呼吸，能量和弹药使用独立消耗区间叠层。分类箭头占用消耗列，分类本身不预览/不扣费；展开锁定保留选中视觉。ActionType 原整数值保持，历史中文 JSON 值与字典键保留读取兼容。
 
 Unity 引用编译、133 条枚举/JSON/语言/计时回归与新增 prefab 引用检查通过。编辑器窗口已能发现，但截图与恢复激活均超时，故本轮真实 Play、分辨率及视觉验收仍未通过；详见 BattleUIAcceptance.md 最新章节。已有设计 PNG 是旧设计示意，尚未重生成，不能作为本次运行证据。
+
+暂停窗口（2026-11-05）：U14 已迁移为 `Resources/UI/BattlePauseWindow.prefab`，真实嵌套 AVG Panel/Header/Button，支持 Prefab Mode、Variant 和 UIManager 模板覆盖。专项33项通过，双分辨率及手调截图已复核；继续、重开、退出与多持有者暂停保持。详见[暂停窗口模板与B35记录](暂停窗口模板与B35记录.md)。B35 其余面板继续按清单迁移。
+
+结果窗口（2026-11-05）：U15 场景内嵌与回退入口统一使用 `Resources/UI/BattleResultWindow.prefab`，真实嵌套 AVG 模块，支持手调和 Inspector Variant、长奖励滚动。57项专项通过，实际失败重开、退出主菜单、胜利继续及一次奖励提交已验证。详见[结果窗口模板与B35记录](结果窗口模板与B35记录.md)。B35整体仍进行中。
 
 设计生成源也已同步攻击分类、独立三角箭头/费用互斥和子菜单居中示例；现有 PNG 尚未重生成。
 

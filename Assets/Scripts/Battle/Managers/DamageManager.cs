@@ -45,7 +45,7 @@ public sealed class DamageManager
     {
         var result = new Settlement();
         // 1. 校验目标，读取掩体、屏障与命中规则。
-        if (!CanAffect(attacker, target, skill)) return result;
+        if (!SkillTargeting.IsValid(attacker, target, skill)) return result;
         if (battle.PlayerController.isBursting && !battle.IsBurstActor(attacker) && skill.attackPacks.Count > 0 &&
             battle.TryDeferBurstEffect(attacker, () => ResolveSkillTarget(attacker, target, skill, checkResult, isFlank, passiveMultiplier, action))) return result;
         action ??= BattleActionContext.Current ?? new BattleActionContext(attacker, skill, isFlank);
@@ -67,6 +67,7 @@ public sealed class DamageManager
         result.IsCritical = context.MustCrit || BattleRandom.Range(1, 101) <= attacker.unitAttrCenter.critRate;
 
         // 3. 各段使用统一公式；实战才提交聚能累计、扣血和受击事件。
+        bool reachedTarget = skill.attackPacks.Count == 0;
         foreach (var pack in skill.attackPacks)
         {
             // 致死后不再结算后续段，也不重复发送受击或击杀事件。
@@ -75,6 +76,10 @@ public sealed class DamageManager
             int dice = result.IsCritical ? DamageCalculator.MinDice : DamageCalculator.Roll4D6();
             int damage = CalculateDamage(context, pack, result.IsCritical, dice, ref burst);
             if (context.IsBursting) CommitBurst(burst);
+            int incoming = damage;
+            damage = battle.AbsorbRangeDamage(attacker, target, damage);
+            if (incoming > 0 && damage == 0) continue;
+            reachedTarget = true;
             if (context.BarrierBlocked)
             {
                 battle.buffManager.AbsorbAttack(target.unitAttrCenter, damage);
@@ -85,7 +90,7 @@ public sealed class DamageManager
             bool killed = target.isDead;
             System.Action notify = () =>
             {
-                if (attacker == null || target == null) return;
+                if (attacker == null || target == null || target is RangeBarrier) return;
                 battle.characterSkillManager.NotifyTakeDamage(target.gameObject, attacker.gameObject);
                 if (killed && attacker.isPlayerPiece != target.isPlayerPiece)
                     battle.characterSkillManager.NotifyKillEnemy(attacker.gameObject, target.gameObject);
@@ -95,9 +100,9 @@ public sealed class DamageManager
             if (damage > 0) result.DamageInfos.Add(new DamageInfo(damage, pack.damageType.ToChinese(), result.IsCritical));
         }
 
-        // 4. 屏障阻挡整次攻击，破盾后本次剩余伤害和附加效果仍不穿透。
-        result.CanApplyEffects = !context.BarrierBlocked;
-        result.HitAttack = result.CanApplyEffects && skill.attackPacks.Count > 0;
+        // 减速场仍阻挡整次攻击；范围护盾仅在全部伤害段被吸收时阻止附加效果。
+        result.CanApplyEffects = !context.BarrierBlocked && reachedTarget && !(target is RangeBarrier);
+        result.HitAttack = !context.BarrierBlocked && reachedTarget && skill.attackPacks.Count > 0;
         return result;
     }
 
@@ -106,13 +111,13 @@ public sealed class DamageManager
     /// 识别结果未指定时涵盖所有结果；不预测被动、击退碰撞或协同攻击。
     /// </summary>
     public Preview PreviewSkill(PieceController attacker, PieceController target, SkillPack skill,
-        CheckResult? checkResult = null, bool isFlank = false)
+        CheckResult? checkResult = null, bool isFlank = false, IReadOnlyList<PieceController> orderedTargets = null)
     {
         var preview = new Preview();
         if (skill == null) return preview;
         foreach (var pack in skill.attackPacks) preview.ByType[pack.damageType] = default;
         // 1. 和实战共用目标与命中规则；屏障不会产生生命伤害。
-        if (!CanAffect(attacker, target, skill)) return preview;
+        if (!SkillTargeting.IsValid(attacker, target, skill)) return preview;
         Context context = CreateContext(attacker, target, skill, checkResult ?? CheckResult.None, isFlank);
         context.PassiveMultiplier = battle.characterSkillManager.PreviewDamageMultiplier(attacker.gameObject, target.gameObject);
         preview.HitRate = context.HitRate;
@@ -136,12 +141,20 @@ public sealed class DamageManager
                 // 3. 逐段穷举 4D6，在副本上累计聚能，再按伤害类型合并。
                 BurstState minBurst = CaptureBurst();
                 BurstState maxBurst = minBurst;
+                var minShields = new Dictionary<RangeBarrier, int>();
+                var maxShields = new Dictionary<RangeBarrier, int>();
+                PrimeRangePreview(attacker, target, skill, check, isFlank, orderedTargets,
+                    false, minShields, ref minBurst);
+                PrimeRangePreview(attacker, target, skill, check, isFlank, orderedTargets,
+                    true, maxShields, ref maxBurst);
                 var byType = new Dictionary<DamageType, DamagePreviewResult>();
                 int totalMin = 0, totalMax = 0;
                 foreach (var pack in skill.attackPacks)
                 {
                     int min = CalculateBound(context, pack, isCrit, false, ref minBurst);
                     int max = CalculateBound(context, pack, isCrit, true, ref maxBurst);
+                    min = battle.AbsorbRangeDamage(attacker, target, min, minShields);
+                    max = battle.AbsorbRangeDamage(attacker, target, max, maxShields);
                     byType.TryGetValue(pack.damageType, out var old);
                     byType[pack.damageType] = DamagePreviewResult.Create(old.MinDamage + min, old.MaxDamage + max);
                     totalMin += min;
@@ -158,9 +171,44 @@ public sealed class DamageManager
         return preview;
     }
 
-    private static bool CanAffect(PieceController attacker, PieceController target, SkillPack skill)
+    private void PrimeRangePreview(PieceController attacker, PieceController target, SkillPack skill,
+        CheckResult check, bool flank, IReadOnlyList<PieceController> targets,
+        bool maximum, Dictionary<RangeBarrier, int> shields, ref BurstState burst)
     {
-        return SkillTargeting.IsValid(attacker, target, skill);
+        if (targets == null) return;
+        // 范围攻击共享耐久；先在副本上结算排在当前目标之前的伤害。
+        foreach (var prior in targets)
+        {
+            if (prior == target) break;
+            if (!SkillTargeting.IsValid(attacker, prior, skill)) continue;
+            Context context = CreateContext(attacker, prior, skill, check, flank);
+            context.PassiveMultiplier = battle.characterSkillManager.PreviewDamageMultiplier(attacker.gameObject, prior.gameObject);
+            if (!maximum && context.HitRate < 100) continue;
+            int health = prior is RangeBarrier shield && shields.TryGetValue(shield, out int durability)
+                ? durability : prior.unitAttrCenter.CurHealth;
+            foreach (var pack in skill.attackPacks)
+            {
+                if (health <= 0) break;
+                int value = PreviewPreviousBound(context, pack, maximum, ref burst);
+                value = battle.AbsorbRangeDamage(attacker, prior, value, shields);
+                if (!context.BarrierBlocked) health -= value;
+                if (prior is RangeBarrier barrier) shields[barrier] = Mathf.Max(0, health);
+            }
+        }
+    }
+
+    private static int PreviewPreviousBound(Context context, AttackPack pack, bool maximum, ref BurstState burst)
+    {
+        bool mustCrit = context.MustCrit || context.Attacker.unitAttrCenter.critRate >= 100;
+        if (mustCrit || context.Attacker.unitAttrCenter.critRate <= 0)
+            return CalculateBound(context, pack, mustCrit, maximum, ref burst);
+        var normal = burst;
+        var critical = burst;
+        int a = CalculateBound(context, pack, false, maximum, ref normal);
+        int b = CalculateBound(context, pack, true, maximum, ref critical);
+        bool useCritical = maximum ? b > a : b < a;
+        burst = useCritical ? critical : normal;
+        return useCritical ? b : a;
     }
 
     private Context CreateContext(PieceController attacker, PieceController target, SkillPack skill,

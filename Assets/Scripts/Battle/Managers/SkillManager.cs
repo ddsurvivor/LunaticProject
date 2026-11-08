@@ -146,6 +146,7 @@ public static class SkillTargeting
 
     public static bool IsValid(PieceController caster, PieceController target, SkillPack skill)
     {
+        if (target is RangeBarrier && (skill?.attackPacks == null || skill.attackPacks.Count == 0)) return false;
         return skill != null && (!BattleRelations.IsOffensive(skill) || BattleRelations.CanInitiateAttack(caster)) && IsValid(caster, target, skill.target, skill.AllowDeadCaster) &&
             (!skill.layerSkill || Mathf.Abs(caster.transform.position.y - target.transform.position.y) <= BattleRangeRules.SameLayerTolerance);
     }
@@ -154,6 +155,8 @@ public static class SkillTargeting
     {
         if (caster == null || (caster.isDead && !allowDeadCaster) || target == null ||
             !target.gameObject.activeInHierarchy) return false;
+        if (target.GetComponent<SelfRevive>()?.IsCompletingTrueDeath == true) return false;
+        if (target is RangeBarrier barrier && !barrier.IsActive) return false;
         bool ally = BattleRelations.CanSupport(caster, target);
         if (targetType == SkillTarget.AllyBody) return ally && target.isDead;
         if (target.isDead) return false;
