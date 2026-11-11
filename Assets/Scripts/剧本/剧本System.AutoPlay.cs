@@ -36,7 +36,7 @@ public partial class 剧本System
     /// <summary>切换自动播放。开启时立即推进一句。</summary>
     public void ToggleAutoPlay()
     {
-        if (IsReaderHiding) return;
+        if (IsReaderHiding || IsStoryClosed || IsSettingsMenuOpen) return;
         isAutoPlay = !isAutoPlay;
         autoPlayElapsed = 0f;
         SyncPlaybackButtons();
@@ -48,7 +48,7 @@ public partial class 剧本System
     /// <summary>切换快进，仅在自动播放开启时生效。</summary>
     public void ToggleFastForward()
     {
-        if (IsReaderHiding || !isAutoPlay) return;
+        if (IsReaderHiding || IsStoryClosed || IsSettingsMenuOpen || !isAutoPlay) return;
         isFastForward = !isFastForward;
         autoPlayElapsed = 0f;
         SyncPlaybackButtons();
@@ -115,11 +115,13 @@ public partial class 剧本System
 
     private void Update()
     {
-        if (IsReaderHiding) return;
+        if (IsReaderHiding || IsStoryClosed) return;
+        // 不清空计时或切换自动/快进状态，菜单完全隐藏后继续原来的等待。
+        if (IsSettingsMenuOpen || Input.GetKeyUp(KeyCode.Escape)) return;
         if (UpdateReaderInput()) return;
 
         // 使用随组件启停的计时，避免面板隐藏后残留已被 Unity 停止的协程引用。
-        if (!isAutoPlay || isWaitingForChoice || 已储存剧本 == null || 已阅读 >= 已储存剧本.Length)
+        if (!isAutoPlay || isWaitingForChoice || 已储存剧本 == null)
         {
             autoPlayElapsed = 0f;
             return;
@@ -154,9 +156,8 @@ public partial class 剧本System
     private void OnDisable()
     {
         CancelReaderHide();
-        StopReaderShake();
+        StopStoryPlayback();
         // 隐藏剧情只暂停推进；玩家选择的自动和快进模式保留到下一段剧本。
         autoPlayElapsed = 0f;
-        GM.Ins?.AM.StopAll();
     }
 }

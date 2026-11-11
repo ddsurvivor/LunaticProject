@@ -42,7 +42,14 @@ using UnityEngine.SceneManagement;
             PLAYERPROFILE = new PLAYERPROFILE();
             PLAYERPROFILE.新游戏初始化数值();
             SceneManager.sceneLoaded += OnBattleSessionSceneLoaded;
+            SceneManager.sceneLoaded += OnSceneLoadedForUISound;
+            UISound.AttachToScene(SceneManager.GetActiveScene());
             DebugBattleScene();
+        }
+
+        private void OnSceneLoadedForUISound(Scene scene, LoadSceneMode mode)
+        {
+            UISound.AttachToScene(scene);
         }
 
         private void DebugBattleScene()
@@ -95,9 +102,8 @@ using UnityEngine.SceneManagement;
             FinishBattleSession(false);
             if (大地图System.instance != null && 大地图System.instance.剧情 != null)
             {
-                大地图System.instance.剧情.EndReadingStory();
                 // 战斗入场已有独立动画，阅读器立即关闭，不等待普通关闭淡出。
-                大地图System.instance.剧情.HideReaderImmediately();
+                大地图System.instance.剧情.CloseStory(null, true);
             }
             battleScene = sceneName;
             endLog = storyAfterBattle;

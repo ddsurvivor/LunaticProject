@@ -3,24 +3,31 @@ using System;
 using System.IO;
 using UnityEditor;
 using UnityEditor.Build;
-using UnityEditor.Build.Reporting;
 using UnityEngine;
 
 namespace SteamReviewSupport
 {
-    internal sealed class ReviewBuildValidator : IPreprocessBuildWithReport
+    internal sealed class ReviewBuildValidator : BuildPlayerProcessor
     {
-        public int callbackOrder => 0;
+        private const string DevelopmentAssets = "Assets/ReviewSupport/Editor/DevelopmentStreamingAssets";
 
-        /// <summary>审核开发包缺少模板、剧情或 AVG 场景时中止构建，避免上传不可用的入口。</summary>
-        public void OnPreprocessBuild(BuildReport report)
+        public override int callbackOrder => 0;
+
+        /// <summary>仅向开发包加入预置存档；Windows 开发包同时校验审核入口。</summary>
+        public override void PrepareForBuild(BuildPlayerContext context)
         {
-            if ((report.summary.options & BuildOptions.Development) == 0) return;
-            if (report.summary.platform != BuildTarget.StandaloneWindows64 && report.summary.platform != BuildTarget.StandaloneWindows)
+            var options = context.BuildPlayerOptions;
+            if ((options.options & BuildOptions.Development) == 0) return;
+            // 从 Editor 目录按文件加入，避免正式包或开发包携带源文件 meta。
+            foreach (string directory in new[] { "Datas", "ReviewSaves" })
+                foreach (string file in Directory.GetFiles(Path.Combine(DevelopmentAssets, directory)))
+                    if (!file.EndsWith(".meta", StringComparison.OrdinalIgnoreCase))
+                        context.AddAdditionalPathToStreamingAssets(file, directory + "/" + Path.GetFileName(file));
+            if (options.target != BuildTarget.StandaloneWindows64 && options.target != BuildTarget.StandaloneWindows)
                 return;
             try
             {
-                string source = Path.Combine(Application.streamingAssetsPath, "ReviewSaves");
+                string source = Path.Combine(DevelopmentAssets, "ReviewSaves");
                 var catalog = ReviewSaveStore.Load(source);
                 if (!Array.Exists(EditorBuildSettings.scenes, scene => scene.enabled && scene.path == "Assets/Scenes/AVG.unity"))
                     throw new InvalidDataException("Enable Assets/Scenes/AVG.unity in Build Settings.");

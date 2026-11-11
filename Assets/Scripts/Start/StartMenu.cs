@@ -55,7 +55,8 @@ public class StartMenu : MonoBehaviour
     
     public void OnClickContinue()
     {
-        savePanel.gameObject.SetActive(true);
+        // 主菜单只能读取存档，不能在此保存。
+        savePanel.OpenLoadOnly();
     }
 
     [Button("清除通关标记")]

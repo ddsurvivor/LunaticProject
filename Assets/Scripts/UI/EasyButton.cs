@@ -42,6 +42,8 @@ public class EasyButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
 
     private bool isHolding;
 
+    private bool pointerOver; // 抬起时仍在按钮内才算有效点击，用于播放点击音效
+
     private Vector3 textScale;
 
     private Vector3 btnScale;
@@ -60,9 +62,11 @@ public class EasyButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
             ButtonDown();
         }
 
-        if (Input.GetKeyUp(bindKey))
+        // Esc 可能刚在释放时打开菜单，未收到按下事件的关闭按钮不能处理这次释放。
+        if (Input.GetKeyUp(bindKey) && isHolding)
         {
             ButtonUp();
+            PlayClickSound();
         }
         if (holdTime!=0 && isHolding)
         {
@@ -122,18 +126,29 @@ public class EasyButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler,
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        if (pointerOver) PlayClickSound();
         ButtonUp();
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        pointerOver = true;
+        if (GM.Ins != null && GM.Ins.AM != null)
+            GM.Ins.AM.PlayAudio(AudioCueType.Hover);
         OnEnter.Invoke();
         
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        pointerOver = false;
         OnExit.Invoke();
+    }
+
+    private void PlayClickSound()
+    {
+        if (GM.Ins == null || GM.Ins.AM == null) return;
+        GM.Ins.AM.PlayAudio(AudioCueType.Click);
     }
     
     #endregion

@@ -24,8 +24,7 @@ public partial class 剧本System
     /// <summary>手动推进入口。Next 仍供自动播放和剧本内部指令使用。</summary>
     public bool TryAdvanceByClick()
     {
-        if (!isActiveAndEnabled || IsReaderHiding || isWaitingForChoice || 已储存剧本 == null ||
-            已阅读 >= 已储存剧本.Length ||
+        if (!isActiveAndEnabled || IsReaderHiding || IsStoryClosed || IsSettingsMenuOpen || isWaitingForChoice || 已储存剧本 == null ||
             Time.unscaledTime - lastManualAdvanceTime < manualAdvanceInterval)
             return false;
 

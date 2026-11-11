@@ -5,10 +5,6 @@ using UnityEngine;
 
 public class Center : MonoBehaviour
 {
-    
-    public static Center instance;
-    public Font[] Fonts;
-    
     public static string Language = "CN";
 
     public static int Languageint
@@ -76,13 +72,4 @@ public class Center : MonoBehaviour
 
     #endregion
 
-    private void Awake()
-    {
-        instance = this;
-    }
-
-    public Font GetFont()
-    {
-        return Fonts[Languageint];
-    }
 }

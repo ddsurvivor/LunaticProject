@@ -168,6 +168,19 @@ public class UITabController : MonoBehaviour
         indicatorBox.localPosition = Vector3.LerpUnclamped(indicatorMoveStart, destination, indicatorProgress);
     }
     
+    /// <summary>通过现有标签页入口打开设置，未配置设置页时返回 false。</summary>
+    public bool TryShowSettingsTab()
+    {
+        if (tabs == null) return false;
+        for (int i = 0; i < tabs.Count; i++)
+        {
+            if (tabs[i].subPage == null || tabs[i].subPage.GetComponent<SettingPanel>() == null) continue;
+            ShowTab(i);
+            return true;
+        }
+        return false;
+    }
+
     /// <summary>打开面板，并直接显示指定标签页。</summary>
     public void ShowTab(int index)
     {

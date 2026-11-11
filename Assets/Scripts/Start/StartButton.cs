@@ -20,6 +20,8 @@ public class StartButton : MonoBehaviour,IPointerEnterHandler, IPointerExitHandl
     [Header("点击抬起事件")]
     public UnityEvent onPointerUp;
 
+    private bool pointerOver; // 抬起时仍在按钮内才算有效点击，用于播放点击音效
+
     private void Reset()
     {
         // 自动查找Text和高亮对象（可选）
@@ -29,14 +31,17 @@ public class StartButton : MonoBehaviour,IPointerEnterHandler, IPointerExitHandl
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        pointerOver = true;
         if (buttonText != null)
             buttonText.color = Color.black;
         if (highlightObject != null)
             highlightObject.SetActive(true);
+        PlaySound(AudioCueType.Hover);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        pointerOver = false;
         if (buttonText != null)
             buttonText.color = Color.white;
         if (highlightObject != null)
@@ -46,6 +51,7 @@ public class StartButton : MonoBehaviour,IPointerEnterHandler, IPointerExitHandl
     public void OnPointerUp(PointerEventData eventData)
     {
         //Debug.Log("StartButton clicked!");
+        if (pointerOver) PlaySound(AudioCueType.Click);
         onPointerUp?.Invoke();
     }
 
@@ -53,5 +59,11 @@ public class StartButton : MonoBehaviour,IPointerEnterHandler, IPointerExitHandl
     public void OnPointerDown(PointerEventData eventData)
     {
         //Debug.Log("StartButton down!");
+    }
+
+    private void PlaySound(AudioCueType cue)
+    {
+        if (GM.Ins == null || GM.Ins.AM == null) return;
+        GM.Ins.AM.PlayAudio(cue);
     }
 }

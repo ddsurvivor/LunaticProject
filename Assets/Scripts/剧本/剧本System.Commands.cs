@@ -249,7 +249,6 @@ public partial class 剧本System
                 autoPlayElapsed = 0f;
                 选项按钮.Clear();
                 int choiceStartLine = 已阅读;// 【新增】记录当前 CHOICE 指令的行号，作为相对索引计算的基准
-                curBranchName = curPartName;// 遇到分支则存储一次
                 var prams = 指令切割(key);
                 int 选项长度 = Convert.ToInt32(prams[0]);
                 for (int i = 0; i < 选项长度; i++)
@@ -312,7 +311,7 @@ public partial class 剧本System
                     text.GetComponent<Button>().onClick.AddListener(() =>
                     {
                         if (!isWaitingForChoice) return;
-                        GM.Ins.AM.播放音效("Key");
+                        PlayStorySound("Key");
 
                         foreach (var VARIABLE in 选项按钮)
                         {
@@ -375,19 +374,9 @@ public partial class 剧本System
 
             if (command == Center.Command_Gameover)
             {
-                //大地图System.instance.失败();// 打开失败页面
-                // 自动保存
-                //进度System.存档("读档");
-                //已储存剧本 = 记录上段剧情;
-                
-                DOVirtual.DelayedCall(0.5f ,()=>
-                {
-                    // 退回到上一段剧情
-                    设置新剧本(curBranchName);
-                    Next();
-                    //刷新();
-                }, false);
+                // 失败后不再延迟重播分支，避免关闭后的旧剧情重新启动音效。
                 大地图System.instance.失败();
+                return;
             }
 
             if (key.Contains(Center.Command_If))
@@ -449,6 +438,8 @@ public partial class 剧本System
 
             if (key.Contains(Center.Command_Sound))
             {
+                // END 后仍可更新地图和时间，但不能再启动同一行中的剧情音效。
+                if (storyPlaybackStopped) continue;
                 var prams = 指令切割(key);
                 if (GM.Ins.AM != null)
                 {
@@ -462,12 +453,12 @@ public partial class 剧本System
                         else
                         {
                             int loopParam = Convert.ToInt32(prams[1]);
-                            GM.Ins.AM.播放音效(prams[0], loopParam);
+                            PlayStorySound(prams[0], loopParam);
                         }
                     }
                     else
                     {
-                        GM.Ins.AM.播放音效(prams[0]);
+                        PlayStorySound(prams[0]);
                     }
                 }
                 else
@@ -683,8 +674,7 @@ public partial class 剧本System
 
             if (key.Contains(Center.Command_Close))
             {
-                EndReadingStory();
-                HideReader();
+                CloseStory();
             }
 
             if (key.Contains(Center.Command_Chapter))
@@ -708,7 +698,7 @@ public partial class 剧本System
                     float.TryParse(prams[1], out float fadeTime);
                     float.TryParse(prams[1], out float duration);
                     大地图System.instance.chapterPanel.ShowChapter(title, fadeTime, duration);
-                    GM.Ins.AM.播放音效("chapter-change",1);
+                    PlayStorySound("chapter-change", 1);
                 }
             }
 
@@ -723,7 +713,7 @@ public partial class 剧本System
                     float.TryParse(prams[1], out float fadeTime);
                     float.TryParse(prams[1], out float duration);
                     大地图System.instance.chapterPanel.ShowChapters(title, fadeTime, duration);
-                    GM.Ins.AM.播放音效("day-change",1);
+                    PlayStorySound("day-change", 1);
                 }
             }
 
@@ -804,16 +794,14 @@ public partial class 剧本System
                 {
                     string sceneName = prams[0];
                     if (!GM.Ins.CanLoadScene(sceneName)) continue;
-                    EndReadingStory();
-                    HideReader(() => GM.Ins.LoadScene(sceneName));
+                    CloseStory(() => GM.Ins.LoadScene(sceneName));
                 }
             }
 
             if (key.Contains(Center.Command_Finish))
             {
-                EndReadingStory();
                 LocalGameProgress.MarkGameFinished();
-                HideReader(() => 大地图System.instance.endingCreditsPlayer.Play());
+                CloseStory(() => 大地图System.instance.endingCreditsPlayer.Play());
             }
         }
     }

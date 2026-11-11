@@ -83,8 +83,11 @@ public class DataManager : SerializedMonoBehaviour
             string legacyDirectory = Path.Combine(Application.streamingAssetsPath, "Datas");
             if (Directory.Exists(legacyDirectory))
             {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                // 随包预置进度仅供开发调试，正式包不导入这些存档槽位。
                 for (int i = 0; i < saveSlotCount; i++)
                     CopyLegacySave(legacyDirectory, directory, $"PlayerProfiles_{i}.json");
+#endif
                 CopyLegacySave(legacyDirectory, directory, "PlayerSettingsData.json");
             }
 

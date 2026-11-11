@@ -28,7 +28,11 @@ namespace SteamReviewSupport
 
         private void Initialize()
         {
+#if UNITY_EDITOR
+            sourceDirectory = Path.Combine(Application.dataPath, "ReviewSupport/Editor/DevelopmentStreamingAssets/ReviewSaves");
+#else
             sourceDirectory = Path.Combine(Application.streamingAssetsPath, "ReviewSaves");
+#endif
             saveDirectory = Path.Combine(Application.persistentDataPath, "Datas");
             try
             {
@@ -116,7 +120,7 @@ namespace SteamReviewSupport
             // 每次反序列化原始模板，不依赖已被游玩修改的用户槽位。
             var profile = JsonConvert.DeserializeObject<PLAYERPROFILE>(ReviewSaveStore.ReadTemplate(sourceDirectory, entry));
             if (大地图System.instance != null && 大地图System.instance.剧情 != null)
-                大地图System.instance.剧情.EndReadingStory();
+                大地图System.instance.剧情.CloseStory(null, true);
             PlayingSystem.特殊剧情 = "";
             Time.timeScale = 1f;
             GM.Ins.PLAYERPROFILE = profile;

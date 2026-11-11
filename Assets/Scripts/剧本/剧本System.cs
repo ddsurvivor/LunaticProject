@@ -70,7 +70,6 @@ public partial class 剧本System : MonoBehaviour
     private List<string> choiceList = new List<string>();//存储选项的列表
 
     
-    private string curBranchName = "";//当前分支名
 
     public void 设置新剧本(string t)
     {
@@ -125,11 +124,13 @@ public partial class 剧本System : MonoBehaviour
     [ContextMenu("下一句")]
     public void Next()
     {
-        if (!isActiveAndEnabled || IsReaderHiding || isWaitingForChoice || 已储存剧本 == null) return;
+        if (!isActiveAndEnabled || IsReaderHiding || storyPlaybackStopped || IsSettingsMenuOpen || isWaitingForChoice || 已储存剧本 == null) return;
         autoPlayElapsed = 0f;
         进度条.normalizedPosition = new Vector2(0, -1f);
         if (已阅读 >= 已储存剧本.Length)
         {
+            // 最后一行保留到下一次推进，再统一关闭没有显式 END 的剧情。
+            CloseStory();
             return;
         }
 
@@ -144,7 +145,7 @@ public partial class 剧本System : MonoBehaviour
         currentTypewriter = null;
         当文本更新时?.Invoke();
 
-        GM.Ins.AM.播放音效("Key");
+        PlayStorySound("Key");
         进行指令(当前事件);
         if (!isActiveAndEnabled || IsReaderHiding) return;
         生成剧本预制体();
@@ -167,10 +168,10 @@ public partial class 剧本System : MonoBehaviour
 
     public void OnClickSkip(int num = 0)
     {
-        if (IsReaderHiding || isWaitingForChoice || 已储存剧本 == null || 已阅读 >= 已储存剧本.Length) return;
+        if (IsReaderHiding || IsStoryClosed || IsSettingsMenuOpen || isWaitingForChoice || 已储存剧本 == null || 已阅读 >= 已储存剧本.Length) return;
         StopAutoPlay();//停止自动播放
         Debug.Log($"跳过{已储存剧本.Length - 已阅读}条剧本，遇到选项时停止");
-        GM.Ins.AM.播放音效("Key");
+        PlayStorySound("Key");
         int skipCount = 已储存剧本.Length - 已阅读 - num;
         for (int i = 0; i < skipCount; i++)
         {

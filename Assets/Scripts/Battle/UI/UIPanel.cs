@@ -38,6 +38,7 @@ public class UIPanel : MonoBehaviour
 
     public virtual void ShowPanel()
     {
+        UISound.AttachToObject(gameObject);
         gameObject.SetActive(true);
     }
     public virtual void ClosePanel()
@@ -77,6 +78,7 @@ public class UIPanel : MonoBehaviour
 
     public void Open()
     {
+        UISound.AttachToObject(gameObject);
         gameObject.SetActive(true);
         StartCoroutine(OpenSequence());
     }

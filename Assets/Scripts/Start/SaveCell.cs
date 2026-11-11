@@ -11,6 +11,32 @@ public class SaveCell : SavePanel
     public int index;
     public Text slotText;
     public GameObject loadButton;
+    public GameObject saveButton;
+
+    private Vector2 loadButtonDefaultPos; // 完整模式下载入按钮的位置
+    private bool loadPosCached;
+
+    /// <summary>只读载入模式下隐藏保存按钮，载入按钮右移顶替保存位置。</summary>
+    public void SetLoadOnly(bool loadOnly)
+    {
+        if (saveButton == null || loadButton == null)
+        {
+            if (saveButton != null) saveButton.SetActive(!loadOnly);
+            return;
+        }
+
+        var loadRect = (RectTransform)loadButton.transform;
+        var saveRect = (RectTransform)saveButton.transform;
+
+        if (!loadPosCached)
+        {
+            loadButtonDefaultPos = loadRect.anchoredPosition;
+            loadPosCached = true;
+        }
+
+        saveButton.SetActive(!loadOnly);
+        loadRect.anchoredPosition = loadOnly ? saveRect.anchoredPosition : loadButtonDefaultPos;
+    }
 
     public void SetData(PLAYERPROFILE profile)
     {
