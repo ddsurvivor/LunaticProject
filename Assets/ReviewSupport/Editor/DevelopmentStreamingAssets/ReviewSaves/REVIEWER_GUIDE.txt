@@ -1,6 +1,7 @@
-STEAM REVIEW - WINDOWS DEVELOPMENT BUILD
+STEAM REVIEW - UNITY EDITOR PLAY MODE
 
-Launch the game through Steam and wait for the title screen.
+Enter Play Mode from StartScene in the Unity Editor and focus the Game view.
+Player builds, including Development Builds, do not include this module.
 No manual save-file placement is required. Missing review saves are installed
 automatically in the current Windows user's save directory.
 
@@ -17,7 +18,7 @@ Ctrl+Alt+8  Suicide reference (EXC1-3), load slot 09.
 Ctrl+Alt+9  Restore all seven review slots; previous files are backed up first.
 Ctrl+Alt+0 Open the actual save directory for this Windows account.
 
-Chapter jumps read pristine bundled templates even if the load slots contain
+Chapter jumps read pristine editor templates even if the load slots contain
 old saves. Jumping replaces unsaved progress; it does not overwrite disk saves.
 Keys are ignored during transitions. Use them after the title screen is ready.
 After restoring slots while the load menu is closed, reopen it to see the files.
@@ -38,6 +39,6 @@ Windows default for current project settings:
 Use Ctrl+Alt+0 or the [SteamReview] log if the product settings/path differ.
 Restore backups: Datas/ReviewBackups/<UTC timestamp and unique id>/
 
-These helpers are available in a Windows Development Player and Editor Play Mode.
+These helpers are available only in Editor Play Mode.
 In the Editor, start Play Mode from StartScene and focus the Game view for keys.
 The default game language and all normal story content remain as configured.

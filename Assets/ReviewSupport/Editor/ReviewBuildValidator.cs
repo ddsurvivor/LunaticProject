@@ -1,7 +1,5 @@
 #if UNITY_EDITOR
-using System;
 using System.IO;
-using UnityEditor;
 using UnityEditor.Build;
 using UnityEngine;
 
@@ -9,42 +7,17 @@ namespace SteamReviewSupport
 {
     internal sealed class ReviewBuildValidator : BuildPlayerProcessor
     {
-        private const string DevelopmentAssets = "Assets/ReviewSupport/Editor/DevelopmentStreamingAssets";
-
         public override int callbackOrder => 0;
 
-        /// <summary>仅向开发包加入预置存档；Windows 开发包同时校验审核入口。</summary>
+        /// <summary>所有 Player 构建均禁止携带调试存档；发现源目录残留时中止构建。</summary>
         public override void PrepareForBuild(BuildPlayerContext context)
         {
-            var options = context.BuildPlayerOptions;
-            if ((options.options & BuildOptions.Development) == 0) return;
-            // 从 Editor 目录按文件加入，避免正式包或开发包携带源文件 meta。
-            foreach (string directory in new[] { "Datas", "ReviewSaves" })
-                foreach (string file in Directory.GetFiles(Path.Combine(DevelopmentAssets, directory)))
-                    if (!file.EndsWith(".meta", StringComparison.OrdinalIgnoreCase))
-                        context.AddAdditionalPathToStreamingAssets(file, directory + "/" + Path.GetFileName(file));
-            if (options.target != BuildTarget.StandaloneWindows64 && options.target != BuildTarget.StandaloneWindows)
-                return;
-            try
-            {
-                string source = Path.Combine(DevelopmentAssets, "ReviewSaves");
-                var catalog = ReviewSaveStore.Load(source);
-                if (!Array.Exists(EditorBuildSettings.scenes, scene => scene.enabled && scene.path == "Assets/Scenes/AVG.unity"))
-                    throw new InvalidDataException("Enable Assets/Scenes/AVG.unity in Build Settings.");
-                string sceneText = File.ReadAllText("Assets/Scenes/AVG.unity");
-                foreach (var entry in catalog.entries)
-                {
-                    if (Resources.Load<TextAsset>("Story/" + entry.script) == null)
-                        throw new InvalidDataException("Missing story: " + entry.script);
-                    if (!sceneText.Contains("m_Name: " + entry.map + "\n") && !sceneText.Contains("m_Name: " + entry.map + "\r\n"))
-                        throw new InvalidDataException("Missing map name in AVG: " + entry.map);
-                }
-                Debug.Log($"[SteamReview] Validated {catalog.entries.Length} review entries for Windows Development Build.");
-            }
-            catch (Exception exception)
-            {
-                throw new BuildFailedException("Steam review data validation failed: " + exception.Message);
-            }
+            string streamingAssets = Application.streamingAssetsPath;
+            // 调试模板只保留在 Editor 目录，避免 Unity 自动将误放的文件复制进包。
+            if (Directory.Exists(Path.Combine(streamingAssets, "ReviewSaves")) ||
+                (Directory.Exists(streamingAssets) &&
+                 Directory.GetFiles(streamingAssets, "PlayerProfiles_*.json", SearchOption.AllDirectories).Length > 0))
+                throw new BuildFailedException("StreamingAssets 中存在调试存档，请将其移至 Assets/ReviewSupport/Editor/DevelopmentStreamingAssets 后重新构建。");
         }
     }
 }

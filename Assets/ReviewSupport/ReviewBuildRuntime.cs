@@ -1,4 +1,4 @@
-#if UNITY_EDITOR || (DEVELOPMENT_BUILD && UNITY_STANDALONE_WIN)
+#if UNITY_EDITOR
 using System;
 using System.IO;
 using Newtonsoft.Json;
@@ -17,7 +17,7 @@ namespace SteamReviewSupport
         private bool showHelp = true; // 保留 AVG 内手动切换的显示偏好。
         private string status = "Starting review support...";
 
-        /// <summary>在编辑器 Play Mode 或 Windows Development Player 首场景 Awake 前安装审核档；无需场景挂载。</summary>
+        /// <summary>仅在编辑器 Play Mode 首场景 Awake 前安装审核档；无需场景挂载，不进入 Player 构建。</summary>
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
         {
@@ -28,11 +28,7 @@ namespace SteamReviewSupport
 
         private void Initialize()
         {
-#if UNITY_EDITOR
             sourceDirectory = Path.Combine(Application.dataPath, "ReviewSupport/Editor/DevelopmentStreamingAssets/ReviewSaves");
-#else
-            sourceDirectory = Path.Combine(Application.streamingAssetsPath, "ReviewSaves");
-#endif
             saveDirectory = Path.Combine(Application.persistentDataPath, "Datas");
             try
             {
@@ -176,8 +172,7 @@ namespace SteamReviewSupport
         private void RefreshHelp()
         {
             if (helpText == null) return;
-            string mode = Application.isEditor ? "EDITOR PLAY MODE" : "DEVELOPMENT BUILD";
-            string text = "STEAM REVIEW / " + mode + "\nCtrl+Alt+1: Hide/show this guide\n";
+            string text = "STEAM REVIEW / EDITOR PLAY MODE\nCtrl+Alt+1: Hide/show this guide\n";
             if (catalog != null)
                 foreach (var entry in catalog.entries)
                     text += $"Ctrl+Alt+{entry.shortcutNumber}: {entry.title} [slot {entry.slot + 1:00}]\n";

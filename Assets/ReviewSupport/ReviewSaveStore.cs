@@ -1,4 +1,4 @@
-#if DEVELOPMENT_BUILD || UNITY_EDITOR
+#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace SteamReviewSupport
 {
-    /// <summary>审核入口清单项，供运行时和构建前校验共用。</summary>
+    /// <summary>仅供编辑器 Play Mode 使用的审核入口清单项。</summary>
     public sealed class ReviewEntry
     {
         public int shortcutNumber { get; set; } // Ctrl+Alt+2 至 Ctrl+Alt+8 的数字键编号。
@@ -19,7 +19,7 @@ namespace SteamReviewSupport
         public int chapter { get; set; }
     }
 
-    /// <summary>随包审核入口集合。</summary>
+    /// <summary>编辑器调试用的审核入口集合。</summary>
     public sealed class ReviewCatalog
     {
         public ReviewEntry[] entries { get; set; }
