@@ -436,29 +436,34 @@ public partial class 剧本System
                 清空文本();
             }
 
-            if (key.Contains(Center.Command_Sound))
+            if (command == Center.Command_Sound)
             {
-                // END 后仍可更新地图和时间，但不能再启动同一行中的剧情音效。
-                if (storyPlaybackStopped) continue;
+                if (storyPlaybackStopped || !isActiveAndEnabled || IsReaderHiding || GM.Ins.IsTransitioning) continue;
                 var prams = 指令切割(key);
+                if (prams == null || prams.Length < 1 || prams.Length > 2 || string.IsNullOrWhiteSpace(prams[0]))
+                {
+                    Debug.LogWarning($"SOUND 指令格式错误：{key}");
+                    continue;
+                }
+                string audioName = prams[0].Trim();
                 if (GM.Ins.AM != null)
                 {
                     if (prams.Length >= 2)
                     {
                         // 检查是否为STOP命令
-                        if (prams[1].ToUpper() == "STOP")
+                        if (string.Equals(prams[1].Trim(), "STOP", StringComparison.OrdinalIgnoreCase))
                         {
-                            GM.Ins.AM.停止音效(prams[0]);
+                            GM.Ins.AM.停止音效(audioName);
                         }
-                        else
+                        else if (int.TryParse(prams[1].Trim(), out int loopParam))
                         {
-                            int loopParam = Convert.ToInt32(prams[1]);
-                            PlayStorySound(prams[0], loopParam);
+                            PlayStorySound(audioName, loopParam);
                         }
+                        else Debug.LogWarning($"SOUND 循环参数错误：{key}");
                     }
                     else
                     {
-                        PlayStorySound(prams[0]);
+                        PlayStorySound(audioName);
                     }
                 }
                 else
@@ -467,14 +472,22 @@ public partial class 剧本System
                 }
             }
 
-            if (key.Contains(Center.Command_Music))
+            if (command == Center.Command_Music)
             {
+                if (storyPlaybackStopped || !isActiveAndEnabled || IsReaderHiding || GM.Ins.IsTransitioning) continue;
                 var prams = 指令切割(key);
+                // 兼容现有 MUSIC(名称,1)；音乐通道始终循环，旧第二参数不参与音效循环控制。
+                if (prams == null || prams.Length < 1 || prams.Length > 2 || string.IsNullOrWhiteSpace(prams[0]))
+                {
+                    Debug.LogWarning($"MUSIC 指令格式错误：{key}");
+                    continue;
+                }
+                string audioName = prams[0].Trim();
                 if (GM.Ins.AM != null)
                 {
-                    if (prams[0] != "STOP")
+                    if (!string.Equals(audioName, "STOP", StringComparison.OrdinalIgnoreCase))
                     {
-                        GM.Ins.AM.播放音乐(prams[0]);
+                        GM.Ins.AM.播放音乐(audioName);
                     }
                     else
                     {

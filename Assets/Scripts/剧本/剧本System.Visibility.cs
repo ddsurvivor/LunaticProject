@@ -12,7 +12,8 @@ public partial class 剧本System
     private bool readerHiding;
     private bool readerDefaultInteractable;
     private bool readerDefaultBlocksRaycasts;
-    private bool storyPlaybackStopped; // 同一次关闭只清理一次，避免延迟禁用时停止新界面的音效。
+    private bool storyPlaybackStopped = true; // 未打开及已关闭的阅读器不干扰新界面的音频。
+    private bool isSkippingStory; // 批量跳过及递归 NEXT 期间抑制正文音效。
 
     public bool IsReaderHiding => readerHiding;
 
@@ -21,7 +22,9 @@ public partial class 剧本System
 
     private void PlayStorySound(string audioName, int loop = -1)
     {
-        if (!storyPlaybackStopped) GM.Ins?.AM?.播放音效(audioName, loop);
+        if (!storyPlaybackStopped && !isSkippingStory && isActiveAndEnabled && !IsReaderHiding &&
+            GM.Ins != null && !GM.Ins.IsTransitioning)
+            GM.Ins.AM?.播放音效(audioName, loop);
     }
 
     private CanvasGroup ReaderCanvasGroup
@@ -49,7 +52,7 @@ public partial class 剧本System
     /// <summary>结束当前剧情并关闭阅读器；不写入任务完成进度。</summary>
     public void CloseStory() => CloseStory(null);
 
-    /// <summary>统一结束剧情、清理音效并关闭阅读器；回调在隐藏后执行，立即关闭时取消旧回调。</summary>
+    /// <summary>统一结束剧情、停止音乐和音效并关闭阅读器；回调在隐藏后执行，立即关闭时取消旧回调。</summary>
     public void CloseStory(Action onClosed, bool immediately = false)
     {
         EndReadingStory();
@@ -64,10 +67,10 @@ public partial class 剧本System
         }
     }
 
-    /// <summary>立即清理剧情音效后淡出阅读器；保留未完成剧情的读档状态。</summary>
+    /// <summary>立即停止音乐和音效后淡出阅读器；保留未完成剧情的读档状态。</summary>
     public void HideReader() => HideReader(null);
 
-    /// <summary>立即清理剧情音效后淡出阅读器，隐藏后执行回调；不标记剧情完成。</summary>
+    /// <summary>立即停止音乐和音效后淡出阅读器，隐藏后执行回调；不标记剧情完成。</summary>
     public void HideReader(Action onHidden)
     {
         StopStoryPlayback();
@@ -99,7 +102,7 @@ public partial class 剧本System
             });
     }
 
-    /// <summary>立即清理剧情音效并隐藏阅读器，取消旧关闭回调；不标记剧情完成。</summary>
+    /// <summary>立即停止音乐和音效并隐藏阅读器，取消旧关闭回调；不标记剧情完成。</summary>
     public void HideReaderImmediately()
     {
         StopStoryPlayback();
@@ -113,8 +116,9 @@ public partial class 剧本System
         StopReaderShake();
         if (storyPlaybackStopped) return;
         storyPlaybackStopped = true;
-        // StopAll 同时使未完成的音效加载回调失效，避免关闭后重新播放。
+        // 同时取消尚未完成的音乐和音效加载，避免关闭后由旧回调重新播放。
         GM.Ins?.AM?.StopAll();
+        GM.Ins?.AM?.停止音乐();
     }
 
     /// <summary>取消关闭动画及回调，防止旧操作影响新剧情。</summary>
