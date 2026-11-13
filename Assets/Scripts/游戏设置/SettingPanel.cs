@@ -60,7 +60,7 @@ public class SettingPanel : UIPanel
 
     private void Start()
     {
-        ConfigureResolutionDropdown();
+        ConfigureDropdownRows(resolutionDropdown);
         InitTabs();
         BindSliderEvents(); 
         LoadAndShowSettings();
@@ -73,14 +73,13 @@ public class SettingPanel : UIPanel
             restoreDefaultsButton.onClick.AddListener(RestoreDefaultSettings);*/
     }
 
-    /// <summary>调整分辨率选项行高，避免文字被模板裁切。</summary>
-    private void ConfigureResolutionDropdown()
+    private void ConfigureDropdownRows(UnityEngine.UI.Dropdown dropdown)
     {
-        if (resolutionDropdown == null || resolutionDropdown.template == null || resolutionDropdown.itemText == null)
+        if (dropdown == null || dropdown.template == null || dropdown.itemText == null)
             return;
 
-        // 新 UI 使用 22 号字，旧模板的行高仍为 20，Text 的垂直裁切会隐藏整行文字。
-        var label = resolutionDropdown.itemText;
+        // 按字体计算选项行高，避免旧模板的 Text 垂直裁切隐藏整行文字。
+        var label = dropdown.itemText;
         // Dropdown 的模板平时处于隐藏状态，父级查询必须包含未激活节点。
         var item = label.GetComponentInParent<Toggle>(true);
         if (item == null || !(item.transform is RectTransform itemRect)) return;
@@ -91,7 +90,31 @@ public class SettingPanel : UIPanel
         label.verticalOverflow = VerticalWrapMode.Overflow;
         label.horizontalOverflow = HorizontalWrapMode.Overflow;
         label.raycastTarget = false;
-        resolutionDropdown.RefreshShownValue();
+        dropdown.RefreshShownValue();
+    }
+
+    private void ConfigureLanguageDropdown()
+    {
+        if (languageDropdown == null) return;
+
+        // 当前仅开放中文，保留下拉交互，并修正展开后的选项行高。
+        languageDropdown.Hide();
+        languageDropdown.ClearOptions();
+        languageDropdown.AddOptions(new List<string> { "中文" });
+        languageDropdown.SetValueWithoutNotify(0);
+        ConfigureDropdownRows(languageDropdown);
+        if (languageDropdown.template != null)
+        {
+            // Dropdown 会按选项数量收缩弹窗；顶部固定到输入框底部，防止居中收缩后留下大段空隙。
+            var template = languageDropdown.template;
+            template.anchorMin = new Vector2(0f, 0f);
+            template.anchorMax = new Vector2(1f, 0f);
+            template.pivot = new Vector2(0.5f, 1f);
+            template.anchoredPosition = new Vector2(0f, -4f);
+            template.sizeDelta = new Vector2(0f, template.sizeDelta.y);
+        }
+        languageDropdown.RefreshShownValue();
+        languageDropdown.interactable = true;
     }
 
     #region 选项卡切换逻辑 (Tab System)
@@ -208,6 +231,8 @@ public class SettingPanel : UIPanel
     /// <summary>读取当前设置，并刷新各项控件。</summary>
     public void LoadAndShowSettings()
     {
+        ConfigureLanguageDropdown();
+
         // 核心底线保护：如果直接在主菜单场景单玩、且没有通过初始化场景启动 GM，直接拦截，防止崩溃
         if (GM.Ins == null || GM.Ins.DM == null || GM.Ins.DM.settingsData == null)
         {
@@ -230,7 +255,6 @@ public class SettingPanel : UIPanel
         UpdateSliderText(currentSettings.fastForwardInterval, fastForwardIntervalValueText, DisplayType.Seconds);
 
         if (branchPromptToggle != null) branchPromptToggle.isOn = currentSettings.showImportantBranchPrompt;
-        if (languageDropdown != null) languageDropdown.value = currentSettings.languageIndex;
 
         // ==========================================
         // 2. 刷新画面页面（所有组件各自独立保护）
@@ -278,12 +302,11 @@ public class SettingPanel : UIPanel
         PlayerSettingsData dataToUpdate = GM.Ins.DM.settingsData;
 
         // 工业级无痛存储：只有被拖入场景的 UI 组件才会更新数据。
-        // 未配置的 UI 组件将被跳过，它们在配置数据文件（JSON）中的原有值将完美保留，不会被清零或报错！
+        // 未配置的 UI 组件保留原值；语言由 ApplySettings 统一固定为中文。
         if (textSpeedSlider != null) dataToUpdate.textSpeed = textSpeedSlider.value;
         if (autoPlayDelaySlider != null) dataToUpdate.autoPlayDelay = autoPlayDelaySlider.value;
         if (fastForwardIntervalSlider != null) dataToUpdate.fastForwardInterval = fastForwardIntervalSlider.value;
         if (branchPromptToggle != null) dataToUpdate.showImportantBranchPrompt = branchPromptToggle.isOn;
-        if (languageDropdown != null) dataToUpdate.languageIndex = languageDropdown.value;
 
         if (fullScreenToggle != null) dataToUpdate.isFullScreen = fullScreenToggle.isOn;
         if (resolutionDropdown != null) dataToUpdate.resolutionIndex = resolutionDropdown.value;

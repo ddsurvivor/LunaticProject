@@ -153,52 +153,36 @@ public partial class 剧本System : MonoBehaviour
         进度条.normalizedPosition = new Vector2(0, -1f);
     }
 
-    /// <summary>跳过一行正文并保留剧情状态指令；选项和控制行交回正常推进入口。</summary>
+    /// <summary>直接跳过一行正文，不执行该行指令；选项和控制行保留给正常推进入口。</summary>
     public void SkipNext()
     {
         if (IsStoryClosed || isWaitingForChoice || 已储存剧本 == null || 已阅读 >= 已储存剧本.Length - 1)
             return;
 
         // 保留指令行，由 OnClickSkip 退出循环后通过 Next 正常执行并显示选项。
-        if (当前说话内容.Contains(Center.Tag_notspawn) ||
-            (!string.IsNullOrEmpty(当前事件) && 当前事件.Contains(Center.Command_Choice)))
-            return;
-
-        var script = 已储存剧本;
-        int line = 已阅读;
-        // 变量、检定及奖励仍按原顺序执行，否则后续分支会缺少依据。
-        进行指令(当前事件);
-        if (已储存剧本 == script && 已阅读 == line && isActiveAndEnabled && !IsReaderHiding &&
-            !IsStoryClosed && !isWaitingForChoice && !GM.Ins.IsTransitioning)
-            已阅读++;
+        if (!IsSkipBoundary(已阅读)) 已阅读++;
     }
 
-    /// <summary>停止旧音效并静默跳过正文，保留剧情状态与音乐指令，遇到选项或转场停止。</summary>
+    private bool IsSkipBoundary(int line)
+    {
+        var row = 已储存剧本[line];
+        return row[2].Contains(Center.Tag_notspawn) ||
+               (!string.IsNullOrEmpty(row[0]) && row[0].Contains(Center.Command_Choice));
+    }
+
+    /// <summary>停止旧音效并直接跳过正文；中间指令不执行，只正常推进选项、控制行或目标末行一次。</summary>
     public void OnClickSkip(int num = 0)
     {
-        if (isSkippingStory || !isActiveAndEnabled || IsReaderHiding || IsStoryClosed || IsSettingsMenuOpen ||
+        if (!isActiveAndEnabled || IsReaderHiding || IsStoryClosed || IsSettingsMenuOpen ||
             GM.Ins.IsTransitioning || isWaitingForChoice || 已储存剧本 == null || 已阅读 >= 已储存剧本.Length) return;
         StopAutoPlay();//停止自动播放
         Debug.Log($"跳过{已储存剧本.Length - 已阅读}条剧本，遇到选项时停止");
         GM.Ins.AM.StopAll();
-        isSkippingStory = true;
-        try
-        {
-            int skipCount = 已储存剧本.Length - 已阅读 - num;
-            for (int i = 0; i < skipCount; i++)
-            {
-                var previousScript = 已储存剧本;
-                int previousLine = 已阅读;
-                SkipNext();
-                if (已储存剧本 != previousScript || !isActiveAndEnabled || IsReaderHiding ||
-                    IsStoryClosed || isWaitingForChoice || GM.Ins.IsTransitioning) return;
-                if (已阅读 == previousLine) break;
-            }
-        }
-        finally
-        {
-            isSkippingStory = false;
-        }
+        // 只查找落点，不执行途经行，避免批量加载音频、CG及递归跳转阻塞点击。
+        int targetLine = Math.Max(已阅读, 已储存剧本.Length - Math.Max(1, num));
+        int line = 已阅读;
+        while (line < targetLine && !IsSkipBoundary(line)) line++;
+        已阅读 = line;
 
         // 只执行一次停止处的内容；CHOICE 会进入等待选择状态，不再跳过选项行。
         Next();

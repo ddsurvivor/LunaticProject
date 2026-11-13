@@ -13,7 +13,6 @@ public partial class 剧本System
     private bool readerDefaultInteractable;
     private bool readerDefaultBlocksRaycasts;
     private bool storyPlaybackStopped = true; // 未打开及已关闭的阅读器不干扰新界面的音频。
-    private bool isSkippingStory; // 批量跳过及递归 NEXT 期间抑制正文音效。
 
     public bool IsReaderHiding => readerHiding;
 
@@ -22,7 +21,7 @@ public partial class 剧本System
 
     private void PlayStorySound(string audioName, int loop = -1)
     {
-        if (!storyPlaybackStopped && !isSkippingStory && isActiveAndEnabled && !IsReaderHiding &&
+        if (!storyPlaybackStopped && isActiveAndEnabled && !IsReaderHiding &&
             GM.Ins != null && !GM.Ins.IsTransitioning)
             GM.Ins.AM?.播放音效(audioName, loop);
     }

@@ -8,7 +8,7 @@ public class PlayerSettingsData
     public float autoPlayDelay = 3f;           // 正文自然显示完成后的等待秒数
     public float fastForwardInterval = 0.3f;    // 快进每条正文的固定间隔秒数
     public bool showImportantBranchPrompt = true;// 是否提示重要分支
-    public int languageIndex = 0;               // 显示语言 (0: 简体中文, 1: 英文 等)
+    public int languageIndex = 0;               // 当前仅开放中文，保留索引字段兼容旧设置。
 
     // === 2. 画面设置 ===
     public bool isFullScreen = false;

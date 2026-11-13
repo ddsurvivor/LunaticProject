@@ -210,6 +210,8 @@ public class DataManager : SerializedMonoBehaviour
     public void ApplySettings(PlayerSettingsData newData)
     {
         if (newData == null) return;
+        // 当前仅开放中文，旧设置中的其他语言索引在加载和保存时统一归零。
+        newData.languageIndex = 0;
         settingsData = newData;
 
         // ==========================================

@@ -6,11 +6,10 @@ using System.Text.RegularExpressions;
 using OfficeOpenXml;
 using UnityEditor;
 using UnityEditor.Build;
-using UnityEditor.Build.Reporting;
 using UnityEngine;
 
-/// <summary>构建时临时移出 EXC 剧本未使用的图片，结束后恢复。</summary>
-public class ExCGImageBuildProcessor : BuildPlayerProcessor, IPostprocessBuildWithReport
+/// <summary>通过菜单手动迁移及恢复 EXC 剧本未使用的图片，不参与构建或编辑器自动恢复。</summary>
+public static class ExCGImageBuildProcessor
 {
     private const string ImageRoot = "Assets/Resources/CG";
     private const string StoryRoot = "Assets/Resources/Story";
@@ -18,13 +17,8 @@ public class ExCGImageBuildProcessor : BuildPlayerProcessor, IPostprocessBuildWi
     private const string ManifestPath = StagingRoot + "/manifest.json";
     private const string ReportPath = "Library/ExCGImageBuildReport.json";
     private const string ReleaseRoot = @"E:\GameDev\2 Release\LunaticAVG";
-    private static bool changingAssets;
-    private static BuildReport pendingBuildReport;
     private static readonly Regex ImageCommand = new Regex(
         @"^\s*(CG|FULLCG|HALFCG|CGLOG|SPEAK)\s*\(([^,)]*)", RegexOptions.Compiled);
-
-    // 必须在 Addressables 构建前移出图片。
-    public override int callbackOrder => -1000;
 
     [Serializable]
     public class ImageMove
@@ -122,39 +116,27 @@ public class ExCGImageBuildProcessor : BuildPlayerProcessor, IPostprocessBuildWi
         return relative.Substring(0, relative.Length - Path.GetExtension(relative).Length);
     }
 
-    public override void PrepareForBuild(BuildPlayerContext buildPlayerContext)
+    /// <summary>手动移出未使用的图片及 meta；已有清单时拒绝重复迁移，中断后须手动恢复。</summary>
+    [MenuItem("Tools/CG构建/手动迁移未使用的图片")]
+    public static void StageUnusedImages()
     {
-        Restore();
+        if (File.Exists(ManifestPath))
+            throw new InvalidOperationException("已有 CG 迁移清单，请先通过菜单恢复临时移出的图片。");
         var report = Scan();
-        report.outputPath = buildPlayerContext.BuildPlayerOptions.locationPathName;
-        string directory = Path.GetDirectoryName(report.outputPath);
-        report.directoryBytesBefore = DirectoryBytes(directory);
-        report.resourcesBytesBefore = ResourceBytes(directory);
         Directory.CreateDirectory(StagingRoot);
         // 在第一次移动前写清单，保证移动中断后仍能恢复。
         File.WriteAllText(ManifestPath, JsonUtility.ToJson(report, true));
-        changingAssets = true;
-        try
+        AssetDatabase.SaveAssets();
+        foreach (var image in report.movedImages)
         {
-            AssetDatabase.SaveAssets();
-            foreach (var image in report.movedImages)
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(image.stagedPath));
-                MoveFile(image.originalPath, image.stagedPath);
-                MoveFile(image.originalPath + ".meta", image.stagedPath + ".meta");
-            }
-            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
-            Debug.Log($"[EXC CG] 扫描 {report.stories.Length} 个剧本，临时移出 {report.movedImages.Count} 张图片。");
-            if (report.missingImages.Length > 0)
-                Debug.LogWarning("[EXC CG] 剧本引用的图片不存在：" + string.Join(", ", report.missingImages));
+            Directory.CreateDirectory(Path.GetDirectoryName(image.stagedPath));
+            MoveFile(image.originalPath, image.stagedPath);
+            MoveFile(image.originalPath + ".meta", image.stagedPath + ".meta");
         }
-        catch
-        {
-            changingAssets = false;
-            Restore();
-            throw;
-        }
-        finally { changingAssets = false; }
+        AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+        Debug.Log($"[EXC CG] 扫描 {report.stories.Length} 个剧本，手动移出 {report.movedImages.Count} 张图片；恢复须通过菜单手动执行。");
+        if (report.missingImages.Length > 0)
+            Debug.LogWarning("[EXC CG] 剧本引用的图片不存在：" + string.Join(", ", report.missingImages));
     }
 
     private static void MoveFile(string source, string destination)
@@ -163,46 +145,27 @@ public class ExCGImageBuildProcessor : BuildPlayerProcessor, IPostprocessBuildWi
         File.Move(source, destination);
     }
 
-    public void OnPostprocessBuild(BuildReport buildReport)
-    {
-        if (!File.Exists(ManifestPath)) return;
-        pendingBuildReport = buildReport;
-        var report = JsonUtility.FromJson<ImageBuildReport>(File.ReadAllText(ManifestPath));
-        report.buildResult = buildReport.summary.result.ToString();
-        report.buildReportedBytes = (long)buildReport.summary.totalSize;
-        string directory = Path.GetDirectoryName(report.outputPath);
-        report.directoryBytesAfter = DirectoryBytes(directory);
-        report.resourcesBytesAfter = ResourceBytes(directory);
-        File.WriteAllText(ManifestPath, JsonUtility.ToJson(report, true));
-        Restore();
-    }
-
     /// <summary>恢复图片及原始 meta。遇到同名文件时保留清单，不覆盖文件。</summary>
     [MenuItem("Tools/CG构建/恢复临时移出的图片")]
     public static void Restore()
     {
         if (!File.Exists(ManifestPath)) return;
         var report = JsonUtility.FromJson<ImageBuildReport>(File.ReadAllText(ManifestPath));
-        changingAssets = true;
-        try
+        foreach (var image in report.movedImages)
         {
-            foreach (var image in report.movedImages)
-            {
-                ValidatePath(image.originalPath, ImageRoot);
-                ValidatePath(image.stagedPath, StagingRoot + "/files");
-                Directory.CreateDirectory(Path.GetDirectoryName(image.originalPath));
-                if (File.Exists(image.stagedPath)) MoveFile(image.stagedPath, image.originalPath);
-                if (File.Exists(image.stagedPath + ".meta")) MoveFile(image.stagedPath + ".meta", image.originalPath + ".meta");
-                if (!File.Exists(image.originalPath) || !File.Exists(image.originalPath + ".meta"))
-                    throw new IOException("图片恢复不完整：" + image.originalPath);
-            }
-            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
-            report.restored = true;
-            File.WriteAllText(ReportPath, JsonUtility.ToJson(report, true));
-            File.Delete(ManifestPath);
-            Debug.Log($"[EXC CG] 已恢复 {report.movedImages.Count} 张图片及 meta。报告：{ReportPath}");
+            ValidatePath(image.originalPath, ImageRoot);
+            ValidatePath(image.stagedPath, StagingRoot + "/files");
+            Directory.CreateDirectory(Path.GetDirectoryName(image.originalPath));
+            if (File.Exists(image.stagedPath)) MoveFile(image.stagedPath, image.originalPath);
+            if (File.Exists(image.stagedPath + ".meta")) MoveFile(image.stagedPath + ".meta", image.originalPath + ".meta");
+            if (!File.Exists(image.originalPath) || !File.Exists(image.originalPath + ".meta"))
+                throw new IOException("图片恢复不完整：" + image.originalPath);
         }
-        finally { changingAssets = false; }
+        AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+        report.restored = true;
+        File.WriteAllText(ReportPath, JsonUtility.ToJson(report, true));
+        File.Delete(ManifestPath);
+        Debug.Log($"[EXC CG] 已恢复 {report.movedImages.Count} 张图片及 meta。报告：{ReportPath}");
     }
 
     private static void ValidatePath(string path, string root)
@@ -210,30 +173,6 @@ public class ExCGImageBuildProcessor : BuildPlayerProcessor, IPostprocessBuildWi
         string prefix = Path.GetFullPath(root).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
         if (!Path.GetFullPath(path).StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
             throw new IOException("图片路径超出预期目录：" + path);
-    }
-
-    [InitializeOnLoadMethod]
-    private static void EnableRecovery()
-    {
-        EditorApplication.update -= RecoverAfterBuild;
-        EditorApplication.update += RecoverAfterBuild;
-    }
-
-    private static void RecoverAfterBuild()
-    {
-        if (changingAssets || BuildPipeline.isBuildingPlayer || EditorApplication.isCompiling ||
-            EditorApplication.isUpdating) return;
-        try
-        {
-            Restore();
-            UpdateFinishedBuildReport();
-        }
-        catch (Exception error)
-        {
-            // 防止错误每帧重复输出。修复路径冲突后，可通过菜单再次恢复。
-            EditorApplication.update -= RecoverAfterBuild;
-            Debug.LogException(error);
-        }
     }
 
     [MenuItem("Tools/CG构建/扫描 EXC 图片引用")]
@@ -244,100 +183,19 @@ public class ExCGImageBuildProcessor : BuildPlayerProcessor, IPostprocessBuildWi
         Debug.Log($"[EXC CG] 待移出 {report.movedImages.Count} 张图片，缺失引用 {report.missingImages.Length} 个。报告：{ReportPath}");
     }
 
-    /// <summary>构建指定 Windows 发布目录，并验证所有图片已恢复。</summary>
+    /// <summary>构建指定 Windows 发布目录，不迁移或恢复 CG 图片。</summary>
     [MenuItem("Tools/CG构建/构建 LunaticAVG 发布包")]
     public static void BuildRelease()
     {
-        try
+        var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
         {
-            var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
-            {
-                scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray(),
-                locationPathName = Path.Combine(ReleaseRoot, "EI Iris2.exe"),
-                target = BuildTarget.StandaloneWindows64,
-                options = BuildOptions.None
-            });
-            pendingBuildReport = report;
-            if (report.summary.result != BuildResult.Succeeded)
-                throw new BuildFailedException("EXC 发布包构建失败：" + report.summary.result);
-        }
-        finally
-        {
-            Restore();
-            UpdateFinishedBuildReport();
-        }
+            scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray(),
+            locationPathName = Path.Combine(ReleaseRoot, "EI Iris2.exe"),
+            target = BuildTarget.StandaloneWindows64,
+            options = BuildOptions.None
+        });
+        if (report.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded)
+            throw new BuildFailedException("EXC 发布包构建失败：" + report.summary.result);
     }
 
-    // Postprocess 中的结果可能仍是 Unknown，构建返回后再写最终状态。
-    private static void UpdateFinishedBuildReport()
-    {
-        if (pendingBuildReport == null || !File.Exists(ReportPath)) return;
-        var report = JsonUtility.FromJson<ImageBuildReport>(File.ReadAllText(ReportPath));
-        report.buildResult = pendingBuildReport.summary.result.ToString();
-        report.buildReportedBytes = (long)pendingBuildReport.summary.totalSize;
-        File.WriteAllText(ReportPath, JsonUtility.ToJson(report, true));
-        pendingBuildReport = null;
-    }
-
-    /// <summary>检查指令解析、移动中断恢复及同名文件保护。</summary>
-    public static void RunChecks()
-    {
-        Restore();
-        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        CollectImageNames("CG(A,3)+FULLCG(B,1,2)+HALFCG(C)+CGLOG(D,3,2)+SPEAK(P,0)+SPEAK()+CGACTIVE(1)+CGLOG(D)", used);
-        if (!used.SetEquals(new[] { "A", "B", "C", "D", "P" }))
-            throw new Exception("图片指令解析检查失败。");
-
-        var scan = Scan();
-        var image = scan.movedImages.First();
-        byte[] original = File.ReadAllBytes(image.originalPath);
-        string guid = AssetDatabase.AssetPathToGUID(image.originalPath);
-        string savedReport = File.Exists(ReportPath) ? File.ReadAllText(ReportPath) : null;
-        ValidatePath(image.originalPath, ImageRoot);
-        try
-        {
-            var partial = new ImageBuildReport { movedImages = new List<ImageMove> { image } };
-            Directory.CreateDirectory(Path.GetDirectoryName(image.stagedPath));
-            File.WriteAllText(ManifestPath, JsonUtility.ToJson(partial));
-            MoveFile(image.originalPath, image.stagedPath);
-            Restore();
-            if (!original.SequenceEqual(File.ReadAllBytes(image.originalPath)) ||
-                AssetDatabase.AssetPathToGUID(image.originalPath) != guid)
-                throw new Exception("移动中断恢复后，图片或 GUID 不一致。");
-
-            File.WriteAllText(ManifestPath, JsonUtility.ToJson(partial));
-            MoveFile(image.originalPath, image.stagedPath);
-            File.WriteAllText(image.originalPath, "CG recovery collision test");
-            bool collisionRejected = false;
-            try { Restore(); }
-            catch (IOException) { collisionRejected = true; }
-            if (!collisionRejected || !File.Exists(ManifestPath) || !File.Exists(image.stagedPath))
-                throw new Exception("恢复冲突时没有保留图片和清单。");
-            File.Delete(image.originalPath);
-            Restore();
-            if (!original.SequenceEqual(File.ReadAllBytes(image.originalPath)))
-                throw new Exception("冲突解除后图片内容不一致。");
-            Debug.Log("[EXC CG] PASS：指令解析、移动中断恢复、同名保护和恢复后内容检查。");
-        }
-        finally
-        {
-            if (File.Exists(image.stagedPath) && File.Exists(image.originalPath) &&
-                File.ReadAllText(image.originalPath) == "CG recovery collision test")
-                File.Delete(image.originalPath);
-            Restore();
-            if (savedReport != null) File.WriteAllText(ReportPath, savedReport);
-        }
-    }
-
-    private static long DirectoryBytes(string directory)
-    {
-        return Directory.Exists(directory)
-            ? Directory.GetFiles(directory, "*", SearchOption.AllDirectories).Sum(p => new FileInfo(p).Length) : 0;
-    }
-
-    private static long ResourceBytes(string directory)
-    {
-        return Directory.Exists(directory)
-            ? Directory.GetFiles(directory, "resources.assets*", SearchOption.AllDirectories).Sum(p => new FileInfo(p).Length) : 0;
-    }
 }
