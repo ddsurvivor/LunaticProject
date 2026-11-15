@@ -13,6 +13,7 @@ public partial class 剧本System
     private bool readerDefaultInteractable;
     private bool readerDefaultBlocksRaycasts;
     private bool storyPlaybackStopped = true; // 未打开及已关闭的阅读器不干扰新界面的音频。
+    private bool storyWasSkipped; // 本次阅读使用过跳过，结束时不将音频延续到大地图。
 
     public bool IsReaderHiding => readerHiding;
 
@@ -50,6 +51,14 @@ public partial class 剧本System
 
     /// <summary>结束当前剧情并关闭阅读器；不写入任务完成进度。</summary>
     public void CloseStory() => CloseStory(null);
+
+    /// <summary>正常结束剧情并返回大地图；未使用跳过时保留背景音乐和循环音效。</summary>
+    public void CompleteStory()
+    {
+        // 先结束播放资格，后续隐藏及禁用回调不会把延续到地图的音频再次停止。
+        StopStoryPlayback(stopAudio: storyWasSkipped);
+        CloseStory();
+    }
 
     /// <summary>统一结束剧情、停止音乐和音效并关闭阅读器；回调在隐藏后执行，立即关闭时取消旧回调。</summary>
     public void CloseStory(Action onClosed, bool immediately = false)
@@ -109,12 +118,17 @@ public partial class 剧本System
         gameObject.SetActive(false);
     }
 
-    private void StopStoryPlayback()
+    private void StopStoryPlayback(bool stopAudio = true)
     {
         autoPlayElapsed = 0f;
         StopReaderShake();
         if (storyPlaybackStopped) return;
         storyPlaybackStopped = true;
+        if (stopAudio) StopStoryAudio();
+    }
+
+    private void StopStoryAudio()
+    {
         // 同时取消尚未完成的音乐和音效加载，避免关闭后由旧回调重新播放。
         GM.Ins?.AM?.StopAll();
         GM.Ins?.AM?.停止音乐();
@@ -133,6 +147,7 @@ public partial class 剧本System
     {
         CancelReaderHide();
         storyPlaybackStopped = false;
+        storyWasSkipped = false;
         var group = ReaderCanvasGroup;
         group.alpha = 1f;
         group.interactable = readerDefaultInteractable;

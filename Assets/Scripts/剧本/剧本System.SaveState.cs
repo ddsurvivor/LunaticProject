@@ -19,7 +19,7 @@ public partial class 剧本System
         if (readingMapStory) profile.BeginStory(readingMapScript);
     }
 
-    /// <summary>结束剧情阅读状态并停止音乐和音效；关闭窗口使用 CloseStory，临时隐藏使用 HideReader。</summary>
+    /// <summary>结束剧情阅读状态；默认停止音频，正常结束由 CompleteStory 先决定是否保留音频。</summary>
     public void EndReadingStory()
     {
         StopStoryPlayback();

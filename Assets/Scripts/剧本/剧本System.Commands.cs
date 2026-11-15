@@ -687,7 +687,7 @@ public partial class 剧本System
 
             if (key.Contains(Center.Command_Close))
             {
-                CloseStory();
+                CompleteStory();
             }
 
             if (key.Contains(Center.Command_Chapter))

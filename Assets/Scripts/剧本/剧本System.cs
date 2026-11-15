@@ -129,8 +129,8 @@ public partial class 剧本System : MonoBehaviour
         进度条.normalizedPosition = new Vector2(0, -1f);
         if (已阅读 >= 已储存剧本.Length)
         {
-            // 最后一行保留到下一次推进，再统一关闭没有显式 END 的剧情。
-            CloseStory();
+            // 最后一行保留到下一次推进；自然读完返回地图时延续未被停止的剧情音频。
+            CompleteStory();
             return;
         }
 
@@ -170,14 +170,15 @@ public partial class 剧本System : MonoBehaviour
                (!string.IsNullOrEmpty(row[0]) && row[0].Contains(Center.Command_Choice));
     }
 
-    /// <summary>停止旧音效并直接跳过正文；中间指令不执行，只正常推进选项、控制行或目标末行一次。</summary>
+    /// <summary>停止旧音乐和音效并直接跳过正文；本次阅读结束不保留音频，中间指令不执行。</summary>
     public void OnClickSkip(int num = 0)
     {
         if (!isActiveAndEnabled || IsReaderHiding || IsStoryClosed || IsSettingsMenuOpen ||
             GM.Ins.IsTransitioning || isWaitingForChoice || 已储存剧本 == null || 已阅读 >= 已储存剧本.Length) return;
         StopAutoPlay();//停止自动播放
         Debug.Log($"跳过{已储存剧本.Length - 已阅读}条剧本，遇到选项时停止");
-        GM.Ins.AM.StopAll();
+        storyWasSkipped = true;
+        StopStoryAudio();
         // 只查找落点，不执行途经行，避免批量加载音频、CG及递归跳转阻塞点击。
         int targetLine = Math.Max(已阅读, 已储存剧本.Length - Math.Max(1, num));
         int line = 已阅读;
@@ -185,7 +186,15 @@ public partial class 剧本System : MonoBehaviour
         已阅读 = line;
 
         // 只执行一次停止处的内容；CHOICE 会进入等待选择状态，不再跳过选项行。
-        Next();
+        try
+        {
+            Next();
+        }
+        finally
+        {
+            // 落点可能再次请求按键音或循环音频，跳过结束前一并停止并取消加载。
+            StopStoryAudio();
+        }
     }
 
 
