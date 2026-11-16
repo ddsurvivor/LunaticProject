@@ -128,6 +128,7 @@ public partial class 剧本System
 
     private void OnDestroy()
     {
+        StopReaderAudio();
         CancelReaderHide();
         cgLogTransition?.Kill();
         if (cgLogSprite != null) Destroy(cgLogSprite);

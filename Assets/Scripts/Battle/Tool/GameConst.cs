@@ -20,8 +20,12 @@ public static class GameConst
         public static readonly Color32 Positive = new Color32(125, 197, 158, 255); // #7DC59E，战斗扩展色：增益、治疗。
         public static readonly Color32 Health = new Color32(125, 197, 158, 255); // #7DC59E，血量；阵营另用色条和图标标识。
         public static readonly Color32 DamagePreview = new Color32(234, 105, 99, 255); // #EA6963，预计损血段。
+        public static readonly Color32 DamagePreviewMinimum = new Color32(255, 255, 255, 255); // #FFFFFF，小区间：确定扣除的最小伤害。
+        public static readonly Color32 DamagePreviewMaximum = new Color32(255, 216, 64, 255); // #FFD840，大区间：超出最小伤害、额外可能扣血的部分。
         public static readonly Color32 SkillRange = new Color32(231, 165, 51, 255); // #E7A533，技能范围与当前瞄准。
     }
+
+    public const float SkillAimLineWidth = 0.09f; // 世界单位；技能瞄准线宽为原0.045的两倍。
 
     public const int attackBurstCharge = 10;
     //public const int skillBurstCharge = 15;

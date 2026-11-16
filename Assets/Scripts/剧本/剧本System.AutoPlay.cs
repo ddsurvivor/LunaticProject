@@ -144,6 +144,7 @@ public partial class 剧本System
     }
     private void OnEnable()
     {
+        readerAudioStopped = false;
         foreach (var text in GetComponentsInChildren<UnityEngine.UI.Text>(true))
             ChineseTextLayout.Ensure(text);
         RestoreReaderVisibility();
@@ -157,6 +158,6 @@ public partial class 剧本System
         StopReaderShake();
         // 隐藏剧情只暂停推进；玩家选择的自动和快进模式保留到下一段剧本。
         autoPlayElapsed = 0f;
-        GM.Ins?.AM.StopAll();
+        StopReaderAudio();
     }
 }

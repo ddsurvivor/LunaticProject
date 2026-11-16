@@ -19,8 +19,10 @@ public partial class 剧本System
         if (readingMapStory) profile.BeginStory(readingMapScript);
     }
 
+    /// <summary>结束剧情阅读记录，并立即停止音乐、音效及待加载的播放请求。</summary>
     public void EndReadingStory()
     {
+        StopReaderAudio();
         readingMapStory = false;
         readingMapScript = null;
         if (大地图System.instance != null && 大地图System.instance.剧情 == this)

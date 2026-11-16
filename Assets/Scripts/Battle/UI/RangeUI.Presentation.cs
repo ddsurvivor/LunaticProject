@@ -202,6 +202,8 @@ public partial class RangeUI
         }
         var outline = outlines[outlineCount++];
         outline.gameObject.SetActive(true);
+        // 范围线会在技能瞄准与普通范围间复用，每次绘制按当前用途恢复宽度。
+        outline.widthMultiplier = _curSkillPack != null ? GameConst.SkillAimLineWidth : 0.045f;
         outline.startColor = outline.endColor = color;
         outline.positionCount = outlinePoints.Count;
         for (int i = 0; i < outlinePoints.Count; i++) outline.SetPosition(i, outlinePoints[i]);

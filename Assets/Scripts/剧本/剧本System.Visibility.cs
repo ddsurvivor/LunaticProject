@@ -18,6 +18,7 @@ public partial class 剧本System
     private bool readerHiding;
     private bool readerDefaultInteractable;
     private bool readerDefaultBlocksRaycasts;
+    private bool readerAudioStopped = true; // 同一次关闭仅清理一次，避免淡出后的禁用误停新页面音乐。
 
     public bool IsReaderHiding => readerHiding;
 
@@ -43,12 +44,13 @@ public partial class 剧本System
         gameObject.SetActive(true);
     }
 
-    /// <summary>淡出并隐藏阅读器。此方法不标记剧情完成。</summary>
+    /// <summary>立即停止音乐和音效，再淡出隐藏阅读器；不标记剧情完成。</summary>
     public void HideReader() => HideReader(null);
 
-    /// <summary>淡出并隐藏阅读器，完成后执行回调。</summary>
+    /// <summary>立即停止音乐和音效，再淡出隐藏阅读器，完全隐藏后执行回调。</summary>
     public void HideReader(Action onHidden)
     {
+        StopReaderAudio();
         if (readerHiding) return;
         if (!gameObject.activeInHierarchy || readerHideDuration <= 0f)
         {
@@ -78,9 +80,10 @@ public partial class 剧本System
             });
     }
 
-    /// <summary>战斗专用：不等待淡出，并取消旧关闭回调。</summary>
+    /// <summary>立即停止音乐和音效并隐藏阅读器，取消旧关闭回调。</summary>
     public void HideReaderImmediately()
     {
+        StopReaderAudio();
         bool wasVisible = gameObject.activeInHierarchy;
         CancelReaderHide();
         gameObject.SetActive(false);
@@ -99,9 +102,21 @@ public partial class 剧本System
     private void RestoreReaderVisibility()
     {
         CancelReaderHide();
+        if (isActiveAndEnabled) readerAudioStopped = false;
         var group = ReaderCanvasGroup;
         group.alpha = 1f;
         group.interactable = readerDefaultInteractable;
         group.blocksRaycasts = readerDefaultBlocksRaycasts;
+    }
+
+    private void StopReaderAudio()
+    {
+        if (readerAudioStopped) return;
+        readerAudioStopped = true;
+        var audio = GM.Ins != null ? GM.Ins.AM : null;
+        if (audio == null) return;
+        // 同时取消未完成的加载，关闭后不能由旧回调重启音乐或循环音效。
+        audio.StopAll();
+        audio.停止音乐();
     }
 }
