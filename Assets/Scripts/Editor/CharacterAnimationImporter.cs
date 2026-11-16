@@ -71,7 +71,7 @@ public static class CharacterAnimationImporter
         return settings;
     }
 
-    /// <summary>扫描目录内文件，支持旧技能分隔编号、新四位帧号和数字排序；不修改资源。</summary>
+    /// <summary>扫描目录内文件，支持技能分隔编号、分组或无组的四位帧号和数字排序；不修改资源。</summary>
     public static Plan Scan(PieceDisplay target, Settings settings)
     {
         if (target == null) throw new ArgumentException("请先指定 PieceDisplay。");
@@ -252,6 +252,18 @@ public static class CharacterAnimationImporter
         format = Actions[action];
         string token = action == 1 ? "(?:move|run)" : Actions[action];
         string head = "^" + Regex.Escape(prefix) + token;
+        if (action == 7)
+        {
+            var ungrouped = Regex.Match(name, head + @"(\d{4})$", RegexOptions.IgnoreCase);
+            if (ungrouped.Success)
+            {
+                // 未标技能组的四位帧号沿用第 1 组，不与显式分组序列混合。
+                group = 0;
+                number = int.Parse(ungrouped.Groups[1].Value);
+                format = "无组四位帧号";
+                return true;
+            }
+        }
         var match = Regex.Match(name, head + (action == 7 ? @"(?:(\d+)-(\d+)|(\d+)(\d{4}))$" : @"(\d*)$"), RegexOptions.IgnoreCase);
         if (!match.Success) return false;
         if (action == 7)
