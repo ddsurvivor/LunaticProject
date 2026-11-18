@@ -130,7 +130,7 @@ public class PlasmaExplosiveBarrel : MonoBehaviour, IEnemyExplosiveTarget
         // 4. 音效
         if (skillPack.skillSound != null)
         {
-            AudioSource.PlayClipAtPoint(skillPack.skillSound, Camera.main.transform.position);
+            GM.Ins?.AM?.PlayClip(skillPack.skillSound);
         }
         
         pieceController.ShowHighlight(false);

@@ -63,7 +63,7 @@ public class CheckDicePanel : MonoBehaviour
         // 播放音效
         if (rollSound != null)
         {
-            AudioSource.PlayClipAtPoint(rollSound, Camera.main.transform.position);
+            GM.Ins?.AM?.PlayClip(rollSound);
         }
 
         // 开始滚动动画
@@ -101,7 +101,7 @@ public class CheckDicePanel : MonoBehaviour
             fail.gameObject.SetActive(false);
             if (successSound != null)
             {
-                AudioSource.PlayClipAtPoint(successSound, Camera.main.transform.position);
+                GM.Ins?.AM?.PlayClip(successSound);
             }
         }
         else
@@ -111,7 +111,7 @@ public class CheckDicePanel : MonoBehaviour
             // 播放音效
             if (failSound != null)
             {
-                AudioSource.PlayClipAtPoint(failSound, Camera.main.transform.position);
+                GM.Ins?.AM?.PlayClip(failSound);
             }
         }
 

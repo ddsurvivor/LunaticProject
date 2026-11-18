@@ -163,29 +163,16 @@ public class DataManager : SerializedMonoBehaviour
         settingsData = new PlayerSettingsData();
         JsonTool.SaveJson(settingsData, GetSaveFilePath("PlayerSettingsData.json"));
     }
-    /*public void ApplySettings(PlayerSettingsData settingsData)
-    {
-        // 实际应用画质设置
-        QualitySettings.SetQualityLevel(settingsData.qualityLevel);
-        // 实际应用全屏设置
-        Screen.fullScreen = settingsData.isFullScreen;
-        // 应用音量 (通常配合 AudioMixer 使用)
-        AudioListener.volume = settingsData.masterVolume;
-        
-        Debug.Log("设置已应用到引擎");
-        JsonTool.SaveJson(settingsData, GetSaveFilePath("PlayerSettingsData.json"));
-    }*/
-    
-    
-    
     [Header("Audio Settings")]
     [SerializeField] private AudioMixer mainMixer; // 需在 Mixer 中右键 Volume 暴露变量
+    /// <summary>提供音量设置使用的混音器，供 AudioManager 创建音源时统一路由。</summary>
+    public AudioMixer MainMixer => mainMixer;
     private const string MASTER_PARAM = "MasterVolume";
     private const string BGM_PARAM = "BGMVolume";
     private const string SFX_PARAM = "SFXVolume";
     private const string VOICE_PARAM = "VoiceVolume";
-    [Header("Video Presets (Strict 16:9)")]
-    // 严格限制 16:9 分辨率阵列
+    [Header("Video Presets")]
+    // 保留七档历史预设及索引，兼容已有设置中的分辨率选择。
     private readonly List<Vector2Int> resolutionPresets = new List<Vector2Int>()
     {
         new Vector2Int(1280, 720),
@@ -226,11 +213,20 @@ public class DataManager : SerializedMonoBehaviour
         // ==========================================
         // 2. 画面设置实装 (底层物理切换)
         // ==========================================
-        Screen.fullScreen = settingsData.isFullScreen;
+        settingsData.NormalizeScreenMode();
+        FullScreenMode mode = settingsData.screenModeIndex == 0 ? FullScreenMode.ExclusiveFullScreen
+            : settingsData.screenModeIndex == 2 ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed;
         // A. 分辨率与全屏判定
         int resIndex = Mathf.Clamp(settingsData.resolutionIndex, 0, resolutionPresets.Count - 1);
         Vector2Int targetRes = resolutionPresets[resIndex];
-        Screen.SetResolution(targetRes.x, targetRes.y, settingsData.isFullScreen);
+        // 窗口不能超出桌面；只限制实际尺寸，保留玩家选择的分辨率索引。
+        if (mode == FullScreenMode.Windowed)
+        {
+            Resolution desktop = Screen.currentResolution;
+            targetRes.x = Mathf.Min(targetRes.x, desktop.width);
+            targetRes.y = Mathf.Min(targetRes.y, desktop.height);
+        }
+        Screen.SetResolution(targetRes.x, targetRes.y, mode);
 
         // B. 帧数限制实装
         switch (settingsData.targetFPSIndex)
@@ -254,10 +250,7 @@ public class DataManager : SerializedMonoBehaviour
         // ==========================================
         // 3. 声音设置实装 (对数分贝转换)
         // ==========================================
-        SetMixerVolume(MASTER_PARAM, settingsData.masterVolume);
-        SetMixerVolume(BGM_PARAM, settingsData.bgmVolume);
-        SetMixerVolume(SFX_PARAM, settingsData.sfxVolume);
-        SetMixerVolume(VOICE_PARAM, settingsData.voiceVolume);
+        ApplyAudioSettings(settingsData);
 
 
         // ==========================================
@@ -272,6 +265,22 @@ public class DataManager : SerializedMonoBehaviour
             Debug.LogError($"[DM] 写入硬盘故障，请检查读写权限: {e.Message}");
         }
     }
+    private void Start()
+    {
+        // GM 在 Awake 中读取设置；Mixer 参数需在 Start 再应用，避免初始化覆盖音量。
+        ApplyAudioSettings(settingsData);
+    }
+
+    /// <summary>立即应用四档音量；不切换画面、不广播文字设置，也不写入磁盘。</summary>
+    public void ApplyAudioSettings(PlayerSettingsData data)
+    {
+        if (data == null) return;
+        SetMixerVolume(MASTER_PARAM, data.masterVolume);
+        SetMixerVolume(BGM_PARAM, data.bgmVolume);
+        SetMixerVolume(SFX_PARAM, data.sfxVolume);
+        SetMixerVolume(VOICE_PARAM, data.voiceVolume);
+    }
+
     /// <summary>
     /// 音频线性滑块值转对数分贝公式函数
     /// </summary>
@@ -281,7 +290,7 @@ public class DataManager : SerializedMonoBehaviour
 
         // 核心公式：dB = log10(Value) * 20
         // 当 Slider 接近 0 时强制降到 -80dB 实现物理静音，防止 log10(0) 报错
-        float dB = sliderValue > 0.0001f ? Mathf.Log10(sliderValue) * 20f : -80f;
+        float dB = sliderValue > 0.0001f ? Mathf.Log10(Mathf.Clamp01(sliderValue)) * 20f : -80f;
         mainMixer.SetFloat(exposedParam, dB);
     }
     

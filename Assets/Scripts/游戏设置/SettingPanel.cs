@@ -30,7 +30,7 @@ public class SettingPanel : UIPanel
     [SerializeField] private Dropdown languageDropdown;
 
     [Header("UI - Video Settings SubPage")]
-    [SerializeField] private Toggle fullScreenToggle;
+    [SerializeField] private Dropdown screenModeDropdown;
     [SerializeField] private Dropdown resolutionDropdown;
     [SerializeField] private Dropdown fpsDropdown;
     [SerializeField] private Slider brightnessSlider;
@@ -61,16 +61,17 @@ public class SettingPanel : UIPanel
     private void Start()
     {
         ConfigureDropdownRows(resolutionDropdown);
+        ConfigureDropdownRows(screenModeDropdown);
         InitTabs();
         BindSliderEvents(); 
         LoadAndShowSettings();
 
-        /*// 按钮监听事件的安全保护
+        // 正式预制体通过 CustomAdvancedButton 的持久事件绑定；兼容显式指定的普通按钮。
         if (saveButton != null) 
             saveButton.onClick.AddListener(SaveAndApplySettings);
             
         if (restoreDefaultsButton != null) 
-            restoreDefaultsButton.onClick.AddListener(RestoreDefaultSettings);*/
+            restoreDefaultsButton.onClick.AddListener(RestoreDefaultSettings);
     }
 
     private void ConfigureDropdownRows(UnityEngine.UI.Dropdown dropdown)
@@ -168,7 +169,7 @@ public class SettingPanel : UIPanel
 
     private void BindSliderEvents()
     {
-        foreach (var toggle in new[] { fullScreenToggle, particleToggle })
+        foreach (var toggle in new[] { particleToggle })
         {
             if (toggle == null) continue;
             var caption = toggle.GetComponentInChildren<Text>();
@@ -190,16 +191,44 @@ public class SettingPanel : UIPanel
             brightnessSlider.onValueChanged.AddListener((val) => UpdateSliderText(val, brightnessValueText, DisplayType.Percentage));
 
         if (masterVolumeSlider != null)
-            masterVolumeSlider.onValueChanged.AddListener((val) => UpdateSliderText(val, masterVolumeValueText, DisplayType.Percentage));
+            masterVolumeSlider.onValueChanged.AddListener(val =>
+            {
+                UpdateSliderText(val, masterVolumeValueText, DisplayType.Percentage);
+                PreviewAudioSettings();
+            });
 
         if (bgmVolumeSlider != null)
-            bgmVolumeSlider.onValueChanged.AddListener((val) => UpdateSliderText(val, bgmVolumeValueText, DisplayType.Percentage));
+            bgmVolumeSlider.onValueChanged.AddListener(val =>
+            {
+                UpdateSliderText(val, bgmVolumeValueText, DisplayType.Percentage);
+                PreviewAudioSettings();
+            });
 
         if (sfxVolumeSlider != null)
-            sfxVolumeSlider.onValueChanged.AddListener((val) => UpdateSliderText(val, sfxVolumeValueText, DisplayType.Percentage));
+            sfxVolumeSlider.onValueChanged.AddListener(val =>
+            {
+                UpdateSliderText(val, sfxVolumeValueText, DisplayType.Percentage);
+                PreviewAudioSettings();
+            });
 
         if (voiceVolumeSlider != null)
-            voiceVolumeSlider.onValueChanged.AddListener((val) => UpdateSliderText(val, voiceVolumeValueText, DisplayType.Percentage));
+            voiceVolumeSlider.onValueChanged.AddListener(val =>
+            {
+                UpdateSliderText(val, voiceVolumeValueText, DisplayType.Percentage);
+                PreviewAudioSettings();
+            });
+    }
+
+    private void PreviewAudioSettings()
+    {
+        var manager = GM.Ins?.DM;
+        if (manager == null || manager.settingsData == null) return;
+        var data = manager.settingsData;
+        if (masterVolumeSlider != null) data.masterVolume = masterVolumeSlider.value;
+        if (bgmVolumeSlider != null) data.bgmVolume = bgmVolumeSlider.value;
+        if (sfxVolumeSlider != null) data.sfxVolume = sfxVolumeSlider.value;
+        if (voiceVolumeSlider != null) data.voiceVolume = voiceVolumeSlider.value;
+        manager.ApplyAudioSettings(data);
     }
 
     private enum DisplayType { Percentage, Multiplier, Seconds }
@@ -259,7 +288,8 @@ public class SettingPanel : UIPanel
         // ==========================================
         // 2. 刷新画面页面（所有组件各自独立保护）
         // ==========================================
-        if (fullScreenToggle != null) fullScreenToggle.isOn = currentSettings.isFullScreen;
+        currentSettings.NormalizeScreenMode();
+        if (screenModeDropdown != null) screenModeDropdown.SetValueWithoutNotify(currentSettings.screenModeIndex);
         if (resolutionDropdown != null) resolutionDropdown.value = currentSettings.resolutionIndex;
         if (fpsDropdown != null) fpsDropdown.value = currentSettings.targetFPSIndex;
         if (fpsSlider != null) fpsSlider.value = currentSettings.targetFPSIndex;
@@ -270,7 +300,7 @@ public class SettingPanel : UIPanel
         
         if (particleDropdown != null) particleDropdown.value = currentSettings.particleEffectLevel;
         if (particleToggle != null) particleToggle.isOn = currentSettings.particleEffectLevel > 0;
-        foreach (var toggle in new[] { fullScreenToggle, particleToggle })
+        foreach (var toggle in new[] { particleToggle })
         {
             if (toggle == null) continue;
             var caption = toggle.GetComponentInChildren<Text>();
@@ -280,16 +310,16 @@ public class SettingPanel : UIPanel
         // ==========================================
         // 3. 刷新声音页面（所有组件各自独立保护）
         // ==========================================
-        if (masterVolumeSlider != null) masterVolumeSlider.value = currentSettings.masterVolume;
+        if (masterVolumeSlider != null) masterVolumeSlider.SetValueWithoutNotify(currentSettings.masterVolume);
         UpdateSliderText(currentSettings.masterVolume, masterVolumeValueText, DisplayType.Percentage);
         
-        if (bgmVolumeSlider != null) bgmVolumeSlider.value = currentSettings.bgmVolume;
+        if (bgmVolumeSlider != null) bgmVolumeSlider.SetValueWithoutNotify(currentSettings.bgmVolume);
         UpdateSliderText(currentSettings.bgmVolume, bgmVolumeValueText, DisplayType.Percentage);
         
-        if (sfxVolumeSlider != null) sfxVolumeSlider.value = currentSettings.sfxVolume;
+        if (sfxVolumeSlider != null) sfxVolumeSlider.SetValueWithoutNotify(currentSettings.sfxVolume);
         UpdateSliderText(currentSettings.sfxVolume, sfxVolumeValueText, DisplayType.Percentage);
         
-        if (voiceVolumeSlider != null) voiceVolumeSlider.value = currentSettings.voiceVolume;
+        if (voiceVolumeSlider != null) voiceVolumeSlider.SetValueWithoutNotify(currentSettings.voiceVolume);
         UpdateSliderText(currentSettings.voiceVolume, voiceVolumeValueText, DisplayType.Percentage);
     }
 
@@ -308,7 +338,7 @@ public class SettingPanel : UIPanel
         if (fastForwardIntervalSlider != null) dataToUpdate.fastForwardInterval = fastForwardIntervalSlider.value;
         if (branchPromptToggle != null) dataToUpdate.showImportantBranchPrompt = branchPromptToggle.isOn;
 
-        if (fullScreenToggle != null) dataToUpdate.isFullScreen = fullScreenToggle.isOn;
+        if (screenModeDropdown != null) dataToUpdate.screenModeIndex = screenModeDropdown.value;
         if (resolutionDropdown != null) dataToUpdate.resolutionIndex = resolutionDropdown.value;
         if (fpsDropdown != null) dataToUpdate.targetFPSIndex = fpsDropdown.value;
         if (fpsSlider != null) dataToUpdate.targetFPSIndex = Mathf.RoundToInt(fpsSlider.value);

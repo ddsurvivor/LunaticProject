@@ -82,7 +82,7 @@ public class ExplosiveBarrel : MonoBehaviour, IEnemyExplosiveTarget
         BattleScene.Ins.BM.PieceSkill(pieceController, targetPieces, skillPack.WithDeadCaster(), transform.position);
         
         // 播放音效
-        if (skillPack.skillSound != null) AudioSource.PlayClipAtPoint(skillPack.skillSound, Camera.main.transform.position);
+        if (skillPack.skillSound != null) GM.Ins?.AM?.PlayClip(skillPack.skillSound);
         
         // 6. 最后销毁桶本身（或者更换为残骸模型）
         //Destroy(gameObject);

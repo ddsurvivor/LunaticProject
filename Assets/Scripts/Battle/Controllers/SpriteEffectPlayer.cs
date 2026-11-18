@@ -58,7 +58,7 @@ public class SpriteEffectPlayer : MonoBehaviour
         // 2. 触发音效
         if (feedbackSfx != null)
         {
-            AudioSource.PlayClipAtPoint(feedbackSfx, Camera.main.transform.position, volume);
+            GM.Ins?.AM?.PlayClip(feedbackSfx, volume);
             //_audioSource.PlayOneShot(feedbackSfx, volume);
         }
 

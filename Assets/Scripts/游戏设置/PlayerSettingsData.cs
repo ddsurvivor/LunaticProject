@@ -11,7 +11,8 @@ public class PlayerSettingsData
     public int languageIndex = 0;               // 当前仅开放中文，保留索引字段兼容旧设置。
 
     // === 2. 画面设置 ===
-    public bool isFullScreen = false;
+    public bool isFullScreen = false;          // 保留旧设置兼容字段，由显示模式同步。
+    public int screenModeIndex = -1;          // -1 表示待迁移；0 全屏、1 窗口、2 无边框窗口。
     public int resolutionIndex = 2;             // 分辨率索引
     public int targetFPSIndex = 1;              // 帧数限制索引 (如 30, 60, 无限制)
     public float brightness = 1.0f;             // 亮度
@@ -22,4 +23,12 @@ public class PlayerSettingsData
     public float bgmVolume = 0.8f;
     public float sfxVolume = 0.8f;
     public float voiceVolume = 0.8f;            // 角色语音
+
+    /// <summary>迁移旧版全屏开关并规范显示模式；不改变分辨率选择。</summary>
+    public void NormalizeScreenMode()
+    {
+        if (screenModeIndex < 0 || screenModeIndex > 2)
+            screenModeIndex = isFullScreen ? 0 : 1;
+        isFullScreen = screenModeIndex != 1;
+    }
 }

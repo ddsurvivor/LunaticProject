@@ -196,7 +196,7 @@ public class SelfExploreSummonPiece : MonoBehaviour
         BattleScene.Ins.BM.PieceSkill(pieceController, targetPieces,skillPack);
         
         // TODO: 2. 播放爆炸特效和音效
-        if (skillPack.skillSound != null) AudioSource.PlayClipAtPoint(skillPack.skillSound, Camera.main.transform.position);
+        if (skillPack.skillSound != null) GM.Ins?.AM?.PlayClip(skillPack.skillSound);
         ObjectPool.Ins.GenerateObject(
             skillPack.skillVFXType,
             transform.position + Vector3.up * 3f, Quaternion.identity);

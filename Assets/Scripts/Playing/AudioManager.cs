@@ -12,8 +12,6 @@ using System.IO;
 
 public class AudioManager : SerializedMonoBehaviour
 {
-    public float BGM音量 => GM.Ins.DM.settingsData.bgmVolume;
-    public float SE音量  => GM.Ins.DM.settingsData.sfxVolume;
 
     [Title("核心配置")]
     public AudioConfig audioConfig;
@@ -46,11 +44,21 @@ public class AudioManager : SerializedMonoBehaviour
     private long playbackVersion; // 全部音效的取消版本；BGM 由 musicVersion 独立取消。
     private long musicVersion;
     private bool isSceneTransitioning;
+    private AudioMixerGroup bgmGroup;
+    private AudioMixerGroup sfxGroup;
+    private AudioMixerGroup voiceGroup;
 
+    /// <summary>创建音源池并接入设置使用的 Mixer；由 GM 在加载设置后调用。</summary>
     public void 初始化()
     {
+        if (GM.Ins != null && GM.Ins.DM != null && GM.Ins.DM.MainMixer != null)
+            audioMixer = GM.Ins.DM.MainMixer;
+        bgmGroup = FindGroup("BGM");
+        sfxGroup = FindGroup("SFX");
+        voiceGroup = FindGroup("Voice");
         // 初始化 BGM
         bgmAudioSource = gameObject.AddComponent<AudioSource>();
+        bgmAudioSource.outputAudioMixerGroup = bgmGroup;
         bgmAudioSource.loop = true;
         bgmAudioSource.playOnAwake = false;
         
@@ -86,8 +94,18 @@ public class AudioManager : SerializedMonoBehaviour
         go.transform.SetParent(seAudioSourcePool.transform);
         AudioSource source = go.AddComponent<AudioSource>();
         source.playOnAwake = false;
+        source.outputAudioMixerGroup = sfxGroup;
         _sePool.Add(source);
         return source;
+    }
+
+    private AudioMixerGroup FindGroup(string groupName)
+    {
+        if (audioMixer != null)
+            foreach (var group in audioMixer.FindMatchingGroups(groupName))
+                if (group.name == groupName) return group;
+        Debug.LogError($"[AudioManager] 缺少音频混音组：{groupName}，请检查 MainMixer 配置。");
+        return null;
     }
 
     #region 公开播放接口
@@ -159,7 +177,7 @@ public class AudioManager : SerializedMonoBehaviour
             {
                 bgmAudioSource.Stop();
                 bgmAudioSource.clip = clip;
-                bgmAudioSource.volume = BGM音量;
+                bgmAudioSource.volume = 1f;
                 bgmAudioSource.Play();
             }
             else
@@ -170,7 +188,8 @@ public class AudioManager : SerializedMonoBehaviour
                 // 从对象池取出一个组件播放
                 AudioSource seSource = GetAvailableSESource();
                 seSource.clip = clip;
-                seSource.volume = SE音量;
+                seSource.outputAudioMixerGroup = sfxGroup;
+                seSource.volume = 1f;
                 seSource.loop = isLoopSE;
                 seSource.Play();
 
@@ -316,7 +335,7 @@ public class AudioManager : SerializedMonoBehaviour
         }
     }
 
-    /// <summary>停止全部音效，并取消尚未完成的播放请求。</summary>
+    /// <summary>停止全部音效和语音，并取消尚未完成的音效播放请求。</summary>
     public void StopAll()
     {
         playbackVersion++;
@@ -390,20 +409,26 @@ public class AudioManager : SerializedMonoBehaviour
     }
 
 
-    /// <summary>
-    /// 直接传入 AudioClip 播放音效 (已整合进对象池，0 GC)
-    /// </summary>
-    /// <param name="clip">要播放的音频切片</param>
-    public void PlayClip(AudioClip clip)
+    /// <summary>从音源池播放音效；volume 为素材自身倍率，设置音量统一由 Mixer 控制。</summary>
+    public void PlayClip(AudioClip clip, float volume = 1f)
+    {
+        PlayPooledClip(clip, sfxGroup, volume);
+    }
+
+    /// <summary>从音源池播放角色语音，受主音量和语音音量控制；StopAll 同时停止语音。</summary>
+    public void PlayVoice(AudioClip clip, float volume = 1f)
+    {
+        PlayPooledClip(clip, voiceGroup, volume);
+    }
+
+    private void PlayPooledClip(AudioClip clip, AudioMixerGroup group, float volume)
     {
         if (_isDestroyed || isSceneTransitioning || clip == null) return;
-
-        // 直接从我们写好的对象池中取出一个空闲的 AudioSource
-        AudioSource seSource = GetAvailableSESource();
-        
-        seSource.clip = clip;
-        seSource.volume = SE音量;
-        seSource.loop = false;
-        seSource.Play();
+        AudioSource source = GetAvailableSESource();
+        source.outputAudioMixerGroup = group;
+        source.clip = clip;
+        source.volume = Mathf.Clamp01(volume);
+        source.loop = false;
+        source.Play();
     }
 }
