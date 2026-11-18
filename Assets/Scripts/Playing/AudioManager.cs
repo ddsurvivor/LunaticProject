@@ -70,6 +70,10 @@ public class AudioManager : SerializedMonoBehaviour
         {
             CreateNewAudioSourceToPool(i);
         }
+
+        // 场景预置的旧音源未接入 Mixer，在播循环背景音乐不受音量设置控制；统一兜底归入 BGM 组。
+        SceneManager.sceneLoaded += OnSceneLoadedRouteLegacySources;
+        RouteLegacySceneSources(SceneManager.GetActiveScene());
     }
 
     /// <summary>
@@ -107,6 +111,23 @@ public class AudioManager : SerializedMonoBehaviour
         Debug.LogError($"[AudioManager] 缺少音频混音组：{groupName}，请检查 MainMixer 配置。");
         return null;
     }
+
+    /// <summary>场景预置且未接入 Mixer 的旧音源统一归入 BGM 组，保证音量设置对在播循环背景音乐生效。</summary>
+    private void RouteLegacySceneSources(Scene scene)
+    {
+        if (!scene.IsValid() || bgmGroup == null) return;
+        foreach (GameObject root in scene.GetRootGameObjects())
+        {
+            foreach (AudioSource source in root.GetComponentsInChildren<AudioSource>(true))
+            {
+                if (source.outputAudioMixerGroup != null) continue;
+                source.outputAudioMixerGroup = bgmGroup;
+                Debug.LogWarning($"[AudioManager] 场景音源“{source.name}”未接入混音器，已自动归入 BGM 组。");
+            }
+        }
+    }
+
+    private void OnSceneLoadedRouteLegacySources(Scene scene, LoadSceneMode mode) => RouteLegacySceneSources(scene);
 
     #region 公开播放接口
 
@@ -391,6 +412,7 @@ public class AudioManager : SerializedMonoBehaviour
     private void OnDestroy()
     {
         _isDestroyed = true;
+        SceneManager.sceneLoaded -= OnSceneLoadedRouteLegacySources;
         StopAll();
         停止音乐();
         EndSceneTransition();

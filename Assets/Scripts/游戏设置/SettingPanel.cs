@@ -217,6 +217,17 @@ public class SettingPanel : UIPanel
                 UpdateSliderText(val, voiceVolumeValueText, DisplayType.Percentage);
                 PreviewAudioSettings();
             });
+
+        // 无边框窗口按桌面分辨率显示，切到该模式时禁用分辨率下拉。
+        if (screenModeDropdown != null)
+            screenModeDropdown.onValueChanged.AddListener(_ => UpdateResolutionDropdownState());
+    }
+
+    /// <summary>无边框窗口模式禁用分辨率下拉；全屏与窗口模式保持可选。</summary>
+    private void UpdateResolutionDropdownState()
+    {
+        if (resolutionDropdown == null || screenModeDropdown == null) return;
+        resolutionDropdown.interactable = screenModeDropdown.value != 2;
     }
 
     private void PreviewAudioSettings()
@@ -291,6 +302,7 @@ public class SettingPanel : UIPanel
         currentSettings.NormalizeScreenMode();
         if (screenModeDropdown != null) screenModeDropdown.SetValueWithoutNotify(currentSettings.screenModeIndex);
         if (resolutionDropdown != null) resolutionDropdown.value = currentSettings.resolutionIndex;
+        UpdateResolutionDropdownState();
         if (fpsDropdown != null) fpsDropdown.value = currentSettings.targetFPSIndex;
         if (fpsSlider != null) fpsSlider.value = currentSettings.targetFPSIndex;
         UpdateFpsText(currentSettings.targetFPSIndex);

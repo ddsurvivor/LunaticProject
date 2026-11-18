@@ -216,13 +216,17 @@ public class DataManager : SerializedMonoBehaviour
         settingsData.NormalizeScreenMode();
         FullScreenMode mode = settingsData.screenModeIndex == 0 ? FullScreenMode.ExclusiveFullScreen
             : settingsData.screenModeIndex == 2 ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed;
-        // A. 分辨率与全屏判定
+        // A. 分辨率与显示模式判定
         int resIndex = Mathf.Clamp(settingsData.resolutionIndex, 0, resolutionPresets.Count - 1);
         Vector2Int targetRes = resolutionPresets[resIndex];
-        // 窗口不能超出桌面；只限制实际尺寸，保留玩家选择的分辨率索引。
-        if (mode == FullScreenMode.Windowed)
+        Resolution desktop = Screen.currentResolution;
+        // 无边框窗口按桌面分辨率开窗（主流做法），忽略所选预设；窗口模式限制实际尺寸，保留玩家选择。
+        if (mode == FullScreenMode.FullScreenWindow)
         {
-            Resolution desktop = Screen.currentResolution;
+            targetRes = new Vector2Int(desktop.width, desktop.height);
+        }
+        else if (mode == FullScreenMode.Windowed)
+        {
             targetRes.x = Mathf.Min(targetRes.x, desktop.width);
             targetRes.y = Mathf.Min(targetRes.y, desktop.height);
         }
