@@ -642,7 +642,7 @@ public partial class PieceController : MonoBehaviour
             };
             PieceDisplay.Playback animation = null;
             if (pieceDisplay != null && pieceDisplay.isActiveAndEnabled)
-                animation = pieceDisplay.PlayAction(displayState, release, skill.animationIndex);
+                animation = pieceDisplay.PlayAction(displayState, release, skill.animationIndex, skill.skillId);
             else release();
             actionPlayback = animation;
 
