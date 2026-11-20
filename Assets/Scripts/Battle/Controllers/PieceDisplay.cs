@@ -12,7 +12,6 @@ public class PieceDisplay : SerializedMonoBehaviour
     
     // 棋子图片控制脚本，有一个SpriteRenderer用于显示棋子图片
     public SpriteRenderer pieceSpriteRenderer;
-    [LabelText("头顶 UI 锚点")] public Transform overheadAnchor; // 随棋子预制体保存，按不同身高手动调整。
     // 所有美术资源现已全部统一为 List<Sprite> 序列帧
     public List<Sprite> idleSprite;
     public List<Sprite> moveSprite;
@@ -23,7 +22,6 @@ public class PieceDisplay : SerializedMonoBehaviour
     public List<Sprite> deathSprites;
     [OdinSerialize]
     public List<List<Sprite>> skillSpriteList = new();
-    [LabelText("出手时机覆盖")] public List<ActionReleaseTiming> releaseTimings = new();
 
     // 每次播放独立持有进度和回调，旧播放不能完成新动作。
     public sealed class Playback
@@ -32,13 +30,13 @@ public class PieceDisplay : SerializedMonoBehaviour
         public bool IsCancelled { get; internal set; }
         public bool HasReleased { get; internal set; }
         internal List<Sprite> Frames;
-        internal float Elapsed, FrameDuration, Duration, ReleaseTime;
+        internal float Elapsed, FrameDuration, Duration;
         internal bool Loop, ReturnToIdle;
         internal UnityAction Release, Finish;
     }
 
-    public const float FramesPerSecond = 12f; // 正式动画与编辑器预览共用的序列帧率。
-    public const float FrameDuration = 1f / FramesPerSecond;
+    private const float frameDuration = 1f / 6f;
+    private const float dodgeDuration = 1f; // 闪避统一播放一秒，不随素材帧数变化。
     private Playback playback;
     private PieceDisplayState state;
     private Vector3 dodgeOrigin; // 闪避位移前的位置，结束或中断时必须恢复。
@@ -46,24 +44,9 @@ public class PieceDisplay : SerializedMonoBehaviour
     private bool pendingReaction;
     private PieceDisplayState pendingReactionState;
     private bool pendingReactionReturns;
-    private bool capturedOpacity;
-    private float initialOpacity; // 首次初始化时的预制体透明度，复用时保留原有美术配置。
     public bool BurstFrozen { get; private set; }
     public bool IsPlayingOneShot => !BurstFrozen && playback != null && !playback.Loop && !playback.IsDone;
     private bool IsAction => state == PieceDisplayState.Attack || state == PieceDisplayState.Shoot || state == PieceDisplayState.Skill;
-
-    /// <summary>棋子初始化时停止上一生命的动画及淡出，恢复首次初始化的精灵透明度。</summary>
-    public void ResetForReuse()
-    {
-        StopAnimation();
-        if (pieceSpriteRenderer == null) return;
-        var color = pieceSpriteRenderer.color;
-        if (!capturedOpacity) { initialOpacity = color.a; capturedOpacity = true; }
-        // 旧死亡淡出必须先取消，避免重新初始化后仍回写透明度或停用棋子。
-        pieceSpriteRenderer.DOKill();
-        color.a = initialOpacity;
-        pieceSpriteRenderer.color = color;
-    }
 
     /// <summary>
     /// 保留旧调用签名和序列帧数据。一次性动画的正 duration 仅表示播完回待机，
@@ -89,16 +72,13 @@ public class PieceDisplay : SerializedMonoBehaviour
         StartPlayback(next, GetFrames(next, index), back || duration > 0f, finish, null, duration);
     }
 
-    /// <summary>使用角色技能覆盖或动画默认出手点；未配置时保留序列中点，每次播放快照计时。</summary>
-    public Playback PlayAction(PieceDisplayState next, UnityAction release, int index = 0, string skillId = null)
+    /// <summary>自动以序列中点作为出手帧，不需要逐个角色增加动画事件。</summary>
+    public Playback PlayAction(PieceDisplayState next, UnityAction release, int index = 0)
     {
-        var current = StartPlayback(next, GetFrames(next, index), true, null, release, -1f);
-        current.ReleaseTime = GetReleaseTime(next, index, skillId);
-        return current;
+        return StartPlayback(next, GetFrames(next, index), true, null, release, -1f);
     }
 
-    /// <summary>获取正式动作序列，供战斗与编辑器预览共用；返回列表只供读取。</summary>
-    public List<Sprite> GetFrames(PieceDisplayState next, int index = 0)
+    private List<Sprite> GetFrames(PieceDisplayState next, int index)
     {
         switch (next)
         {
@@ -117,23 +97,6 @@ public class PieceDisplay : SerializedMonoBehaviour
         }
     }
 
-    /// <summary>按角色技能覆盖、角色动画默认、中点的优先级解析出手秒数。</summary>
-    public float GetReleaseTime(PieceDisplayState next, int index = 0, string skillId = null)
-    {
-        int count = GetFrames(next, index)?.Count ?? 0;
-        var timing = FindReleaseTiming(next, index, skillId);
-        if (timing == null && !string.IsNullOrEmpty(skillId)) timing = FindReleaseTiming(next, index, null);
-        return timing == null ? (count / 2) * FrameDuration : timing.GetSeconds(count);
-    }
-
-    /// <summary>读取指定作用域的配置，不自动回退；空技能 ID 表示该动画的默认配置。</summary>
-    public ActionReleaseTiming FindReleaseTiming(PieceDisplayState next, int index, string skillId)
-    {
-        return releaseTimings?.Find(t => t != null && t.action == next &&
-            (next != PieceDisplayState.Skill || t.animationIndex == index) &&
-            string.Equals(t.skillId ?? "", skillId ?? "", StringComparison.Ordinal));
-    }
-
     private Playback StartPlayback(PieceDisplayState next, List<Sprite> frames, bool back,
         UnityAction finish, UnityAction release, float duration)
     {
@@ -141,7 +104,9 @@ public class PieceDisplay : SerializedMonoBehaviour
         state = next;
         playback = new Playback
         {
-            Frames = frames, FrameDuration = FrameDuration,
+            Frames = frames, FrameDuration = next == PieceDisplayState.Dodge
+                ? dodgeDuration / Math.Max(1, frames?.Count ?? 0)
+                : next == PieceDisplayState.Move ? frameDuration / 2f : frameDuration,
             Loop = next == PieceDisplayState.Idle || next == PieceDisplayState.Move,
             ReturnToIdle = back, Finish = finish, Release = release, Duration = duration
         };
@@ -155,15 +120,12 @@ public class PieceDisplay : SerializedMonoBehaviour
         return playback;
     }
 
-    private void Update() => AdvancePlayback(Time.deltaTime);
-
-    /// <summary>推进正式动画时钟；编辑器仅对未绑定战斗回调的独立预览对象调用。</summary>
-    public void AdvancePlayback(float deltaTime)
+    private void Update()
     {
         if (BurstFrozen) return;
         var current = playback;
-        if (current == null || current.IsDone || deltaTime <= 0f || float.IsNaN(deltaTime) || float.IsInfinity(deltaTime)) return;
-        current.Elapsed += deltaTime;
+        if (current == null || current.IsDone || Time.deltaTime <= 0f) return;
+        current.Elapsed += Time.deltaTime;
         int count = pieceSpriteRenderer != null && current.Frames != null ? current.Frames.Count : 0;
         int frame = Mathf.FloorToInt(current.Elapsed / current.FrameDuration);
         if (dodgeOffset)
@@ -178,7 +140,7 @@ public class PieceDisplay : SerializedMonoBehaviour
             pieceSpriteRenderer.sprite = current.Frames[current.Loop ? frame % count : Mathf.Min(frame, count - 1)];
 
         // 即使低帧率跳过出手帧，仍只发送一次出手事件。空动画在下一次有效更新正常出手。
-        if (!current.HasReleased && (count == 0 || current.Elapsed >= current.ReleaseTime))
+        if (!current.HasReleased && (count == 0 || frame >= count / 2))
         {
             current.HasReleased = true;
             current.Release?.Invoke();
@@ -252,28 +214,6 @@ public class PieceDisplay : SerializedMonoBehaviour
     private void OnDisable() => StopAnimation();
 
 
-}
-
-public enum ActionReleaseMode { Frame, Seconds }
-
-[Serializable]
-public class ActionReleaseTiming
-{
-    public PieceDisplayState action = PieceDisplayState.Skill;
-    public int animationIndex;
-    public string skillId; // 空值是动画默认，否则仅覆盖这个角色的指定技能。
-    public ActionReleaseMode mode;
-    public int frame = 1; // 从1开始，选定帧开始时出手。
-    public float seconds;
-
-    /// <summary>将配置换算为秒；旧配置越界时限于末帧开始，空序列立即出手。</summary>
-    public float GetSeconds(int frameCount)
-    {
-        float maximum = Math.Max(0, frameCount - 1) * PieceDisplay.FrameDuration;
-        if (mode == ActionReleaseMode.Frame)
-            return (Mathf.Clamp(frame, 1, Math.Max(1, frameCount)) - 1) * PieceDisplay.FrameDuration;
-        return float.IsNaN(seconds) || float.IsInfinity(seconds) ? 0f : Mathf.Clamp(seconds, 0f, maximum);
-    }
 }
 
 public enum PieceDisplayState

@@ -143,7 +143,7 @@ public class CharacterAnimationImportWindow : EditorWindow
             Run(() => { CharacterAnimationImporter.RepairTextures(plan); Scan(); });
         showIgnored = EditorGUILayout.Foldout(showIgnored, "未采用文件（" + plan.ignored.Count + "）：副本、B 版或命名不匹配", true);
         if (showIgnored) foreach (string file in plan.ignored) EditorGUILayout.LabelField(file, EditorStyles.miniLabel);
-        EditorGUILayout.HelpBox("所有动作统一 " + PieceDisplay.FramesPerSecond + " 帧/秒。未配置出手点时使用序列中点；可打开出手时机调节器单独校准。", MessageType.None);
+        EditorGUILayout.HelpBox("普通动作 6 帧/秒，移动 12 帧/秒；闪避共 1 秒。攻击在序列中点出手，增加帧数会延长动作。", MessageType.None);
         EditorGUILayout.EndScrollView();
     }
 
@@ -152,7 +152,7 @@ public class CharacterAnimationImportWindow : EditorWindow
         previewRow = Mathf.Clamp(previewRow, 0, plan.rows.Count - 1);
         var row = plan.rows[previewRow];
         if (row.frames.Count == 0) return;
-        float fps = PieceDisplay.FramesPerSecond;
+        float fps = row.action == 1 ? 12f : row.action == 4 ? row.frames.Count : 6f;
         if (playing) previewFrame = (int)((EditorApplication.timeSinceStartup - previewStart) * fps) % row.frames.Count;
         previewFrame = Mathf.Clamp(previewFrame, 0, row.frames.Count - 1);
         EditorGUILayout.BeginHorizontal();
@@ -190,7 +190,6 @@ public class PieceDisplayEditor : OdinEditor
     public override void OnInspectorGUI()
     {
         if (GUILayout.Button("打开角色动画导入")) CharacterAnimationImportWindow.ShowFor((PieceDisplay)target);
-        if (GUILayout.Button("打开技能出手调节")) SkillReleaseTimingWindow.ShowFor((PieceDisplay)target);
         base.OnInspectorGUI();
     }
 }
