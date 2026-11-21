@@ -5,13 +5,14 @@ using UnityEngine;
 using static BattleUITemplateAuthoring;
 
 /// <summary>生成战外设施的共享模板与侧栏入口；只创建缺失资产，保留后续手动布局。</summary>
+// B63：Tools入口已撤下；功能暂留，后续删除前需核对正式资源与业务引用。
 public static class PowerSpineTemplateAuthoring
 {
     public const string PanelPath = "Assets/Resources/UI/PowerSpinePanel.prefab";
     public const string EntryPath = "Assets/Resources/UI/PowerSpineEntry.prefab";
 
     /// <summary>使用 AVG 嵌套模块创建设施 UI；已有模板和 Variant 不被覆盖。</summary>
-    [MenuItem("Tools/Facilities/Create Power Spine Templates If Missing")]
+
     public static void CreateIfMissing()
     {
         var style = Resources.Load<BattleHealthBarStyle>("UI/BattleHealthBarStyle");

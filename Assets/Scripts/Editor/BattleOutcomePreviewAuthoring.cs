@@ -4,11 +4,12 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>只创建缺失的战果提示模板，沿用 AVG 模块并保留手动布局。</summary>
+// B63：Tools入口已撤下；功能暂留，后续删除前需核对正式资源与业务引用。
 public static class BattleOutcomePreviewAuthoring
 {
     public const string Path = "Assets/Resources/UI/BattleOutcomePreview.prefab";
     /// <summary>创建非交互的屏幕边缘提示；不会覆盖已有模板。</summary>
-    [MenuItem("Tools/Battle UI/Create Outcome Preview If Missing")]
+
     public static void CreateIfMissing()
     {
         if (File.Exists(Path)) return;

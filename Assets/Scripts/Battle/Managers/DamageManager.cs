@@ -12,6 +12,7 @@ public sealed class DamageManager
         public bool CanApplyEffects;
         public bool HitAttack;
         public bool IsCritical;
+        public bool DeviceInterferenceResolved; // 装置干扰在首次实际命中扣血前处理，避免致死命中先触发报警。
         public readonly List<DamageInfo> DamageInfos = new();
         public readonly List<BattleDamageResult> DamageResults = new(); // 只记录实际进入生命提交的段，不包含屏障吸收。
     }
@@ -64,7 +65,7 @@ public sealed class DamageManager
             battle.tipTextManager.ShowMiss(target.transform);
             return result;
         }
-        result.IsCritical = context.MustCrit || BattleRandom.Range(1, 101) <= attacker.unitAttrCenter.critRate;
+        result.IsCritical = context.MustCrit || BattleRandom.Range(1, 101) <= attacker.unitAttrCenter.EffectiveCriticalRate;
 
         // 3. 各段使用统一公式；实战才提交聚能累计、扣血和受击事件。
         bool reachedTarget = skill.attackPacks.Count == 0;
@@ -84,6 +85,17 @@ public sealed class DamageManager
             {
                 battle.buffManager.AbsorbAttack(target.unitAttrCenter, damage);
                 continue;
+            }
+            if (target is SceneBattleDevice && !result.DeviceInterferenceResolved)
+            {
+                result.DeviceInterferenceResolved = true;
+                // 只对实际穿过屏障的命中先施加电子干扰；后续通用效果循环不重复掷骰或叠层。
+                foreach (var buff in skill.buffPacks)
+                    if (buff != null && buff.buffType == BuffType.ElectronicInterference && buff.target != SkillTarget.Self &&
+                        (buff.target == SkillTarget.All ||
+                         (buff.target == SkillTarget.Ally || buff.target == SkillTarget.AllyBody) && BattleRelations.CanSupport(attacker, target) ||
+                         (buff.target == SkillTarget.Enemy || buff.target == SkillTarget.EnemyAll || buff.target == SkillTarget.FarthestEnemy) && BattleRelations.CanAttack(attacker, target)) &&
+                        GameConst.CheckRate(buff.rate)) battle.buffManager.AddBuff(target.unitAttrCenter, buff.buffType, buff.stacks);
             }
             result.DamageResults.Add(target.unitAttrCenter.TakeDamage(new AttackPack(damage, pack.damageType, result.IsCritical),
                 new BattleDamageSource(BattleDamageKind.Skill, attacker, skill, action)));
@@ -135,8 +147,8 @@ public sealed class DamageManager
             for (int critical = 0; critical <= 1; critical++)
             {
                 bool isCrit = critical == 1;
-                if (!isCrit && (context.MustCrit || attacker.unitAttrCenter.critRate >= 100)) continue;
-                if (isCrit && !context.MustCrit && attacker.unitAttrCenter.critRate <= 0) continue;
+                if (!isCrit && (context.MustCrit || attacker.unitAttrCenter.EffectiveCriticalRate >= 100)) continue;
+                if (isCrit && !context.MustCrit && attacker.unitAttrCenter.EffectiveCriticalRate <= 0) continue;
 
                 // 3. 逐段穷举 4D6，在副本上累计聚能，再按伤害类型合并。
                 BurstState minBurst = CaptureBurst();
@@ -199,8 +211,8 @@ public sealed class DamageManager
 
     private static int PreviewPreviousBound(Context context, AttackPack pack, bool maximum, ref BurstState burst)
     {
-        bool mustCrit = context.MustCrit || context.Attacker.unitAttrCenter.critRate >= 100;
-        if (mustCrit || context.Attacker.unitAttrCenter.critRate <= 0)
+        bool mustCrit = context.MustCrit || context.Attacker.unitAttrCenter.EffectiveCriticalRate >= 100;
+        if (mustCrit || context.Attacker.unitAttrCenter.EffectiveCriticalRate <= 0)
             return CalculateBound(context, pack, mustCrit, maximum, ref burst);
         var normal = burst;
         var critical = burst;
@@ -227,9 +239,9 @@ public sealed class DamageManager
         bool guaranteed = context.IsBursting || skill.target is SkillTarget.EnemyAll
             or SkillTarget.All or SkillTarget.Self or SkillTarget.AllyBody or SkillTarget.Ally;
         context.HitRate = guaranteed ? 100 : Mathf.Clamp(Mathf.FloorToInt(
-            attacker.unitAttrCenter.buffAttrDic[BuffAttrType.HitRate]
+            (attacker.unitAttrCenter.buffAttrDic[BuffAttrType.HitRate]
             + (skill.target is SkillTarget.Enemy or SkillTarget.FarthestEnemy
-                ? attacker.unitAttrCenter.buffAttrDic[BuffAttrType.SingleTargetHitRate] : 0f)
+                ? attacker.unitAttrCenter.buffAttrDic[BuffAttrType.SingleTargetHitRate] : 0f)) * SceneBattleDevice.HitMultiplier(attacker)
             - target.unitAttrCenter.buffAttrDic[BuffAttrType.EvasionRate]
             - (context.Cover != null ? GM.Ins.DM.gameConstSO.CoverEvasionBonus : 0)), 0, 100);
         SetRecognition(ref context, skill, check);

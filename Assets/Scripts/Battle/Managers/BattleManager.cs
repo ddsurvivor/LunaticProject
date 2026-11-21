@@ -195,6 +195,7 @@ public partial class BattleManager : MonoBehaviour
             // 处理buff
             foreach (var buffPack in skillPack.buffPacks)
             {
+                if (settlement.DeviceInterferenceResolved && buffPack.buffType == BuffType.ElectronicInterference) continue;
                 if (buffPack.target == SkillTarget.Self)
                 {
                     // 施法者状态在目标循环外只结算一次。
@@ -232,6 +233,7 @@ public partial class BattleManager : MonoBehaviour
             // 处理附加效果
             ApplySKillEffect(skillPack, attacker, target, targetPos);
             ApplyAddEffect(skillPack, attacker, target, targetPos, actualHealthLoss);
+            if (settlement.HitAttack && target is SceneBattleDevice device) device.NotifySkillHit(attacker, skillPack);
             if (skillPack.memeCureTags != MemeCureTag.None) timedMemeStatuses.TryCure(target, skillPack.memeCureTags);
             if (IsBurstActor(attacker)) // 聚能状态下所有攻击附加击退效果
             {

@@ -18,6 +18,8 @@ public partial class GM
         internal UnityEngine.Random.State OutsideRandom; // 离开会话时恢复战斗之外的随机序列。
         internal UnityEngine.Random.State InitialWorldRandom; // 对象初始化前的序列，重开时原样恢复。
         internal readonly HashSet<string> Achievements = new(); // 本次尝试尚未对平台提交的成就。
+        internal bool DeviceAlarmRestart;
+        internal readonly Dictionary<int, UnityEngine.Vector3> InitialDeployment = new(); // 首次正式开战的友军站位，报警重开复用。
     }
 
     private BattleSession battleSession; // 随 GM 常驻，跨重载保留最初战前快照。
@@ -27,6 +29,39 @@ public partial class GM
     public int BattleAttempt => battleSession?.Attempts ?? 0;
     public bool IsRestartedBattle => BattleAttempt > 1;
     public int PendingBattleAchievements => battleSession?.Achievements.Count ?? 0;
+
+    /// <summary>只在首次正式开战捕获已完成部署的位置，不保存途中位置或写入玩家档案。</summary>
+    public void CaptureDeviceAlarmDeployment(BattleManager manager)
+    {
+        if (battleSession == null || battleSession.InitialDeployment.Count != 0) return;
+        foreach (var piece in manager.PlayerController.pieces)
+            if (piece != null && !piece.isDead) battleSession.InitialDeployment[piece.pieceID] = piece.transform.position;
+    }
+
+    /// <summary>警戒塔沿正式战前快照重开，恢复初次部署并自动进入第一回合；不提交本局奖励。</summary>
+    public bool RestartBattleFromDeviceAlarm()
+    {
+        if (battleSession == null || IsTransitioning) return false;
+        battleSession.DeviceAlarmRestart = true;
+        if (RestartBattle()) return true;
+        battleSession.DeviceAlarmRestart = false;
+        return false;
+    }
+
+    /// <summary>仅报警重开消费一次；常规手动重开仍使用原来的重新部署与介绍流程。</summary>
+    public bool RestoreDeviceAlarmDeployment(BattleManager manager)
+    {
+        if (battleSession == null || !battleSession.DeviceAlarmRestart || battleSession.Scene != manager.gameObject.scene.name) return false;
+        battleSession.DeviceAlarmRestart = false;
+        foreach (var piece in manager.PlayerController.pieces)
+        {
+            if (piece == null || !battleSession.InitialDeployment.TryGetValue(piece.pieceID, out var position)) continue;
+            var agent = piece.GetComponent<UnityEngine.AI.NavMeshAgent>();
+            if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh) agent.Warp(position);
+            else piece.transform.position = position;
+        }
+        return true;
+    }
 
     /// <summary>棋子初始化前捕获战前数据；重开后的新管理器沿用原快照与种子。</summary>
     internal void BeginBattleSession(BattleManager manager)

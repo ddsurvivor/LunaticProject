@@ -157,6 +157,7 @@ public static class SkillTargeting
             !target.gameObject.activeInHierarchy) return false;
         if (target.GetComponent<SelfRevive>()?.IsCompletingTrueDeath == true) return false;
         if (target is RangeBarrier barrier && !barrier.IsActive) return false;
+        if (target is SceneBattleDevice device && !device.IsInitialized) return false;
         bool ally = BattleRelations.CanSupport(caster, target);
         if (targetType == SkillTarget.AllyBody) return ally && target.isDead;
         if (target.isDead) return false;

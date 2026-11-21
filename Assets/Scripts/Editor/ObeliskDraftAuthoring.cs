@@ -8,13 +8,14 @@ using UnityEngine;
 using UnityEngine.Events;
 
 /// <summary>制作尚未定稿数值的方尖碑结构草稿，不登记到棋子目录或战斗关卡。</summary>
+// B63：Tools入口已撤下；功能暂留，后续删除前需核对正式资源与业务引用。
 public static class ObeliskDraftAuthoring
 {
     public const string PrefabPath = "Assets/Prefab/Battle/Enemy/Drafts/Obelisk_Draft.prefab";
     private const string SpriteFolder = "Assets/A美术/BattleSprites/INST1方尖碑";
 
     /// <summary>首次复制黑衣人结构并绑定方尖碑帧；草稿保持停用，已有文件不覆盖。</summary>
-    [MenuItem("Tools/Battle/Obelisk/Create Draft If Missing")]
+
     public static void CreateIfMissing()
     {
         if (File.Exists(PrefabPath)) { Debug.Log("方尖碑草稿已存在，请手动编辑；不会覆盖。"); return; }

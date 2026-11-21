@@ -3,12 +3,13 @@ using UnityEngine;
 using static BattleUITemplateAuthoring;
 
 /// <summary>首次创建暂停模板，保留 AVG 模块的嵌套 prefab 连接，不覆盖已有资产。</summary>
+// B63：Tools入口已撤下；功能暂留，后续删除前需核对正式资源与业务引用。
 public static class BattlePauseTemplateAuthoring
 {
     public const string PrefabPath = "Assets/Resources/UI/BattlePauseWindow.prefab";
 
     /// <summary>仅首次生成嵌套 AVG 模块的暂停模板；已有资产及手动覆盖保持不变。</summary>
-    [MenuItem("Tools/Battle UI/Create Pause Template If Missing")]
+
     public static void CreateIfMissing()
     {
         if (System.IO.File.Exists(PrefabPath))

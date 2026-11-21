@@ -39,7 +39,7 @@ public partial class BattleManager
 
     /// <summary>判断棋子能否参与速度调度；排除死亡、未激活及尚未唤醒的敌人。</summary>
     public static bool IsSpeedParticipant(PieceController piece) => piece != null &&
-        piece.gameObject.activeInHierarchy && piece.unitAttrCenter != null && !piece.isDead &&
+        piece.gameObject.activeInHierarchy && !(piece is SceneBattleDevice) && piece.unitAttrCenter != null && !piece.isDead &&
         (!(piece is EnemyController enemy) || enemy.isActived);
 
     /// <summary>收集当前有效参战者；按双方交错顺序注册，作为同刻满条时的稳定排序依据。</summary>
@@ -61,6 +61,7 @@ public partial class BattleManager
         if (SpeedTurnsActive || !inBattle || startupPhase != StartupPhase.Active) return;
         speedQueue.Clear();
         SpeedTurnsActive = true;
+        GM.Ins.CaptureDeviceAlarmDeployment(this);
         BattleScene.Ins.UM.EnableSpeedTimeline(this);
         PlayerController.RefreshBurstUI();
         speedRoutine = StartCoroutine(SpeedTurnRoutine());
@@ -100,6 +101,7 @@ public partial class BattleManager
                 if (round != _turnNumber)
                 {
                     _turnNumber = round;
+                    SceneBattleDevice.OnWorldRound(this);
                     battleDialogueManager?.TriggerTurnNumStart(round);
                     BattleScene.Ins.UM.turnNumberText.text = round.ToString();
                     if (round >= winTurnCondition) { PlayerWin(); yield break; }
@@ -117,6 +119,7 @@ public partial class BattleManager
             // 新状态在事件前快照，保护TurnStart内施加或刷新的持续时间。
             timedMemeStatuses.BeginNormalTurn(next);
             next.TurnStart();
+            SceneBattleDevice.OnNormalTurnStart(next, this);
             if (!inBattle || !SpeedTurnsActive) yield break;
             buffManager.ProcessBuffs(next.unitAttrCenter);
             timedMemeStatuses.ResolveTurnStart(next);

@@ -3,12 +3,13 @@ using UnityEngine;
 using static BattleUITemplateAuthoring;
 
 /// <summary>首次创建结果窗口模板，保留 AVG 模块连接和手动布局。</summary>
+// B63：Tools入口已撤下；功能暂留，后续删除前需核对正式资源与业务引用。
 public static class BattleResultTemplateAuthoring
 {
     public const string PrefabPath = "Assets/Resources/UI/BattleResultWindow.prefab";
 
     /// <summary>生成结果模板及可滚动奖励预告；已有文件不覆盖。</summary>
-    [MenuItem("Tools/Battle UI/Create Result Template If Missing")]
+
     public static void CreateIfMissing()
     {
         if (System.IO.File.Exists(PrefabPath))

@@ -1,5 +1,7 @@
 # 战斗 UI
 
+B63：本文历史`Tools/Battle UI/`入口已撤下，模板生成/升级实现暂留待删除；正式预制体、Variant及运行组件保留，后文菜单路径不再是可用入口。
+
 素材生成入口为 `python Tools/Art/generate_battle_ui.py`（依赖Pillow）。正式Sprite与导入配置写入 `Assets/A美术/BattleCommonUI/`，提色JSON和设计预览写入 `tmp/Reports/BattleUIArt-<日期>/`；这些设计图不能作为运行验收截图。
 
 样式使用 `GameConst.UIColors`；保留现有业务组件、事件、暂停持有者及序列化绑定。B35 其余面板迁移继续跳过，不能按旧迁移顺序自动恢复开发。

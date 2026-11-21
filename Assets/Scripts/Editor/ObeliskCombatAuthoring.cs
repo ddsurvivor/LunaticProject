@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>将方尖碑草稿接入正式棋子目录，使用用户授权的临时战斗数值。</summary>
+// B63：Tools入口已撤下；功能暂留，后续删除前需核对正式资源与业务引用。
 public static class ObeliskCombatAuthoring
 {
     public const string PrefabPath = "Assets/Prefab/Battle/Enemy/Enemy10.prefab";
@@ -15,7 +16,7 @@ public static class ObeliskCombatAuthoring
     public const string CatalogPath = "Assets/ScriptableObjects/PieceDataListSO.asset";
 
     /// <summary>首次创建方尖碑战斗配置与独立技能库；已有配置不覆盖，部分缺失时停止以便人工处理。</summary>
-    [MenuItem("Tools/Battle/Obelisk/Create Combat Configuration If Missing")]
+
     public static void CreateIfMissing()
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("请在编辑模式创建方尖碑。");
@@ -90,7 +91,7 @@ public static class ObeliskCombatAuthoring
     }
 
     /// <summary>将正式方尖碑的可见主体调为黑衣人等高，按主体底边落地，保留根节点与战斗配置。</summary>
-    [MenuItem("Tools/Battle/Obelisk/Match Black Suit Height")]
+
     public static void ApplyBlackSuitHeight()
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("请在编辑模式调整方尖碑体型。");
@@ -141,7 +142,7 @@ public static class ObeliskCombatAuthoring
     }
 
     /// <summary>为已存在的正式方尖碑补入逆转敌我永久免疫，不覆盖其他手动棋子配置。</summary>
-    [MenuItem("Tools/Battle/Obelisk/Apply Permanent Inversion Immunity")]
+
     public static void ApplyPermanentInversionImmunity()
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("请在编辑模式配置方尖碑免疫。");
@@ -156,7 +157,7 @@ public static class ObeliskCombatAuthoring
     }
 
     /// <summary>为已存在的方尖碑补入确认的被动光环和永久免疫，保留已有光环的手动参数。</summary>
-    [MenuItem("Tools/Battle/Obelisk/Apply Confirmed Support Configuration")]
+
     public static void ApplySupportConfiguration()
     {
         ApplyPermanentInversionImmunity();

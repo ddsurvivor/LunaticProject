@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 /// <summary>首次生成群体护盾正式资产；再次执行仅补缺失配置，保留手动参数与预制体覆盖。</summary>
+// B63：Tools入口已撤下；功能暂留，后续删除前需核对正式资源与业务引用。
 public static class RangeBarrierAuthoring
 {
     public const string BodyPath = "Assets/Prefab/Battle/Enemy/ObeliskRangeBarrier.prefab";
@@ -13,7 +14,7 @@ public static class RangeBarrierAuthoring
     public const string SkillId = "obelisk_range_barrier";
 
     /// <summary>在编辑模式补入已确认的B38技能、发射器、护盾实体及共用血条变体。</summary>
-    [MenuItem("Tools/Battle/Obelisk/Apply Confirmed Range Barrier")]
+
     public static void Apply()
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("请在编辑模式配置护盾。");

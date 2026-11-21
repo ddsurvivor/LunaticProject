@@ -70,6 +70,8 @@ public sealed class BattleOverheadStatusLayer : MonoBehaviour
         pieces.UnionWith(battle.AIController.pieces);
         pieces.UnionWith(battle.summonPieces);
         pieces.UnionWith(battle.RangeBarriers);
+        foreach (var device in SceneBattleDevice.Active)
+            if (device != null && device.gameObject.scene == battle.gameObject.scene) pieces.Add(device);
         foreach (var explosive in EnemyExplosiveTargets.Active) if (explosive.Piece != null) pieces.Add(explosive.Piece);
         staleViews.Clear();
         foreach (var key in views.Keys)

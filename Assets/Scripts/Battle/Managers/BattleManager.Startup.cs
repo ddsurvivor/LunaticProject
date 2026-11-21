@@ -30,12 +30,19 @@ public partial class BattleManager
         }
         if (!inBattle || startupPhase != StartupPhase.Ready) return;
         startupRequested = false;
-        if (BeginDeploymentIfAvailable()) return;
+        bool alarmRestart = GM.Ins.RestoreDeviceAlarmDeployment(this);
+        if (!alarmRestart && BeginDeploymentIfAvailable()) return;
         startupPhase = StartupPhase.Sweeping; // 在调用可能触发事件的初始化前占用。
         int version = ++startupVersion;
         Debug.Log("战斗开始");
         characterSkillManager.Init(PlayerController.pieces.Concat(AIController.pieces)
             .Concat(summonPieces).Distinct().ToList());
+        if (alarmRestart)
+        {
+            startupPhase = StartupPhase.Introduction;
+            CompleteBattleIntroduction();
+            return;
+        }
         if (!IsCurrentSweep(version)) return;
         SetSkipVisible(true);
         if (!IsCurrentSweep(version)) return;

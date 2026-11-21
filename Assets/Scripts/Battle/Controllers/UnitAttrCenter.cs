@@ -70,6 +70,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     
     // 暴击率
     public int critRate;
+    public int EffectiveCriticalRate => Mathf.Clamp(critRate + SceneBattleDevice.CriticalBonus(pc), 0, 100);
     // 暴击伤害
    public int critDamageRate;
 

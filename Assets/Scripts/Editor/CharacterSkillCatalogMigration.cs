@@ -4,10 +4,11 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>将历史角色内嵌技能迁入统一技能库，保留各条配置而不按同名技能合并。</summary>
+// B63：Tools入口已撤下；功能暂留，后续删除前需核对正式资源与业务引用。
 public static class CharacterSkillCatalogMigration
 {
     /// <summary>仅恢复已迁移角色丢失的技能库引用；先核对全部 ID，不重建技能、不覆盖已有技能库或角色配置。</summary>
-    [MenuItem("Tools/技能配置/恢复丢失的角色技能库绑定")]
+
     public static void RestoreMissingLibraryBindings()
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling || EditorApplication.isUpdating) return;
@@ -52,7 +53,7 @@ public static class CharacterSkillCatalogMigration
     }
 
     /// <summary>迁移所有角色 SO；只在编辑模式运行，可重复执行且不覆盖已拆分的技能引用。</summary>
-    [MenuItem("Tools/技能配置/迁移角色技能到统一技能库")]
+
     public static void Migrate()
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode) return;

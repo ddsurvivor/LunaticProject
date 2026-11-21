@@ -58,6 +58,7 @@ public static partial class EnumExtensions
             case BuffType.SpontaneousMemeticAttack: return "自发模因攻击";
             case BuffType.MemeticRetaliation: return "认知反噬";
             case BuffType.Stun: return "眩晕";
+            case BuffType.ElectronicInterference: return "电子干扰";
             default: return type.ToString();
         }
     }
@@ -170,6 +171,7 @@ public enum BuffType
     [LabelText("自发模因攻击")] SpontaneousMemeticAttack = 106,
     [LabelText("认知反噬")] MemeticRetaliation = 107,
     [LabelText("眩晕")] Stun = 108,
+    [LabelText("电子干扰")] ElectronicInterference = 109,
 }
 
 /// <summary>

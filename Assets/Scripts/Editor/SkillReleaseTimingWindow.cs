@@ -29,6 +29,7 @@ public class SkillReleaseTimingWindow : EditorWindow
     private FloatField secondsField;
     private Button saveButton;
     private List<SkillPack> choices = new();
+    private float projectileSpeedDraft = 20f, targetDistance = 5f;
 
     /// <summary>从菜单打开调节器，并尝试定位当前选中的棋子。</summary>
     [MenuItem("Tools/角色动画/技能出手调节")]
@@ -93,7 +94,7 @@ public class SkillReleaseTimingWindow : EditorWindow
         root.style.paddingLeft = root.style.paddingRight = 12;
         root.style.paddingTop = 10;
         rootVisualElement.Add(root);
-        root.Add(new HelpBox("12 FPS · 场景精灵预览 · 单次动作一个出手点。保存到所选 PieceDisplay；场景实例的修改作为实例覆盖保存，应用至预制体请使用 Inspector Overrides。", HelpBoxMessageType.Info));
+        root.Add(new HelpBox("默认12 FPS，可单独设置每张图的停留秒数。帧模式在指定图开始时出手；旧秒模式保留绝对时间。角色配置保存到所选 PieceDisplay。", HelpBoxMessageType.Info));
         var target = new ObjectField("角色 PieceDisplay") { objectType = typeof(PieceDisplay), allowSceneObjects = true, value = targetDisplay };
         target.RegisterValueChangedCallback(e => { ChangeTarget(e.newValue as PieceDisplay); target.SetValueWithoutNotify(targetDisplay); });
         root.Add(target);
@@ -154,10 +155,10 @@ public class SkillReleaseTimingWindow : EditorWindow
         modeField = new EnumField("设置方式", draft.mode);
         modeField.RegisterValueChangedCallback(e =>
         {
-            float seconds = draft.GetSeconds(Count);
+            float seconds = draft.GetSeconds(Timeline);
             draft.mode = (ActionReleaseMode)e.newValue;
             draft.seconds = seconds;
-            draft.frame = Mathf.Clamp(Mathf.RoundToInt(seconds * PieceDisplay.FramesPerSecond) + 1, 1, Math.Max(1, Count));
+            draft.frame = Timeline.GetFrame(seconds) + 1;
             Changed();
         });
         root.Add(modeField);
@@ -168,10 +169,39 @@ public class SkillReleaseTimingWindow : EditorWindow
         secondsField.RegisterValueChangedCallback(e =>
         {
             draft.seconds = e.newValue;
-            draft.seconds = draft.GetSeconds(Count);
+            draft.seconds = draft.GetSeconds(Timeline);
             Changed();
         });
         root.Add(secondsField);
+        var holds = new Foldout { text = "逐帧停留时长（0 = 默认1/12秒）", value = Count <= 4 };
+        for (int i = 0; i < Count; i++)
+        {
+            int index = i;
+            var hold = new FloatField("第" + (i + 1) + "张（秒）") { value = draft.frameDurations != null && i < draft.frameDurations.Count ? draft.frameDurations[i] : 0f };
+            hold.RegisterValueChangedCallback(e =>
+            {
+                draft.frameDurations ??= new List<float>();
+                while (draft.frameDurations.Count <= index) draft.frameDurations.Add(0);
+                float value = e.newValue;
+                if (value < 0 || float.IsNaN(value) || float.IsInfinity(value)) value = 0;
+                draft.frameDurations[index] = value; hold.SetValueWithoutNotify(value); Changed();
+            });
+            holds.Add(hold);
+        }
+        root.Add(holds);
+        var selectedSkill = choices.Find(s => s.skillId == skillId);
+        if (selectedSkill != null)
+        {
+            bool projectile = selectedSkill.bulletVFXType != ItemType.NONE;
+            root.Add(new HelpBox(projectile ? "有弹道：发射帧生成子弹，到达目标才命中。速度保存到共享技能库，会影响使用该技能的角色。" : "无弹道：出手点直接命中，不附加飞行等待。", HelpBoxMessageType.Info));
+            if (projectile)
+            {
+                var velocity = new FloatField("子弹速度（世界单位/秒）") { value = projectileSpeedDraft };
+                velocity.RegisterValueChangedCallback(e => { projectileSpeedDraft = e.newValue; dirty = true; RefreshFields(); }); root.Add(velocity);
+                var distance = new FloatField("预览目标距离") { value = targetDistance };
+                distance.RegisterValueChangedCallback(e => { targetDistance = float.IsNaN(e.newValue) || float.IsInfinity(e.newValue) ? 0 : Mathf.Max(0, e.newValue); distance.SetValueWithoutNotify(targetDistance); RefreshFields(); }); root.Add(distance);
+            }
+        }
         timeline = new Slider("时间轴（秒）", 0f, Mathf.Max(PieceDisplay.FrameDuration, Duration));
         timeline.RegisterValueChangedCallback(e => Seek(e.newValue));
         root.Add(timeline);
@@ -179,13 +209,13 @@ public class SkillReleaseTimingWindow : EditorWindow
         var controls = new VisualElement { style = { flexDirection = FlexDirection.Row } };
         AddButton(controls, "播放/暂停", TogglePlayback);
         AddButton(controls, "重播", () => { Seek(0); playing = true; lastTick = EditorApplication.timeSinceStartup; });
-        AddButton(controls, "上一帧", () => Seek(Mathf.Max(0, Mathf.Round(elapsed * PieceDisplay.FramesPerSecond) - 1) * PieceDisplay.FrameDuration));
-        AddButton(controls, "下一帧", () => Seek((Mathf.Floor(elapsed * PieceDisplay.FramesPerSecond) + 1) * PieceDisplay.FrameDuration));
+        AddButton(controls, "上一帧", () => Seek(Timeline.GetFrameStart(Timeline.GetFrame(elapsed) - 1)));
+        AddButton(controls, "下一帧", () => Seek(Timeline.GetFrameStart(Timeline.GetFrame(elapsed) + 1)));
         root.Add(controls);
         AddButton(root, "将当前帧设为出手帧", () =>
         {
             draft.mode = ActionReleaseMode.Frame;
-            draft.frame = Mathf.Clamp(Mathf.FloorToInt(elapsed * PieceDisplay.FramesPerSecond) + 1, 1, Math.Max(1, Count));
+            draft.frame = Timeline.GetFrame(elapsed) + 1;
             Changed();
         });
         var repeat = new Toggle("循环播放") { value = loop };
@@ -208,7 +238,12 @@ public class SkillReleaseTimingWindow : EditorWindow
     }
 
     private int Count => targetDisplay == null ? 0 : targetDisplay.GetFrames(action, animationIndex)?.Count ?? 0;
-    private float Duration => Count * PieceDisplay.FrameDuration;
+    private PieceAnimationTimeline Timeline => new PieceAnimationTimeline(Count, draft?.frameDurations);
+    private float Duration => Timeline.Duration;
+    private float FlightDuration => choices.Find(s => s.skillId == skillId)?.bulletVFXType != ItemType.NONE &&
+        choices.Any(s => s.skillId == skillId) && projectileSpeedDraft > 0 && !float.IsInfinity(projectileSpeedDraft)
+        ? targetDistance / projectileSpeedDraft : 0f;
+    private float PreviewDuration => Mathf.Max(Duration, (draft?.GetSeconds(Timeline) ?? 0) + FlightDuration);
     private string ScopeId => skillOverride ? skillId : "";
 
     private PieceData ActorData()
@@ -223,10 +258,13 @@ public class SkillReleaseTimingWindow : EditorWindow
         DestroyPreview(); dirty = false; elapsed = 0;
         var existing = targetDisplay == null ? null : targetDisplay.FindReleaseTiming(action, animationIndex, ScopeId);
         float fallback = targetDisplay == null ? 0 : targetDisplay.GetReleaseTime(action, animationIndex, ScopeId);
-        draft = existing == null ? new ActionReleaseTiming { mode = ActionReleaseMode.Seconds, seconds = fallback,
-                frame = Mathf.RoundToInt(fallback * PieceDisplay.FramesPerSecond) + 1 }
+        existing ??= targetDisplay == null ? null : targetDisplay.FindReleaseTiming(action, animationIndex, null);
+        draft = existing == null ? new ActionReleaseTiming { mode = ActionReleaseMode.Frame, seconds = fallback,
+                frame = Count / 2 + 1 }
             : JsonUtility.FromJson<ActionReleaseTiming>(JsonUtility.ToJson(existing));
         draft.action = action; draft.animationIndex = animationIndex; draft.skillId = ScopeId;
+        draft.frameDurations ??= new List<float>();
+        projectileSpeedDraft = library?.skillPacks?.Find(s => s != null && s.skillId == skillId)?.ProjectileSpeed ?? 20f;
     }
 
     private void Changed()
@@ -241,16 +279,19 @@ public class SkillReleaseTimingWindow : EditorWindow
     private void RefreshFields()
     {
         if (frameField == null || draft == null) return;
-        float release = draft.GetSeconds(Count);
-        frameField.SetValueWithoutNotify(draft.mode == ActionReleaseMode.Frame ? draft.frame : Mathf.FloorToInt(release * PieceDisplay.FramesPerSecond) + 1);
+        float release = draft.GetSeconds(Timeline);
+        frameField.SetValueWithoutNotify(draft.mode == ActionReleaseMode.Frame ? draft.frame : Timeline.GetFrame(release) + 1);
         secondsField.SetValueWithoutNotify(release);
         modeField.SetValueWithoutNotify(draft.mode);
         frameField.SetEnabled(draft.mode == ActionReleaseMode.Frame);
         secondsField.SetEnabled(draft.mode == ActionReleaseMode.Seconds);
         timeline.SetValueWithoutNotify(elapsed);
-        positionLabel.text = $"{Count} 帧 · {Duration:F3}秒 · 当前第 {Mathf.Clamp(Mathf.FloorToInt(elapsed * PieceDisplay.FramesPerSecond) + 1, 1, Math.Max(1, Count))} 帧 · 出手 {release:F3}秒";
+        timeline.highValue = Mathf.Max(PieceDisplay.FrameDuration, PreviewDuration);
+        positionLabel.text = $"{Count} 帧 · 动画{Duration:F3}秒 · 当前第 {Timeline.GetFrame(elapsed) + 1} 帧 · 出手 {release:F3}秒 · 预计命中 {release + FlightDuration:F3}秒";
         status.text = Count == 0 ? "没有可播放的序列，请检查角色、动作入口和动画索引。" :
             (dirty ? "有未保存的调整。" : "草稿与当前配置一致。") + " 出手时场景显示黄色圆圈及文字；预览不扣费、不结算伤害。";
+        if (draft.mode == ActionReleaseMode.Seconds && draft.seconds > Timeline.GetFrameStart(Count - 1))
+            status.text += " 旧秒数超出当前末帧开始；请核对并显式选择出手帧后保存。";
     }
 
     private bool EnsurePreview()
@@ -293,7 +334,7 @@ public class SkillReleaseTimingWindow : EditorWindow
     {
         wait = 0;
         playback = preview.PlayAction(action, () => flashUntil = EditorApplication.timeSinceStartup + 0.25, animationIndex, skillId);
-        elapsed = Mathf.Clamp(time, 0, Mathf.Max(0, Duration - PieceDisplay.FrameDuration));
+        elapsed = Mathf.Clamp(time, 0, PreviewDuration);
         if (elapsed > 0) preview.AdvancePlayback(elapsed);
         lastTick = EditorApplication.timeSinceStartup;
     }
@@ -319,11 +360,12 @@ public class SkillReleaseTimingWindow : EditorWindow
         float delta = (float)(now - lastTick) * speed; lastTick = now;
         if (playback.IsDone)
         {
+            if (elapsed < PreviewDuration) { elapsed += delta; RefreshFields(); SceneView.RepaintAll(); return; }
             if (!loop) { playing = false; RefreshFields(); return; }
             wait += delta;
             if (wait >= interval) StartPreview(0);
         }
-        else { elapsed = Mathf.Min(Duration, elapsed + delta); preview.AdvancePlayback(delta); }
+        else { elapsed = Mathf.Min(PreviewDuration, elapsed + delta); preview.AdvancePlayback(delta); }
         RefreshFields(); SceneView.RepaintAll();
     }
 
@@ -335,12 +377,32 @@ public class SkillReleaseTimingWindow : EditorWindow
         Handles.color = released ? Color.yellow : Color.gray;
         Handles.DrawWireDisc(point, view.camera.transform.forward, 0.4f);
         Handles.Label(point + Vector3.up * 0.6f, released ? "出手！" : "技能出手预览");
+        if (FlightDuration > 0)
+        {
+            var target = point + Vector3.right * targetDistance;
+            float release = draft.GetSeconds(Timeline);
+            Handles.DrawLine(point, target);
+            Handles.DrawWireDisc(target, view.camera.transform.forward, .3f);
+            if (elapsed >= release)
+            {
+                float progress = Mathf.Clamp01((elapsed - release) / FlightDuration);
+                Handles.color = progress >= 1f ? Color.red : Color.yellow;
+                Handles.DrawSolidDisc(Vector3.Lerp(point, target, progress), view.camera.transform.forward, .1f);
+                Handles.Label(target + Vector3.up * .6f, progress >= 1f ? "到达命中" : "飞行中");
+            }
+        }
     }
 
     private void Save(bool remove)
     {
         if (targetDisplay == null || Count == 0 || EditorApplication.isPlayingOrWillChangePlaymode) return;
         if (skillOverride && string.IsNullOrEmpty(skillId)) return;
+        var selectedSkill = library?.skillPacks?.Find(s => s != null && s.skillId == skillId);
+        if (selectedSkill != null && selectedSkill.bulletVFXType != ItemType.NONE &&
+            (projectileSpeedDraft <= 0 || float.IsNaN(projectileSpeedDraft) || float.IsInfinity(projectileSpeedDraft)))
+        { status.text = "子弹速度必须为有限正数，未保存。"; return; }
+        if (!remove && draft.mode == ActionReleaseMode.Seconds && draft.seconds > Timeline.GetFrameStart(Count - 1))
+        { status.text = "旧秒数超出末帧开始，请先选择出手帧或修正秒数，再保存。"; return; }
         // 由 Unity 序列化保存新增配置，保留原序列及 Odin 数据；场景实例只登记自身覆盖。
         Undo.RegisterCompleteObjectUndo(targetDisplay, "调整技能出手时机");
         var list = targetDisplay.releaseTimings ?? new List<ActionReleaseTiming>();
@@ -349,10 +411,18 @@ public class SkillReleaseTimingWindow : EditorWindow
         if (!remove)
         {
             draft.frame = Mathf.Clamp(draft.frame, 1, Math.Max(1, Count));
-            draft.seconds = draft.GetSeconds(Count);
+            draft.seconds = draft.GetSeconds(Timeline);
             list.Add(JsonUtility.FromJson<ActionReleaseTiming>(JsonUtility.ToJson(draft)));
         }
         targetDisplay.releaseTimings = list;
+        if (!remove && selectedSkill != null && selectedSkill.projectileSpeed != projectileSpeedDraft)
+        {
+            Undo.RecordObject(library, "调整技能子弹速度");
+            selectedSkill.projectileSpeed = projectileSpeedDraft;
+            ((ISerializationCallbackReceiver)library).OnBeforeSerialize();
+            EditorUtility.SetDirty(library);
+            AssetDatabase.SaveAssetIfDirty(library);
+        }
         EditorUtility.SetDirty(targetDisplay);
         if (EditorUtility.IsPersistent(targetDisplay)) PrefabUtility.SavePrefabAsset(targetDisplay.transform.root.gameObject);
         else

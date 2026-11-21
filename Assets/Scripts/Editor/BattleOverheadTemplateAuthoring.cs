@@ -2,12 +2,13 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>生成可手动编辑的头顶 UI 初始模板；不会覆盖已有 prefab。</summary>
+// B63：Tools入口已撤下；功能暂留，后续删除前需核对正式资源与业务引用。
 public static class BattleOverheadTemplateAuthoring
 {
     public const string PrefabPath = "Assets/Resources/UI/PieceOverheadStatus.prefab";
 
     /// <summary>显式修正共享模板的背景不透明度和固定像素外框，保留布局、业务绑定及变体继承。</summary>
-    [MenuItem("Tools/Battle UI/Fix Compact Overhead Frame")]
+
     public static void FixCompactFrame()
     {
         var image = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath).GetComponent<UnityEngine.UI.Image>();
@@ -29,7 +30,7 @@ public static class BattleOverheadTemplateAuthoring
     }
 
     /// <summary>一次性升级共享模板；已升级的模板保留后续手动布局。</summary>
-    [MenuItem("Tools/Battle UI/Upgrade Compact Overhead Template")]
+
     public static void UpgradeCompactTemplate()
     {
         var root = PrefabUtility.LoadPrefabContents(PrefabPath);
@@ -44,7 +45,6 @@ public static class BattleOverheadTemplateAuthoring
         finally { PrefabUtility.UnloadPrefabContents(root); }
     }
 
-    [MenuItem("Tools/Battle UI/Create Overhead Template If Missing")]
     public static void CreateIfMissing()
     {
         if (System.IO.File.Exists(PrefabPath))
