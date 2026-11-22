@@ -18,7 +18,7 @@ public static class GameConst
         public static readonly Color32 Ally = new Color32(74, 195, 213, 255); // #4AC3D5，战斗扩展色：我方、移动范围。
         public static readonly Color32 Enemy = new Color32(234, 105, 99, 255); // #EA6963，战斗扩展色：敌方、危险范围。
         public static readonly Color32 Positive = new Color32(125, 197, 158, 255); // #7DC59E，战斗扩展色：增益、治疗。
-        public static readonly Color32 Health = new Color32(125, 197, 158, 255); // #7DC59E，血量；阵营另用色条和图标标识。
+        public static readonly Color32 Health = new Color32(125, 197, 158, 255); // #7DC59E，我方血量；敌方使用 Enemy 色。
         public static readonly Color32 DamagePreview = new Color32(234, 105, 99, 255); // #EA6963，预计损血段。
         public static readonly Color32 DamagePreviewMinimum = new Color32(255, 255, 255, 255); // #FFFFFF，小区间：确定扣除的最小伤害。
         public static readonly Color32 DamagePreviewMaximum = new Color32(255, 216, 64, 255); // #FFD840，大区间：超出最小伤害、额外可能扣血的部分。

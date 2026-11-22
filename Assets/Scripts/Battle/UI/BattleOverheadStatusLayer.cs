@@ -13,8 +13,6 @@ public sealed class BattleOverheadStatusLayer : MonoBehaviour
     private readonly Dictionary<PieceController, PieceOverheadStatusUI> views = new();
     private readonly HashSet<PieceController> pieces = new();
     private readonly List<PieceController> staleViews = new();
-    private readonly Vector3[] corners = new Vector3[4];
-    private readonly List<Rect> hudBounds = new(2); // 同帧各卡片共用顶部HUD边界，仅记录可见区域。
     private readonly Dictionary<CanvasGroup, (float alpha, bool blocks, bool interactable)> legacyGroups = new();
     private readonly List<CanvasGroup> ownedGroups = new();
     private RectTransform details;
@@ -83,9 +81,6 @@ public sealed class BattleOverheadStatusLayer : MonoBehaviour
             if (old != null) Destroy(old.gameObject);
             views.Remove(key);
         }
-        hudBounds.Clear();
-        CacheHudBounds(ui.ActionTimelineRect);
-        CacheHudBounds(ui.TimeControlsRect);
         foreach (var piece in pieces)
         {
             if (piece == null) continue;
@@ -130,57 +125,6 @@ public sealed class BattleOverheadStatusLayer : MonoBehaviour
     {
         var projected = (Vector2)Camera.main.WorldToScreenPoint(view.HeadPosition);
         SetScreenPosition(view.Rect, projected + view.HeadOffset);
-        var bounds = ScreenBounds(view.Rect);
-        var safe = Screen.safeArea;
-        var offset = Vector2.zero;
-        if (view.ConstrainToScreen)
-        {
-            offset.x = bounds.xMin < safe.xMin ? safe.xMin - bounds.xMin : bounds.xMax > safe.xMax ? safe.xMax - bounds.xMax : 0;
-            offset.y = bounds.yMin < safe.yMin ? safe.yMin - bounds.yMin : bounds.yMax > safe.yMax ? safe.yMax - bounds.yMax : 0;
-            bounds.position += offset;
-        }
-        // 边缘卡片保持完整，并让出速度条和快进区域；不改变棋子世界坐标。
-        if (view.AvoidTopHud)
-            foreach (var hud in hudBounds)
-            {
-                if (!bounds.Overlaps(hud)) continue;
-                // 优先横向避开顶部HUD，避免向下挤压时把血条重新盖到头脸上。
-                float left = hud.xMin - 8f - bounds.xMax;
-                float right = hud.xMax + 8f - bounds.xMin;
-                bool leftFits = CanShiftBesideHud(bounds, left, safe);
-                bool rightFits = CanShiftBesideHud(bounds, right, safe);
-                if (leftFits || rightFits)
-                {
-                    float horizontal = leftFits && (!rightFits || Mathf.Abs(left) <= Mathf.Abs(right)) ? left : right;
-                    offset.x += horizontal;
-                    bounds.x += horizontal;
-                    continue;
-                }
-                float down = hud.yMin - 8f - bounds.yMax;
-                offset.y += down;
-                bounds.y += down;
-            }
-        SetScreenPosition(view.Rect, projected + view.HeadOffset + offset);
-    }
-
-    private bool CanShiftBesideHud(Rect bounds, float horizontal, Rect safe)
-    {
-        bounds.x += horizontal;
-        if (bounds.xMin < safe.xMin || bounds.xMax > safe.xMax) return false;
-        foreach (var hud in hudBounds)
-            if (bounds.Overlaps(hud)) return false;
-        return true;
-    }
-
-    private void CacheHudBounds(RectTransform rect) { if (rect != null) hudBounds.Add(ScreenBounds(rect)); }
-
-    private Rect ScreenBounds(RectTransform rect)
-    {
-        rect.GetWorldCorners(corners);
-        var camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
-        var min = RectTransformUtility.WorldToScreenPoint(camera, corners[0]);
-        var max = RectTransformUtility.WorldToScreenPoint(camera, corners[2]);
-        return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
     }
     private void SetScreenPosition(RectTransform rect, Vector2 point)
     {

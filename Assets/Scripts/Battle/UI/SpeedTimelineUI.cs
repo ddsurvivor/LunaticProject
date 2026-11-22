@@ -1,17 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>附着现有战斗 Canvas 的顶部速度条；头像从右侧0向左侧100移动。</summary>
+/// <summary>附着现有战斗 Canvas 的顶部速度条；头像按行动顺序排成单行。</summary>
 public sealed class SpeedTimelineUI : MonoBehaviour
 {
-    [SerializeField] private RectTransform track; // 右侧为进度 0，左侧为进度 100。
+    [SerializeField] private RectTransform track; // 队列头像的横向显示区域。
     [SerializeField] private SpeedTimelineMarkerUI markerTemplate; // 隐藏的头像模板，运行时按棋子复制。
     private BattleManager battle;
     private readonly Dictionary<PieceController, SpeedTimelineMarkerUI> markers = new();
-    private readonly HashSet<PieceController> positionedMarkers = new(); // 新头像首次直接进入安全位置，之后才参与缓动。
     private readonly List<PieceController> removed = new();
     private readonly List<PieceController> lanePieces = new();
-    private readonly List<float> lanePositions = new();
     private readonly Dictionary<int, Sprite> playerPortraits = new();
     private System.Comparison<PieceController> compareActionOrder;
 
@@ -47,8 +45,8 @@ public sealed class SpeedTimelineUI : MonoBehaviour
         }
         var participants = battle.SpeedParticipants();
         // 人数超过轨道容量时缩小头像，仍为当前者预留放大与间隔。
-        float markerScale = Mathf.Clamp((track.rect.width / Mathf.Max(1, participants.Count) - 6f)
-            / Mathf.Max(1f, markerTemplate.Rect.rect.width * 1.15f), 0.05f, 1f);
+        float markerScale = Mathf.Min(1f, Mathf.Max(0f, track.rect.width)
+            / Mathf.Max(1f, participants.Count * (markerTemplate.Rect.rect.width * 1.15f + 6f)));
         // 同步动态参战者，死亡或离场后移除对应头像。
         removed.Clear();
         foreach (var old in markers.Keys)
@@ -57,7 +55,6 @@ public sealed class SpeedTimelineUI : MonoBehaviour
         {
             Destroy(markers[old].Rect.gameObject);
             markers.Remove(old);
-            positionedMarkers.Remove(old);
         }
         foreach (var piece in participants)
         {
@@ -95,7 +92,6 @@ public sealed class SpeedTimelineUI : MonoBehaviour
     private void LayoutLane(List<PieceController> participants, float markerScale)
     {
         lanePieces.Clear();
-        lanePositions.Clear();
         lanePieces.AddRange(participants);
         compareActionOrder ??= battle.CompareActionOrder;
         // 尚未同步入队的新参战者保持本帧来源次序，不以 InstanceID 代替注册顺序。
@@ -111,35 +107,10 @@ public sealed class SpeedTimelineUI : MonoBehaviour
             lanePieces[previous + 1] = piece;
         }
         if (lanePieces.Count == 0) return;
-        float inset = markerTemplate.Rect.rect.width * markerScale * 1.15f * 0.5f + 3;
-        float left = -track.rect.width + inset, right = -inset;
-        if (left > right) left = right = -track.rect.width * 0.5f;
-        float spacing = lanePieces.Count > 1 ? Mathf.Min(inset * 2, (right - left) / (lanePieces.Count - 1)) : 0;
-        // 双向挤压在端点内展开相近进度；只调整展示位置，保持真实进度与排序不变。
+        float spacing = track.rect.width / lanePieces.Count;
+        // 头像按真实行动顺序均匀排列，行动进度不再决定横坐标。
         for (int i = 0; i < lanePieces.Count; i++)
-        {
-            float x = Mathf.Clamp(-track.rect.width * Mathf.Clamp01(battle.ActionProgress(lanePieces[i]) / 100f), left, right);
-            lanePositions.Add(i == 0 ? x : Mathf.Max(x, lanePositions[i - 1] + spacing));
-        }
-        lanePositions[lanePositions.Count - 1] = Mathf.Min(right, lanePositions[lanePositions.Count - 1]);
-        for (int i = lanePositions.Count - 2; i >= 0; i--)
-            lanePositions[i] = Mathf.Min(lanePositions[i], lanePositions[i + 1] - spacing);
-        for (int i = 0; i < lanePieces.Count; i++)
-        {
-            var rect = markers[lanePieces[i]].Rect;
-            Vector2 target = new(lanePositions[i], 0);
-            Vector2 position = positionedMarkers.Add(lanePieces[i]) ? target
-                : Vector2.Lerp(rect.anchoredPosition, target, 1 - Mathf.Exp(-20 * Time.unscaledDeltaTime));
-            lanePositions[i] = Mathf.Clamp(position.x, left, right);
-        }
-        // 缓动、交棒、增员和窗口缩放均可能压缩间距；每帧重新约束，避免只保证最终位置不重叠。
-        for (int i = 1; i < lanePositions.Count; i++)
-            lanePositions[i] = Mathf.Max(lanePositions[i], lanePositions[i - 1] + spacing);
-        lanePositions[lanePositions.Count - 1] = Mathf.Min(right, lanePositions[lanePositions.Count - 1]);
-        for (int i = lanePositions.Count - 2; i >= 0; i--)
-            lanePositions[i] = Mathf.Min(lanePositions[i], lanePositions[i + 1] - spacing);
-        for (int i = 0; i < lanePieces.Count; i++)
-            markers[lanePieces[i]].Rect.anchoredPosition = new Vector2(lanePositions[i], 0);
+            markers[lanePieces[i]].Rect.anchoredPosition = new Vector2(-track.rect.width + spacing * (i + .5f), 0);
     }
 
 }

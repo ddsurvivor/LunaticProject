@@ -44,6 +44,11 @@ public partial class RangeUI : MonoBehaviour
     /// <summary>当前瞄准技能；关闭范围时为 null，供只读战果提示使用。</summary>
     public SkillPack PreviewSkill => _curSkillPack;
     private SkillPack _curSkillPack;
+    private bool aimTooltipShown;
+
+    private static bool HasFreeAim(SkillPack skill) => skill != null &&
+        (skill.target == SkillTarget.Area || skill.rangeType == RangeType.Fan ||
+         skill.rangeType == RangeType.Arc || skill.rangeType == RangeType.Grenade);
 
     public bool isPlayerRange = false;
 
@@ -109,10 +114,17 @@ public partial class RangeUI : MonoBehaviour
         if (skillPack.rangeType == RangeType.Fan) ShowFan();
         if (skillPack.rangeType == RangeType.Arc) arcRoot.SetActive(true);
         SetSelectionPosition(_selectionPosition);
+        if (isPlayerRange && _owner != null && _owner.IsUsingSkill && HasFreeAim(skillPack))
+        {
+            var tooltip = BattleScene.Ins?.UM?.skillTooltipUI;
+            if (tooltip != null) { tooltip.ShowTooltip(skillPack, _owner, true); aimTooltipShown = true; }
+        }
     }
 
     public void CloseRange()
     {
+        if (aimTooltipShown) BattleScene.Ins?.UM?.skillTooltipUI?.HideTooltip();
+        aimTooltipShown = false;
         ApplyTargets(new List<PieceController>());
         _curSkillPack = null;
         circle.SetActive(false);
@@ -159,12 +171,14 @@ public partial class RangeUI : MonoBehaviour
         if (!isPlayerRange || _curSkillPack == null || _owner == null || _owner.IsPerformingAction ||
             (!_owner.IsUsingSkill && !_owner.isUsingOrder) || Camera.main == null) return;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        bool freeAim = HasFreeAim(_curSkillPack) && Application.isFocused &&
+            (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl));
         var hits = Physics.RaycastAll(ray, Mathf.Infinity, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
         System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
         foreach (var hit in hits)
         {
             var piece = hit.collider.GetComponentInParent<PieceController>();
-            if (piece != null && piece != _owner) { SetSelectionPosition(piece.transform.position); return; }
+            if (!freeAim && piece != null && piece != _owner) { SetSelectionPosition(piece.transform.position); return; }
             if (hit.collider.CompareTag("Ground")) { SetSelectionPosition(hit.point); return; }
         }
         Plane groundPlane = new Plane(Vector3.up, _owner.transform.position);

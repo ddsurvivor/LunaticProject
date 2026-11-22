@@ -40,15 +40,9 @@ public sealed class PieceOverheadStatusUI : MonoBehaviour
     [SerializeField, Min(1)] private float singleRowHeight = 58;
     [SerializeField, HideInInspector] private float doubleRowHeight = 58; // 保留旧模板字段兼容；所有状态始终只占一行。
     [SerializeField] private Vector2 headOffset = new Vector2(0, 24); // 屏幕像素偏移，实际跟随位置由展示层控制。
-    [SerializeField] private bool constrainToScreen = true;
-    [SerializeField] private bool avoidTopHud = true;
     [SerializeField, HideInInspector] private int compactLayoutVersion;
     /// <summary>模板配置的头顶屏幕像素偏移，不修改棋子坐标。</summary>
     public Vector2 HeadOffset => headOffset;
-    /// <summary>是否将卡片保持在屏幕安全区内。</summary>
-    public bool ConstrainToScreen => constrainToScreen;
-    /// <summary>是否避让当前速度条及快进/设置区域。</summary>
-    public bool AvoidTopHud => avoidTopHud;
 #if UNITY_EDITOR
     private Sprite constructionFill;
 #endif
@@ -232,6 +226,7 @@ public sealed class PieceOverheadStatusUI : MonoBehaviour
         Color color = Piece.isPlayerPiece ? GameConst.UIColors.Ally : enemy ? GameConst.UIColors.Enemy : GameConst.UIColors.Accent;
         UpdateTitle(Piece.pieceData?.pieceName ?? Piece.name);
         factionAccent.color = color;
+        bar.color = Piece.isPlayerPiece ? GameConst.UIColors.Health : GameConst.UIColors.Enemy;
         healthAnimation.Update(bar, shadow, attr.MaxHealth > 0 ? (float)attr.CurHealth / attr.MaxHealth : 0f, Piece);
         pips.SetPoints(Mathf.Min(24, attr.CurMovePoint), Mathf.Min(24, attr.MaxMovePoint));
         var old = Piece is EnemyController controller ? controller.enemyCanvas?.hpBarUI : attr.hpBarUI;

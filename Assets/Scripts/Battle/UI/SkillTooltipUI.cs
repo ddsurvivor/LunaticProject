@@ -16,7 +16,7 @@ public partial class SkillTooltipUI : MonoBehaviour
     /// 显示并更新技能提示信息
     /// </summary>
     /// <param name="skill">传入的技能数据包</param>
-    public void ShowTooltip(SkillPack skill, PieceController caster = null)
+    public void ShowTooltip(SkillPack skill, PieceController caster = null, bool freeAimHint = false)
     {
         if (skill == null) { HideTooltip(); return; }
 
@@ -43,6 +43,7 @@ public partial class SkillTooltipUI : MonoBehaviour
         
         sb.AppendLine("---------------------------");
         sb.AppendLine($"技能描述: {skill.description}");
+        if (freeAimHint) sb.AppendLine("按住 Ctrl 自由调整范围方向，松开恢复目标锁定");
 
         // 3. 新增：在描述末尾动态追加技能伤害信息
         if (skill.attackPacks != null && skill.attackPacks.Count > 0)
