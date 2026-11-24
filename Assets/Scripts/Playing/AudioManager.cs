@@ -43,7 +43,7 @@ public class AudioManager : SerializedMonoBehaviour
 
     // 版本号可取消同一帧内发出的播放请求。
     private readonly Dictionary<string, long> audioStopVersions = new Dictionary<string, long>();
-    private long playbackVersion;
+    private long playbackVersion; // 全部音效的取消版本；BGM 由 musicVersion 独立取消。
     private long musicVersion;
     private bool isSceneTransitioning;
 
@@ -108,10 +108,15 @@ public class AudioManager : SerializedMonoBehaviour
         播放音效(audioname);
     }
 
+    /// <summary>播放音效；1 为循环，0 为结束循环后播完当前一遍（未开始时只播一次），其余值为单次。</summary>
     public void 播放音效(string audioName, int loop = -1)
     {
+        if (_isDestroyed || isSceneTransitioning || string.IsNullOrWhiteSpace(audioName)) return;
         if (loop == 0) // 停止循环，但让当前这遍播放完
         {
+            // 循环音效可能尚在异步加载，先取消旧请求再决定播放当前这一遍。
+            audioStopVersions.TryGetValue(audioName, out long version);
+            audioStopVersions[audioName] = version + 1;
             if (循环音效字典.ContainsKey(audioName))
                 停止循环让其播放完(audioName);
             else
@@ -145,9 +150,9 @@ public class AudioManager : SerializedMonoBehaviour
         // 加载完毕后的实际执行逻辑 (闭包回调)
         System.Action<AudioClip> onReadyToPlay = (clip) =>
         {
-            if (_isDestroyed || isSceneTransitioning || requestVersion != playbackVersion) return;
+            if (_isDestroyed || isSceneTransitioning || (!isBGM && requestVersion != playbackVersion)) return;
             audioStopVersions.TryGetValue(audioName, out long currentStopVersion);
-            if (currentStopVersion != stopVersion) return;
+            if (!isBGM && currentStopVersion != stopVersion) return;
             if (isBGM && requestMusicVersion != musicVersion) return;
 
             if (isBGM)
@@ -159,8 +164,8 @@ public class AudioManager : SerializedMonoBehaviour
             }
             else
             {
-                // 如果是循环音效，先停掉之前的
-                if (isLoopSE) 停止音效(audioName);
+                // 替换已播放的同名循环，不取消排在当前加载回调之后的播放请求。
+                if (isLoopSE) StopActiveSound(audioName);
 
                 // 从对象池取出一个组件播放
                 AudioSource seSource = GetAvailableSESource();
@@ -274,20 +279,29 @@ public class AudioManager : SerializedMonoBehaviour
         }
     }
 
+    /// <summary>立即停止指定音效的全部实例，并取消该名称待加载的音效请求；不影响BGM。</summary>
     public void 停止音效(string audioName)
     {
         if (string.IsNullOrWhiteSpace(audioName)) return;
         audioStopVersions.TryGetValue(audioName, out long version);
         audioStopVersions[audioName] = version + 1;
 
-        // 1. 停止循环字典中的引用
+        StopActiveSound(audioName);
+    }
+
+    private void StopActiveSound(string audioName)
+    {
         if (循环音效字典.TryGetValue(audioName, out AudioSource loopSource))
         {
-            if (loopSource != null) loopSource.Stop();
+            if (loopSource != null)
+            {
+                loopSource.Stop();
+                loopSource.loop = false;
+                loopSource.clip = null;
+            }
             循环音效字典.Remove(audioName);
         }
 
-        // 2. 停止对象池中所有正在播放该音效的组件 (包括单次播放的)
         if (_audioCache.TryGetValue(audioName, out AudioClip targetClip) && targetClip != null)
         {
             foreach (var source in _sePool)
@@ -295,6 +309,7 @@ public class AudioManager : SerializedMonoBehaviour
                 if (source.isPlaying && source.clip == targetClip)
                 {
                     source.Stop();
+                    source.loop = false;
                     source.clip = null; // 释放池内引用
                 }
             }
@@ -357,6 +372,8 @@ public class AudioManager : SerializedMonoBehaviour
     private void OnDestroy()
     {
         _isDestroyed = true;
+        StopAll();
+        停止音乐();
         EndSceneTransition();
         // 包括尚未完成的加载，每个句柄只释放一次。
         foreach (var kvp in _audioHandles)

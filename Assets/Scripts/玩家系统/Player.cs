@@ -10,6 +10,28 @@ public enum AttrOp { Get=0, Add=1, Set=2,Sub=3 } // 定义操作：读取、累�
 /// </summary>
 public class Player
 {
+    [System.NonSerialized]
+    private Dictionary<object, int[]> temporaryAttributeBonuses; // 仅运行时按来源持有，不进入存档或战前快照。
+
+    /// <summary>设置五项基础属性的临时加值；来源重复设置时替换，调用方负责刷新对应棋子。</summary>
+    internal void SetTemporaryAttributeBonuses(object source, int[] bonuses)
+    {
+        if (source == null || bonuses == null || bonuses.Length != 5) return;
+        temporaryAttributeBonuses ??= new Dictionary<object, int[]>();
+        temporaryAttributeBonuses[source] = (int[])bonuses.Clone();
+    }
+
+    /// <summary>移除指定来源的临时属性，保留其他来源及基础值；调用方负责刷新对应棋子。</summary>
+    internal void RemoveTemporaryAttributeBonuses(object source) => temporaryAttributeBonuses?.Remove(source);
+
+    private int TemporaryAttributeBonus(int index)
+    {
+        int bonus = 0;
+        if (temporaryAttributeBonuses != null)
+            foreach (var values in temporaryAttributeBonuses.Values) bonus += values[index];
+        return bonus;
+    }
+
     public SkillLoadoutState skills = new(); // 学习与配置结果随玩家存档保存。
     /// <summary>返回存档中配置的主动技能；旧存档首次读取时继承角色初始配置。</summary>
     public List<SkillPack> GetConfiguredSkills(PieceData data)
@@ -75,7 +97,7 @@ public class Player
     /// <returns>返回操作后的最终数值</returns>
     public int AccessAttribute(int index, AttrOp op, int val = 0) {
         if (op == AttrOp.Get && index >= 0 && index <= 4)
-            return BaseAttribute(index) + ComponentEquipment.AttributeBonus(this, index);
+            return BaseAttribute(index) + ComponentEquipment.AttributeBonus(this, index) + TemporaryAttributeBonus(index);
         // 先获取目标属性的引用
         switch (index) {
             

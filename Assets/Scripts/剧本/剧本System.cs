@@ -71,6 +71,7 @@ public partial class 剧本System : MonoBehaviour
 
     
     private string curBranchName = "";//当前分支名
+    private bool isSkippingStory; // 批量跳过期间不启动正文音效，递归跳转共用此状态。
 
     public void 设置新剧本(string t)
     {
@@ -125,11 +126,13 @@ public partial class 剧本System : MonoBehaviour
     [ContextMenu("下一句")]
     public void Next()
     {
-        if (!isActiveAndEnabled || IsReaderHiding || isWaitingForChoice || 已储存剧本 == null) return;
+        if (readerAudioStopped || !isActiveAndEnabled || IsReaderHiding || isWaitingForChoice || 已储存剧本 == null) return;
         autoPlayElapsed = 0f;
         进度条.normalizedPosition = new Vector2(0, -1f);
         if (已阅读 >= 已储存剧本.Length)
         {
+            EndReadingStory();
+            HideReader();
             return;
         }
 
@@ -144,7 +147,7 @@ public partial class 剧本System : MonoBehaviour
         currentTypewriter = null;
         当文本更新时?.Invoke();
 
-        GM.Ins.AM.播放音效("Key");
+        PlayStorySound("Key");
         进行指令(当前事件);
         if (!isActiveAndEnabled || IsReaderHiding) return;
         生成剧本预制体();
@@ -155,7 +158,7 @@ public partial class 剧本System : MonoBehaviour
     /// <summary>跳过一行正文并保留其指令副作用；选项和控制行交回正常推进入口。</summary>
     public void SkipNext()
     {
-        if (isWaitingForChoice || 已储存剧本 == null || 已阅读 >= 已储存剧本.Length - 1)
+        if (readerAudioStopped || isWaitingForChoice || 已储存剧本 == null || 已阅读 >= 已储存剧本.Length - 1)
             return;
 
         // 保留指令行，由 OnClickSkip 退出循环后通过 Next 正常执行并显示选项。
@@ -172,28 +175,43 @@ public partial class 剧本System : MonoBehaviour
             已阅读++;
     }
 
-    /// <summary>跳过正文但保留剧情指令，遇到选项或场景切换时停止。</summary>
+    /// <summary>停止旧音效并静默跳过正文，保留剧情状态与音乐指令，遇到选项或场景切换时停止。</summary>
     public void OnClickSkip(int num = 0)
     {
-        if (!isActiveAndEnabled || IsReaderHiding || isWaitingForChoice || GM.Ins.IsTransitioning ||
+        if (readerAudioStopped || isSkippingStory || !isActiveAndEnabled || IsReaderHiding || isWaitingForChoice || GM.Ins.IsTransitioning ||
             已储存剧本 == null || 已阅读 >= 已储存剧本.Length) return;
         StopAutoPlay();//停止自动播放
         Debug.Log($"跳过{已储存剧本.Length - 已阅读}条剧本，遇到选项时停止");
-        GM.Ins.AM.播放音效("Key");
-        int skipCount = 已储存剧本.Length - 已阅读 - num;
-        for (int i = 0; i < skipCount; i++)
+        // 先取消当前及待加载的音效；跳过仍执行剧情状态和音乐指令。
+        GM.Ins.AM.StopAll();
+        isSkippingStory = true;
+        try
         {
-            var previousScript = 已储存剧本;
-            int previousLine = 已阅读;
-            SkipNext();
-            // 跳转已经显示了新剧本首句，旧循环不能继续消费新剧本或重复执行离场指令。
-            if (已储存剧本 != previousScript || !isActiveAndEnabled || IsReaderHiding ||
-                isWaitingForChoice || GM.Ins.IsTransitioning) return;
-            if (已阅读 == previousLine) break;
+            int skipCount = 已储存剧本.Length - 已阅读 - num;
+            for (int i = 0; i < skipCount; i++)
+            {
+                var previousScript = 已储存剧本;
+                int previousLine = 已阅读;
+                SkipNext();
+                // 跳转已经显示了新剧本首句，旧循环不能继续消费新剧本或重复执行离场指令。
+                if (已储存剧本 != previousScript || !isActiveAndEnabled || IsReaderHiding ||
+                    isWaitingForChoice || GM.Ins.IsTransitioning) return;
+                if (已阅读 == previousLine) break;
+            }
+        }
+        finally
+        {
+            isSkippingStory = false;
         }
 
         // 只执行一次停止处的内容；CHOICE 会进入等待选择状态，不再跳过选项行。
         Next();
+    }
+
+    private void PlayStorySound(string audioName, int loop = -1)
+    {
+        if (readerAudioStopped || isSkippingStory || !isActiveAndEnabled || IsReaderHiding || GM.Ins.IsTransitioning) return;
+        GM.Ins.AM.播放音效(audioName, loop);
     }
 
 
@@ -355,11 +373,11 @@ public partial class 剧本System : MonoBehaviour
             case 1: // 仅淡入
                 targetimg.sprite = sprite;
                 targetimg.color = new Color(1, 1, 1, 0);
-                targetimg.DOFade(1f, duration);
+                targetimg.DOFade(1f, duration).SetUpdate(UseUnscaledTime);
                 break;
 
             case 2: // 仅淡出
-                targetimg.DOFade(0f, duration).OnComplete(() =>
+                targetimg.DOFade(0f, duration).SetUpdate(UseUnscaledTime).OnComplete(() =>
                 {
                     targetimg.sprite = sprite;
                     targetimg.color = new Color(1, 1, 1, 1);
@@ -367,10 +385,10 @@ public partial class 剧本System : MonoBehaviour
                 break;
 
             case 3: // 淡出后淡入（默认）
-                targetimg.DOFade(0f, duration / 2).OnComplete(() =>
+                targetimg.DOFade(0f, duration / 2).SetUpdate(UseUnscaledTime).OnComplete(() =>
                 {
                     targetimg.sprite = sprite;
-                    targetimg.DOFade(1f, duration / 2);
+                    targetimg.DOFade(1f, duration / 2).SetUpdate(UseUnscaledTime);
                 });
                 break;
         }
@@ -382,7 +400,7 @@ public partial class 剧本System : MonoBehaviour
         logText.color = new Color(logText.color.r, logText.color.g, logText.color.b, 0f); // 初始透明度为0
         logText.gameObject.SetActive(true);
         logText.text = str;
-        Sequence fadeTweener = DOTween.Sequence();
+        Sequence fadeTweener = DOTween.Sequence().SetUpdate(UseUnscaledTime);
         //fadeTweener.AppendInterval(startDelay);
         fadeTweener.Append(logText.DOFade(1f, fadeDuration).SetEase(Ease.Linear));
         fadeTweener.AppendInterval(displayDuration);

@@ -142,7 +142,8 @@ public sealed class MemeService
                 ? !BattleRelations.CanAttack(actor, target) : BattleRelations.CanSupport(actor, target),
             trigger = skill.attackPacks != null && skill.attackPacks.Count > 0 ? MemeTrigger.AttackHit : MemeTrigger.SupportResolved,
             recognitionPassed = skill.isRecognitionCheck && (check == CheckResult.DamageIncreased || check == CheckResult.MustCrit),
-            resistancePercent = target.MemeState.GetResistance(id)
+            resistancePercent = target.pieceData?.permanentMemeImmunities?.Contains(id) == true
+                ? 100 : target.MemeState.GetResistance(id)
         };
     }
 

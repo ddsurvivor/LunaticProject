@@ -37,7 +37,7 @@ public partial class 剧本System
         Tweener tween = target is RectTransform rect
             ? rect.DOShakeAnchorPos(duration, strength, vibrato)
             : target.DOShakePosition(duration, strength, vibrato);
-        shakeTween = tween;
+        shakeTween = tween.SetUpdate(UseUnscaledTime);
         tween.OnUpdate(() =>
         {
             if (target == null) return;
@@ -312,7 +312,7 @@ public partial class 剧本System
                     text.GetComponent<Button>().onClick.AddListener(() =>
                     {
                         if (!isWaitingForChoice) return;
-                        GM.Ins.AM.播放音效("Key");
+                        PlayStorySound("Key");
 
                         foreach (var VARIABLE in 选项按钮)
                         {
@@ -375,19 +375,9 @@ public partial class 剧本System
 
             if (command == Center.Command_Gameover)
             {
-                //大地图System.instance.失败();// 打开失败页面
-                // 自动保存
-                //进度System.存档("读档");
-                //已储存剧本 = 记录上段剧情;
-                
-                DOVirtual.DelayedCall(0.5f ,()=>
-                {
-                    // 退回到上一段剧情
-                    设置新剧本(curBranchName);
-                    Next();
-                    //刷新();
-                }, false);
+                // 失败后关闭剧情，不能由延迟重播分支重新启动已停止的循环声。
                 大地图System.instance.失败();
+                return;
             }
 
             if (key.Contains(Center.Command_If))
@@ -447,27 +437,34 @@ public partial class 剧本System
                 清空文本();
             }
 
-            if (key.Contains(Center.Command_Sound))
+            if (command == Center.Command_Sound)
             {
+                if (readerAudioStopped || !isActiveAndEnabled || IsReaderHiding || GM.Ins.IsTransitioning) continue;
                 var prams = 指令切割(key);
+                if (prams == null || prams.Length < 1 || prams.Length > 2 || string.IsNullOrWhiteSpace(prams[0]))
+                {
+                    Debug.LogWarning($"SOUND 指令格式错误：{key}");
+                    continue;
+                }
+                string audioName = prams[0].Trim();
                 if (GM.Ins.AM != null)
                 {
                     if (prams.Length >= 2)
                     {
                         // 检查是否为STOP命令
-                        if (prams[1].ToUpper() == "STOP")
+                        if (string.Equals(prams[1].Trim(), "STOP", StringComparison.OrdinalIgnoreCase))
                         {
-                            GM.Ins.AM.停止音效(prams[0]);
+                            GM.Ins.AM.停止音效(audioName);
                         }
-                        else
+                        else if (int.TryParse(prams[1].Trim(), out int loopParam))
                         {
-                            int loopParam = Convert.ToInt32(prams[1]);
-                            GM.Ins.AM.播放音效(prams[0], loopParam);
+                            PlayStorySound(audioName, loopParam);
                         }
+                        else Debug.LogWarning($"SOUND 循环参数错误：{key}");
                     }
                     else
                     {
-                        GM.Ins.AM.播放音效(prams[0]);
+                        PlayStorySound(audioName);
                     }
                 }
                 else
@@ -476,14 +473,22 @@ public partial class 剧本System
                 }
             }
 
-            if (key.Contains(Center.Command_Music))
+            if (command == Center.Command_Music)
             {
+                if (readerAudioStopped || !isActiveAndEnabled || IsReaderHiding || GM.Ins.IsTransitioning) continue;
                 var prams = 指令切割(key);
+                // 兼容现有 MUSIC(名称,1)；音乐通道始终循环，旧第二参数不参与音效循环控制。
+                if (prams == null || prams.Length < 1 || prams.Length > 2 || string.IsNullOrWhiteSpace(prams[0]))
+                {
+                    Debug.LogWarning($"MUSIC 指令格式错误：{key}");
+                    continue;
+                }
+                string audioName = prams[0].Trim();
                 if (GM.Ins.AM != null)
                 {
-                    if (prams[0] != "STOP")
+                    if (!string.Equals(audioName, "STOP", StringComparison.OrdinalIgnoreCase))
                     {
-                        GM.Ins.AM.播放音乐(prams[0]);
+                        GM.Ins.AM.播放音乐(audioName);
                     }
                     else
                     {
@@ -630,7 +635,7 @@ public partial class 剧本System
                 }
                 FULLCG.transform.parent.gameObject.SetActive(true);
                 FULLCG.color = new Color(1, 1, 1, 0);
-                Sequence sequence = DOTween.Sequence().SetTarget(FULLCG);
+                Sequence sequence = DOTween.Sequence().SetTarget(FULLCG).SetUpdate(UseUnscaledTime);
                 sequence.Append(FULLCG.DOFade(1f, fadeTime));
                 sequence.AppendInterval(duration);
                 sequence.Append(FULLCG.DOFade(0f, fadeTime));
@@ -657,7 +662,7 @@ public partial class 剧本System
                 HALFCG.sprite = sprite;
                 HALFCG.transform.parent.gameObject.SetActive(true);
                 HALFCG.color = new Color(1, 1, 1, 0);
-                Sequence sequence = DOTween.Sequence();
+                Sequence sequence = DOTween.Sequence().SetUpdate(UseUnscaledTime);
                 sequence.Append(HALFCG.DOFade(1f, fadeTime));
             }
 
@@ -708,7 +713,7 @@ public partial class 剧本System
                     float.TryParse(prams[1], out float fadeTime);
                     float.TryParse(prams[1], out float duration);
                     大地图System.instance.chapterPanel.ShowChapter(title, fadeTime, duration);
-                    GM.Ins.AM.播放音效("chapter-change",1);
+                    PlayStorySound("chapter-change",1);
                 }
             }
 
@@ -723,7 +728,7 @@ public partial class 剧本System
                     float.TryParse(prams[1], out float fadeTime);
                     float.TryParse(prams[1], out float duration);
                     大地图System.instance.chapterPanel.ShowChapters(title, fadeTime, duration);
-                    GM.Ins.AM.播放音效("day-change",1);
+                    PlayStorySound("day-change",1);
                 }
             }
 

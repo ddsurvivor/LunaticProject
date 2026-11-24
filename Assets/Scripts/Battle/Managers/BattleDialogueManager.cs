@@ -40,8 +40,10 @@ namespace BattleDialogue
 
             // 2. 触发具体的表现层逻辑
             Debug.Log($"[DialogueManager] 正在播放本场景对话: <b>{logName}</b>");
-            BattleScene.Ins.UM.StartLog(logName);
+            BattleScene.Ins.UM.ShowDialogue(logName);
         }
+
+        private void OnDisable() => currentDialogueCompleteCallback = null;
 
         /// <summary>
         /// 关键回调接口：当UI面板完全关闭、玩家点完最后一句时，由外部UI控制脚本调用此方法
@@ -79,16 +81,16 @@ namespace BattleDialogue
         
         public void TriggerTurnNumStart(int turnNum, Action onComplete = null)
         {
-            // 目前示例中未实现基于回合数的触发逻辑，但接口预留了turnNum参数以供未来扩展
             string logName = GetLogName(ETriggerType.TurnNumStart, turnNum);
             StartLog(logName, onComplete);
         }
 
-        private bool hasBursted = false; // 示例中简单使用一个布尔值来模拟聚能状态，实际项目中可能需要更复杂的状态管理
+        private bool hasBursted = false; // 每场只播放一次聚能就绪提示。
         public void TriggerBurstReady(Action onComplete = null)
         {
             if (hasBursted)
             {
+                onComplete?.Invoke();
                 return;
             }
             else

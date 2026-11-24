@@ -58,6 +58,7 @@ public static partial class EnumExtensions
             case BuffType.SpontaneousMemeticAttack: return "自发模因攻击";
             case BuffType.MemeticRetaliation: return "认知反噬";
             case BuffType.Stun: return "眩晕";
+            case BuffType.ElectronicInterference: return "电子干扰";
             default: return type.ToString();
         }
     }
@@ -170,6 +171,7 @@ public enum BuffType
     [LabelText("自发模因攻击")] SpontaneousMemeticAttack = 106,
     [LabelText("认知反噬")] MemeticRetaliation = 107,
     [LabelText("眩晕")] Stun = 108,
+    [LabelText("电子干扰")] ElectronicInterference = 109,
 }
 
 /// <summary>
@@ -224,6 +226,7 @@ public enum EnemyAIType
 
 public enum EnemySkillRole
 {
+    [LabelText("群体护盾")] RangeBarrier = 4,
     [LabelText("自动识别")] Auto = 0,
     [LabelText("远程攻击技能")] RangedAttack = 1,
     [LabelText("近战攻击技能")] MeleeAttack = 2,
@@ -277,6 +280,7 @@ public enum RangeType
 
 public enum SkillEffect
 {
+    RangeBarrier = 5,
     HealArea = 1,// 区域治疗
     Blink = 2,// 瞬移
     SpaceBomb = 3,// 轨道轰炸

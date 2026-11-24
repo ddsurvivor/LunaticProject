@@ -1,11 +1,12 @@
 """生成战斗通用白色 UI 素材、Unity 导入配置与设计预览（依赖 Pillow）。"""
 from pathlib import Path
+from datetime import date
 from PIL import Image, ImageDraw, ImageFont
 from collections import Counter
 import json, re, uuid, math
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'Assets/A美术/BattleCommonUI'
-DOC = ROOT / 'Docs/UI/BattleCommonUI'
+DOC = ROOT / 'tmp/Reports' / f'BattleUIArt-{date.today():%Y%m%d}' # 设计预览与提色结果不进入正式文档。
 OUT.mkdir(parents=True, exist_ok=True)
 DOC.mkdir(parents=True, exist_ok=True)
 S = 4

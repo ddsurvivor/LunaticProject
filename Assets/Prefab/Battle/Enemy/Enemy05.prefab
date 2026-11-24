@@ -186,6 +186,37 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 3127
+--- !u!1 &1369349997649400996
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7121326049148568379}
+  m_Layer: 0
+  m_Name: OverheadAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7121326049148568379
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1369349997649400996}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.3847506, y: 4.7945933, z: 3.185828}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7676897098428941033}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2239412359177071608
 GameObject:
   m_ObjectHideFlags: 0
@@ -1041,6 +1072,7 @@ Transform:
   - {fileID: 3688759610860199562}
   - {fileID: 393174191836547886}
   - {fileID: 4601425819252869819}
+  - {fileID: 7121326049148568379}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1240,25 +1272,13 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: buffStates
-      Entry: 7
-      Data: 7|System.Collections.Generic.List`1[[BuffState, Assembly-CSharp]], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
     - Name: buffAttrDic
       Entry: 7
-      Data: 8|System.Collections.Generic.Dictionary`2[[BuffAttrType, Assembly-CSharp],[System.Single,
+      Data: 7|System.Collections.Generic.Dictionary`2[[BuffAttrType, Assembly-CSharp],[System.Single,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 9|System.Collections.Generic.EnumEqualityComparer`1[[BuffAttrType, Assembly-CSharp]],
+      Data: 8|System.Collections.Generic.EnumEqualityComparer`1[[BuffAttrType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -1294,6 +1314,7 @@ MonoBehaviour:
   critDamageRate: 0
   ATK: 0
   CON: 0
+  buffStates: []
   hpBarFill: {fileID: 4473352558913161704}
   hpBarUI: {fileID: 0}
   OnDead:
@@ -1359,6 +1380,7 @@ MonoBehaviour:
       Entry: 8
       Data: 
   pieceSpriteRenderer: {fileID: 864119987245996845}
+  overheadAnchor: {fileID: 7121326049148568379}
   idleSprite:
   - {fileID: 21300000, guid: 900704236dfbee94284bfef261d194a5, type: 3}
   - {fileID: 21300000, guid: 2e2a01103d812204eb9bdea88e8cfec8, type: 3}
@@ -1419,18 +1441,44 @@ MonoBehaviour:
   _actionListPanel: {fileID: 0}
   pieceDisplay: {fileID: 5695186063273423355}
   _pieceData:
+    memeBodyType: 0
+    memeTargetTags: []
+    innateMemeIds:
+    permanentMemeImmunities:
+    speed: 10
+    turnPortrait: {fileID: 0}
+    turnPortraitIsFullBody: 0
+    turnPortraitFraming:
+      useOverride: 0
+      useFullSpriteRect: 0
+      contentRect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1
+        height: 1
+      zoom: 1
+      offset: {x: 0, y: 0}
+      upperBodyFraction: 0.42
     pieceId: 0
     pieceName: 
     maxHealth: 0
     maxMovePoint: 0
     moveRange: 0
+    meleeSkillId:
+    rangedSkillId:
+    initialSkillIds: []
     meleeAtk:
+      skillId:
       skillName: 
+      memeIds:
+      enemySkillRole: 0
       description: 
       mpCost: 0
       target: 0
       rangeType: 0
       rangeValue: 0
+      reachKind: 0
       rangeAgle: 0
       explodeRadius: 0
       arcWeight: 0
@@ -1441,6 +1489,7 @@ MonoBehaviour:
       attackPacks: []
       atkTimes: 1
       buffPacks: []
+      memeCureTags: 0
       skillEffects: 
       skillSound: {fileID: 0}
       consumeItems: []
@@ -1449,12 +1498,16 @@ MonoBehaviour:
       layerSkill: 0
       isRecognitionCheck: 0
     rangedAtk:
+      skillId:
       skillName: 
+      memeIds:
+      enemySkillRole: 0
       description: 
       mpCost: 0
       target: 0
       rangeType: 0
       rangeValue: 0
+      reachKind: 0
       rangeAgle: 0
       explodeRadius: 0
       arcWeight: 0
@@ -1465,6 +1518,7 @@ MonoBehaviour:
       attackPacks: []
       atkTimes: 1
       buffPacks: []
+      memeCureTags: 0
       skillEffects: 
       skillSound: {fileID: 0}
       consumeItems: []
@@ -1485,7 +1539,13 @@ MonoBehaviour:
     passiveSkillTypes: 
     weaponIcon: {fileID: 0}
     orderProfiles: []
+  turnSpeedOverride: 0
   playerData:
+    skills:
+      initialized: 0
+      learned: []
+      equipped: []
+    pieceId: 0
     curHealth: 0
     curAmmo: 0
     curMana: 0
@@ -1493,21 +1553,27 @@ MonoBehaviour:
     spriteName: 
     normalSlots: 000000000000000000000000
     weaponSlots: 0000000000000000
+    memeSlots: 0000000000000000
   pieceID: 1005
   player: {fileID: 0}
   isPlayerPiece: 0
   isUsingOrder: 0
+  isGrauding: 0
   _attackPack:
     damage: 0
     damageType: 0
     isCritical: 0
   _skillPack:
+    skillId:
     skillName: 
+    memeIds:
+    enemySkillRole: 0
     description: 
     mpCost: 0
     target: 0
     rangeType: 0
     rangeValue: 0
+    reachKind: 0
     rangeAgle: 0
     explodeRadius: 0
     arcWeight: 0
@@ -1518,6 +1584,7 @@ MonoBehaviour:
     attackPacks: []
     atkTimes: 1
     buffPacks: []
+    memeCureTags: 0
     skillEffects: 
     skillSound: {fileID: 0}
     consumeItems: []
@@ -1574,11 +1641,25 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   outlineEffect: {fileID: 0}
+  level: 1
   enemyAIType: 3
   isActived: 0
   navigate: 0
   enemyCanvas: {fileID: 3065270991423444578}
   tagetLine: {fileID: 2582565035618413019}
+  targetStrategy: 0
+  strategyRules: []
+  maximizeAOETargets: 1
+  attackExplosives: 0
+  healthPriority: 0
+  fragilePriority: 0
+  defenseType: 2
+  prioritizeHealing: 1
+  isBoss: 0
+  retreatWhenLowHealth: 1
+  retreatHealthRatio: 0.3
+  healHealthRatio: 0.5
+  executeHealthRatio: 0.3
 --- !u!114 &5051116303628005189
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1604,6 +1685,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 6526f2557206bd04b838a9b45890242f, type: 3}
   - {fileID: 21300000, guid: d207bd9b9a45d3048b32dde43ef1f04d, type: 3}
   reviveSpriteList: []
+  dropComponentOnDeath: 1
 --- !u!195 &2794539319465192438
 NavMeshAgent:
   m_ObjectHideFlags: 0

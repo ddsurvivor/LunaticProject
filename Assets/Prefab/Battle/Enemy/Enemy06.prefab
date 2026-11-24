@@ -346,6 +346,37 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &1981947230713283568
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6792303440201705737}
+  m_Layer: 0
+  m_Name: OverheadAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6792303440201705737
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1981947230713283568}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.6346893, y: 4.313734, z: 1.9658546}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2820315917553685405}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2102714108776790656
 GameObject:
   m_ObjectHideFlags: 0
@@ -525,6 +556,9 @@ MonoBehaviour:
   floatDistance: -1
   floatDuration: 1
   floatEase: 7
+  enableFlicker: 0
+  targetRenderer: {fileID: 0}
+  flickerDuration: 0.5
 --- !u!1 &2820315916246336207
 GameObject:
   m_ObjectHideFlags: 0
@@ -651,6 +685,7 @@ Transform:
   - {fileID: 8832379952391467652}
   - {fileID: 7715199072775979199}
   - {fileID: 7309448057831817440}
+  - {fileID: 6792303440201705737}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -850,25 +885,13 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: buffStates
-      Entry: 7
-      Data: 7|System.Collections.Generic.List`1[[BuffState, Assembly-CSharp]], mscorlib
-    - Name: 
-      Entry: 12
-      Data: 0
-    - Name: 
-      Entry: 13
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
     - Name: buffAttrDic
       Entry: 7
-      Data: 8|System.Collections.Generic.Dictionary`2[[BuffAttrType, Assembly-CSharp],[System.Single,
+      Data: 7|System.Collections.Generic.Dictionary`2[[BuffAttrType, Assembly-CSharp],[System.Single,
         mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 9|System.Collections.Generic.EnumEqualityComparer`1[[BuffAttrType, Assembly-CSharp]],
+      Data: 8|System.Collections.Generic.EnumEqualityComparer`1[[BuffAttrType, Assembly-CSharp]],
         mscorlib
     - Name: 
       Entry: 12
@@ -904,6 +927,7 @@ MonoBehaviour:
   critDamageRate: 0
   ATK: 0
   CON: 0
+  buffStates: []
   hpBarFill: {fileID: 3733274785919134415}
   hpBarUI: {fileID: 0}
   OnDead:
@@ -944,6 +968,7 @@ MonoBehaviour:
       Entry: 8
       Data: 
   pieceSpriteRenderer: {fileID: 4377983920536472043}
+  overheadAnchor: {fileID: 6792303440201705737}
   idleSprite:
   - {fileID: 21300000, guid: 258adcf6636426a4fac309abfe22fa2c, type: 3}
   - {fileID: 21300000, guid: f8ed319e933cfaa46adb61ae1fc1ded7, type: 3}
@@ -979,18 +1004,44 @@ MonoBehaviour:
   _actionListPanel: {fileID: 0}
   pieceDisplay: {fileID: 190077875118252175}
   _pieceData:
+    memeBodyType: 0
+    memeTargetTags: []
+    innateMemeIds:
+    permanentMemeImmunities:
+    speed: 10
+    turnPortrait: {fileID: 0}
+    turnPortraitIsFullBody: 0
+    turnPortraitFraming:
+      useOverride: 0
+      useFullSpriteRect: 0
+      contentRect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 1
+        height: 1
+      zoom: 1
+      offset: {x: 0, y: 0}
+      upperBodyFraction: 0.42
     pieceId: 0
     pieceName: 
     maxHealth: 0
     maxMovePoint: 0
     moveRange: 0
+    meleeSkillId:
+    rangedSkillId:
+    initialSkillIds: []
     meleeAtk:
+      skillId:
       skillName: 
+      memeIds:
+      enemySkillRole: 0
       description: 
       mpCost: 0
       target: 0
       rangeType: 0
       rangeValue: 0
+      reachKind: 0
       rangeAgle: 0
       explodeRadius: 0
       arcWeight: 0
@@ -1001,6 +1052,7 @@ MonoBehaviour:
       attackPacks: []
       atkTimes: 1
       buffPacks: []
+      memeCureTags: 0
       skillEffects: 
       skillSound: {fileID: 0}
       consumeItems: []
@@ -1009,12 +1061,16 @@ MonoBehaviour:
       layerSkill: 0
       isRecognitionCheck: 0
     rangedAtk:
+      skillId:
       skillName: 
+      memeIds:
+      enemySkillRole: 0
       description: 
       mpCost: 0
       target: 0
       rangeType: 0
       rangeValue: 0
+      reachKind: 0
       rangeAgle: 0
       explodeRadius: 0
       arcWeight: 0
@@ -1025,6 +1081,7 @@ MonoBehaviour:
       attackPacks: []
       atkTimes: 1
       buffPacks: []
+      memeCureTags: 0
       skillEffects: 
       skillSound: {fileID: 0}
       consumeItems: []
@@ -1044,27 +1101,42 @@ MonoBehaviour:
     dropRate: 0
     passiveSkillTypes: 
     weaponIcon: {fileID: 0}
+    orderProfiles: []
+  turnSpeedOverride: 0
   playerData:
+    skills:
+      initialized: 0
+      learned: []
+      equipped: []
+    pieceId: 0
     curHealth: 0
     curAmmo: 0
     curMana: 0
+    deadCount: 0
     spriteName: 
     normalSlots: 000000000000000000000000
     weaponSlots: 0000000000000000
+    memeSlots: 0000000000000000
   pieceID: 1006
   player: {fileID: 0}
   isPlayerPiece: 0
+  isUsingOrder: 0
+  isGrauding: 0
   _attackPack:
     damage: 0
     damageType: 0
     isCritical: 0
   _skillPack:
+    skillId:
     skillName: 
+    memeIds:
+    enemySkillRole: 0
     description: 
     mpCost: 0
     target: 0
     rangeType: 0
     rangeValue: 0
+    reachKind: 0
     rangeAgle: 0
     explodeRadius: 0
     arcWeight: 0
@@ -1075,6 +1147,7 @@ MonoBehaviour:
     attackPacks: []
     atkTimes: 1
     buffPacks: []
+    memeCureTags: 0
     skillEffects: 
     skillSound: {fileID: 0}
     consumeItems: []
@@ -1090,6 +1163,7 @@ MonoBehaviour:
   cantControl: 0
   ableMove: 1
   deadNotDelete: 0
+  ableStrick: 0
   OnInit:
     m_PersistentCalls:
       m_Calls: []
@@ -1106,11 +1180,25 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   outlineEffect: {fileID: 0}
+  level: 1
   enemyAIType: 6
   isActived: 1
   navigate: 0
   enemyCanvas: {fileID: 7145512964930992748}
   tagetLine: {fileID: 590423761786204968}
+  targetStrategy: 0
+  strategyRules: []
+  maximizeAOETargets: 1
+  attackExplosives: 0
+  healthPriority: 0
+  fragilePriority: 0
+  defenseType: 2
+  prioritizeHealing: 1
+  isBoss: 0
+  retreatWhenLowHealth: 1
+  retreatHealthRatio: 0.3
+  healHealthRatio: 0.5
+  executeHealthRatio: 0.3
 --- !u!114 &1433800631
 MonoBehaviour:
   m_ObjectHideFlags: 0

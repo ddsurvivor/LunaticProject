@@ -135,7 +135,7 @@ public partial class 剧本System
         float delay = isFastForward
             ? Mathf.Max(0.1f, settings != null ? settings.fastForwardInterval : fastForwardDelay)
             : Mathf.Max(0f, settings != null ? settings.autoPlayDelay : normalDelay);
-        autoPlayElapsed += Time.deltaTime;
+        autoPlayElapsed += UseUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
         if (autoPlayElapsed >= delay)
         {
             autoPlayElapsed = 0f;
@@ -144,6 +144,7 @@ public partial class 剧本System
     }
     private void OnEnable()
     {
+        readerAudioStopped = false;
         foreach (var text in GetComponentsInChildren<UnityEngine.UI.Text>(true))
             ChineseTextLayout.Ensure(text);
         RestoreReaderVisibility();
@@ -157,6 +158,6 @@ public partial class 剧本System
         StopReaderShake();
         // 隐藏剧情只暂停推进；玩家选择的自动和快进模式保留到下一段剧本。
         autoPlayElapsed = 0f;
-        GM.Ins?.AM.StopAll();
+        StopReaderAudio();
     }
 }

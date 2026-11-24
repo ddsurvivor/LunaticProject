@@ -60,8 +60,11 @@ public class 大地图System : SerializedMonoBehaviour
     public EndingCreditsPlayer endingCreditsPlayer;
 
     public GameObject blackFront;//黑幕
+    /// <summary>关闭剧情及其音频后显示失败页面，不在后台重播失败分支。</summary>
     public void 失败()
     {
+        剧情.EndReadingStory();
+        剧情.HideReader();
         gameoverPanel.gameObject.SetActive(true);
         gameoverPanel.alpha = 0f;
         gameoverPanel.DOFade(1f, 1f);
@@ -213,7 +216,6 @@ public class 大地图System : SerializedMonoBehaviour
     {
         剧情.EndReadingStory();
         剧情.HideReader();
-        GM.Ins.AM.StopAll();
         //当前地图.transform.DOScale(Vector3.one, 点击后放大进行时间);
         foreach (var node in NodeList)
         {

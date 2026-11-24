@@ -21,6 +21,7 @@ public class PLAYERPROFILE
     public Player[] player = new Player[20];
 
     public MemeProgress memeProgress = new(); // 队伍永久解锁，不随单场战斗清除。
+    public PowerSpineProgress powerSpineProgress = new(); // 动力脊设施进度，旧档缺字段时为零级。
 
     [Header("进度存档")] public int dateYear = 1567;
     public int dateMonth = 1;
@@ -119,6 +120,7 @@ public class PLAYERPROFILE
     {
         Debug.Log("检测为新游戏,初始化数值");
         coins = GameConst.initialCoins;
+        powerSpineProgress = new PowerSpineProgress();
 
         player = new Player[20];
         player[0] = new Player();

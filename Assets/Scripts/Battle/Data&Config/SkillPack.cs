@@ -47,6 +47,9 @@ public class SkillPack
     [ShowIf("@this.skillVFXType != ItemType.NONE")] 
     public bool isRotate = false; // 是否旋转子弹特效
     public ItemType bulletVFXType;// 子弹特效类型
+    [LabelText("子弹速度（0=默认20米/秒）"), MinValue(0f)]
+    public float projectileSpeed; // 0兼容尚未序列化此字段的旧资源，其他值显式覆盖。
+    public float ProjectileSpeed => projectileSpeed == 0f ? 20f : projectileSpeed;
     public List<AttackPack> attackPacks = new();// 伤害列表
     public int atkTimes = 1; // 攻击次数
     public List<BuffPack> buffPacks = new();    // 附加效果列表

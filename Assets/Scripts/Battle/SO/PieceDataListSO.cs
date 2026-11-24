@@ -10,9 +10,9 @@
     public class PieceDataListSO: SerializedScriptableObject
     {
         [HideInInspector] public bool skillsMigrated; // 已完成内嵌技能转存，防止重复迁移。
-        [OdinSerialize]
+        [NonSerialized, OdinSerialize]
         //[TableList]
-        public List<PieceData> pieceDataList = new();
+        public List<PieceData> pieceDataList = new(); // 仅由 Odin 保存整表，避免 Unity 重建列表时覆盖技能库引用及字典。
         
         [Button("为敌人填充默认等级成长", ButtonSizes.Large)]
         [InfoBox("当前敌人编号从 1000 起。默认仅补齐未配置的属性；勾选覆盖已有值可重置。成长只对 EnemyController 生效。")]

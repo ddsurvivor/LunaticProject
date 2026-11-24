@@ -35,8 +35,8 @@ public partial class PieceController : MonoBehaviour
     [Min(0), Tooltip("0 使用棋子数据中的速度，否则覆盖此棋子的回合速度")]
     public float turnSpeedOverride; // 大于 0 时仅覆盖当前实例的回合速度。
     /// <summary>返回行动条每次累加的速度，依次使用实例覆盖、棋子配置及默认值 10。</summary>
-    public float TurnSpeed => turnSpeedOverride > 0 ? turnSpeedOverride :
-        (pieceData != null && pieceData.speed > 0 ? pieceData.speed : 10f);
+    public float TurnSpeed => (turnSpeedOverride > 0 ? turnSpeedOverride :
+        (pieceData != null && pieceData.speed > 0 ? pieceData.speed : 10f)) + SceneBattleDevice.SpeedBonus(this);
 
     public Player playerData;
 
@@ -136,8 +136,17 @@ public partial class PieceController : MonoBehaviour
     /// <summary>仅供战斗反应队列中止其持有的在途攻击，取消弹道及尚未提交的命中。</summary>
     internal void CancelBattleReaction() => CancelCombatAction();
 
+    /// <summary>破盾停机立即取消尚未提交的攻击并停止导航，已结算的伤害不回滚。</summary>
+    internal void InterruptForShutdown()
+    {
+        CancelCombatAction();
+        var navigation = GetComponent<UnityEngine.AI.NavMeshAgent>();
+        if (navigation != null && navigation.isActiveAndEnabled && navigation.isOnNavMesh) navigation.ResetPath();
+    }
+
     protected virtual void OnDisable()
     {
+        ReleaseSummonRegistration();
         CancelCombatAction();
         StopHitShake();
         _isAttacking = _isUsingSkill = false;
@@ -155,6 +164,7 @@ public partial class PieceController : MonoBehaviour
 
     private void OnDestroy()
     {
+        ReleaseSummonRegistration();
         MemeState.ClearNetworkLinks();
         passiveManager?.UnregisterPiece(gameObject);
         BattleScene.Ins?.BM?.timedMemeStatuses.ClearForPiece(this);
@@ -162,14 +172,16 @@ public partial class PieceController : MonoBehaviour
 
     public void Init(PlayerController player, PieceData pieceData = null)
     {
+        ReleaseSummonRegistration();
         BattleScene.Ins?.BM?.ReleaseExplosiveBody(transform);
         BattleLifeVersion++;
+        GetComponent<SelfRevive>()?.ResetForReuse();
         burstDeathQueued = false;
         BattleScene.Ins?.BM?.timedMemeStatuses.ClearForPiece(this);
         MemeState.Reset();
         CancelCombatAction();
         StopHitShake();
-        pieceDisplay?.StopAnimation();
+        pieceDisplay?.ResetForReuse();
         passiveManager = BattleScene.Ins?.BM?.characterSkillManager;
         passiveManager?.UnregisterPiece(gameObject);
         this.player = player;
@@ -626,11 +638,11 @@ public partial class PieceController : MonoBehaviour
             {
                 if (launched || version != combatVersion || isDead || !isActiveAndEnabled) return;
                 launched = true;
-                projectileTween = ShootBolt(position, skill.bulletVFXType, impact);
+                projectileTween = ShootBolt(position, skill.bulletVFXType, impact, skill.ProjectileSpeed);
             };
             PieceDisplay.Playback animation = null;
             if (pieceDisplay != null && pieceDisplay.isActiveAndEnabled)
-                animation = pieceDisplay.PlayAction(displayState, release, skill.animationIndex);
+                animation = pieceDisplay.PlayAction(displayState, release, skill.animationIndex, skill.skillId);
             else release();
             actionPlayback = animation;
 
@@ -680,7 +692,8 @@ public partial class PieceController : MonoBehaviour
         fx.transform.rotation = Quaternion.Euler(45, -45, angle + 90f);
     }
 
-    public void Hurt()
+    /// <summary>棋子受击表现入口，特殊独立耐久目标可覆盖以避免角色受击动画。</summary>
+    public virtual void Hurt()
     {
         var battle = BattleScene.Ins.BM;
         if (!isPlayerPiece && battle.PlayerController.isBursting &&
@@ -772,6 +785,7 @@ public partial class PieceController : MonoBehaviour
 
     public bool SkillAvailable(SkillPack skillPack)
     {
+        if (!BarrierEmitter.CanUse(this, skillPack)) return false;
         if (!unitAttrCenter.HasMana(unitAttrCenter.GetSkillManaCost(skillPack))) return false;
         if (!unitAttrCenter.HasItem(skillPack.consumeItems)) return false;
         return true;
@@ -851,20 +865,25 @@ public partial class PieceController : MonoBehaviour
         ShootBolt(targetPos, ItemType.ROCKET);
     }
     
-    protected Tween ShootBolt(Vector3 tagetPos, ItemType itemType, Action arrived = null)
+    /// <summary>出手时发射，有弹道按距离和速度飞行，到达才回调；取消或缺资源不补发命中。</summary>
+    protected Tween ShootBolt(Vector3 tagetPos, ItemType itemType, Action arrived = null, float speed = 20f)
     {
         if (itemType == ItemType.NONE)
         {
             arrived?.Invoke();
             return null;
         }
-        Debug.Log("生成子弹");
+        if (speed <= 0f || float.IsNaN(speed) || float.IsInfinity(speed))
+        {
+            Debug.LogWarning("弹道速度必须为有限正数，本次发射取消。", this);
+            return null;
+        }
         Vector3 startPos = transform.position + Vector3.up * 1.5f;
-        Vector3 targetPosFixed = new Vector3(tagetPos.x, startPos.y, tagetPos.z);
+        Vector3 targetPosFixed = tagetPos + Vector3.up * 1.5f;
         var projectile = ObjectPool.Ins.GenerateObject(itemType, startPos, Quaternion.identity);
         if (projectile == null)
         {
-            arrived?.Invoke();
+            Debug.LogWarning("弹道资源缺失，本次发射取消，不结算命中。", this);
             return null;
         }
         // 本次飞行负责回收，取消预制体通用寿命，防止减速期间提前回收。
@@ -885,7 +904,9 @@ public partial class PieceController : MonoBehaviour
             recycled = true;
             if (projectile != null) ObjectPool.Ins.HideObject(projectile);
         };
-        return bolt.DOMove(targetPosFixed, 0.5f).SetEase(Ease.Linear)
+        float duration = Vector3.Distance(startPos, targetPosFixed) / speed; // 按实际直线路径计时，距离越远到达越晚。
+        if (duration <= 0f) { arrived?.Invoke(); recycle(); return null; }
+        return bolt.DOMove(targetPosFixed, duration).SetEase(Ease.Linear)
             .SetUpdate(UpdateType.Normal, false)
             .SetLink(projectile, LinkBehaviour.KillOnDisable)
             .OnComplete(() => { arrived?.Invoke(); recycle(); })
@@ -1009,10 +1030,7 @@ public partial class PieceController : MonoBehaviour
         foreach (var passive in componentPassives) availablePassives.Remove(passive);
         componentPassives.Clear();
         RefreshConfiguredSkills();
-        var attributes = ReadPlayerAttributes();
-        if (componentPlayerAttributes != null && playerData != null)
-            unitAttrCenter.RefreshPlayerAttributes(componentPlayerAttributes, attributes);
-        componentPlayerAttributes = attributes;
+        RefreshPlayerAttributeBonuses();
         foreach (var data in ComponentEquipment.Equipped(playerData))
         {
             if (data.effectType == ComponentEffect.PassiveEffect && data.passiveType != PassiveType.None &&
@@ -1031,6 +1049,16 @@ public partial class PieceController : MonoBehaviour
             }
         }
         _isUsingSkill = false;
+        if (BattleScene.Ins?.UM != null) BattleScene.Ins.UM.OnPieceStateChance(this);
+    }
+
+    /// <summary>按当前有效属性差值刷新战斗数值，不补满资源、不取消正在执行的动作。</summary>
+    internal void RefreshPlayerAttributeBonuses()
+    {
+        var attributes = ReadPlayerAttributes();
+        if (componentPlayerAttributes != null && playerData != null)
+            unitAttrCenter.RefreshPlayerAttributes(componentPlayerAttributes, attributes);
+        componentPlayerAttributes = attributes;
         if (BattleScene.Ins?.UM != null) BattleScene.Ins.UM.OnPieceStateChance(this);
     }
 

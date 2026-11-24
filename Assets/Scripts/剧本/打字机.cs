@@ -130,7 +130,7 @@ public class 打字机 : MonoBehaviour
         {
             currentText = 完整文本.Substring(0, i + 1);
             _textComponent.text = currentText;
-            yield return new WaitForSeconds(CharacterDelay);
+            yield return owner != null ? owner.WaitForReaderSeconds(CharacterDelay) : new WaitForSeconds(CharacterDelay);
         }
     }
     
@@ -223,7 +223,7 @@ public class 打字机 : MonoBehaviour
             visibleCharactersShown = i + 1;
 
             if (i + 1 < visibleCharIndices.Count)
-                yield return new WaitForSeconds(CharacterDelay);
+                yield return owner != null ? owner.WaitForReaderSeconds(CharacterDelay) : new WaitForSeconds(CharacterDelay);
         }
         _textComponent.text = fullContent;
         textCompleted = true;

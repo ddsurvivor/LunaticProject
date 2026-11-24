@@ -39,7 +39,16 @@ public partial class RangeUI : MonoBehaviour
     private List<PieceController> _curTargets = new();
     /// <summary>确认行动前重新查询当前目标，避免死亡或离场单位沿用旧高亮快照。</summary>
     public List<PieceController> GetCurTargets { get { RefreshTargets(); return _curTargets; } }
+    /// <summary>当前选中顺序的只读快照入口；目标回调中读取不会递归触发范围刷新。</summary>
+    public IReadOnlyList<PieceController> PreviewTargets => _curTargets;
+    /// <summary>当前瞄准技能；关闭范围时为 null，供只读战果提示使用。</summary>
+    public SkillPack PreviewSkill => _curSkillPack;
     private SkillPack _curSkillPack;
+    private bool aimTooltipShown;
+
+    private static bool HasFreeAim(SkillPack skill) => skill != null &&
+        (skill.target == SkillTarget.Area || skill.rangeType == RangeType.Fan ||
+         skill.rangeType == RangeType.Arc || skill.rangeType == RangeType.Grenade);
 
     public bool isPlayerRange = false;
 
@@ -105,10 +114,17 @@ public partial class RangeUI : MonoBehaviour
         if (skillPack.rangeType == RangeType.Fan) ShowFan();
         if (skillPack.rangeType == RangeType.Arc) arcRoot.SetActive(true);
         SetSelectionPosition(_selectionPosition);
+        if (isPlayerRange && _owner != null && _owner.IsUsingSkill && HasFreeAim(skillPack))
+        {
+            var tooltip = BattleScene.Ins?.UM?.skillTooltipUI;
+            if (tooltip != null) { tooltip.ShowTooltip(skillPack, _owner, true); aimTooltipShown = true; }
+        }
     }
 
     public void CloseRange()
     {
+        if (aimTooltipShown) BattleScene.Ins?.UM?.skillTooltipUI?.HideTooltip();
+        aimTooltipShown = false;
         ApplyTargets(new List<PieceController>());
         _curSkillPack = null;
         circle.SetActive(false);
@@ -155,12 +171,14 @@ public partial class RangeUI : MonoBehaviour
         if (!isPlayerRange || _curSkillPack == null || _owner == null || _owner.IsPerformingAction ||
             (!_owner.IsUsingSkill && !_owner.isUsingOrder) || Camera.main == null) return;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        bool freeAim = HasFreeAim(_curSkillPack) && Application.isFocused &&
+            (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl));
         var hits = Physics.RaycastAll(ray, Mathf.Infinity, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
         System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
         foreach (var hit in hits)
         {
             var piece = hit.collider.GetComponentInParent<PieceController>();
-            if (piece != null && piece != _owner) { SetSelectionPosition(piece.transform.position); return; }
+            if (!freeAim && piece != null && piece != _owner) { SetSelectionPosition(piece.transform.position); return; }
             if (hit.collider.CompareTag("Ground")) { SetSelectionPosition(hit.point); return; }
         }
         Plane groundPlane = new Plane(Vector3.up, _owner.transform.position);
@@ -213,14 +231,16 @@ public partial class RangeUI : MonoBehaviour
 
     private void ApplyTargets(List<PieceController> newTargets)
     {
-        foreach (var piece in _curTargets)
+        var previous = _curTargets;
+        _curTargets = newTargets;
+        foreach (var piece in previous)
             if (piece != null && !newTargets.Contains(piece)) piece.ShowHighlight(false);
         foreach (var piece in newTargets)
         {
             piece.ShowHighlight(true);
-            if (!_curTargets.Contains(piece)) piece.OnBeTarget(_owner, _curSkillPack);
+            // 共享护盾耐久和目标顺序可能变化，即使目标未变也刷新只读伤害预览。
+            piece.OnBeTarget(_owner, _curSkillPack);
         }
-        _curTargets = newTargets;
     }
 
     private void OnDisable()

@@ -8,6 +8,8 @@ public sealed class ActionPointPipsUI : MonoBehaviour
     [SerializeField] private List<UnityEngine.UI.Image> points = new();
     [SerializeField] private Sprite filledSprite;
     [SerializeField] private Sprite emptySprite;
+    [SerializeField, Min(1f)] private float maximumPointSize = 22f;
+    [SerializeField, Min(1f)] private float maximumPointSpacing = 27f;
     public Sprite FilledSprite => filledSprite;
     public Sprite EmptySprite => emptySprite;
     private int previewCount;
@@ -38,8 +40,8 @@ public sealed class ActionPointPipsUI : MonoBehaviour
             points.Add(Instantiate(points[0], transform, false));
 
         float width = ((RectTransform)transform).rect.width;
-        float step = Mathf.Min(27f, width / Mathf.Max(1, maximum));
-        float size = Mathf.Min(22f, step * 0.82f);
+        float step = Mathf.Min(maximumPointSpacing, width / Mathf.Max(1, maximum));
+        float size = Mathf.Min(maximumPointSize, step * 0.82f);
         for (int i = 0; i < points.Count; i++)
         {
             var point = points[i];

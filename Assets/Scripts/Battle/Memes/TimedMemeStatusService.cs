@@ -18,7 +18,7 @@ public sealed class TimedMemeStatus
     internal int Revision; // 刷新使旧回合快照失效，避免当回合立即减时或追加DOT。
 }
 
-/// <summary>本场精确状态：普通回合快照计时、付费主动行动伤害及指定标签解除。</summary>
+/// <summary>本场精确状态及方尖碑联动：普通回合快照、付费行动伤害、指定解除及一次传播。</summary>
 public sealed class TimedMemeStatusService
 {
     public const string CellHandler = "cellular-self-destruction";
@@ -29,6 +29,7 @@ public sealed class TimedMemeStatusService
     public const string DragonHandler = "dragon-slaying";
     private readonly Dictionary<PieceController, List<TimedMemeStatus>> states = new();
     private readonly Dictionary<PieceController, List<TurnEntry>> turns = new(); // 仅保存正在进行的普通回合快照。
+    private readonly HashSet<PieceController> resolvedTurnStarts = new(); // 普通回合开始重复查询不重复治疗。
 
     private sealed class TurnEntry
     {
@@ -57,9 +58,22 @@ public sealed class TimedMemeStatusService
     private static int Duration(string id) => id == CellHandler ? 5 : id == HeatHandler || id == InversionHandler ? 3 : 4;
     private static float Magnitude(string id) => id == CellHandler || id == HeatHandler ? .1f : id == ParalysisHandler ? .3f : 0f;
 
-    private void Apply(MemeEffectContext context, MemeEffectDefinition effect)
+    private void Apply(MemeEffectContext context, MemeEffectDefinition effect, bool allowDragonSpread = true)
     {
         var target = context.Target;
+        var obelisk = effect.handlerId == DragonHandler ? target.GetComponent<ObeliskAura>() : null;
+        if (obelisk != null)
+        {
+            if (!allowDragonSpread) obelisk.KillByDragon(context);
+            else obelisk.ApplyDragon(context, next =>
+            {
+                // 成功词条直接传播，不重掷15%施加率；完全免疫仍阻止传播效果。
+                if (next.pieceData?.permanentMemeImmunities?.Contains(context.Meme.id) == true ||
+                    next.MemeState.GetResistance(context.Meme.id) >= 100) return;
+                Apply(new MemeEffectContext(context.Actor, next, context.Meme, context.Sources, context.Action), effect, false);
+            });
+            return;
+        }
         if (!states.TryGetValue(target, out var list)) states.Add(target, list = new List<TimedMemeStatus>());
         var status = list.Find(s => s.HandlerId == effect.handlerId);
         if (status == null) list.Add(status = new TimedMemeStatus { HandlerId = effect.handlerId });
@@ -84,10 +98,11 @@ public sealed class TimedMemeStatusService
         turns.Add(target, snapshot);
     }
 
-    /// <summary>旧回合开始Buff结算后调用；仅快照内的细胞自毁扣血，每轮至多一次，死亡不继续结算。</summary>
+    /// <summary>旧Buff之后先结算光环治疗，再处理快照细胞自毁；普通回合至多一次，死亡不继续。</summary>
     public void ResolveTurnStart(PieceController target)
     {
-        if (target == null || target.isDead || !turns.TryGetValue(target, out var snapshot)) return;
+        if (target == null || target.isDead || !turns.TryGetValue(target, out var snapshot) || !resolvedTurnStarts.Add(target)) return;
+        ObeliskAura.HealAtTurnStart(target, BattleScene.Ins?.BM);
         foreach (var entry in snapshot.ToArray())
         {
             if (target.isDead) break;
@@ -102,6 +117,7 @@ public sealed class TimedMemeStatusService
     {
         if (target == null || !turns.TryGetValue(target, out var snapshot)) return;
         turns.Remove(target);
+        resolvedTurnStarts.Remove(target);
         if (target.isDead) { ClearForPiece(target); return; }
         foreach (var entry in snapshot)
             if (IsCurrent(target, entry) && --entry.Status.RemainingTurns <= 0) Remove(target, entry.Status, true);
@@ -164,6 +180,7 @@ public sealed class TimedMemeStatusService
         if (ReferenceEquals(target, null)) return;
         states.Remove(target);
         turns.Remove(target);
+        resolvedTurnStarts.Remove(target);
         if (target != null) RefreshState(target, new List<TimedMemeStatus>());
     }
 
@@ -172,6 +189,7 @@ public sealed class TimedMemeStatusService
     {
         foreach (var target in new List<PieceController>(states.Keys)) ClearForPiece(target);
         turns.Clear();
+        resolvedTurnStarts.Clear();
     }
 
     private bool IsCurrent(PieceController target, TurnEntry entry) => entry.Revision == entry.Status.Revision &&

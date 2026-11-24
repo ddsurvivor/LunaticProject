@@ -53,6 +53,12 @@ public partial class EnemyController : PieceController
     public override void Dead()
     {
         if (HasQueuedBurstDeath) return;
+        var revive = GetComponent<SelfRevive>();
+        if (revive != null && revive.isFakeDead)
+        {
+            unitAttrCenter.SetHealth(1);
+            return;
+        }
         MemeState.ClearNetworkLinks();
         BattleScene.Ins?.BM?.timedMemeStatuses.ClearForPiece(this);
         CancelCombatAction();
@@ -67,10 +73,13 @@ public partial class EnemyController : PieceController
         BattleScene.Ins.TM.RequestHitStop();
         Debug.Log($"{this.name} 死亡");
         OnDead?.Invoke();
-        isActived = false;
+        // 假死仍须获得自身普通回合，才能触发OnTurnStart绑定的复活事件。
+        isActived = GetComponent<SelfRevive>()?.isFakeDead == true;
         enemyCanvas?.gameObject.SetActive(false);
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Death, false, -1, () =>
         {
+            var revive = GetComponent<SelfRevive>();
+            if (revive != null && (revive.isFakeDead || revive.IsCompletingTrueDeath)) return;
             CheckDrop();
             if (!deadNotDelete)
             {
@@ -179,6 +188,16 @@ public partial class EnemyController : PieceController
                 }
             }
         }
+    }
+
+    /// <summary>假死终结的表现完成后提交最终死亡和一次掉落；调用方须先校验生命版本。</summary>
+    internal void CompleteTrueDeath()
+    {
+        if (isDead || !gameObject.activeInHierarchy) return;
+        unitAttrCenter.SetHealth(0);
+        CheckDrop();
+        gameObject.SetActive(false);
+        BattleScene.Ins.BM.PlayerCheckWin();
     }
 
     public override void OnBeTarget(PieceController attacker, SkillPack skillPack)

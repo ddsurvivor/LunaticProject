@@ -121,10 +121,9 @@ public partial class PieceActionListPanel
         var root = (RectTransform)transform;
         var parent = (RectTransform)root.parent;
         var camera = menuCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : menuCanvas.worldCamera;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, Screen.safeArea.min, camera, out var min);
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, Screen.safeArea.max, camera, out var max);
-        min += Vector2.one * SafeMargin;
-        max -= Vector2.one * SafeMargin;
+        var area = BattleScene.Ins.UM.GetActionPanelArea(parent, camera, SafeMargin);
+        var min = area.min;
+        var max = area.max;
         float availableHeight = Mathf.Max(RowHeight, max.y - min.y);
         float width = Mathf.Max(80 + HorizontalPadding, Mathf.Min(RowWidth + HorizontalPadding, (max.x - min.x - MenuGap) / 2));
         float height = Mathf.Min(availableHeight, primaryEntries.Count * RowHeight - RowSpacing + 2 * VerticalPadding);

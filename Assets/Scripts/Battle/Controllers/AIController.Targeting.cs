@@ -21,6 +21,8 @@ public partial class AIController
         Vector3? previewPosition = null)
     {
         if (aiPiece == null || aiPiece.isDead) return null;
+        var focusTarget = SceneBattleDevice.FocusTarget(aiPiece);
+        if (focusTarget != null && IsValidTarget(aiPiece, focusTarget)) return focusTarget;
         var candidates = BattleScene.Ins?.BM?.PlayerController?.pieces;
         if (candidates == null) return null;
         var behavior = aiPiece.ResolveStrategy();

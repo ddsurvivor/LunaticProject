@@ -8,13 +8,14 @@ public sealed class BattleStatusEntry
     public string Value { get; }
     public string Detail { get; }
     public Sprite Icon { get; }
-    public BattleStatusEntry(string name, string value, string detail, Sprite icon = null)
-    { Name = name; Value = value; Detail = detail; Icon = icon; }
+    public string StackLabel { get; } // 头顶只显示真实层数；回合、百分比和来源数保留在详情。
+    public BattleStatusEntry(string name, string value, string detail, Sprite icon = null, string stackLabel = "")
+    { Name = name; Value = value; Detail = detail; Icon = icon; StackLabel = stackLabel; }
 }
 
 public static class BattleStatusReadModel
 {
-    /// <summary>读取旧Buff、六种精确模因、网络暴露与本场抗性；不触发随机、解除或计时。</summary>
+    /// <summary>读取旧Buff、模因、光环、网络与永久/临时抗性；不触发随机、治疗或计时。</summary>
     public static List<BattleStatusEntry> Read(PieceController piece, BattleManager battle)
     {
         var result = new List<BattleStatusEntry>();
@@ -23,12 +24,15 @@ public static class BattleStatusReadModel
         buffs.Sort((a, b) => ((int)a.buffType).CompareTo((int)b.buffType));
         foreach (var buff in buffs)
         {
+            bool shutdown = buff.buffType == BuffType.Stun && piece.GetComponent<BarrierEmitter>()?.ShutdownTurns > 0;
             var name = buff.buffType.ToChinese();
+            if (shutdown) name = "破盾停机";
             string value = buff.buffType == BuffType.SlowingField ? $"{buff.barrierHealth}盾"
-                : buff.stacks < 0 ? "永久" : $"{buff.stacks}层";
+                : shutdown ? $"{buff.stacks}回" : buff.stacks < 0 ? "永久" : $"{buff.stacks}层";
             Sprite icon = null;
             battle.spriteManager?.buffIconDic?.TryGetValue(buff.buffType, out icon);
-            result.Add(new BattleStatusEntry(name, value, buff.stacks < 0 ? "永久状态不会随普通回合自然减少。" : "层数按此状态的规则结算。", icon));
+            result.Add(new BattleStatusEntry(name, value, shutdown ? "自身普通回合计时；不能行动，治疗光环暂停。" : buff.stacks < 0 ? "永久状态不会随普通回合自然减少。" : "层数按此状态的规则结算。", icon,
+                buff.stacks < 0 ? "∞" : buff.stacks.ToString()));
         }
         foreach (var status in battle.timedMemeStatuses.GetStatuses(piece))
         {
@@ -44,10 +48,14 @@ public static class BattleStatusReadModel
             foreach (var definition in catalog.memes)
             {
                 if (definition == null) continue;
-                int resistance = piece.MemeState.GetResistance(definition.id);
+                bool permanent = piece.pieceData?.permanentMemeImmunities?.Contains(definition.id) == true;
+                int resistance = permanent ? 100 : piece.MemeState.GetResistance(definition.id);
                 if (resistance > 0)
-                    result.Add(new BattleStatusEntry(definition.displayName + "抗性", $"{resistance}%", resistance >= 100 ? "本场同词条免疫。" : "本场同词条抗性，不叠加强度。"));
+                    result.Add(new BattleStatusEntry(definition.displayName + "抗性", $"{resistance}%", permanent ? "棋子固有永久免疫，复用和重开保留。" : resistance >= 100 ? "本场同词条免疫。" : "本场同词条抗性，不叠加强度。"));
             }
+        var aura = ObeliskAura.HealingSource(piece, battle);
+        if (aura != null)
+            result.Add(new BattleStatusEntry("方尖碑治疗光环", $"{Mathf.Clamp01(aura.healFraction) * 100:0}%", "目标普通回合开始治疗；多个来源不叠加，离开范围或来源死亡即失效。"));
         return result;
     }
 

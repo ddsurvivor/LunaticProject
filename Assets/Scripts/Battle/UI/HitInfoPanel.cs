@@ -42,7 +42,7 @@ public class HitInfoPanel : MonoBehaviour
         gameObject.SetActive(true);
 
         // 1. 只向伤害管理器请求预览，UI 不再维护另一套战斗公式。
-        var preview = BattleScene.Ins.BM.damageManager.PreviewSkill(attacker, target, skillPack, checkResult, isFlank);
+        var preview = BattleScene.Ins.BM.damageManager.PreviewSkill(attacker, target, skillPack, checkResult, isFlank, attacker.rangeUI?.PreviewTargets);
         hitRateText.text = $"{preview.HitRate}%";
 
         // 2. 同类型多段伤害已合并；固定伤害显示单值，随机伤害显示区间。

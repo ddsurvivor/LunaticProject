@@ -70,16 +70,19 @@ public class SummonEffect : SkillEffectBase
     public int summonPieceId;
     public ItemType summonPieceObj;
 
+    /// <summary>先验证棋子配置，再生成、初始化及唯一登记；无效配置不借用预制体回退数据。</summary>
     public void ApplyEffect(Vector3 pos, PlayerController summoner)
     {
-        // 在指定地点生成召唤棋子，并且初始化
-        PieceController summonPiece = ObjectPool.Ins.GenerateObject(summonPieceObj, pos, Quaternion.identity)
-            ?.GetComponent<PieceController>();
-        if(summonPiece== null) return;
-        PieceData pieceData = BattleScene.Ins.BM.pieceDataListSO.GetPieceData(summonPieceId);
-        //summonPiece.Init(summoner, pieceData);
+        var battle = BattleScene.Ins?.BM;
+        if (battle == null || !battle.isActiveAndEnabled || summoner == null || battle.pieceDataListSO == null) return;
+        PieceData pieceData = battle.pieceDataListSO.GetPieceData(summonPieceId);
+        if (pieceData == null) return;
+        var instance = ObjectPool.Ins.GenerateObject(summonPieceObj, pos, Quaternion.identity);
+        if (instance == null) return;
+        var summonPiece = instance.GetComponent<PieceController>();
+        if (summonPiece == null) { ObjectPool.Ins.HideObject(instance); return; }
         summonPiece.Init(summoner, pieceData);
-        BattleScene.Ins.BM.summonPieces.Add(summonPiece);// 将召唤的棋子加入召唤者的棋子列表
+        if (BattleScene.Ins?.BM != battle || !battle.RegisterSummon(summonPiece)) ObjectPool.Ins.HideObject(instance);
     }
 }
 

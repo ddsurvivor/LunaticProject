@@ -159,6 +159,7 @@ public partial class AIController : PlayerController
             return actionAttempted;
         }
         if (TryBehaviorRecovery(aiPiece) || TryHealingPriority(aiPiece, strategy)) return true;
+        if (TryRangeBarrier(aiPiece)) return true;
         if (EnemyBehaviorRules.ShouldFlee(aiPiece))
         {
             pendingAttacks.Remove(aiPiece);
@@ -202,6 +203,19 @@ public partial class AIController : PlayerController
         if (TryAttackPlan(aiPiece, NormalPlan(aiPiece, target, false)) || actionAttempted) return true;
         if (TryAttackPlan(aiPiece, NormalPlan(aiPiece, target, true)) || actionAttempted) return true;
         return TryApproach(aiPiece, target.transform.position, aiPiece.GetRange(true));
+    }
+
+    private bool TryRangeBarrier(EnemyController piece)
+    {
+        var skill = piece.availableSkills?.FirstOrDefault(s => s?.skillEffects?.Contains(SkillEffect.RangeBarrier) == true);
+        if (skill == null || !piece.SkillAvailable(skill) || piece.unitAttrCenter.CurMovePoint < piece.unitAttrCenter.GetSkillAPCost(skill) || piece.IsPerformingAction) return false;
+        actionAttempted = true;
+        if (piece.unitAttrCenter.TryCostSkill(skill))
+        {
+            piece.StartSkillAttack(skill);
+            piece.CastSupportSkill(piece, skill);
+        }
+        return true;
     }
 
     private static AttackPlan NormalPlan(EnemyController piece, PieceController target, bool ranged)

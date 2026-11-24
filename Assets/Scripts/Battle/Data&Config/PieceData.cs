@@ -14,6 +14,7 @@ public class PieceData
     [LabelText("模因身体类型")] public MemeBodyType memeBodyType;
     [LabelText("模因目标标签")] public List<string> memeTargetTags = new();
     [LabelText("固有模因编号")] public List<int> innateMemeIds = new();
+    [LabelText("永久免疫模因编号")] public List<int> permanentMemeImmunities = new(); // 独立于本场临时抗性，初始化和解除状态均不清除此配置。
     [FoldoutGroup("敌人等级成长"), OdinSerialize]
     [LabelText("每级成长"), DictionaryDrawerSettings(KeyLabel = "成长属性", ValueLabel = "每级增加")]
     public Dictionary<EnemyGrowthAttribute, float> levelGrowth = new();

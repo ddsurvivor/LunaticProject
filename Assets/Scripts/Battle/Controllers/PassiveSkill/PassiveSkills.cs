@@ -7,24 +7,38 @@ namespace SkillSystem
     // ==========================================
     public class SkillSuccessor : BasePassiveSkill
     {
-        private const float HP_THRESHOLD = 0.3f;
-        private const float ATTRIBUTE_BONUS = 0.2f;
-        private const float MOVE_RANGE_ADD = 10f;
+        private const int HP_THRESHOLD_PERCENT = 40; // 严格低于40%时生效，等于门槛不生效。
+        private const float ATTRIBUTE_BONUS = 0.2f; // 按触发时的属性快照增加20%。
         private bool active;
-        private int attackBonus;
+        private int attackBonus; // 保存实际加值，退出时不按已变化的属性重新计算。
+        private float moveRangeBonus;
+        private readonly int[] armorBonuses = new int[3]; // 动能、热能、火种护甲各自持有加值。
+        private UnitAttrCenter bonusUnit;
 
+        /// <summary>随宿主生命与上限变化切换低血量增益；死亡、恢复至40%或卸载时撤销。</summary>
         public override void OnHpChanged(GameObject instigator, float currentHp, float maxHp)
         {
-            if (instigator != owner || maxHp <= 0) return;
-            bool shouldActivate = currentHp > 0 && currentHp / maxHp < HP_THRESHOLD;
+            if (owner == null || instigator != owner) return;
+            if (maxHp <= 0) { RemoveBonus(); return; }
+            // 交叉乘法避免Mono浮点除法精度把恰好40%判成低于门槛。
+            bool shouldActivate = currentHp > 0 && (double)currentHp * 100 < (double)maxHp * HP_THRESHOLD_PERCENT;
             if (!shouldActivate) { RemoveBonus(); return; }
             if (active) return;
             var unit = owner.GetComponent<UnitAttrCenter>();
+            if (unit == null) return;
             active = true;
+            bonusUnit = unit;
             // 保存实际加值，撤销时不按已经变化的攻击力重新计算。
             attackBonus = Mathf.RoundToInt(unit.ATK * ATTRIBUTE_BONUS);
+            moveRangeBonus = Mathf.Max(0f, unit.BaseMoveRange) * ATTRIBUTE_BONUS;
+            for (int i = 0; i < armorBonuses.Length; i++)
+            {
+                var type = (DamageType)(i + 1);
+                armorBonuses[i] = Mathf.RoundToInt(unit.attr.GetArmor(type) * ATTRIBUTE_BONUS);
+                unit.attr.SetArmor(type, unit.attr.GetArmor(type) + armorBonuses[i]);
+            }
             unit.ModifyAttribute(UnitAttrType.ATK, attackBonus);
-            unit.ModifyAttribute(UnitAttrType.MoveRange, MOVE_RANGE_ADD);
+            unit.ModifyAttribute(UnitAttrType.MoveRange, moveRangeBonus);
             BattleScene.Ins.BM.tipTextManager.ShowTip(owner.transform, data.skillName);
             ObjectPool.Ins.GenerateObject(ItemType.SPECIALTY_ACTIVATE, owner.transform.position, Quaternion.identity);
         }
@@ -33,12 +47,19 @@ namespace SkillSystem
         {
             if (!active) return;
             active = false;
-            if (owner == null) return;
-            var unit = owner.GetComponent<UnitAttrCenter>();
+            var unit = bonusUnit;
+            bonusUnit = null;
             if (unit == null) return;
+            for (int i = 0; i < armorBonuses.Length; i++)
+            {
+                var type = (DamageType)(i + 1);
+                unit.attr.SetArmor(type, unit.attr.GetArmor(type) - armorBonuses[i]);
+                armorBonuses[i] = 0;
+            }
             unit.ModifyAttribute(UnitAttrType.ATK, -attackBonus);
-            unit.ModifyAttribute(UnitAttrType.MoveRange, -MOVE_RANGE_ADD);
+            unit.ModifyAttribute(UnitAttrType.MoveRange, -moveRangeBonus);
             attackBonus = 0;
+            moveRangeBonus = 0;
         }
 
         public override void OnSkillUnequipped() => RemoveBonus();
@@ -183,7 +204,10 @@ namespace SkillSystem
 
             if (BattleRandom.Value <= TRIGGER_CHANCE)
             {
-                Debug.Log($"[被动触发] 侦测到宿主 {owner.name} 自身通过了模式识别！【转账拦截】触发：成功拦截并获得 {REWARD_CURRENCY} 标准货币！");
+                var battle = BattleScene.Ins != null ? BattleScene.Ins.BM : null;
+                // 收益先留在本次尝试，沿用胜利离场提交与重开丢弃的规则。
+                if (battle != null && battle.TryAddBattleCurrencyReward(owner.GetComponent<PieceController>(), REWARD_CURRENCY))
+                    Debug.Log($"[被动触发] {owner.name}【转账拦截】：获得 {REWARD_CURRENCY} 标准货币，胜利离开战斗时结算。");
             }
         }
     }
@@ -197,13 +221,17 @@ namespace SkillSystem
         private const int BUFF_DURATION_TURNS = 2;     // 持续回合数 2回合
         private const int ATTRIBUTE_BONUS = 3;         // 属性提升点数 3点
 
-        private int _hitCounter = 0;
-        private int _remainingTurns = 0;
+        private int _hitCounter = 0; // 增益生效期间不累计下一轮受击。
+        private int _remainingTurns = 0; // 仅由宿主普通回合结束递减。
         private bool _isBuffActive = false;
+        private PieceController bonusOwner;
+        private Player bonusPlayer; // 卸载时撤销原持有者，避免复用棋子后误改新档案。
 
         public override void OnTakeDamage(GameObject instigator, GameObject attacker)
         {
-            if (instigator != owner) return;
+            if (owner == null || instigator != owner) return;
+            var piece = owner.GetComponent<PieceController>();
+            if (piece == null || piece.playerData == null || piece.isDead || piece.unitAttrCenter.CurHealth <= 0) return;
             if (_isBuffActive) return; 
 
             _hitCounter++;
@@ -214,10 +242,14 @@ namespace SkillSystem
                 _hitCounter = 0;
                 _isBuffActive = true;
                 _remainingTurns = BUFF_DURATION_TURNS;
+                bonusOwner = piece;
+                bonusPlayer = piece.playerData;
+                // 只叠加运行时属性，刷新使用既有换算与资源裁剪，不改存档基础值。
+                bonusPlayer.SetTemporaryAttributeBonuses(this, new[] { ATTRIBUTE_BONUS, ATTRIBUTE_BONUS, ATTRIBUTE_BONUS, 0, 0 });
+                bonusOwner.RefreshPlayerAttributeBonuses();
                 BattleScene.Ins.BM.tipTextManager.ShowTip(instigator.transform
                     , $"{data.skillName}");
                 ObjectPool.Ins.GenerateObject(ItemType.SPECIALTY_ACTIVATE, instigator.transform.position, Quaternion.identity);
-                //TODO: 添加持续3回合的buff
                 
                 Debug.Log($"[被动触发] {owner.name} 自身累积遭受 {REQUIRED_HIT_COUNT} 次攻击，触发【边缘求生】：自身体力、意志和作战属性提升 {ATTRIBUTE_BONUS} 点，持续 {BUFF_DURATION_TURNS} 回合！");
             }
@@ -230,10 +262,33 @@ namespace SkillSystem
                 _remainingTurns--;
                 if (_remainingTurns <= 0)
                 {
-                    _isBuffActive = false;
+                    RemoveBonus();
                     Debug.Log($"[状态解除] {owner.name} 的【边缘求生】持续回合结束，自身属性恢复正常。");
                 }
             }
+        }
+
+        public override void OnHpChanged(GameObject instigator, float currentHp, float maxHp)
+        {
+            if (instigator == owner && currentHp <= 0) OnSkillUnequipped();
+        }
+
+        private void RemoveBonus()
+        {
+            if (!_isBuffActive) return;
+            _isBuffActive = false;
+            _remainingTurns = 0;
+            bonusPlayer?.RemoveTemporaryAttributeBonuses(this);
+            if (bonusOwner != null && ReferenceEquals(bonusOwner.playerData, bonusPlayer))
+                bonusOwner.RefreshPlayerAttributeBonuses();
+            bonusOwner = null;
+            bonusPlayer = null;
+        }
+
+        public override void OnSkillUnequipped()
+        {
+            _hitCounter = 0;
+            RemoveBonus();
         }
     }
 
@@ -269,12 +324,22 @@ namespace SkillSystem
         private const float TRIGGER_CHANCE = 0.20f;    // 触发概率 20%
         private const int PROTECT_LAYERS = 3;          // 防护层数 3层
 
+        /// <summary>由正式施法成功通知调用，按当前支援关系为有效参战友方概率施加防护。</summary>
         public override void OnCastActiveSkill(GameObject instigator)
         {
-            if (instigator != owner) return;
+            if (owner == null || instigator != owner) return;
+            var battle = BattleScene.Ins != null ? BattleScene.Ins.BM : null;
+            var caster = owner.GetComponent<PieceController>();
+            if (battle == null || !battle.IsBattleRunning || battle.LastOutcome != BattleOutcome.None || caster == null) return;
+            // 沿用参战资格和当前支援关系，目标快照去重，排除尸体、退场及尚未激活的单位。
+            var targets = battle.SpeedParticipants().FindAll(piece => BattleRelations.CanSupport(caster, piece));
+            if (!targets.Contains(caster)) return;
 
             if (BattleRandom.Value <= TRIGGER_CHANCE)
             {
+                foreach (var piece in targets)
+                    battle.buffManager.AddBuff(piece.unitAttrCenter, BuffType.Shield, PROTECT_LAYERS);
+                battle.tipTextManager.ShowTip(owner.transform, data.skillName);
                 Debug.Log($"[被动触发] {owner.name} 释放了主动技能，触发【维护保障】：成功为全队施加 {PROTECT_LAYERS} 层 [防护]！");
             }
         }
