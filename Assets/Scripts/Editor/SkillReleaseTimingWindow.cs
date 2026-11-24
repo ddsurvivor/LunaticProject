@@ -94,7 +94,7 @@ public class SkillReleaseTimingWindow : EditorWindow
         root.style.paddingLeft = root.style.paddingRight = 12;
         root.style.paddingTop = 10;
         rootVisualElement.Add(root);
-        root.Add(new HelpBox("默认12 FPS，可单独设置每张图的停留秒数。帧模式在指定图开始时出手；旧秒模式保留绝对时间。角色配置保存到所选 PieceDisplay。", HelpBoxMessageType.Info));
+        root.Add(new HelpBox("默认帧率由全局动画配置决定，可单独设置每张图的停留秒数。帧模式在指定图开始时出手；旧秒模式保留绝对时间。角色配置保存到所选 PieceDisplay。", HelpBoxMessageType.Info));
         var target = new ObjectField("角色 PieceDisplay") { objectType = typeof(PieceDisplay), allowSceneObjects = true, value = targetDisplay };
         target.RegisterValueChangedCallback(e => { ChangeTarget(e.newValue as PieceDisplay); target.SetValueWithoutNotify(targetDisplay); });
         root.Add(target);
@@ -173,7 +173,7 @@ public class SkillReleaseTimingWindow : EditorWindow
             Changed();
         });
         root.Add(secondsField);
-        var holds = new Foldout { text = "逐帧停留时长（0 = 默认1/12秒）", value = Count <= 4 };
+        var holds = new Foldout { text = "逐帧停留时长（0 = 动作全局默认）", value = Count <= 4 };
         for (int i = 0; i < Count; i++)
         {
             int index = i;
@@ -202,7 +202,7 @@ public class SkillReleaseTimingWindow : EditorWindow
                 distance.RegisterValueChangedCallback(e => { targetDistance = float.IsNaN(e.newValue) || float.IsInfinity(e.newValue) ? 0 : Mathf.Max(0, e.newValue); distance.SetValueWithoutNotify(targetDistance); RefreshFields(); }); root.Add(distance);
             }
         }
-        timeline = new Slider("时间轴（秒）", 0f, Mathf.Max(PieceDisplay.FrameDuration, Duration));
+        timeline = new Slider("时间轴（秒）", 0f, Mathf.Max(BattleAnimationSettings.FrameDuration(action), Duration));
         timeline.RegisterValueChangedCallback(e => Seek(e.newValue));
         root.Add(timeline);
         positionLabel = new Label(); root.Add(positionLabel);
@@ -238,7 +238,7 @@ public class SkillReleaseTimingWindow : EditorWindow
     }
 
     private int Count => targetDisplay == null ? 0 : targetDisplay.GetFrames(action, animationIndex)?.Count ?? 0;
-    private PieceAnimationTimeline Timeline => new PieceAnimationTimeline(Count, draft?.frameDurations);
+    private PieceAnimationTimeline Timeline => new PieceAnimationTimeline(Count, draft?.frameDurations, action);
     private float Duration => Timeline.Duration;
     private float FlightDuration => choices.Find(s => s.skillId == skillId)?.bulletVFXType != ItemType.NONE &&
         choices.Any(s => s.skillId == skillId) && projectileSpeedDraft > 0 && !float.IsInfinity(projectileSpeedDraft)
@@ -286,7 +286,7 @@ public class SkillReleaseTimingWindow : EditorWindow
         frameField.SetEnabled(draft.mode == ActionReleaseMode.Frame);
         secondsField.SetEnabled(draft.mode == ActionReleaseMode.Seconds);
         timeline.SetValueWithoutNotify(elapsed);
-        timeline.highValue = Mathf.Max(PieceDisplay.FrameDuration, PreviewDuration);
+        timeline.highValue = Mathf.Max(BattleAnimationSettings.FrameDuration(action), PreviewDuration);
         positionLabel.text = $"{Count} 帧 · 动画{Duration:F3}秒 · 当前第 {Timeline.GetFrame(elapsed) + 1} 帧 · 出手 {release:F3}秒 · 预计命中 {release + FlightDuration:F3}秒";
         status.text = Count == 0 ? "没有可播放的序列，请检查角色、动作入口和动画索引。" :
             (dirty ? "有未保存的调整。" : "草稿与当前配置一致。") + " 出手时场景显示黄色圆圈及文字；预览不扣费、不结算伤害。";

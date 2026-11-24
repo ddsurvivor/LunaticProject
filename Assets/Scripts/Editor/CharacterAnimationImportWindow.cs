@@ -143,7 +143,7 @@ public class CharacterAnimationImportWindow : EditorWindow
             Run(() => { CharacterAnimationImporter.RepairTextures(plan); Scan(); });
         showIgnored = EditorGUILayout.Foldout(showIgnored, "未采用文件（" + plan.ignored.Count + "）：副本、B 版或命名不匹配", true);
         if (showIgnored) foreach (string file in plan.ignored) EditorGUILayout.LabelField(file, EditorStyles.miniLabel);
-        EditorGUILayout.HelpBox("默认12帧/秒，逐帧停留时长与正式播放器共用；可在PieceDisplay打开出手调节。", MessageType.None);
+        EditorGUILayout.HelpBox("技能和其他动作分别使用全局默认帧率；逐帧停留时长与正式播放器共用。", MessageType.None);
         EditorGUILayout.EndScrollView();
     }
 
@@ -155,7 +155,7 @@ public class CharacterAnimationImportWindow : EditorWindow
         var states = new[] { PieceDisplayState.Idle, PieceDisplayState.Move, PieceDisplayState.Attack, PieceDisplayState.Shoot,
             PieceDisplayState.Dodge, PieceDisplayState.Hit, PieceDisplayState.Death, PieceDisplayState.Skill };
         var timing = targetDisplay.FindReleaseTiming(states[row.action], Mathf.Max(0, row.skillIndex), null);
-        var timeline = new PieceAnimationTimeline(row.frames.Count, timing?.frameDurations);
+        var timeline = new PieceAnimationTimeline(row.frames.Count, timing?.frameDurations, states[row.action]);
         if (playing) previewFrame = timeline.GetFrame((float)(EditorApplication.timeSinceStartup - previewStart), true);
         previewFrame = Mathf.Clamp(previewFrame, 0, row.frames.Count - 1);
         EditorGUILayout.BeginHorizontal();

@@ -38,7 +38,7 @@ public class PieceDisplay : SerializedMonoBehaviour
         internal UnityAction Release, Finish;
     }
 
-    public const float FramesPerSecond = 12f; // 正式动画与编辑器预览共用的序列帧率。
+    public const float FramesPerSecond = 12f; // 兼容旧调用的技能默认帧率，实际播放读取全局配置。
     public const float FrameDuration = 1f / FramesPerSecond;
     private Playback playback;
     private PieceDisplayState state;
@@ -127,13 +127,13 @@ public class PieceDisplay : SerializedMonoBehaviour
         return timing == null ? timeline.GetFrameStart(timeline.Count / 2) : timing.GetSeconds(timeline);
     }
 
-    /// <summary>快照每张图的停留时长；技能未设置时继承动画默认，空项沿用12 FPS。</summary>
+    /// <summary>快照每张图的停留时长；空项使用对应动作的全局默认帧率。</summary>
     public PieceAnimationTimeline GetTimeline(PieceDisplayState next, int index = 0, string skillId = null)
     {
         var timing = FindReleaseTiming(next, index, skillId);
         if (timing?.frameDurations == null || timing.frameDurations.Count == 0)
             timing = FindReleaseTiming(next, index, null);
-        return new PieceAnimationTimeline(GetFrames(next, index)?.Count ?? 0, timing?.frameDurations);
+        return new PieceAnimationTimeline(GetFrames(next, index)?.Count ?? 0, timing?.frameDurations, next);
     }
 
     /// <summary>读取指定作用域的配置，不自动回退；空技能 ID 表示该动画的默认配置。</summary>
@@ -151,8 +151,8 @@ public class PieceDisplay : SerializedMonoBehaviour
         state = next;
         playback = new Playback
         {
-            Frames = frames, FrameDuration = FrameDuration,
-            Timeline = timeline ?? new PieceAnimationTimeline(frames?.Count ?? 0),
+            Frames = frames, FrameDuration = BattleAnimationSettings.FrameDuration(next),
+            Timeline = timeline ?? new PieceAnimationTimeline(frames?.Count ?? 0, null, next),
             Loop = next == PieceDisplayState.Idle || next == PieceDisplayState.Move,
             ReturnToIdle = back, Finish = finish, Release = release, Duration = duration
         };
@@ -180,7 +180,7 @@ public class PieceDisplay : SerializedMonoBehaviour
         if (dodgeOffset)
         {
             // 单张或缺失闪避素材时也用横移表达闪身，且不改变棋子的碰撞与导航位置。
-            float progress = Math.Min(1f, current.Elapsed / Math.Max(FrameDuration, current.Timeline.Duration));
+            float progress = Math.Min(1f, current.Elapsed / Math.Max(current.FrameDuration, current.Timeline.Duration));
             float direction = pieceSpriteRenderer.transform.localScale.x < 0 ? 1f : -1f;
             pieceSpriteRenderer.transform.localPosition = dodgeOrigin + Vector3.right *
                 ((float)Math.Sin(progress * Math.PI) * 0.3f * direction);
@@ -276,12 +276,12 @@ public class ActionReleaseTiming
     public ActionReleaseMode mode;
     public int frame = 1; // 从1开始，选定帧开始时出手。
     public float seconds;
-    public List<float> frameDurations = new(); // 各帧秒数；空列表或非正数沿用1/12秒，不重复复制图片。
+    public List<float> frameDurations = new(); // 各帧秒数；空列表或非正数使用该动作的全局默认帧率。
 
     /// <summary>将配置换算为秒；旧配置越界时限于末帧开始，空序列立即出手。</summary>
     public float GetSeconds(int frameCount)
     {
-        return GetSeconds(new PieceAnimationTimeline(frameCount));
+        return GetSeconds(new PieceAnimationTimeline(frameCount, null, action));
     }
 
     /// <summary>帧模式累加前面各图时长；旧秒模式保留绝对秒数，不随停留时长重映射。</summary>
@@ -300,13 +300,13 @@ public sealed class PieceAnimationTimeline
     public int Count => ends.Length;
     public float Duration => Count == 0 ? 0f : ends[Count - 1];
 
-    public PieceAnimationTimeline(int count, IList<float> durations = null)
+    public PieceAnimationTimeline(int count, IList<float> durations = null, PieceDisplayState action = PieceDisplayState.Skill)
     {
         ends = new float[Math.Max(0, count)];
         for (int i = 0; i < ends.Length; i++)
         {
             float duration = durations != null && i < durations.Count ? durations[i] : 0f;
-            if (duration <= 0f || float.IsNaN(duration) || float.IsInfinity(duration)) duration = PieceDisplay.FrameDuration;
+            if (duration <= 0f || float.IsNaN(duration) || float.IsInfinity(duration)) duration = BattleAnimationSettings.FrameDuration(action);
             ends[i] = (i == 0 ? 0f : ends[i - 1]) + duration;
         }
     }
