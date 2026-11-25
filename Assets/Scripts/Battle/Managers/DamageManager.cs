@@ -236,7 +236,7 @@ public sealed class DamageManager
         };
         context.CoverReduction = context.Cover != null
             ? GM.Ins.DM.gameConstSO.GetCoverDamageReduction(context.Cover.Level) : 0;
-        bool guaranteed = context.IsBursting || skill.target is SkillTarget.EnemyAll
+        bool guaranteed = skill.hackDevice || context.IsBursting || skill.target is SkillTarget.EnemyAll
             or SkillTarget.All or SkillTarget.Self or SkillTarget.AllyBody or SkillTarget.Ally;
         context.HitRate = guaranteed ? 100 : Mathf.Clamp(Mathf.FloorToInt(
             (attacker.unitAttrCenter.buffAttrDic[BuffAttrType.HitRate]

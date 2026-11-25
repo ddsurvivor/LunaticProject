@@ -38,7 +38,10 @@ public class Player
     {
         skills ??= new SkillLoadoutState();
         skills.Initialize(data);
-        return data?.skillLibrary != null ? skills.Resolve(data.skillLibrary) : data?.DefaultSkills ?? new List<SkillPack>();
+        var configured = data?.skillLibrary != null ? skills.Resolve(data.skillLibrary) : data?.DefaultSkills ?? new List<SkillPack>();
+        // 成年与少年绿共用存档，角色界面同样只在成年形态显示骇入。
+        if (data?.pieceId != 102) configured.RemoveAll(skill => skill != null && skill.skillId == SkillPack.AdultGreenHackId);
+        return configured;
     }
     public int pieceId;
     [ShowInInspector]private string name;

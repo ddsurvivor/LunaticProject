@@ -102,6 +102,16 @@ public sealed class SceneBattleDevice : PieceController
     public bool Contains(Vector3 point) => radius >= 0 && !float.IsNaN(radius) && !float.IsInfinity(radius) &&
         (point - transform.position).sqrMagnitude <= radius * radius;
 
+    /// <summary>变更装置阵营并清除旧集火和范围记录；返回是否实际变更。</summary>
+    public bool SetFaction(bool playerFaction)
+    {
+        if (!IsInitialized || !isActiveAndEnabled || isDead || isPlayerPiece == playerFaction) return false;
+        isPlayerPiece = playerFaction;
+        focusTarget = null;
+        visits.Clear();
+        return true;
+    }
+
     private bool CrossesRange(Vector3 from, Vector3 to)
     {
         Vector3 delta = to - from;
@@ -226,7 +236,17 @@ public sealed class SceneBattleDevice : PieceController
         destroying = true; focusTarget = null;
         foreach (var collider in GetComponentsInChildren<Collider>()) collider.enabled = false;
         foreach (var renderer in GetComponentsInChildren<Renderer>()) renderer.enabled = false;
-        pieceDisplay?.ChangeDisplayState(PieceDisplayState.Death);
+        // 停止装置作用后保留精灵渲染，死亡序列播完再隐藏。
+        if (pieceDisplay != null && pieceDisplay.pieceSpriteRenderer != null &&
+            pieceDisplay.deathSprites != null && pieceDisplay.deathSprites.Count > 0)
+        {
+            var spriteRenderer = pieceDisplay.pieceSpriteRenderer;
+            spriteRenderer.enabled = true;
+            pieceDisplay.ChangeDisplayState(PieceDisplayState.Death, finish: () =>
+            {
+                if (spriteRenderer != null) spriteRenderer.enabled = false;
+            });
+        }
         OnDead?.Invoke();
     }
 

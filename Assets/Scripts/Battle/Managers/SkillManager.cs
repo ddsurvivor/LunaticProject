@@ -146,6 +146,8 @@ public static class SkillTargeting
 
     public static bool IsValid(PieceController caster, PieceController target, SkillPack skill)
     {
+        if (skill != null && skill.hackDevice && (!(target is SceneBattleDevice device) ||
+            caster == null || !caster.isPlayerPiece || device.isPlayerPiece)) return false;
         if (target is RangeBarrier && (skill?.attackPacks == null || skill.attackPacks.Count == 0)) return false;
         return skill != null && (!BattleRelations.IsOffensive(skill) || BattleRelations.CanInitiateAttack(caster)) && IsValid(caster, target, skill.target, skill.AllowDeadCaster) &&
             (!skill.layerSkill || Mathf.Abs(caster.transform.position.y - target.transform.position.y) <= BattleRangeRules.SameLayerTolerance);

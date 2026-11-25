@@ -20,6 +20,8 @@ public partial class PieceController
             if (data.effectType == ComponentEffect.ActiveSkill && data.skillPack != null &&
                 !string.IsNullOrWhiteSpace(data.skillPack.skillName) && !availableSkills.Contains(data.skillPack))
                 availableSkills.Add(data.skillPack);
+        // 成年与少年绿共用玩家存档，专属技能只在成年形态显示。
+        if (_pieceData?.pieceId != 102) availableSkills.RemoveAll(s => s != null && s.skillId == SkillPack.AdultGreenHackId);
     }
 
     /// <summary>学习技能；立即配置时须等待动作结束，学习费用和等级条件由调用方控制。</summary>

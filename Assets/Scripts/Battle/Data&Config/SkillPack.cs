@@ -8,6 +8,7 @@ public enum SkillReachKind { Auto, Melee, Ranged }
 [System.Serializable]
 public class SkillPack
 {
+    public const string AdultGreenHackId = "b76a2026112547029f4ac709213eff01"; // 成年绿专属技能的稳定 ID。
     [LabelText("技能 ID"), ReadOnly] public string skillId; // 稳定引用标识，改名不影响角色配置或存档。
     /// <summary>仅爆炸物死亡后的延迟结算使用；不序列化、不改变原技能。</summary>
     [field: System.NonSerialized] public bool AllowDeadCaster { get; private set; }
@@ -29,6 +30,7 @@ public class SkillPack
     [LabelText("固有模因编号")] public List<int> memeIds = new();
     [LabelText("敌人 AI 技能用途")] public EnemySkillRole enemySkillRole = EnemySkillRole.Auto; // 默认按技能效果和相对近战射程推断用途。
     public string description;// 技能描述
+    [LabelText("骇入敌方装置")] public bool hackDevice; // 仅选择敌方场景装置，成功后归我方。
     [LabelText("能量消耗")]public int mpCost;
     //public int cooldown;// 冷却时间
     public SkillTarget target;// 作用目标

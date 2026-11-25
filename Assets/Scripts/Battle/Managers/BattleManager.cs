@@ -233,9 +233,10 @@ public partial class BattleManager : MonoBehaviour
             // 处理附加效果
             ApplySKillEffect(skillPack, attacker, target, targetPos);
             ApplyAddEffect(skillPack, attacker, target, targetPos, actualHealthLoss);
+            if (skillPack.hackDevice && target is SceneBattleDevice hacked) hacked.SetFaction(true);
             if (settlement.HitAttack && target is SceneBattleDevice device) device.NotifySkillHit(attacker, skillPack);
             if (skillPack.memeCureTags != MemeCureTag.None) timedMemeStatuses.TryCure(target, skillPack.memeCureTags);
-            if (IsBurstActor(attacker)) // 聚能状态下所有攻击附加击退效果
+            if (IsBurstActor(attacker) && !skillPack.hackDevice) // 聚能状态下攻击附加击退效果，骇入不造成伤害或位移。
             {
                 SpaceBombEffect(skillPack, attacker, target, targetPos, true); // 去除假死
                 // 如果没有击退效果则添加默认击退效果，如果有击退效果则不添加
@@ -253,7 +254,7 @@ public partial class BattleManager : MonoBehaviour
             }
 
             // 排队到击退落点与碰撞结算后再判定夹击。
-            CheckFlankAttack(attacker, target);
+            if (!skillPack.hackDevice) CheckFlankAttack(attacker, target);
         }
 
         foreach (var buffPack in skillPack.buffPacks)

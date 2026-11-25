@@ -6,6 +6,7 @@ using System.Collections.Generic;
 public sealed class SkillLoadoutState
 {
     public bool initialized; // 区分旧存档和玩家主动清空的技能配置。
+    public bool adultGreenHackGranted; // 旧存档只补发一次，之后尊重玩家的配置。
     public List<string> learned = new();
     public List<string> equipped = new();
 
@@ -14,10 +15,21 @@ public sealed class SkillLoadoutState
     {
         learned ??= new List<string>();
         equipped ??= new List<string>();
-        if (initialized || data?.skillLibrary == null) return;
+        if (data?.skillLibrary == null) return;
+        if (initialized)
+        {
+            if (data.pieceId == 102 && !adultGreenHackGranted)
+            {
+                const string hackId = SkillPack.AdultGreenHackId;
+                if (data.initialSkillIds != null && data.initialSkillIds.Contains(hackId) && Learn(hackId, data.skillLibrary, true))
+                    adultGreenHackGranted = true;
+            }
+            return;
+        }
         foreach (string id in data.initialSkillIds ?? new List<string>())
             if (data.skillLibrary.GetById(id) != null && !learned.Contains(id)) { learned.Add(id); equipped.Add(id); }
         initialized = true;
+        if (data.pieceId == 102 && learned.Contains(SkillPack.AdultGreenHackId)) adultGreenHackGranted = true;
     }
 
     /// <summary>学习技能库中的技能；可选择立即加入配置，不重复学习或装配。</summary>
