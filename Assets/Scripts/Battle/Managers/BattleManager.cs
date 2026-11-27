@@ -14,6 +14,8 @@ using Random = UnityEngine.Random;
 
 public partial class BattleManager : MonoBehaviour
 {
+    /// <summary>仅挂载于空间站训练副本的流程；其他战斗保持原规则。</summary>
+    public SpaceStationTrainingController Training { get; private set; }
     public AIController AIController;
     public PlayerController PlayerController;
     [FormerlySerializedAs("camera")] public CameraController cameraController;
@@ -80,8 +82,11 @@ public partial class BattleManager : MonoBehaviour
             _timedMemeStatuses?.ClearAll();
             ClearNetworkConnections();
             characterSkillManager.ClearAllRegistry();
+            Training = GetComponent<SpaceStationTrainingController>();
+            Training?.PrepareBattle(this);
             PlayerController.Init();
             AIController.Init();
+            Training?.InitializeBattle();
             ApplySetting(GM.Ins.battleSetting); // 在完成所有棋子初始化以后，更新预设
             _delaySkillPack = null;
             delayAction = null;
@@ -130,6 +135,7 @@ public partial class BattleManager : MonoBehaviour
     /// <summary>兼容旧交棒事件，标记结束当前棋子；实际切换由调度器等待动画与移动完成后执行。</summary>
     public void ChangeTurn()
     {
+        if (Training != null && Training.RestrictsCommands && ActivePiece != null && ActivePiece.isPlayerPiece && !Training.AllowsAction(ActivePiece, ActionType.Wait)) return;
         if (SpeedTurnsActive && ActivePiece != null) finishPieceTurn = true;
     }
 
@@ -326,6 +332,7 @@ public partial class BattleManager : MonoBehaviour
         }
 
         Debug.Log($"判定敌人棋子全灭：{allEnemyDead}");
+        if (allEnemyDead && Training != null && Training.HoldVictory()) allEnemyDead = false;
         if (allEnemyDead)
         {
             PlayerWin();

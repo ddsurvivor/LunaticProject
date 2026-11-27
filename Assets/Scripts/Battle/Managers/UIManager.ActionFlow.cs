@@ -5,6 +5,8 @@ using UnityEngine;
 public partial class UIManager
 {
     private PieceController actionActor;
+    /// <summary>行动选点或已提交动作仍在协调，头像查看和默认选择恢复应等待其结束。</summary>
+    public bool HasActionFlow => actionActor != null;
     private Func<ActionResourceCost> selectionCost;
     private readonly List<ActionCostPreviewUI> selectionViews = new();
     private bool actionCommitted; // 确认扣费后只等待执行结束，不再展示待消耗费用。
@@ -102,6 +104,7 @@ public partial class UIManager
 
     private void LateUpdate()
     {
+        RefreshOpeningDialogueHud();
         UpdateMessageLanes();
         if (BattleScene.Ins != null && BattleScene.Ins.TM.IsPaused) return;
         if (MemeLoadoutPanel.IsOpen) return;
@@ -138,5 +141,5 @@ public partial class UIManager
         if (battle.CanControlPiece(actor)) scene.CM.SelectActivePiece(actor);
     }
 
-    private void OnDisable() { ClearTransientMessages(); ClearActionFlow(); }
+    private void OnDisable() { SetOpeningDialogueHudHidden(false); ClearTransientMessages(); ClearActionFlow(); }
 }

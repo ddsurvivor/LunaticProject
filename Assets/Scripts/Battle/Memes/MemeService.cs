@@ -28,6 +28,9 @@ public sealed class MemeService
     private readonly BattleManager battle;
     private readonly MemeResolver resolver;
     private readonly Dictionary<string, IMemeEffectHandler> handlers = new(StringComparer.Ordinal);
+    /// <summary>本关教学可临时访问目标词条，永久解锁档案不因此改变。</summary>
+    public MemeProgress EquipmentProgress => battle.Training != null
+        ? battle.Training.EquipmentProgress(GM.Ins?.PLAYERPROFILE?.memeProgress) : GM.Ins?.PLAYERPROFILE?.memeProgress;
     public MemeCatalogSO Catalog => battle.memeCatalog != null ? battle.memeCatalog : GM.Ins?.DM?.MemeCatalog;
 
     /// <summary>完成单个词条判定和效果提交后通知；预览不发送该事件。</summary>
@@ -57,7 +60,7 @@ public sealed class MemeService
     {
         var sources = new List<MemeSource>();
         if (actor == null || skill == null) return new MemeActionContext(sources, isReaction, isPreview ? null : new BattleActionContext(actor, skill, isReaction));
-        var progress = GM.Ins?.PLAYERPROFILE?.memeProgress;
+        var progress = EquipmentProgress;
         var slots = actor.playerData?.memeSlots;
         if (slots != null)
             for (int i = 0; i < Math.Min(slots.Length, MemeEquipment.SlotCount); i++)
@@ -92,7 +95,8 @@ public sealed class MemeService
             battle.PlayerController == null || !battle.PlayerController.pieces.Contains(actor) || actor.IsUsingSkill ||
             battle.HasExternalPlayerControl)
         { error = "当前角色不能配置模因"; return false; }
-        var progress = GM.Ins?.PLAYERPROFILE?.memeProgress;
+        if (battle.Training?.AllowsEquipment(actor, slots) == false) { error = "请按教学装备屠龙术，保留其他槽位。"; return false; }
+        var progress = EquipmentProgress;
         if (!MemeEquipment.Validate(Catalog, progress, slots, out error)) return false;
         if (MemeEquipment.SameSlots(actor.playerData.memeSlots, slots)) { error = "模因配置没有变化"; return false; }
         // 先快照整套配置，再调用已有费用入口；行动中断保留其正常扣费语义。
@@ -100,6 +104,7 @@ public sealed class MemeService
         if (!actor.unitAttrCenter.CostMP(MemeEquipment.BattleEquipCost, true))
         { error = "行动点不足或配置行动被状态中断"; return false; }
         actor.playerData.memeSlots = replacement;
+        battle.Training?.OnMemeEquipped(actor);
         return true;
     }
 

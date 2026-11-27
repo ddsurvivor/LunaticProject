@@ -36,6 +36,7 @@ public class AudioManager : SerializedMonoBehaviour
 
     // 【优化 2：简单的对象池】彻底消除 new GameObject 和 Destroy 带来的 GC
     private List<AudioSource> _sePool = new List<AudioSource>();
+    private readonly Dictionary<AudioSource, ClipLoopHandle> clipLoops = new(); // 直接切片循环独占池槽，不以素材名称共享所有权。
     private int _initPoolSize = 15; // 初始池大小
 
     // 【优化 3：记录循环音效】直接记录 AudioSource 引用，抛弃复杂的 List<GameObject>
@@ -71,8 +72,8 @@ public class AudioManager : SerializedMonoBehaviour
     {
         foreach (var source in _sePool)
         {
-            // 只要没有在播放，就认为它是空闲可复用的 (无需 Destroy)
-            if (!source.isPlaying) 
+            // 独占循环即使暂时未发声也不能被其他音效抢占，必须先释放句柄。
+            if (!source.isPlaying && !clipLoops.ContainsKey(source))
                 return source;
         }
         
@@ -177,7 +178,7 @@ public class AudioManager : SerializedMonoBehaviour
                 if (isLoopSE) 循环音效字典[audioName] = seSource;
                 
                 // 注意：播放单次 SE 再也不需要开启协程去等待它播放完毕然后清理了！
-                // 因为我们的对象池逻辑只认 `!source.isPlaying`，它播完自动就变成了可用状态！
+                // 单次音效播完自动成为空闲源；独占循环必须显式释放句柄。
             }
         };
 
@@ -331,6 +332,8 @@ public class AudioManager : SerializedMonoBehaviour
             }
         }
         循环音效字典.Clear();
+        foreach (var handle in clipLoops.Values) handle.Invalidate();
+        clipLoops.Clear();
     }
 
     /// <summary>停止背景音乐，并取消待加载的音乐请求。</summary>
@@ -405,5 +408,47 @@ public class AudioManager : SerializedMonoBehaviour
         seSource.volume = SE音量;
         seSource.loop = false;
         seSource.Play();
+    }
+
+    /// <summary>直接切片循环的独占句柄；停止只释放自身播放，全局停止后的旧句柄不能影响已复用池槽。</summary>
+    public sealed class ClipLoopHandle
+    {
+        internal AudioSource Source;
+        private AudioManager owner;
+
+        internal ClipLoopHandle(AudioManager manager, AudioSource source) { owner = manager; Source = source; }
+
+        /// <summary>立即停止本句柄的循环，不补播尾音；可重复调用。</summary>
+        public void Stop()
+        {
+            if (owner != null) owner.StopClipLoop(this);
+            Invalidate();
+        }
+
+        internal void Invalidate() { owner = null; Source = null; }
+    }
+
+    /// <summary>循环播放已加载切片；调用方持有句柄并在移动结束时停止，切场景和StopAll统一取消。</summary>
+    public ClipLoopHandle PlayClipLoop(AudioClip clip)
+    {
+        if (_isDestroyed || isSceneTransitioning || clip == null) return null;
+        var source = GetAvailableSESource();
+        var handle = new ClipLoopHandle(this, source);
+        clipLoops.Add(source, handle);
+        source.clip = clip;
+        source.volume = SE音量;
+        source.loop = true;
+        source.Play();
+        return handle;
+    }
+
+    private void StopClipLoop(ClipLoopHandle handle)
+    {
+        var source = handle.Source;
+        if (source == null || !clipLoops.TryGetValue(source, out var current) || !ReferenceEquals(current, handle)) return;
+        source.Stop();
+        source.loop = false;
+        source.clip = null;
+        clipLoops.Remove(source);
     }
 }

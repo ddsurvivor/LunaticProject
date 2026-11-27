@@ -12,19 +12,22 @@ public partial class BattleManager
     public PieceController ActivePiece { get; private set; }
     /// <summary>速度回合调度是否已启动，供输入和速度条 UI 判断生命周期。</summary>
     public bool SpeedTurnsActive { get; private set; }
-    /// <summary>返回速度条显示进度；当前行动者固定显示 100，其余读取队列进度。</summary>
-    public float ActionProgress(PieceController piece) => piece == ActivePiece ? 100 : (float)speedQueue.Progress(piece);
-    /// <summary>速度条只读排序入口；当前行动者优先，其余使用真实队列的就绪顺序及稳定注册次序。</summary>
+    /// <summary>当前行动者和聚能参与者显示100，其他角色读取普通队列进度；不改写队列。</summary>
+    public float ActionProgress(PieceController piece) => piece == ActivePiece || IsBurstActor(piece) ? 100 : (float)speedQueue.Progress(piece);
+    /// <summary>速度条只读排序：当前行动者、聚能主角、其余普通队列；不消费或推进普通进度。</summary>
     public int CompareActionOrder(PieceController a, PieceController b)
     {
         if (a == b) return 0;
         if (a == ActivePiece) return -1;
         if (b == ActivePiece) return 1;
+        bool leftBurst = IsBurstActor(a), rightBurst = IsBurstActor(b);
+        if (leftBurst != rightBurst) return leftBurst ? -1 : 1;
+        if (leftBurst) return selectedBurstActors.IndexOf(a).CompareTo(selectedBurstActors.IndexOf(b));
         return speedQueue.CompareDisplayOrder(a, b);
     }
     /// <summary>统一校验玩家能否操作该棋子，包含回合归属、AP、控制状态及动作等待限制。</summary>
     public bool CanControlPiece(PieceController piece) => SpeedTurnsActive && inBattle && !BattleScene.Ins.TM.IsPaused &&
-        !BurstInputPending && PlayerController.isInTurn && piece != null && piece == ActivePiece &&
+        (Training == null || Training.AllowsActor(piece)) && !BurstInputPending && PlayerController.isInTurn && piece != null && piece == ActivePiece &&
         IsSpeedParticipant(piece) && !piece.cantControl && !BattleRelations.IsBehaviorControlled(piece) && !piece.isIdle && piece.unitAttrCenter.CurMovePoint > 0 &&
         !HasCombatPresentation && !moveManager.IsMoving;
 
@@ -86,11 +89,12 @@ public partial class BattleManager
         yield return null;
         while (SpeedTurnsActive && inBattle)
         {
-            if (BattleScene.Ins.TM.IsPaused || HasCombatPresentation || moveManager.IsMoving) { yield return null; continue; }
+            if (BattleScene.Ins.TM.IsPaused || HasCombatPresentation || moveManager.IsMoving || Training?.BlocksTurnAdvance == true) { yield return null; continue; }
             AIController.RefreshSpeedTurnWorld();
             speedQueue.Sync(SpeedParticipants());
             // 优先处理已满条的棋子，队列无就绪单位时才推进速度时钟。
-            var next = speedQueue.TakeReady();
+            var next = Training != null ? Training.TakeOpeningActor() : null;
+            next ??= speedQueue.TakeReady();
             if (next == null)
             {
                 PlayerCheckWin();
@@ -133,6 +137,7 @@ public partial class BattleManager
                 if (manual)
                 {
                     PlayerController.BeginPieceTurn(next);
+                    Training?.OnPieceTurnStarted(next);
                     BattleScene.Ins.CM.SelectActivePiece(next);
                 }
                 else if (next is EnemyController enemy) AIController.BeginEnemyPieceTurn(enemy);
@@ -149,7 +154,7 @@ public partial class BattleManager
             while (inBattle && IsSpeedParticipant(next) && !finishPieceTurn &&
                    !next.isIdle && !next.cantControl && next.unitAttrCenter.CurMovePoint > 0)
             {
-                if (BattleScene.Ins.TM.IsPaused) { yield return null; continue; }
+                if (BattleScene.Ins.TM.IsPaused || Training?.BlocksTurnAdvance == true) { yield return null; continue; }
                 if (burstRequested) yield return BurstInterruption(next);
                 else yield return null;
             }
@@ -157,7 +162,7 @@ public partial class BattleManager
             if (burstRequested && inBattle) yield return BurstInterruption(next);
             PlayerController.isInTurn = false;
             AIController.isInTurn = false;
-            while (inBattle && (BattleScene.Ins.TM.IsPaused || HasCombatPresentation || moveManager.IsMoving)) yield return null;
+            while (inBattle && (BattleScene.Ins.TM.IsPaused || HasCombatPresentation || moveManager.IsMoving || Training?.BlocksTurnAdvance == true)) yield return null;
             if (!inBattle) yield break;
             BattleScene.Ins.CM.ClearTurnSelection();
             if (_delaySkillCaster == next) HandleDelaySkill();

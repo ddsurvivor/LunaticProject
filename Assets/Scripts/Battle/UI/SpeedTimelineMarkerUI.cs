@@ -13,8 +13,10 @@ public sealed class TurnPortraitFraming
     private bool ShowContentRect => useOverride && !useFullSpriteRect;
 }
 
-public sealed class SpeedTimelineMarkerUI : MonoBehaviour
+public sealed class SpeedTimelineMarkerUI : MonoBehaviour, UnityEngine.EventSystems.IPointerClickHandler
 {
+    private PieceController boundUnit;
+    private System.Action<PieceController> selectUnit;
     [SerializeField] private UnityEngine.UI.Image portrait;
     [SerializeField] private RectTransform portraitViewport;
     [SerializeField] private UnityEngine.UI.Text missingPortrait;
@@ -34,6 +36,22 @@ public sealed class SpeedTimelineMarkerUI : MonoBehaviour
     private Vector2 cachedOffset;
     private UnityEngine.UI.Text overflowText; // 满条后的额外进度，避免挤压布局隐藏真实数值。
     private static readonly System.Collections.Generic.Dictionary<Sprite, Rect> boundsCache = new();
+
+    /// <summary>绑定头像点击目标；根背景接收射线，裁切头像及装饰保持原显示规则。</summary>
+    public void BindSelection(PieceController piece, System.Action<PieceController> onSelect)
+    {
+        boundUnit = piece;
+        selectUnit = onSelect;
+        var surface = GetComponent<UnityEngine.UI.Graphic>();
+        if (surface != null) surface.raycastTarget = true;
+    }
+
+    /// <summary>左键点击由选择协调器校验生命周期和操作占用，再选中并聚焦该单位。</summary>
+    public void OnPointerClick(UnityEngine.EventSystems.PointerEventData eventData)
+    {
+        if (eventData.button == UnityEngine.EventSystems.PointerEventData.InputButton.Left && isActiveAndEnabled)
+            selectUnit?.Invoke(boundUnit);
+    }
 
     /// <summary>供预制体生成器绑定头像、独立裁切窗口、缺图提示和蒙版外的状态装饰。</summary>
     public void Configure(UnityEngine.UI.Image face, UnityEngine.UI.Image accent, GameObject highlight,

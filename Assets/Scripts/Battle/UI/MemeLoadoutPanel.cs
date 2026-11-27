@@ -74,12 +74,12 @@ public sealed partial class MemeLoadoutPanel : MonoBehaviour
     /// <summary>查看并尝试放入当前草稿槽；锁定、重复或无效词条保留原草稿并展示失败原因。</summary>
     public void SelectMeme(int id)
     {
-        if (!Current) return;
+        if (!Current || battle?.Training?.AllowsMeme(actor, id) == false) return;
         inspectedId = id;
         var candidate = (int[])draft.Clone();
         candidate[selectedSlot] = id;
         if (id == 0) { draft[selectedSlot] = 0; message = null; Refresh(); return; }
-        if (!MemeEquipment.Validate(catalog, profile.memeProgress, candidate, out message)) { Refresh(); return; }
+        if (!MemeEquipment.Validate(catalog, battle != null ? battle.memeService.EquipmentProgress : profile.memeProgress, candidate, out message)) { Refresh(); return; }
         draft[selectedSlot] = id;
         message = null;
         Refresh();
@@ -106,7 +106,8 @@ public sealed partial class MemeLoadoutPanel : MonoBehaviour
     {
         if (!ReferenceEquals(GM.Ins?.PLAYERPROFILE, profile)) return "存档已切换，请重新打开。";
         if (!MemeEquipment.SameSlots(player.memeSlots, original)) return "配置已由其他入口更新，请重新打开。";
-        if (!MemeEquipment.Validate(catalog, profile.memeProgress, draft, out var error)) return error;
+        if (battle?.Training?.AllowsEquipment(actor, draft) == false) return "请按教学装备屠龙术，保留其他槽位。";
+        if (!MemeEquipment.Validate(catalog, battle != null ? battle.memeService.EquipmentProgress : profile.memeProgress, draft, out var error)) return error;
         if (MemeEquipment.SameSlots(player.memeSlots, draft)) return "配置没有变化。";
         if (battle != null && (!battle.CanControlPiece(actor) || battle.HasExternalPlayerControl || actor.IsUsingSkill)) return "仅当前可操作角色能确认战内换装。";
         if (battle != null && actor.unitAttrCenter.CurMovePoint < MemeEquipment.BattleEquipCost) return "行动点不足，确认需要2 AP。";

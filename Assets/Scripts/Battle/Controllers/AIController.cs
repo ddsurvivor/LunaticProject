@@ -97,7 +97,7 @@ public partial class AIController : PlayerController
         if (BattleScene.Ins != null && BattleScene.Ins.TM != null && BattleScene.Ins.TM.IsPaused) return;
         var battle = BattleScene.Ins.BM;
         if (UpdateBehaviorControl(battle)) return;
-        if (battle.BurstInputPending || !isInTurn || !battle.SpeedTurnsActive || battle.HasCombatPresentation || battle.moveManager.IsMoving) return;
+        if (battle.Training?.BlocksTurnAdvance == true || battle.BurstInputPending || !isInTurn || !battle.SpeedTurnsActive || battle.HasCombatPresentation || battle.moveManager.IsMoving) return;
         if (!(battle.ActivePiece is EnemyController enemy)) return;
         _timer += Time.deltaTime;
         if (_timer < _actionInterval) return;
@@ -497,7 +497,6 @@ public partial class AIController : PlayerController
             previousPositions[piece] = origin;
             piece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
             piece.CheckFace(destination - origin);
-            piece.PlayAudio(ActionType.Move);
         });
     }
 

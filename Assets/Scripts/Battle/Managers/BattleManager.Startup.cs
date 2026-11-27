@@ -4,12 +4,15 @@ using UnityEngine;
 
 public partial class BattleManager
 {
-    private enum StartupPhase { Ready, Deployment, Sweeping, Introduction, Active, Cancelled }
+    private enum StartupPhase { Ready, Deployment, Sweeping, Introduction, OpeningDialogue, Active, Cancelled }
     private StartupPhase startupPhase;
     private bool startupInitialized, startupInitializing, startupRequested;
     private int startupVersion;
     // 一个句柄覆盖开始前等待与整场巡视，不再另建计时 Tween 推测巡视结束。
     private Coroutine sweepCoroutine;
+
+    /// <summary>开场剧情尚未完全关闭，此时隐藏战斗HUD且不启动正式回合。</summary>
+    public bool IsPlayingOpeningDialogue => startupPhase == StartupPhase.OpeningDialogue;
 
     private void ResetBattleStartup()
     {
@@ -100,10 +103,24 @@ public partial class BattleManager
     public void CompleteBattleIntroduction()
     {
         if (!isActiveAndEnabled || !inBattle || startupPhase != StartupPhase.Introduction) return;
-        startupPhase = StartupPhase.Active;
+        startupPhase = StartupPhase.OpeningDialogue;
+        int version = startupVersion;
+        SetOpeningDialogueHudHidden(true);
         GM.Ins.BeginBattleRules(this);
+        // 阅读器完全关闭后才开战；空剧本与自动测试通过同一回调立即继续。
+        if (battleDialogueManager != null)
+            battleDialogueManager.TriggerBattleStart(() => CompleteOpeningDialogue(version));
+        else CompleteOpeningDialogue(version);
+    }
+
+    private void CompleteOpeningDialogue(int version)
+    {
+        var scene = BattleScene.Ins;
+        if (scene == null || scene.BM != this || !isActiveAndEnabled || !inBattle ||
+            startupVersion != version || !IsPlayingOpeningDialogue) return;
+        startupPhase = StartupPhase.Active;
+        SetOpeningDialogueHudHidden(false);
         if (!SuppressExternalPresentation) BattleScene.Ins.UM.battleStartUIPanel?.PlayBattleStartAnimation(1f);
-        battleDialogueManager?.TriggerBattleStart();
         // 对话触发器也可能要求退出/重新初始化场景。
         if (isActiveAndEnabled && inBattle && startupPhase == StartupPhase.Active) PlayerStart();
     }
@@ -126,11 +143,18 @@ public partial class BattleManager
 
     private void CancelBattleStartup()
     {
-        StopSpeedTurns();
         startupPhase = StartupPhase.Cancelled;
+        StopSpeedTurns();
+        SetOpeningDialogueHudHidden(false);
         EndDeploymentSession();
         StopBattleSweep();
         SetSkipVisible(false);
+    }
+
+    private void SetOpeningDialogueHudHidden(bool hidden)
+    {
+        var scene = BattleScene.Ins;
+        if (scene != null && scene.BM == this) scene.UM?.SetOpeningDialogueHudHidden(hidden);
     }
 
     private void SetSkipVisible(bool visible)

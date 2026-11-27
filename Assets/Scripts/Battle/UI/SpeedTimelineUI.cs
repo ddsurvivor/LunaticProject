@@ -78,6 +78,7 @@ public sealed class SpeedTimelineUI : MonoBehaviour
                 if (sprite == null && piece.pieceDisplay != null && piece.pieceDisplay.pieceSpriteRenderer != null)
                     sprite = piece.pieceDisplay.pieceSpriteRenderer.sprite;
                 marker.BindPortrait(sprite, fullBody, piece.pieceData?.turnPortraitFraming);
+                marker.BindSelection(piece, SelectPortrait);
                 markers.Add(piece, marker);
             }
             bool active = battle.ActivePiece == piece;
@@ -87,6 +88,12 @@ public sealed class SpeedTimelineUI : MonoBehaviour
             if (active) marker.Rect.SetAsLastSibling();
         }
         LayoutLane(participants, markerScale);
+    }
+
+    private void SelectPortrait(PieceController piece)
+    {
+        var scene = BattleScene.Ins;
+        if (scene != null && scene.BM == battle) scene.CM?.TrySelectPortraitUnit(piece);
     }
 
     private void LayoutLane(List<PieceController> participants, float markerScale)

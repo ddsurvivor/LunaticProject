@@ -16,9 +16,35 @@ B71（2026-11-22）：区域、扇形、弧形及手雷范围瞄准时按住左�
 
 最新覆盖：B47左下Buff格子26×26、间距2；B48头顶锚点及顶部HUD横向避让；B50教程使用独立暂停；B51仅BattleScene无CG背景为黑色alpha0.20；B52共享头顶及护盾变体宽120；B53技能瞄准线0.09，普通范围/移动落点0.045。
 
-B54白色最小伤害区间与黄色额外区间呼吸、B55命中/伤害预览上移、B56敌方红血条均待实现。下面模块清单内的“红黄预览”和旧Enemy/DamagePreview配色是原实现记录，后续按[开发计划](../开发计划.md)覆盖；不能将颜色常数登记视为游戏接入完成。
+B54/B55（2026-11-27）：`DamagePreviewFillAnimation`共用于共享头顶（含护盾）和旧HpBarUI。确定扣除的区段使用DamagePreviewMinimum白色，额外可能扣除的区段使用DamagePreviewMaximum黄色，按当前生命截断；黄色沿已确认样式以1.8秒周期在0.18–1透明度间呼吸，持续刷新不重启相位，隐藏/生命复用时清除。真实血条保持阵营色及原伤害动画。
+
+命中/伤害预览由正式`HitInfoPanel.UpdateDisplay`计算；头顶卡片复制并同步已有文本、图标，不重算伤害。原脚底图形通过CanvasGroup隐藏，保留目标高亮取消及血条快照生命周期；只读副本不持有旧血条清理权限。副本锚定卡片顶边上方6像素，最多两列（总宽160像素），图标14像素、文字有效10–13像素，并随Canvas比例补偿字形采样。卡片展开、移动、镜头和既有遮挡规则统一驱动；保持B68固定锚点规则，密集目标不自动避让，屏幕边缘允许裁切。没有修改实际受伤飘字。
+
+B54/B55通过双程序集编译和51项隔离Unity检查，实际渲染截图与边界见[结果](../验收和结果.md)。尚未完成正式关卡手动操作及Player验收。下文“红黄预览”和旧Enemy/DamagePreview配色为历史记录，以本更新及B70为准；B56已由B70覆盖。
+
+## 默认选择与头像聚焦（B82）
+
+2026-11-27：`ClickManager.UnitSelection`统一普通默认选择与头像入口。速度条每个有效参战者头像根背景接收左键点击，头像裁切/装饰本身仍不拦截射线；`SpeedTimelineMarkerUI`绑定当前单位，回调由所属速度条确认同一BattleManager后交给`TrySelectPortraitUnit`。左下`PieceInfoPanel.head`首次接入按钮，重复刷新不叠加监听，保留原按钮事件；点击读取当前显示的角色。
+
+当前可行动者显示行动菜单；普通非行动者（含敌人）仅选中、查看详情和聚焦，不改ActivePiece、不授予AP或行动权。敌人详情沿已有状态面板，左下信息仍遵守只显示玩家的原规则。聚能合格队友经正式TrySelectBurstActor请求切换，安全交接后才变更行动者，不额外扣费或补AP。死亡、停用、未唤醒及丢失目标不接受头像选中。
+
+右键取消/空白点击回到当前可行动者；头像临时查看关闭或目标失效后恢复，选择丢失时补回。普通回合交棒沿原SelectActivePiece刷新；不逐帧重设镜头，手动平移保持。技能/指令瞄准、移动选点、HasActionFlow协调、移动执行/战斗表现、暂停/窗口、模因页、聚能交接、外部控制和转场期间头像及自动恢复让出控制。UI命中即停止世界左键处理，不依赖Selectable焦点，避免头像点击同时提交下方的移动。
+
+头像聚焦调用原CameraController.SetFollow，沿现有Cinemachine优先级与跟随链路，不改镜头缩放/阻尼。金色行动强调仍只指示当前行动者，临时查看不改变队列顺序。60项隔离Play Mode检查及双程序集编译通过，含原生GraphicRaycaster、Cinemachine位置、正式聚能切换、临时查看/恢复、生命周期与HUD回调幂等；正式关卡、物理输入、完整瞄准和Player待用户验收，证据见结果页。
 
 ## 模板与手调
+
+B77装置影响范围由`ClickManager.DeviceRange`接入既有悬停入口，独立复用`BattleRangeStyle`世界圆环，不占用`RangeUI`的技能/移动状态。显示规则、颜色及水平截面边界见[场景装置](场景装置.md)。
+
+### 战前布置模板（B81 / U22）
+
+2026-11-27用户单项授权U22，不恢复B35其余面板批量迁移。`BattleDeploymentController`保留独立Canvas（sortingOrder=150），加载`Assets/Resources/UI/BattleDeploymentPanel.prefab`；可在其`Deployment Panel Prefab`指定变体。该组件由BattleManager自动接入，已有场景无需逐个重存；要保存自定义引用，可在BattleManager宿主预挂同一组件并指定模板。
+
+模板保留AVG Panel/Header/Button的真实嵌套连接及共享字体。顶部标题、当前棋子与操作反馈分开；宽度按屏幕锚点伸缩，1920×1080参考缩放宽高匹配0.5。背景只在面板范围内拦截射线，不遮挡整个战场，不添加EventSystem或暂停持有者。确认沿原`BattleManager.ConfirmDeployment → ValidateAll → End → StartBattle`；拖拽时按钮不可交互且alpha0.4，结束恢复1。导航采样、区域占地/碰撞、拖拽提交与取消回退方法未改。
+
+可在Prefab Mode调整Panel/Header、Selection/Status文字、ConfirmDeployment位置/尺寸和字体，保留BattleDeploymentPanel的四个绑定。运行时只更新姓名、状态、按钮interactable和确认CanvasGroup alpha；不重建层级或改写字号/锚点。模板事件保留，Bind只移除本实例上一次绑定的监听。结束/禁用立即隐藏并释放实例，恢复原战斗按钮状态；无部署区与重开回退仍走原流程。
+
+59项隔离Play Mode检查及双程序集编译通过，960×540、1280×720、1920×1080、1280×1024实际渲染复核；夹具使用真实部署控制器、区域和NavMesh及正式Deployment partial，外围角色/开战后流程替身。两轮截图、复现步骤、未覆盖边界见结果页；正式关卡/物理输入、原场景遮挡和Player待验收。
 
 ### 哪些已经是正式模板
 
@@ -27,6 +53,7 @@ B54白色最小伤害区间与黄色额外区间呼吸、B55命中/伤害预览�
 | 敌我头顶卡片 | `Assets/Resources/UI/PieceOverheadStatus.prefab`；`BattleOverheadStatusLayer.CreateView` 实例化，敌我共用同一模板 | 可编辑层级、RectTransform、文字字号及图形；可创建 Prefab Variant，在 UIManager 的 `Overhead Status Prefab` 中指定 |
 | 头顶共享外观 | `Assets/Resources/UI/BattleHealthBarStyle.asset` | 调整 AVG 面板 sprite、字体、九宫格倍率；模板关闭 `Apply Shared Style` 后可独立调整外观 |
 | 速度条 | `Assets/Resources/UI/SpeedTimeline.prefab`，由 `SpeedTimelineUI` 创建 | 可调整轨道、模板头像、字体及外观；角色顺序、头像位置/数量/密集缩放由运行数据控制，本轮未对其做完整变体调参矩阵 |
+| 战前布置 U22 | `Assets/Resources/UI/BattleDeploymentPanel.prefab`，部署控制器实例化到独立Canvas | 嵌套AVG模块，可编辑层级/字体/锚点并创建Variant；动态内容及拖拽确认状态由组件控制 |
 | 设置窗口 | `Assets/Prefab/UI/SettingPanel.prefab`；战斗复用窗口实例或指定 prefab | 使用现有 prefab；战斗会适配关闭按钮和暂停，不能把这部分业务行为当成纯静态布局 |
 | B35 其余窗口 | 暂停、结果回退、模因换装、状态详情等仍含运行时代码生成结构 | 尚未全部改为共享 prefab；不能保证这些窗口已具备与头顶模板相同的手调能力，见面板清单逐项迁移 |
 
@@ -86,7 +113,7 @@ GUID 直接引用不等于运行时实例数量，也不展开 prefab 继承。�
 | U19 | 教学 / 开场提示 | `TutorialUI`、`TutorialManager`；BattleScene 内嵌、`Assets/Prefab/UI/TutorialPanel.prefab`，AVG/Playing 也有直接引用 | 面板/标题/确认复用；数据和教学顺序保留 | 已读标记、首触发、完成后交还控制；不能把普通提示都判为教学关 |
 | U20 | 战斗开场 / 胜利演出 | `BattleStartUIPanel`；BattleScene、`Assets/Prefab/UI/BattleStartPanel.prefab`，AVG/Playing 也有直接引用 | 演出容器保留，文字/按钮统一；不把它替换为暂停或结果控制器 | 演出完成回调、跳过、输入占用；注意 UIManager 对其有胜利提示兼容用法 |
 | U21 | 检定面板 / 成败标识 | `Assets/Scripts/剧本/CheckDicePanel.cs`；BattleScene、`Assets/Prefab/UI/DicePanel.prefab` 等 | 保留剧情与战斗共用检定控制；外框/按钮/字体统一，骰子专用表现保留 | 检定等待和最终结算次序，不因换窗跳过确认回调 |
-| U22 | 部署面板 / 确认按钮 | `Assets/Scripts/Battle/Authoring/BattleDeploymentController.cs` 创建独立 Canvas、`DeploymentPanel/ConfirmDeployment` | 独立 Canvas 生命周期保留，面板/确认/说明复用 AVG | 部署拖放、确认、退出、无部署区回退；不能迁移到会被战斗输入锁提前隐藏的 HUD |
+| U22 | 部署面板 / 确认按钮 | `BattleDeploymentController` 独立Canvas加载`Resources/UI/BattleDeploymentPanel` | B81已接入嵌套AVG Panel/Header/Button，独立生命周期保留；待用户验收 | 部署拖放、确认、退出、无部署区回退；不能迁移到会被战斗输入锁提前隐藏的 HUD |
 | U23 | 加载 / 转场 / tips | `Assets/Scripts/UI/BattleTransitionPanel.cs`，由常驻 GM 使用；支持引用及回退 loadingPanel，`Resources/UI/LoadingTipCatalog` | 转场遮罩保持专用；tips/标题/进度条外壳统一 AVG，保留回退路径 | 异步加载完成、黑屏保护、tips冷却/分页、切换后清理；不修改实际进度与等待条件 |
 | U24 | 伤害 / 命中 / 浮动文字 | `HitInfoPanel`、`TipText`、`Assets/Prefab/UI/TipText 1.prefab`，棋子/对象池入口 | 保留专用表现、阵营和伤害语义；仅统一可读字体及色板 | 不套 Panel 边框、不拦截射线，不改变时间倍率适配或对象池租期 |
 | U25 | 移动 / 技能范围 / 目标指示 | `RangeUI` + `.Presentation.cs`、`EnemyAttackIndicator`；`Assets/Prefab/UI/RangeUI.prefab` 等 | 保留世界空间几何与范围素材；可复用色板，不能套窗口模块 | 遮挡/跨层/准星/合法性；B21/B18规则不重写，这是有理由的结构例外 |

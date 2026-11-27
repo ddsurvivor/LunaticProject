@@ -90,6 +90,7 @@ public partial class UIManager : SerializedMonoBehaviour
             var canvas = pieceInfoPanel.GetComponentInParent<Canvas>().rootCanvas;
             timeControls = BattleTimeControls.Create(canvas, this, battleSettingsPrefab, fastForwardKey, fastForwardHoldThreshold);
         }
+        RefreshOpeningDialogueHud();
     }
 
     private void Update() { HandleWindowKeys(); }
@@ -169,7 +170,7 @@ public partial class UIManager : SerializedMonoBehaviour
     }
 
     /// <summary>战斗剧情沿用已经初始化的设置入口。</summary>
-    public void OpenDialogueSettings() => timeControls?.OpenSettings();
+    public void OpenDialogueSettings() => timeControls?.OpenDialogueSettings();
 
     public void OnTurnStart()
     {
@@ -214,6 +215,6 @@ public partial class UIManager : SerializedMonoBehaviour
     
     public void ShowUndoMoveButton(bool show)
     {
-        undoMoveBtn.gameObject.SetActive(show);
+        undoMoveBtn.gameObject.SetActive(show && BattleScene.Ins.BM.Training?.RestrictsCommands != true);
     }
 }

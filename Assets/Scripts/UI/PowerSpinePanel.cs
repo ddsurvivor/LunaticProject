@@ -56,7 +56,7 @@ public sealed class PowerSpinePanel : MonoBehaviour
             var step = rules?.steps != null && level < rules.steps.Length ? rules.steps[level] : null;
             next = step == null ? "尚未配置下一等级" : $"下一级：Lv.{level + 1}　容量 {target.Capacity:0}　充能 ×{target.ChargeMultiplier:0.##}\n费用：{step.coinCost} 金币　需要章节：{step.minimumChapter}";
         }
-        details.text = $"当前等级：Lv.{level}　持有金币：{profile.coins}\n聚能容量：{current.Capacity:0}　充能倍率：×{current.ChargeMultiplier:0.##}\n\n{next}\n\n每名角色入场消耗 50；序章与教学使用基础能力。";
+        details.text = $"当前等级：Lv.{level}　持有金币：{profile.coins}\n聚能容量：{current.Capacity:0}　充能倍率：×{current.ChargeMultiplier:0.##}\n\n{next}\n\n每次聚能统一消耗 50，主角可自由切换行动；序章与教学使用基础能力。";
         string error = "尚未配置动力脊升级规则";
         upgradeButton.interactable = rules != null && rules.CanUpgrade(profile, out error);
         if (!upgradeButton.interactable) feedback.text = error;

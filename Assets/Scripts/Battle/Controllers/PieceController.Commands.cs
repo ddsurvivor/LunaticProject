@@ -32,6 +32,7 @@ public partial class PieceController
         ActionType requested = command.kind == PlayerBattleCommandKind.Move ? ActionType.Move : command.kind == PlayerBattleCommandKind.Melee ? ActionType.MeleeAttack :
             command.kind == PlayerBattleCommandKind.Ranged ? ActionType.RangedAttack : command.kind == PlayerBattleCommandKind.Skill ? ActionType.Skill :
             command.kind == PlayerBattleCommandKind.Reload ? ActionType.Reload : command.kind == PlayerBattleCommandKind.Climb ? ActionType.Climb : ActionType.Wait;
+        if (battle.Training?.AllowsAction(this, requested) == false) return BattleCommandResult.Rejected;
         bool unlocked = availableActions != null && (availableActions.Contains(requested) ||
             command.kind == PlayerBattleCommandKind.Reload && availableActions.Contains(ActionType.RangedAttack) ||
             command.kind == PlayerBattleCommandKind.Climb && availableActions.Contains(ActionType.Move));
@@ -77,6 +78,7 @@ public partial class PieceController
                 float clearance = radius + (other.GetComponent<NavMeshAgent>()?.radius ?? 0.5f);
                 if (Vector3.Distance(other.transform.position, destination) < clearance) return BattleCommandResult.Rejected;
             }
+            if (battle.Training?.AllowsMoveDestination(this, destination) == false) return BattleCommandResult.Rejected;
             if (!unitAttrCenter.CostMP(ActionType.Move)) return PaidFailure();
             StartDrag();
             CheckFace(destination - transform.position);
@@ -93,6 +95,7 @@ public partial class PieceController
         var targets = SkillTargeting.Query(this, skill, position);
         if (targets.Count == 0 && skill.target != SkillTarget.Area && skill.target != SkillTarget.Self) return BattleCommandResult.Rejected;
         var action = special ? ActionType.Skill : ranged ? ActionType.RangedAttack : ActionType.MeleeAttack;
+        if (battle.Training?.AllowsAttack(this, action, targets) == false) return BattleCommandResult.Rejected;
         if (!(special ? unitAttrCenter.TryCostSkill(skill) : unitAttrCenter.CostMP(action))) return PaidFailure();
         // 付费自伤可能解除行为状态，提交后再次校验当前关系，避免按旧敌我关系出手。
         if (targets.Count > 0 && !targets.Exists(t => SkillTargeting.IsValid(this, t, skill))) return BattleCommandResult.Interrupted;

@@ -392,6 +392,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
 
     public bool CostMP(ActionType actionType)
     {
+        if (pc.isPlayerPiece && BattleScene.Ins.BM.Training != null && !BattleScene.Ins.BM.Training.AllowsAction(pc, actionType)) return false;
         if (pc.isDead || GetBuffStacks(BuffType.Stun) != 0) return false;
         if ((actionType == ActionType.MeleeAttack || actionType == ActionType.RangedAttack || actionType == ActionType.OrbitalStrike || actionType == ActionType.GuardOrder) &&
             !BattleRelations.CanInitiateAttack(pc)) return false;
@@ -420,6 +421,8 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     /// <summary>固定费用主动行动显式传true；先扣AP再结算精确状态，致死不退AP、不执行后续动作。</summary>
     public bool CostMP(int costPoint, bool activeAction)
     {
+        if (!activeAction && pc.isPlayerPiece && BattleScene.Ins.BM.Training != null &&
+            BattleScene.Ins.BM.Training.RestrictsCommands && !BattleScene.Ins.BM.Training.AllowsAction(pc, ActionType.Wait)) return false;
         if (pc.isDead || GetBuffStacks(BuffType.Stun) != 0) return false;
         if (_curMovePoint >= costPoint)
         {
@@ -544,6 +547,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     /// <summary>普通及延迟技能共用：资源不足不扣费；行动异常中断只消耗行动点。</summary>
     public bool TryCostSkill(SkillPack skill)
     {
+        if (pc.isPlayerPiece && BattleScene.Ins.BM.Training?.AllowsAction(pc, ActionType.Skill) == false) return false;
         int manaCost = GetSkillManaCost(skill);
         if (skill == null || !BarrierEmitter.CanUse(pc, skill) || BattleRelations.IsOffensive(skill) && !BattleRelations.CanInitiateAttack(pc) || !HasMana(manaCost) ||
             !TryGetItemCosts(skill.consumeItems, out var costs) || !HasItemCosts(costs)) return false;

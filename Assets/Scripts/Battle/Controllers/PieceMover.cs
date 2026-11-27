@@ -79,7 +79,10 @@ public class PieceMover : MonoBehaviour
 
     private void Update()
     {
-        if (!isTracking || agent == null) return;
+        if (!isTracking) return;
+        if (piece == null) piece = GetComponent<PieceController>();
+        bool navigating = agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh;
+        if (!navigating) { piece?.StopMovementAudio(); return; }
 
         // 核心到达判定条件（与原先 MoveManager 一致）
         if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance) // 这里的 stoppingDistance 可结合你的扩展方法
@@ -87,6 +90,7 @@ public class PieceMover : MonoBehaviour
             if (!agent.hasPath || agent.velocity.sqrMagnitude <= 2f)
             {
                 isTracking = false;
+                piece?.StopMovementAudio();
                 
                 ClearPath(); // 到达终点后清理并隐藏路径
 
@@ -98,11 +102,16 @@ public class PieceMover : MonoBehaviour
                 {
                     BattleScene.Ins.BM.orderManager.OnUnityMoveEnd(piece);
                 }
+                return;
             }
         }
+        piece?.UpdateMovementAudio(Time.deltaTime > 0 && !agent.isStopped && agent.hasPath &&
+            agent.velocity.sqrMagnitude > .0001f && BattleScene.Ins?.BM?.IsBattleRunning == true);
     }
 
     #region 路径计算与渲染 (移植自原 MoveManager)
+
+    private void OnDisable() => piece?.StopMovementAudio();
 
     private void DrawPath(NavMeshPath path)
     {

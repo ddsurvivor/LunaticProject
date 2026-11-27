@@ -29,6 +29,7 @@ public partial class ClickManager
 
     public void ClearEnemyTargetLineInteraction()
     {
+        HideDeviceRangeInspection();
         CancelMovementPreview();
         if (outcomePreview != null) { Destroy(outcomePreview.gameObject); outcomePreview = null; }
         ClearEnemyTargetLines(true);
@@ -130,6 +131,7 @@ public partial class ClickManager
     {
         CancelMovementPreview();
         SetHoveredPiece(null);
+        HideDeviceRangeInspection();
         ClearEnemyTargetLines();
     }
 }

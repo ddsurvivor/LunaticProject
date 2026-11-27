@@ -13,6 +13,7 @@ public class MoveManager : MonoBehaviour
     private NavMeshAgent agent;
     private UnityAction onReachDestination; // 存储外部传进来的回调函数
     private bool isTracking = false;
+    private PieceController movementAudioPiece; // 当前导航的音效所有者，Agent失效后仍可清理。
     private float movementDeadline;
     public bool IsMoving => isTracking;
     public PieceController MovingPiece => isTracking && agent != null ? agent.GetComponent<PieceController>() : null;
@@ -49,11 +50,17 @@ public class MoveManager : MonoBehaviour
         }
         if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDestinationDistance() &&
             (!agent.hasPath || agent.velocity.sqrMagnitude <= 2f))
+        {
             FinishMovement(true);
+            return;
+        }
+        movementAudioPiece?.UpdateMovementAudio(Time.deltaTime > 0 && !agent.isStopped && agent.hasPath &&
+            agent.velocity.sqrMagnitude > .0001f && BattleScene.Ins?.BM?.IsBattleRunning == true);
     }
 
     private void FinishMovement(bool reached = false)
     {
+        StopMovementAudio();
         var finishedPiece = agent != null ? agent.GetComponent<PieceController>() : null;
         var callback = onReachDestination;
         isTracking = false;
@@ -63,6 +70,7 @@ public class MoveManager : MonoBehaviour
         if (finishedPiece != null) BattleScene.Ins.BM.orderManager.OnUnityMoveEnd(finishedPiece);
         callback?.Invoke();
         BattleScene.Ins.BM.CompleteUndoableMove(finishedPiece, reached);
+        BattleScene.Ins.BM.Training?.OnMovementFinished(finishedPiece, reached);
     }
 
     /*/// <summary>
@@ -432,6 +440,10 @@ public class MoveManager : MonoBehaviour
         if (movingAgent == null) return 0f;
         Vector3 target = customTargetPosition ?? lastValidPreviewPosition;
         if (float.IsInfinity(target.x) || float.IsNaN(target.x)) return 0f;
+        var movingPiece = pawnObject.GetComponent<PieceController>();
+        if (movingPiece != null && movingPiece.isPlayerPiece && BattleScene.Ins.BM.Training != null &&
+            (!BattleScene.Ins.BM.Training.AllowsAction(movingPiece, ActionType.Move) ||
+             !BattleScene.Ins.BM.Training.AllowsMoveDestination(movingPiece, target))) return 0f;
 
         // 先确认完整路径，再切换导航状态，失败时不能留下“正在移动”的锁。
         tempPath ??= new NavMeshPath();
@@ -446,6 +458,7 @@ public class MoveManager : MonoBehaviour
             return 0f;
         }
         agent = movingAgent;
+        movementAudioPiece = pawnObject.GetComponent<PieceController>();
         onReachDestination = onMoveComplete;
         isTracking = true;
         BattleScene.Ins.BM.StartUndoableMove(pawnObject.GetComponent<PieceController>(), target);
@@ -519,7 +532,15 @@ public class MoveManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        StopMovementAudio();
         if (pathMaterial != null) Destroy(pathMaterial);
+    }
+
+    private void OnDisable() => StopMovementAudio();
+
+    private void StopMovementAudio()
+    {
+        movementAudioPiece?.StopMovementAudio();
     }
 
     #region 内部辅助方法（计算长度与渲染）

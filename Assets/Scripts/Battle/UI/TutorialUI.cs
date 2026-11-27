@@ -17,6 +17,8 @@ public class TutorialUI : MonoBehaviour
     private int _currentIndex = 0;
     private string _currentLevelName;
     
+    private System.Action transientCompletion; // 关卡提示不写入已读存档，关闭后交还流程控制器。
+    private bool transientImageEnabled;
     private bool _isBattleStart = false; // 是否在战斗开始时显示教程
 
     private void Awake()
@@ -45,6 +47,7 @@ public class TutorialUI : MonoBehaviour
     {
         if (data == null || data.pages.Count == 0) return;
 
+        transientCompletion = null;
         _currentLevelName = levelName;
         _pages = data.pages;
         _currentIndex = 0;
@@ -86,13 +89,37 @@ public class TutorialUI : MonoBehaviour
         }
     }
 
+    /// <summary>显示一次关卡提示；不受永久已读标记影响，完成后回调调用方。</summary>
+    public void ShowTransient(string title, string body, System.Action onComplete, Sprite illustration = null)
+    {
+        Show(new TutorialData { pages = new List<TutorialPage> { new TutorialPage { title = title, description = body, image = illustration } } }, null);
+        transientCompletion = onComplete;
+        transientImageEnabled = displayImage.enabled;
+        displayImage.enabled = illustration != null;
+    }
+
     public void CompleteTutorial()
     {
-        GM.Ins.PLAYERPROFILE.seenTutorials.Add(_currentLevelName);
+        if (!gameObject.activeInHierarchy) return;
+        var completion = transientCompletion;
+        transientCompletion = null;
+        if (completion == null) GM.Ins.PLAYERPROFILE.seenTutorials.Add(_currentLevelName);
+        else displayImage.enabled = transientImageEnabled;
         bool battleStart = _isBattleStart;
         _isBattleStart = false;
         if (battleStart) BattleScene.Ins.BM.CompleteBattleIntroduction();
         gameObject.SetActive(false);
         GM.Ins.AM.PlayAudio(AudioCueType.Close);
+        completion?.Invoke();
+    }
+
+    private void OnDisable()
+    {
+        var completion = transientCompletion;
+        transientCompletion = null;
+        if (completion == null) return;
+        // Esc关闭也算跳过本次说明；转场回调由调用方校验所属战斗，不能推进新场景。
+        displayImage.enabled = transientImageEnabled;
+        completion.Invoke();
     }
 }

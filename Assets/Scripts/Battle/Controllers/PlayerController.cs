@@ -88,15 +88,16 @@ public class PlayerController : SerializedMonoBehaviour
         if (!wasReady && ableBurst)
         {
             GM.Ins.AM.PlayAudio(AudioCueType.ChargeFull);
-            BattleScene.Ins.BM.battleDialogueManager.TriggerBurstReady();
+            if (BattleScene.Ins.BM.Training == null) BattleScene.Ins.BM.battleDialogueManager.TriggerBurstReady();
         }
         RefreshBurstUI();
+        BattleScene.Ins.BM.Training?.OnBurstChargeChanged();
     }
 
-    /// <summary>按确认人数支付聚能费用并刷新 UI；失败时不扣费。</summary>
+    /// <summary>按有效参战人数校验后统一支付50；人数不提高费用，失败时不扣费。</summary>
     public bool SpendBurst(int actors)
     {
-        if (!burstGauge.Spend(actors)) return false;
+        if (isBursting || !burstGauge.Spend(actors)) return false;
         RefreshBurstUI();
         return true;
     }
@@ -108,7 +109,7 @@ public class PlayerController : SerializedMonoBehaviour
         RefreshBurstUI();
     }
 
-    /// <summary>开启聚能并冻结本场引信/爆炸物，重置累计伤害与入场表现；选人、支付和额外AP由调度器负责。</summary>
+    /// <summary>开启聚能并冻结本场引信/爆炸物；统一支付、全体额外AP和自由交接由调度器负责。</summary>
     public void EnterBurstMode()
     {
         isBursting = true;
@@ -136,7 +137,7 @@ public class PlayerController : SerializedMonoBehaviour
         BattleScene.Ins.BM.ReleaseBurstEffects();
     }
 
-    /// <summary>同步聚能槽、按钮可用状态与选人/退出/冷却文字。</summary>
+    /// <summary>同步聚能槽、按钮可用状态与等待/退出/冷却文字，不再显示预选人数。</summary>
     public void RefreshBurstUI()
     {
         UpdateBurstBar();
@@ -144,10 +145,10 @@ public class PlayerController : SerializedMonoBehaviour
         var button = BattleScene.Ins.UM.burstButton;
         if (button == null) return;
         button.gameObject.SetActive(true);
-        button.interactable = isBursting || battle.IsChoosingBurst || (ableBurst && battle.SpeedTurnsActive);
+        button.interactable = battle.Training?.RestrictsCommands != true && (isBursting || battle.BurstInputPending || (ableBurst && battle.SpeedTurnsActive));
         var label = button.GetComponentInChildren<UnityEngine.UI.Text>(true);
-        if (label != null) label.text = isBursting ? "结束聚能" : battle.IsChoosingBurst
-            ? $"发动聚能 ({battle.SelectedBurstCount})" : BurstCooldown > 0
+        if (label != null) label.text = isBursting ? "结束聚能" : battle.BurstInputPending
+            ? "取消聚能请求" : BurstCooldown > 0
             ? $"聚能冷却 {BurstCooldown}" : $"聚能 {burstCharge:0}/{maxBurstCharge:0}";
     }
 

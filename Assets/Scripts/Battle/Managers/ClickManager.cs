@@ -28,15 +28,6 @@ public partial class ClickManager : MonoBehaviour
     private void Update()
     {
         if (BattleScene.Ins.TM.IsPaused || BattleScene.Ins.BM.HasExternalPlayerControl || MemeLoadoutPanel.IsOpen) return;
-        // 聚能选人优先接管世界点击，避免同时触发普通选择或移动。
-        if (BattleScene.Ins.BM.IsChoosingBurst)
-        {
-            if (Input.GetMouseButtonDown(1)) BattleScene.Ins.BM.CancelBurstSelection();
-            if (Input.GetMouseButtonDown(0) && (UnityEngine.EventSystems.EventSystem.current == null ||
-                !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()))
-                BattleScene.Ins.BM.ToggleBurstActor(FindPieceUnderPointer());
-            return;
-        }
         if (BattleScene.Ins.BM.BurstInputPending) return;
         if (BattleScene.Ins.BM.HasCombatPresentation) return;
         if (!BattleScene.Ins.BM.PlayerController.isInTurn) return;
@@ -44,17 +35,9 @@ public partial class ClickManager : MonoBehaviour
         // 鼠标左键点击时发射射线检测
         if (Input.GetMouseButtonDown(0))
         {
-            // 判定是否点击到UI
-            if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
-            {
-                // 如果点击到的UI是RangUI，则不return
-                if (UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject !=
-                    null ){
-                    
-                    //Debug.LogWarning($"点击到了UI:{UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()}，return");
-                    return;
-                }
-            }
+            // 头像不依赖 Selectable 的焦点，任何 UI 射线命中都不能继续提交世界点击或移动。
+            if (UnityEngine.EventSystems.EventSystem.current != null &&
+                UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) return;
             /*if(BattleScene.Ins.UM.pieceActionListPanel.gameObject.activeInHierarchy)
             {return;}*/
             if(_selectedPiece!=null && _selectedPiece.IsUsingSkill) return;
@@ -113,18 +96,8 @@ public partial class ClickManager : MonoBehaviour
         // 点击右键取消
         if (Input.GetMouseButtonDown(1))
         {
-            ClearEnemyTargetLines(true);
-            if (_isDragging)
-            {
-                _selectedPiece.transform.position = _dragStartPos;
-                _selectedPiece.pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
-                _selectedPiece = null;
-                _isDragging = false;
-                _rangeUI.CloseRange();
-                BattleScene.Ins.BM.moveManager.ResetPreviewState();
-            }
-            BattleScene.Ins.UM.pieceActionListPanel.gameObject.SetActive(false);
-            BattleScene.Ins.UM.pieceInfoPanel.StopMpIconsBlink();
+            ClearSelection(false);
+            RestoreActiveSelection(true);
         }
         
         // 按下123的时候，按顺序切换选中的玩家棋子
@@ -147,9 +120,11 @@ public partial class ClickManager : MonoBehaviour
     public void LateUpdate()
     {
         var scene = BattleScene.Ins;
+        if (scene != null && scene.BM != null) RefreshDefaultSelection();
         if (scene == null || scene.BM == null || !scene.BM.CanInspectEnemyTargets)
         {
             SetHoveredPiece(null);
+            HideDeviceRangeInspection();
             ClearEnemyTargetLines();
             if (outcomePreview != null) outcomePreview.gameObject.SetActive(false);
             return;
@@ -157,6 +132,7 @@ public partial class ClickManager : MonoBehaviour
         bool overUI = UnityEngine.EventSystems.EventSystem.current != null &&
             UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
         SetHoveredPiece(overUI ? null : FindPieceUnderPointer());
+        UpdateDeviceRangeInspection();
         UpdateTargetLinePresentation();
         UpdateOutcomePreview();
     }
@@ -178,11 +154,12 @@ public partial class ClickManager : MonoBehaviour
         return nearest;
     }
 
-    /// <summary>交棒或进入聚能选人前清除选择、移动预览及相关操作 UI。</summary>
+    /// <summary>交棒或聚能交接前清除选择、移动预览及相关操作 UI。</summary>
     public void ClearTurnSelection() => ClearSelection(true);
 
     private void ClearSelection(bool clearMoveUndo)
     {
+        inspectingUnit = false;
         BattleScene.Ins.UM.ClearActionFlow();
         CancelMovementPreview();
         ClearEnemyTargetLines(true);
@@ -208,10 +185,16 @@ public partial class ClickManager : MonoBehaviour
 
     private void ClickPieceByIndex(int index)
     {
+        if (BattleScene.Ins.BM.Training?.RestrictsCommands == true) return;
         var playerPieces = BattleScene.Ins.BM.PlayerController.pieces;
         if (index < playerPieces.Count)
         {
             var piece = playerPieces[index];
+            if (BattleScene.Ins.BM.PlayerController.isBursting && piece != BattleScene.Ins.BM.ActivePiece)
+            {
+                BattleScene.Ins.BM.TrySelectBurstActor(piece);
+                return;
+            }
             if (!BattleScene.Ins.BM.CanControlPiece(piece)) return;
             CancelMovementPreview();
             ClearEnemyTargetLines(true);
@@ -229,12 +212,18 @@ public partial class ClickManager : MonoBehaviour
     private void ClickPiece()
     {
         var piece = FindPieceUnderPointer();
-        if (piece == null) return;
+        if (BattleScene.Ins.BM.Training?.RestrictsCommands == true && piece != BattleScene.Ins.BM.ActivePiece) return;
+        if (piece == null) { RestoreActiveSelection(true); return; }
         CancelMovementPreview();
         ClearEnemyTargetLines(true);
         if (piece is EnemyController enemy)
         {
             PinEnemyTargetLine(enemy);
+            return;
+        }
+        if (BattleScene.Ins.BM.PlayerController.isBursting && piece != BattleScene.Ins.BM.ActivePiece)
+        {
+            BattleScene.Ins.BM.TrySelectBurstActor(piece);
             return;
         }
         if (!piece.isPlayerPiece || !BattleScene.Ins.BM.CanControlPiece(piece)) return;
@@ -263,7 +252,8 @@ public partial class ClickManager : MonoBehaviour
 
     public void StartDarg(PieceController piece)
     {
-        if (!BattleScene.Ins.BM.CanControlPiece(piece) || !piece.isPlayerPiece) return;
+        if (!BattleScene.Ins.BM.CanControlPiece(piece) || !piece.isPlayerPiece ||
+            BattleScene.Ins.BM.Training?.AllowsAction(piece, ActionType.Move) == false) return;
         CancelMovementPreview();
         ClearEnemyTargetLines(true);
         BattleScene.Ins.BM.moveManager.ResetPreviewState();
@@ -277,6 +267,7 @@ public partial class ClickManager : MonoBehaviour
         _dragRange = _selectedPiece.unitAttrCenter.MoveRange;
         _rangeUI.ShowCircleRange(_dragStartPos, _dragRange);
 
+        if (dragMove && BattleScene.Ins.BM.Training != null) dragMove = false;
         if (dragMove)
         {
             
@@ -395,6 +386,7 @@ public partial class ClickManager : MonoBehaviour
             _isDragging = false;
             BattleScene.Ins.BM.cameraController.SetFollow(_selectedPiece.transform);
             if (!BattleScene.Ins.BM.moveManager.TryGetPreviewPosition(_selectedPiece.gameObject, out var targetPos) ||
+                BattleScene.Ins.BM.Training?.AllowsMoveDestination(_selectedPiece, targetPos) == false ||
                 !_selectedPiece.unitAttrCenter.CostMP(ActionType.Move))
             {
                 _rangeUI.CloseRange();

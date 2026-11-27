@@ -49,6 +49,9 @@ public sealed class PieceOverheadStatusUI : MonoBehaviour
     private string fullTitle; // 名称未变时不重复测量字体宽度。
     [SerializeField] private ActionPointPipsUI pips;
     private readonly HealthBarFillAnimation healthAnimation = new();
+    private readonly DamagePreviewFillAnimation damagePreview = new();
+    private HitInfoPanel targetPreview;
+    private HitInfoPanel targetPreviewSource;
     [SerializeField] private List<BuffCell> cells = new();
     private List<BattleStatusEntry> entries = new();
     private int life = -1;
@@ -124,8 +127,8 @@ public sealed class PieceOverheadStatusUI : MonoBehaviour
         healthTrack = Image("HealthTrack", 16, 47, 220, 7, GameConst.UIColors.SurfaceInset);
         shadow = Image("HealthShadow", 16, 47, 220, 7, Color.white);
         bar = Image("Health", 16, 47, 220, 7, GameConst.UIColors.Health);
-        minimumPreview = Image("MinimumDamage", 16, 47, 220, 7, GameConst.UIColors.Accent);
-        maximumPreview = Image("MaximumDamage", 16, 47, 220, 7, GameConst.UIColors.DamagePreview);
+        minimumPreview = Image("MinimumDamage", 16, 47, 220, 7, GameConst.UIColors.DamagePreviewMinimum);
+        maximumPreview = Image("MaximumDamage", 16, 47, 220, 7, GameConst.UIColors.DamagePreviewMaximum);
         foreach (var fill in new[] { shadow, bar, minimumPreview, maximumPreview })
         { fill.type = UnityEngine.UI.Image.Type.Filled; fill.fillMethod = UnityEngine.UI.Image.FillMethod.Horizontal; }
         minimumPreview.gameObject.SetActive(false);
@@ -216,6 +219,7 @@ public sealed class PieceOverheadStatusUI : MonoBehaviour
         {
             life = Piece.BattleLifeVersion;
             healthAnimation.Reset();
+            damagePreview.Reset(minimumPreview, maximumPreview);
             pips.ResetPresentation();
             nextStatusRead = 0;
             layer.CloseDetails(this);
@@ -238,14 +242,16 @@ public sealed class PieceOverheadStatusUI : MonoBehaviour
         healthTrack.enabled = showHealth;
         bar.enabled = showHealth;
         shadow.enabled = showHealth;
-        minimumPreview.gameObject.SetActive(preview);
-        maximumPreview.gameObject.SetActive(preview);
+        float afterMinimum = 0, afterMaximum = 0;
         if (shieldPreview != null)
         {
-            minimumPreview.fillAmount = Mathf.Clamp01((attr.CurHealth - shieldPreview.Total.MinDamage) / (float)attr.MaxHealth);
-            maximumPreview.fillAmount = Mathf.Clamp01((attr.CurHealth - shieldPreview.Total.MaxDamage) / (float)attr.MaxHealth);
+            afterMinimum = attr.MaxHealth > 0 ? (attr.CurHealth - shieldPreview.Total.MinDamage) / (float)attr.MaxHealth : 0;
+            afterMaximum = attr.MaxHealth > 0 ? (attr.CurHealth - shieldPreview.Total.MaxDamage) / (float)attr.MaxHealth : 0;
         }
-        else if (preview) { minimumPreview.fillAmount = old.PreviewAfterMinimum; maximumPreview.fillAmount = old.PreviewAfterMaximum; }
+        else if (preview) { afterMinimum = old.PreviewAfterMinimum; afterMaximum = old.PreviewAfterMaximum; }
+        damagePreview.Update(bar, minimumPreview, maximumPreview,
+            attr.MaxHealth > 0 ? (float)attr.CurHealth / attr.MaxHealth : 0, afterMinimum, afterMaximum, preview);
+        RefreshTargetPreview();
         if (Time.unscaledTime < nextStatusRead) return;
         nextStatusRead = Time.unscaledTime + .1f;
         entries = BattleStatusReadModel.Read(Piece, battle);
@@ -260,6 +266,24 @@ public sealed class PieceOverheadStatusUI : MonoBehaviour
                 ? new BattleStatusEntry("更多状态", "+" + (entries.Count - 5), "点击查看全部状态") : entries[i];
             cells[i].SetEntry(entry);
         }
+    }
+
+    private void RefreshTargetPreview()
+    {
+        var source = (Piece as EnemyController)?.enemyCanvas?.hitInfoPanel;
+        bool visible = source != null && source.HasDisplay;
+        if (visible)
+        {
+            if (targetPreview == null || targetPreviewSource != source)
+            {
+                if (targetPreview != null) Destroy(targetPreview.gameObject);
+                targetPreview = source.CreateOverheadCopy(Rect);
+                targetPreviewSource = source;
+            }
+            targetPreview.gameObject.SetActive(true);
+            targetPreview.RefreshOverheadCopy(source);
+        }
+        else if (targetPreview != null) targetPreview.gameObject.SetActive(false);
     }
 
     private void UpdateTitle(string value)
@@ -287,7 +311,13 @@ public sealed class PieceOverheadStatusUI : MonoBehaviour
         if (gameObject.activeSelf) gameObject.SetActive(false);
         layer?.CloseDetails(this);
     }
-    private void OnDisable() { healthAnimation.Reset(); if (pips != null) pips.ResetPresentation(); }
+    private void OnDisable()
+    {
+        healthAnimation.Reset();
+        damagePreview.Reset(minimumPreview, maximumPreview);
+        if (targetPreview != null) targetPreview.gameObject.SetActive(false);
+        if (pips != null) pips.ResetPresentation();
+    }
 
     internal static RectTransform Box(string name, Transform parent, float x, float y, float width, float height)
     {

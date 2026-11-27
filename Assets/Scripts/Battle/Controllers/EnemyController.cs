@@ -52,6 +52,7 @@ public partial class EnemyController : PieceController
 
     public override void Dead()
     {
+        StopMovementAudio();
         if (HasQueuedBurstDeath) return;
         var revive = GetComponent<SelfRevive>();
         if (revive != null && revive.isFakeDead)

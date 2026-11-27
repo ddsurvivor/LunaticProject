@@ -19,11 +19,14 @@ public sealed class BattleDeploymentController : MonoBehaviour
     private NavMeshAgent dragAgent;
     private bool dragAgentUpdatePosition, dragAgentUpdateRotation, dragAgentWasStopped; // 释放后恢复导航接管状态。
     private GameObject overlay;
-    private UnityEngine.UI.Text statusText;
+    [SerializeField] private BattleDeploymentPanel deploymentPanelPrefab;
+    private BattleDeploymentPanel deploymentPanel;
+    private string status;
     private GameObject endTurnObject, burstObject;
     private bool endTurnWasActive, burstWasActive;
     private bool active;
 
+    /// <summary>开始战前布置，保留合法站位并接入独立的部署面板。</summary>
     public void Begin(BattleManager battle, BattleDeploymentArea[] deploymentAreas)
     {
         End();
@@ -42,7 +45,7 @@ public sealed class BattleDeploymentController : MonoBehaviour
             burstObject?.SetActive(false);
             ui.pieceActionListPanel?.gameObject.SetActive(false);
         }
-        BuildOverlay(ui != null && ui.turnNumberText != null ? ui.turnNumberText.font : null);
+        BuildOverlay();
         Physics.SyncTransforms();
         // 保留合法初始站位；其余棋子在所有出生区域中依次找空位。
         foreach (var piece in ControllablePieces())
@@ -245,6 +248,7 @@ public sealed class BattleDeploymentController : MonoBehaviour
     {
         if (selected != null) selected.rangeUI?.ShowSelect(false);
         selected = piece;
+        RefreshPanel();
         if (selected == null) return;
         selected.rangeUI?.ShowSelect(true);
         SetStatus($"已选择{PieceName(selected)}，按住左键拖拽，松开后部署。");
@@ -262,15 +266,22 @@ public sealed class BattleDeploymentController : MonoBehaviour
         burstObject?.SetActive(burstWasActive);
         if (overlay != null) { overlay.SetActive(false); Destroy(overlay); }
         overlay = null;
-        statusText = null;
+        deploymentPanel = null;
+        status = null;
     }
 
     private void OnDisable() => End();
     private void OnApplicationFocus(bool hasFocus) { if (!hasFocus) FinishDrag(false); }
     private static string PieceName(PieceController piece) => piece.playerData?.NAME ?? piece.name;
-    private void SetStatus(string text) { if (statusText != null) statusText.text = text; }
+    private void SetStatus(string text) { status = text; RefreshPanel(); }
 
-    private void BuildOverlay(Font font)
+    private void RefreshPanel()
+    {
+        if (deploymentPanel != null)
+            deploymentPanel.Refresh(selected != null ? PieceName(selected) : null, status, dragging);
+    }
+
+    private void BuildOverlay()
     {
         overlay = new GameObject("DeploymentUI", typeof(RectTransform), typeof(Canvas),
             typeof(UnityEngine.UI.CanvasScaler), typeof(UnityEngine.UI.GraphicRaycaster));
@@ -281,45 +292,16 @@ public sealed class BattleDeploymentController : MonoBehaviour
         var scaler = overlay.GetComponent<UnityEngine.UI.CanvasScaler>();
         scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920, 1080);
-        var panel = new GameObject("DeploymentPanel", typeof(RectTransform), typeof(UnityEngine.UI.Image));
-        var rect = (RectTransform)panel.transform;
-        rect.SetParent(overlay.transform, false);
-        rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 1);
-        rect.pivot = new Vector2(0.5f, 1);
-        rect.anchoredPosition = new Vector2(0, -24);
-        rect.sizeDelta = new Vector2(1000, 100);
-        panel.GetComponent<UnityEngine.UI.Image>().color = new Color(0.04f, 0.07f, 0.09f, 0.96f);
-        statusText = Text(rect, "Instruction", font, new Vector2(20, 12), new Vector2(-220, -12));
-        statusText.fontSize = 22;
-        statusText.alignment = TextAnchor.MiddleLeft;
-        var buttonObject = new GameObject("ConfirmDeployment", typeof(RectTransform), typeof(UnityEngine.UI.Image), typeof(UnityEngine.UI.Button));
-        var buttonRect = (RectTransform)buttonObject.transform;
-        buttonRect.SetParent(rect, false);
-        buttonRect.anchorMin = new Vector2(1, 0);
-        buttonRect.anchorMax = Vector2.one;
-        buttonRect.offsetMin = new Vector2(-200, 16);
-        buttonRect.offsetMax = new Vector2(-16, -16);
-        buttonObject.GetComponent<UnityEngine.UI.Image>().color = new Color(0.06f, 0.42f, 0.3f);
-        var label = Text(buttonRect, "Label", font, Vector2.zero, Vector2.zero);
-        label.text = "开始战斗";
-        label.fontSize = 26;
-        label.alignment = TextAnchor.MiddleCenter;
-        buttonObject.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(manager.ConfirmDeployment);
-    }
-
-    private static UnityEngine.UI.Text Text(Transform parent, string name, Font font, Vector2 min, Vector2 max)
-    {
-        var go = new GameObject(name, typeof(RectTransform), typeof(UnityEngine.UI.Text));
-        var rect = (RectTransform)go.transform;
-        rect.SetParent(parent, false);
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = min;
-        rect.offsetMax = max;
-        var text = go.GetComponent<UnityEngine.UI.Text>();
-        text.font = font != null ? font : Resources.GetBuiltinResource<Font>("Arial.ttf");
-        text.color = Color.white;
-        text.raycastTarget = false;
-        return text;
+        scaler.matchWidthOrHeight = 0.5f;
+        var prefab = deploymentPanelPrefab != null ? deploymentPanelPrefab :
+            Resources.Load<BattleDeploymentPanel>("UI/BattleDeploymentPanel");
+        if (prefab == null || !prefab.HasTemplateBindings)
+        {
+            Debug.LogError("缺少有效的部署面板模板，请检查 Resources/UI/BattleDeploymentPanel。", this);
+            return;
+        }
+        deploymentPanel = Instantiate(prefab, overlay.transform, false);
+        deploymentPanel.Bind(manager.ConfirmDeployment);
+        RefreshPanel();
     }
 }

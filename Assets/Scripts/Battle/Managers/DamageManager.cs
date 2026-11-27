@@ -54,6 +54,7 @@ public sealed class DamageManager
         if (skill.attackPacks.Count > 0 && BattleRelations.CanAttack(attacker, target))
             battle.buffManager.OnAttacked(attacker, target);
         Context context = CreateContext(attacker, target, skill, checkResult, isFlank);
+        if (battle.Training?.GuaranteesHit(attacker, target, skill, action, false) == true) context.HitRate = 100;
         context.PassiveMultiplier = passiveMultiplier;
         if (context.Cover != null)
             ObjectPool.Ins.GenerateObject(ItemType.SHIELD, target.transform.position, Quaternion.identity);
@@ -115,6 +116,7 @@ public sealed class DamageManager
         // 减速场仍阻挡整次攻击；范围护盾仅在全部伤害段被吸收时阻止附加效果。
         result.CanApplyEffects = !context.BarrierBlocked && reachedTarget && !(target is RangeBarrier);
         result.HitAttack = !context.BarrierBlocked && reachedTarget && skill.attackPacks.Count > 0;
+        if (result.HitAttack) battle.Training?.OnAttackImpact(action);
         return result;
     }
 
@@ -132,6 +134,7 @@ public sealed class DamageManager
         if (!SkillTargeting.IsValid(attacker, target, skill)) return preview;
         Context context = CreateContext(attacker, target, skill, checkResult ?? CheckResult.None, isFlank);
         context.PassiveMultiplier = battle.characterSkillManager.PreviewDamageMultiplier(attacker.gameObject, target.gameObject);
+        if (battle.Training?.GuaranteesHit(attacker, target, skill, null, true) == true) context.HitRate = 100;
         preview.HitRate = context.HitRate;
         if (context.BarrierBlocked) return preview;
 

@@ -137,6 +137,7 @@ public sealed class BattleOverheadStatusLayer : MonoBehaviour
         {
             if (enemy.enemyCanvas.hpBarUI != null) Conceal(enemy.enemyCanvas.hpBarUI.gameObject);
             if (enemy.enemyCanvas.BuffRoot != null) Conceal(enemy.enemyCanvas.BuffRoot.gameObject);
+            if (enemy.enemyCanvas.hitInfoPanel != null) Conceal(enemy.enemyCanvas.hitInfoPanel.gameObject);
         }
     }
     private void Conceal(GameObject go)

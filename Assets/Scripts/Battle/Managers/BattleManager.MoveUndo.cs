@@ -84,6 +84,7 @@ public partial class BattleManager
     /// <summary>只恢复最近一次纯移动的位置、朝向与实际 AP；不重放到达事件，不回滚世界或随机。</summary>
     public bool TryUndoMove()
     {
+        if (Training != null && Training.RestrictsCommands) return false;
         if (moveUndo == null || !moveUndo.Ready || !CanControlPiece(moveUndo.Actor)) return false;
         if (!MoveSnapshotCurrent() || Vector3.Distance(moveUndo.Actor.transform.position, moveUndo.Destination) > 0.05f)
         { ClearMoveUndo(); return false; }

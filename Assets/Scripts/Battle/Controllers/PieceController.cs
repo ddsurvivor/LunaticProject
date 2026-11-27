@@ -139,6 +139,7 @@ public partial class PieceController : MonoBehaviour
     /// <summary>破盾停机立即取消尚未提交的攻击并停止导航，已结算的伤害不回滚。</summary>
     internal void InterruptForShutdown()
     {
+        StopMovementAudio();
         CancelCombatAction();
         var navigation = GetComponent<UnityEngine.AI.NavMeshAgent>();
         if (navigation != null && navigation.isActiveAndEnabled && navigation.isOnNavMesh) navigation.ResetPath();
@@ -146,6 +147,7 @@ public partial class PieceController : MonoBehaviour
 
     protected virtual void OnDisable()
     {
+        StopMovementAudio();
         ReleaseSummonRegistration();
         CancelCombatAction();
         StopHitShake();
@@ -164,6 +166,7 @@ public partial class PieceController : MonoBehaviour
 
     private void OnDestroy()
     {
+        StopMovementAudio();
         ReleaseSummonRegistration();
         MemeState.ClearNetworkLinks();
         passiveManager?.UnregisterPiece(gameObject);
@@ -172,6 +175,7 @@ public partial class PieceController : MonoBehaviour
 
     public void Init(PlayerController player, PieceData pieceData = null)
     {
+        StopMovementAudio();
         ReleaseSummonRegistration();
         BattleScene.Ins?.BM?.ReleaseExplosiveBody(transform);
         BattleLifeVersion++;
@@ -368,27 +372,30 @@ public partial class PieceController : MonoBehaviour
         //BattleScene.Ins.UM.teamPanel.OnSelectPiece(pieceID);
     }
 
+    /// <summary>结束拖动并刷新落点，不在停止时补播移动音效。</summary>
     public void StopDrag()
     {
+        StopMovementAudio();
         //BattleScene.Ins.UM.infoBox.ShowInfo(this);
         if (!isPlayerPiece) return;
-        PlayAudio(ActionType.Move);
         CheckActionPos();
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
         // 等移动与反应表现全部完成后，由 UIManager 重建可用目录。
         BattleScene.Ins.UM.pieceInfoPanel.UpdateDisplay();
     }
 
+    /// <summary>切换我方移动表现；脚步声由实际导航状态驱动，寻路失败不会提前播放。</summary>
     public void StartMove()
     {
         if (!isPlayerPiece) return;
         pieceDisplay.ChangeDisplayState(PieceDisplayState.Move);
-        PlayAudio(ActionType.Move);
         //pieceDisplay.ChangeDisplayState(PieceDisplayState.Idle);
     }
 
+    /// <summary>立即停止脚步循环，再处理到达位置、区域及界面刷新。</summary>
     public void StopMove()
     {
+        StopMovementAudio();
         CheckActionPos();
         CheckArea();
         // 不直接激活已清空绑定的旧菜单；行动展示协调器会在解锁后重新展开。
@@ -468,6 +475,7 @@ public partial class PieceController : MonoBehaviour
 
     public void StartNormalAttack(bool range = false)
     {
+        if (isPlayerPiece && BattleScene.Ins.BM.Training != null && !BattleScene.Ins.BM.Training.AllowsAction(this, range ? ActionType.RangedAttack : ActionType.MeleeAttack)) return;
         if (IsPerformingAction) return;
         pendingAttackItem = null;
         _isAttacking = true;
@@ -552,6 +560,7 @@ public partial class PieceController : MonoBehaviour
         var action = _curAtkType;
         var targets = new List<PieceController>(rangeUI.GetCurTargets);
         if (skill == null || (targets.Count == 0 && skill.target != SkillTarget.Area)) return;
+        if (isPlayerPiece && BattleScene.Ins.BM.Training != null && !BattleScene.Ins.BM.Training.AllowsAttack(this, action, targets)) return;
         bool ranged = action == ActionType.RangedAttack;
         if (ranged && unitAttrCenter.AmmoCount <= 0) return;
         Vector3 position = rangeUI.SelectionPosition;
@@ -591,6 +600,7 @@ public partial class PieceController : MonoBehaviour
     {
         int version = combatVersion;
         var memeAction = BattleScene.Ins.BM.memeService.BeginAction(this, skill, isFlank || isMemeReaction);
+        BattleScene.Ins.BM.Training?.OnAttackCommitted(memeAction.Action, action, targets);
         try
         {
             // 让协程句柄先归属本动作；等待检定窗口关闭，包含结果展示阶段。
@@ -670,6 +680,7 @@ public partial class PieceController : MonoBehaviour
             projectileTween = null;
             IsPerformingAction = false;
             combatRoutine = null;
+            BattleScene.Ins?.BM?.Training?.OnAttackFinished(memeAction.Action);
         }
     }
 
@@ -719,6 +730,7 @@ public partial class PieceController : MonoBehaviour
 
     public virtual void Dead()
     {
+        StopMovementAudio();
         if (HasQueuedBurstDeath) return;
         MemeState.ClearNetworkLinks();
         BattleScene.Ins?.BM?.timedMemeStatuses.ClearForPiece(this);
@@ -770,6 +782,7 @@ public partial class PieceController : MonoBehaviour
 
     public void StartSkillAttack(SkillPack skillPack)
     {
+        if (isPlayerPiece && BattleScene.Ins.BM.Training != null && !BattleScene.Ins.BM.Training.AllowsAction(this, ActionType.Skill)) return;
         if (IsPerformingAction) return;
         pendingAttackItem = null;
         if (!unitAttrCenter.HasMana(unitAttrCenter.GetSkillManaCost(skillPack)))
@@ -1102,9 +1115,10 @@ public partial class PieceController : MonoBehaviour
 
     // ======= 音效 ======= //
 
+    /// <summary>播放非移动行动的单次音效；移动音效只由导航持有的循环句柄控制。</summary>
     public void PlayAudio(ActionType actionType)
     {
-        if (_pieceData == null)
+        if (_pieceData == null || actionType == ActionType.Move)
         {
             return;
         }

@@ -187,6 +187,20 @@ public sealed class BattleTimeControls : MonoBehaviour
     public void OpenSettings()
     {
         if (!Running || ui.BlocksWorldInput || settings == null) return;
+        ShowSettings();
+    }
+
+    /// <summary>开场剧情也可打开既有设置；仅阅读器可见时绕过战斗HUD输入锁。</summary>
+    public void OpenDialogueSettings()
+    {
+        if (battle == null || !battle.IsPlayingOpeningDialogue) { OpenSettings(); return; }
+        if (GM.Ins.IsTransitioning || ui.IsResultVisible || settings == null ||
+            ui.logSystem == null || !ui.logSystem.gameObject.activeInHierarchy) return;
+        ShowSettings();
+    }
+
+    private void ShowSettings()
+    {
         CancelPress();
         settings.LoadAndShowSettings();
         settings.gameObject.SetActive(true);

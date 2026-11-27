@@ -10,7 +10,7 @@ public partial class UIManager
     /// <summary>结果窗口显示期间禁止其他菜单接管输入。</summary>
     public bool IsResultVisible => resultOverlay != null && resultOverlay.activeInHierarchy;
     /// <summary>开始与结果窗口的输入占用状态；暂停本身由TimeManager持有。</summary>
-    public bool BlocksWorldInput => IsResultVisible || (battleStartUIPanel != null && battleStartUIPanel.IsPlaying);
+    public bool BlocksWorldInput => openingDialogueHudHidden || IsResultVisible || (battleStartUIPanel != null && battleStartUIPanel.IsPlaying);
 
     private void InitializeWindows()
     {
@@ -79,6 +79,7 @@ public partial class UIManager
             TogglePauseWindow();
             return;
         }
+        if (BattleScene.Ins.BM.Training?.RestrictsCommands == true) return;
         foreach (var entry in keyPanelDic)
             if (entry.Value != null && Input.GetKeyDown(entry.Key))
                 entry.Value.SetActive(!entry.Value.activeSelf);

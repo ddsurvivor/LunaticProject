@@ -1,15 +1,16 @@
 using System;
 
-/// <summary>聚能资源规则；一次角色入场固定消耗初始槽的50%，容量升级不提高费用。</summary>
+/// <summary>聚能资源规则；一次发动统一消耗50，参与人数及容量升级不提高费用。</summary>
 [Serializable]
 public sealed class BurstGauge
 {
-    public const float ActorCost = 50f; // 每名角色的基础能量费用，不随容量升级变化。
+    public const float ActorCost = 50f; // 一次发动的统一费用；保留常量名兼容已有调用。
     public float Charge; // 当前能量，扣费后保留余量。
     public int Cooldown { get; private set; } // 尚需完成的普通棋子回合数。
     public float Capacity { get; private set; } = 100f; // 当前等级允许储存的最大能量。
     public float ChargeMultiplier { get; private set; } = 1f; // 动力脊对单次充能的倍率。
-    public int AffordableActors => (int)(Charge / ActorCost);
+    /// <summary>兼容旧人数查询；满足一次发动费用即可支持三名主角，不再按余额划分参与人数。</summary>
+    public int AffordableActors => Ready ? 3 : 0;
     public bool Ready => Cooldown == 0 && Charge >= ActorCost;
 
     /// <summary>按动力脊等级 0–3 初始化并清空能量与冷却；序章/教学规则强制使用未升级数值。</summary>
@@ -28,11 +29,11 @@ public sealed class BurstGauge
         if (float.IsNaN(amount) || float.IsInfinity(amount) || amount <= 0) return;
         Charge = Math.Min(Capacity, Charge + amount * ChargeMultiplier);
     }
-    /// <summary>按人数一次性扣费；冷却中、人数无效或余额不足时返回 false，不扣费。</summary>
+    /// <summary>有效参战人数大于零时统一扣50；冷却或余额不足时不扣费，人数不作为费用倍率。</summary>
     public bool Spend(int actors)
     {
-        if (!Ready || actors <= 0 || actors > AffordableActors) return false;
-        Charge -= actors * ActorCost;
+        if (!Ready || actors <= 0) return false;
+        Charge -= ActorCost;
         return true;
     }
     /// <summary>退出聚能时开始三个普通棋子回合的冷却。</summary>

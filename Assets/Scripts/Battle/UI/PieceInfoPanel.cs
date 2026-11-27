@@ -34,6 +34,7 @@ using UnityEngine.UI;
     
     [SerializeField][ReadOnly]
     private PieceController piece;
+    private bool portraitClickBound; // 只安装一次本面板的头像监听，保留原按钮事件。
     
     public UnityEngine.UI.Image healthShadowBar;
 
@@ -46,9 +47,28 @@ using UnityEngine.UI;
     {
         if(piece.isPlayerPiece== false) return;// 只显示玩家棋子信息
         this.piece = piece;
+        BindPortraitSelection();
         GetComponent<ActionCostPreviewUI>()?.Bind(piece.unitAttrCenter);
         UpdateDisplay();
     }
+
+    private void BindPortraitSelection()
+    {
+        if (portraitClickBound || head == null) return;
+        var button = head.GetComponent<UnityEngine.UI.Button>();
+        if (button == null)
+        {
+            button = head.gameObject.AddComponent<UnityEngine.UI.Button>();
+            button.targetGraphic = head;
+            button.transition = UnityEngine.UI.Selectable.Transition.None;
+            button.navigation = new UnityEngine.UI.Navigation { mode = UnityEngine.UI.Navigation.Mode.None };
+        }
+        head.raycastTarget = true;
+        button.onClick.AddListener(FocusDisplayedPiece);
+        portraitClickBound = true;
+    }
+
+    private void FocusDisplayedPiece() => BattleScene.Ins?.CM?.TrySelectPortraitUnit(piece);
     
     public void SetPlayer(Player playerData, PieceData pieceData)
     {

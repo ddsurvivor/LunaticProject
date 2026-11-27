@@ -65,7 +65,8 @@ public partial class PieceActionListPanel : SerializedMonoBehaviour
             && (HasAction(ActionType.Reload) || HasAction(ActionType.RangedAttack))) AddPrimaryAction(ActionType.Reload, true);
         foreach (var action in new[] { ActionType.Scan, ActionType.ReleaseBind, ActionType.Climb,
             ActionType.Interact, ActionType.OrbitalStrike, ActionType.Talk }) AddPrimaryAction(action);
-        primaryEntries.Add(new Entry { title = () => "模因装配", available = CanAct,
+        primaryEntries.Add(new Entry { title = () => "模因装配", available = () => CanAct() &&
+            (BattleScene.Ins.BM.Training == null || BattleScene.Ins.BM.Training.AllowsMeme(pc, BattleScene.Ins.BM.Training.dragonMemeId)),
             cost = () => new ActionResourceCost(MemeEquipment.BattleEquipCost),
             execute = () => MemeLoadoutPanel.OpenBattle(pc, primaryRows[0].actionNameText) });
         AddPrimaryAction(ActionType.Wait, true);
@@ -83,7 +84,9 @@ public partial class PieceActionListPanel : SerializedMonoBehaviour
 
     private void AddCategory(Category category)
     {
-        primaryEntries.Add(new Entry { category = category, title = () => CategoryLabel(category), available = CanAct });
+        primaryEntries.Add(new Entry { category = category, title = () => CategoryLabel(category), available = () => CanAct() &&
+            (BattleScene.Ins.BM.Training == null || !BattleScene.Ins.BM.Training.RestrictsCommands ||
+             category == Category.Attack && BattleScene.Ins.BM.Training.AllowsAction(pc, ActionType.MeleeAttack)) });
     }
 
     private static string CategoryLabel(Category category)
@@ -100,6 +103,7 @@ public partial class PieceActionListPanel : SerializedMonoBehaviour
 
     private bool CanExecute(ActionType action, SkillPack skill = null)
     {
+        if (BattleScene.Ins.BM.Training?.AllowsAction(pc, action) == false) return false;
         if (!CanAct() || !ActionResourceCost.Query(pc, action, skill).CanPay(pc.unitAttrCenter)
             || pc.unitAttrCenter.GetBuffStacks(BuffType.Stun) > 0) return false;
         if ((action == ActionType.Move || action == ActionType.Climb)

@@ -12,8 +12,8 @@ public partial class BattleManager
         if (deploymentConfirmed) return false;
         var areas = FindObjectsOfType<BattleDeploymentArea>()
             .Where(area => area.isActiveAndEnabled && area.gameObject.scene == gameObject.scene).ToArray();
-        // 旧关卡没有部署区域时，重开仍在原出生点附近提供可调整且经正式导航验证的区域。
-        if (areas.Length == 0 && GM.Ins.IsRestartedBattle)
+        // 旧关卡重开补通用部署区；强制教学保持固定起点，避免部署后无法到达教学目标。
+        if (areas.Length == 0 && GM.Ins.IsRestartedBattle && Training == null)
             areas = PlayerController.pieces.Where(p => p != null && p.gameObject.activeInHierarchy &&
                 p.isPlayerPiece && !p.isDead && !p.cantControl)
                 .Select(piece =>

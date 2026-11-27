@@ -29,6 +29,7 @@ public sealed partial class MemeLoadoutPanel
             Place((RectTransform)slotButtons[i].transform, 24 + i * 300, 92, 288, 44);
         }
         var clear = MakeButton("ClearSlot", card, source, "清空当前槽", () => SelectMeme(0));
+        clear.interactable = battle?.Training?.AllowsMeme(actor, 0) != false;
         var clearRect = (RectTransform)clear.transform;
         clearRect.anchorMin = clearRect.anchorMax = clearRect.pivot = new Vector2(1, 1);
         clearRect.anchoredPosition = new Vector2(-24, -92);
@@ -56,9 +57,11 @@ public sealed partial class MemeLoadoutPanel
             foreach (var definition in catalog.memes.Where(m => m != null).OrderBy(m => m.id))
             {
                 var meme = definition;
-                bool unlocked = profile.memeProgress?.IsUnlocked(meme.id) == true;
-                string status = !meme.enabled || !meme.IsValid() ? "不可用" : unlocked ? "已解锁" : "未解锁";
+                bool unlocked = (battle != null ? battle.memeService.EquipmentProgress : profile.memeProgress)?.IsUnlocked(meme.id) == true;
+                string status = !meme.enabled || !meme.IsValid() ? "不可用" : unlocked
+                    ? profile.memeProgress?.IsUnlocked(meme.id) == true ? "已解锁" : "教学可用" : "未解锁";
                 var row = MakeButton("Meme" + meme.id, listContent, source, meme.displayName + "  ·  " + status, () => SelectMeme(meme.id));
+                row.interactable = battle?.Training?.AllowsMeme(actor, meme.id) != false;
                 var layout = row.gameObject.AddComponent<UnityEngine.UI.LayoutElement>();
                 layout.preferredHeight = 58;
                 layout.minHeight = 58;

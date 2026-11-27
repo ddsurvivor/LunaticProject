@@ -245,14 +245,6 @@ namespace Lunatic.BattleTesting
 
         private bool HandleBurst()
         {
-            if (battle.IsChoosingBurst)
-            {
-                foreach (var piece in battle.PlayerController.pieces)
-                    if (piece != null && !piece.isDead && !piece.cantControl && piece.unitAttrCenter.GetBuffStacks(BuffType.Stun) == 0 &&
-                        battle.SelectedBurstCount < battle.PlayerController.AffordableBurstActors) battle.ToggleBurstActor(piece);
-                if (battle.SelectedBurstCount == 0) battle.CancelBurstSelection(); else battle.OnBurstButton();
-                return true;
-            }
             if (!battle.PlayerController.isBursting && !battle.BurstInputPending && battle.PlayerController.ableBurst && battle.ActivePiece != null)
             { battle.OnBurstButton(); return true; }
             return false;
