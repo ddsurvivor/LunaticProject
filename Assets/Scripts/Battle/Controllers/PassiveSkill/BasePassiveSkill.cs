@@ -47,5 +47,8 @@ namespace SkillSystem
         public virtual void OnCastActiveSkill(GameObject instigator) { }
         
         public virtual void OnTurnEnd() { } 
+
+        /// <summary>保存有状态被动的回合计数；无运行计数的被动无需额外恢复。</summary>
+        internal virtual System.Action CaptureTurnState() => () => { };
     }
 }

@@ -8,6 +8,17 @@ public sealed class MemeNetworkNode : MonoBehaviour
     private BattleManager owner; // 连接归属本场战斗，结束后不能残留到下一场。
     public int ConnectionCount => targets.Count;
 
+    /// <summary>恢复节点的连接登记，与棋子模因状态快照配套使用。</summary>
+    internal System.Action CaptureTurnState()
+    {
+        var saved = new List<MemeUnitState>(targets); var battle = owner;
+        return () =>
+        {
+            targets.Clear(); foreach (var target in saved) targets.Add(target);
+            owner = battle; if (owner != null) owner.RegisterNetworkNode(this);
+        };
+    }
+
     /// <summary>登记本场存活目标；重复登记幂等。节点重新启用或目标重建后须重新登记。</summary>
     public bool TryConnect(PieceController target)
     {

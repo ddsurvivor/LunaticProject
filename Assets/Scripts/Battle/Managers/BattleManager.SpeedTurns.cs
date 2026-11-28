@@ -27,7 +27,7 @@ public partial class BattleManager
     }
     /// <summary>统一校验玩家能否操作该棋子，包含回合归属、AP、控制状态及动作等待限制。</summary>
     public bool CanControlPiece(PieceController piece) => SpeedTurnsActive && inBattle && !BattleScene.Ins.TM.IsPaused &&
-        (Training == null || Training.AllowsActor(piece)) && !BurstInputPending && PlayerController.isInTurn && piece != null && piece == ActivePiece &&
+        (Training == null || Training.AllowsActor(piece)) && AppleTraining?.AlarmPending != true && !BurstInputPending && PlayerController.isInTurn && piece != null && piece == ActivePiece &&
         IsSpeedParticipant(piece) && !piece.cantControl && !BattleRelations.IsBehaviorControlled(piece) && !piece.isIdle && piece.unitAttrCenter.CurMovePoint > 0 &&
         !HasCombatPresentation && !moveManager.IsMoving;
 
@@ -89,11 +89,13 @@ public partial class BattleManager
         yield return null;
         while (SpeedTurnsActive && inBattle)
         {
-            if (BattleScene.Ins.TM.IsPaused || HasCombatPresentation || moveManager.IsMoving || Training?.BlocksTurnAdvance == true) { yield return null; continue; }
+            if (BattleScene.Ins.TM.IsPaused || HasCombatPresentation || moveManager.IsMoving || Training?.BlocksTurnAdvance == true || AppleTraining?.AlarmPending == true) { yield return null; continue; }
             AIController.RefreshSpeedTurnWorld();
             speedQueue.Sync(SpeedParticipants());
             // 优先处理已满条的棋子，队列无就绪单位时才推进速度时钟。
-            var next = Training != null ? Training.TakeOpeningActor() : null;
+            var next = rollbackActor;
+            rollbackActor = null;
+            next ??= Training != null ? Training.TakeOpeningActor() : null;
             next ??= speedQueue.TakeReady();
             if (next == null)
             {
@@ -114,6 +116,7 @@ public partial class BattleManager
                 continue;
             }
 
+            CaptureNormalTurnCheckpoint(next);
             ActivePiece = next;
             finishPieceTurn = false;
             burstUsedThisTurn = false;
@@ -154,7 +157,7 @@ public partial class BattleManager
             while (inBattle && IsSpeedParticipant(next) && !finishPieceTurn &&
                    !next.isIdle && !next.cantControl && next.unitAttrCenter.CurMovePoint > 0)
             {
-                if (BattleScene.Ins.TM.IsPaused || Training?.BlocksTurnAdvance == true) { yield return null; continue; }
+                if (BattleScene.Ins.TM.IsPaused || Training?.BlocksTurnAdvance == true || AppleTraining?.AlarmPending == true) { yield return null; continue; }
                 if (burstRequested) yield return BurstInterruption(next);
                 else yield return null;
             }
@@ -162,7 +165,7 @@ public partial class BattleManager
             if (burstRequested && inBattle) yield return BurstInterruption(next);
             PlayerController.isInTurn = false;
             AIController.isInTurn = false;
-            while (inBattle && (BattleScene.Ins.TM.IsPaused || HasCombatPresentation || moveManager.IsMoving || Training?.BlocksTurnAdvance == true)) yield return null;
+            while (inBattle && (BattleScene.Ins.TM.IsPaused || HasCombatPresentation || moveManager.IsMoving || Training?.BlocksTurnAdvance == true || AppleTraining?.AlarmPending == true)) yield return null;
             if (!inBattle) yield break;
             BattleScene.Ins.CM.ClearTurnSelection();
             if (_delaySkillCaster == next) HandleDelaySkill();
@@ -172,6 +175,7 @@ public partial class BattleManager
             {
                 next.TurnEnd();
                 timedMemeStatuses.EndNormalTurn(next);
+                AppleTraining?.OnNormalTurnEnded();
             }
             if (manual) PlayerController.EndPieceTurn();
             else if (next is EnemyController) AIController.EndPieceTurn();

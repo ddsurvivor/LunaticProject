@@ -40,4 +40,12 @@ public sealed class BurstGauge
     public void BeginCooldown() => Cooldown = 3;
     /// <summary>由调度器在一个可计入冷却的普通棋子回合结束时调用一次。</summary>
     public void CompleteNormalTurn() { if (Cooldown > 0) Cooldown--; }
+
+    /// <summary>训练回合恢复余额与冷却，容量及升级规则不变。</summary>
+    internal Action CaptureTurnState()
+    {
+        float charge = Charge;
+        int cooldown = Cooldown;
+        return () => { Charge = charge; Cooldown = cooldown; };
+    }
 }

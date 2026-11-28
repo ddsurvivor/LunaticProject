@@ -301,6 +301,31 @@ public class UnitAttrCenter : SerializedMonoBehaviour
     /// <summary>每次有效生命伤害提交后发送一次结果；观察者不得再次扣除本次伤害，屏障全吸收不发送。</summary>
     public event System.Action<BattleDamageResult> DamageApplied;
 
+    /// <summary>保存本关回合边界的属性及状态；恢复直接赋值，不重放伤害、死亡或被动事件。</summary>
+    internal System.Action CaptureTurnState()
+    {
+        var attack = _attr.Copy();
+        int hp = _curHealth, maxHp = _maxHealth, mp = _curMovePoint, maxMp = _maxMovePoint;
+        int ammo = _ammoCount, maxAmmo = _maxAmmoCount, mana = _manaPoint, maxMana = _maxManaPoint;
+        int shield = _tempShield, taunt = _tauntValue, atk = ATK, con = CON, crit = critRate, critDamage = critDamageRate;
+        float move = _moveRange;
+        int attackBonus = playerAttackBonus, constitutionBonus = playerConstitutionBonus;
+        var attributes = new Dictionary<BuffAttrType, float>(buffAttrDic);
+        BuffState Copy(BuffState b) => new BuffState(b.buffType, b.stacks) { barrierHealth = b.barrierHealth,
+            retaliationTurns = b.retaliationTurns, durationPending = b.durationPending, sources = new HashSet<object>(b.sources) };
+        var buffs = buffStates.ConvertAll(Copy);
+        return () =>
+        {
+            _attr = attack.Copy(); _curHealth = hp; _maxHealth = maxHp; _curMovePoint = mp; _maxMovePoint = maxMp;
+            _ammoCount = ammo; _maxAmmoCount = maxAmmo; _manaPoint = mana; _maxManaPoint = maxMana;
+            _tempShield = shield; _tauntValue = taunt; _moveRange = move; ATK = atk; CON = con;
+            playerAttackBonus = attackBonus; playerConstitutionBonus = constitutionBonus;
+            critRate = crit; critDamageRate = critDamage;
+            buffAttrDic = new Dictionary<BuffAttrType, float>(attributes); buffStates = buffs.ConvertAll(Copy);
+            UpdateHpBar();
+        };
+    }
+
     /// <summary>兼容旧伤害入口；未提供来源时标记Unknown，仍只提交一次伤害。</summary>
     public void TakeDamage(AttackPack attackPack) => TakeDamage(attackPack, new BattleDamageSource(BattleDamageKind.Unknown));
 
@@ -318,6 +343,10 @@ public class UnitAttrCenter : SerializedMonoBehaviour
             return new BattleDamageResult(pc, source, attackPack.damage, _curHealth, _curHealth, true);
         battle.ClearMoveUndo();
         using var sourceScope = source.Action.Enter();
+        // 仅训练控制器绑定的树覆盖实际扣血；通用生命变化、结果事件及其他目标保持原链路。
+        int resolvedDamage = battle.AppleTraining?.AdjustTreeDamage(pc, source, attackPack.damage) ?? attackPack.damage;
+        if (resolvedDamage != attackPack.damage)
+            attackPack = new AttackPack(resolvedDamage, attackPack.damageType, attackPack.isCritical);
         // 1. 负数不作为伤害处理；零伤害命中仍继续播放受击反馈。
         int previousHealth = _curHealth;
         _curHealth -= attackPack.damage;
@@ -337,7 +366,7 @@ public class UnitAttrCenter : SerializedMonoBehaviour
         {
             if (pc != null)
             {
-                pc.Dead();
+                if (battle.AppleTraining?.TryPlayTreeDeath(pc) != true) pc.Dead();
             }
             else
             {

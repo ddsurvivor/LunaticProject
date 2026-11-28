@@ -24,6 +24,13 @@ public class PlayerController : SerializedMonoBehaviour
     public bool ableBurst => burstGauge.Ready && !isBursting;
     public int AffordableBurstActors => burstGauge.AffordableActors;
 
+    /// <summary>回合恢复仅归还聚能余额与冷却，不重新初始化档案或设施。</summary>
+    internal System.Action CaptureBurstTurnState()
+    {
+        var restore = burstGauge.CaptureTurnState();
+        return () => { restore(); isBursting = false; totalDamage = 0; burstTarget = null; RefreshBurstUI(); };
+    }
+
     [ReadOnly] public int totalDamage; // 对单一敌人造成的总伤害数值
     [ReadOnly] public PieceController burstTarget; // 当前聚能回合攻击的单一目标敌人
 

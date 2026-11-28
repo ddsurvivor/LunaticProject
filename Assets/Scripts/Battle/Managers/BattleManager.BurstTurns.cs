@@ -34,7 +34,7 @@ public partial class BattleManager
     /// <summary>兼容旧选人查询；聚能直接发动，不再进入预选流程。</summary>
     public bool IsChoosingBurst => false;
     /// <summary>等待聚能进入、切人或退出时禁止提交新的普通行动。</summary>
-    public bool BurstInputPending => burstRequested || requestedBurstActor != null || PlayerController != null && PlayerController.isBursting && cancelBurst;
+    public bool BurstInputPending => AppleTraining?.AlarmPending == true || burstRequested || requestedBurstActor != null || PlayerController != null && PlayerController.isBursting && cancelBurst;
     public int SelectedBurstCount => selectedBurstActors.Count;
     /// <summary>判断当前生命是否参与聚能；初始化复用后的同一对象不继承旧资格。</summary>
     public bool IsBurstActor(PieceController piece) => PlayerController.isBursting && piece != null &&
@@ -43,6 +43,7 @@ public partial class BattleManager
     /// <summary>统一请求发动或提前结束；发动一次扣50，不预选人数，在途动作完成后接管。</summary>
     public void OnBurstButton()
     {
+        if (AppleTraining?.AlarmPending == true) return;
         if (Training != null && Training.RestrictsCommands) return;
         if (BattleScene.Ins.TM.IsPaused || !SpeedTurnsActive || !inBattle) return;
         if (PlayerController.isBursting) { cancelBurst = true; return; }
@@ -62,6 +63,7 @@ public partial class BattleManager
     /// <summary>请求切换聚能角色；不扣费、不补AP，动作/移动/暂停期间拒绝交接。</summary>
     public bool TrySelectBurstActor(PieceController piece)
     {
+        if (AppleTraining?.AlarmPending == true) return false;
         if (Training != null && Training.RestrictsCommands) return false;
         if (!SpeedTurnsActive || !inBattle || !PlayerController.isBursting || !PlayerController.isInTurn ||
             BattleScene.Ins.TM.IsPaused || cancelBurst || HasCombatPresentation || moveManager.IsMoving || !CanActInBurst(piece)) return false;
@@ -146,6 +148,7 @@ public partial class BattleManager
         SetActiveBurstActor(CanActInBurst(interrupted) ? interrupted : selectedBurstActors.FirstOrDefault(CanActInBurst));
         while (IsBurstInterruptionCurrent(version) && !cancelBurst)
         {
+            if (AppleTraining?.AlarmPending == true) { yield return null; continue; }
             if (BattleScene.Ins.TM.IsPaused || HasCombatPresentation || moveManager.IsMoving) { yield return null; continue; }
             if (requestedBurstActor != null || !CanActInBurst(burstActor))
             {

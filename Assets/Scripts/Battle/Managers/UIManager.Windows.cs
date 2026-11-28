@@ -10,7 +10,8 @@ public partial class UIManager
     /// <summary>结果窗口显示期间禁止其他菜单接管输入。</summary>
     public bool IsResultVisible => resultOverlay != null && resultOverlay.activeInHierarchy;
     /// <summary>开始与结果窗口的输入占用状态；暂停本身由TimeManager持有。</summary>
-    public bool BlocksWorldInput => openingDialogueHudHidden || IsResultVisible || (battleStartUIPanel != null && battleStartUIPanel.IsPlaying);
+    public bool BlocksWorldInput => openingDialogueHudHidden || IsResultVisible || BattleScene.Ins?.BM?.AppleTraining?.AlarmPending == true ||
+        (alarmWindow != null && alarmWindow.gameObject.activeInHierarchy) || (battleStartUIPanel != null && battleStartUIPanel.IsPlaying);
 
     private void InitializeWindows()
     {
@@ -71,6 +72,13 @@ public partial class UIManager
                 window.gameObject.SetActive(false);
     }
 
+    /// <summary>回合回退只清理旧操作与临时消息，不进入整场转场或提交结果。</summary>
+    internal void ClearRollbackPresentation()
+    {
+        ClearActionFlow(); ClearTransientMessages(); notificationManager?.ClearNotifications(); logPanel?.ClearLog();
+        if (pieceActionListPanel != null) pieceActionListPanel.gameObject.SetActive(false);
+    }
+
     private void HandleWindowKeys()
     {
         if (IsResultVisible || GM.Ins.IsTransitioning || BlocksWorldInput) return;
@@ -102,6 +110,7 @@ public partial class UIManager
         BattleScene.Ins.BM.StopForWindowTransition();
         ClosePauseWindows();
         if (resultOverlay != null) resultOverlay.SetActive(false);
+        if (alarmWindow != null) alarmWindow.gameObject.SetActive(false);
         if (battleStartUIPanel != null) battleStartUIPanel.CancelAnimation();
         ClearTransientMessages();
         notificationManager?.ClearNotifications();

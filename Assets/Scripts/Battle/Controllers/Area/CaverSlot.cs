@@ -11,6 +11,13 @@
     {
         public Transform[] slotTransforms;
         private Dictionary<Transform, Transform> piecesDic = new();
+
+        /// <summary>保存站位占用，恢复不重放进入掩体或Buff事件。</summary>
+        internal Action CaptureTurnState()
+        {
+            var slots = new Dictionary<Transform, Transform>(piecesDic);
+            return () => piecesDic = new Dictionary<Transform, Transform>(slots);
+        }
         public GameObject highlightEffect;
         
         [LabelText("作为掩体")] public bool providesCover = true;

@@ -31,8 +31,9 @@ public sealed class SceneBattleDevice : PieceController
     public bool IsInitialized { get; private set; }
     public bool AlarmRaised { get; private set; }
     public bool IsOperational => IsInitialized && isActiveAndEnabled && !isDead &&
-        unitAttrCenter.GetBuffStacks(BuffType.ElectronicInterference) == 0 &&
-        unitAttrCenter.GetBuffStacks(BuffType.Stun) == 0 && !MemeState.Paralyzed;
+        (BattleScene.Ins?.BM?.AppleTraining?.Owns(this) == true ||
+         unitAttrCenter.GetBuffStacks(BuffType.ElectronicInterference) == 0 &&
+         unitAttrCenter.GetBuffStacks(BuffType.Stun) == 0 && !MemeState.Paralyzed);
     public static readonly HashSet<SceneBattleDevice> Active = new();
     private readonly Dictionary<PieceController, Visit> visits = new();
     private static readonly Dictionary<PieceController, HealBudget> heals = new();
@@ -87,7 +88,8 @@ public sealed class SceneBattleDevice : PieceController
             bool entered = first ? inside : !visit.Inside &&
                 (inside || CrossesRange(visit.Position, piece.transform.position));
             visits[piece] = new Visit { Life = piece.BattleLifeVersion, Inside = inside, Position = piece.transform.position };
-            if (!entered || !IsOperational) continue;
+            bool trainingGuard = battle.AppleTraining != null && battle.AppleTraining.Owns(this);
+            if (!entered || (!trainingGuard && !IsOperational)) continue;
             if (kind == SceneDeviceKind.SentryTower && BattleRelations.CanAttack(this, piece) &&
                 (!first || alarmOnInitialOccupants)) RaiseAlarm();
             if (kind == SceneDeviceKind.MedicalStation)
@@ -135,6 +137,8 @@ public sealed class SceneBattleDevice : PieceController
         var battle = BattleScene.Ins?.BM;
         if (!IsInitialized || attacker == null || battle == null || skill?.attackPacks?.Count == 0 ||
             !BattleRelations.CanAttack(attacker, this)) return;
+        if (battle.AppleTraining != null && battle.AppleTraining.Owns(this))
+        { RaiseAlarm(); return; }
         if (kind == SceneDeviceKind.MobileCommandCenter && IsOperational)
         {
             focusTarget = attacker; focusLife = attacker.BattleLifeVersion;
@@ -210,6 +214,11 @@ public sealed class SceneBattleDevice : PieceController
     private void RaiseAlarm()
     {
         var battle = BattleScene.Ins?.BM;
+        if (battle != null && battle.AppleTraining != null && battle.AppleTraining.Owns(this))
+        {
+            if (battle.AppleTraining.TryRaiseAlarm(this)) { AlarmRaised = true; onAlarm.Invoke(); }
+            return;
+        }
         if (AlarmRaised || battle == null || battle.PlayerController.isBursting || GM.Ins.IsTransitioning ||
             unitAttrCenter.GetBuffStacks(BuffType.ElectronicInterference) != 0 ||
             !alarmBattles.Add(battle)) return;
@@ -225,6 +234,21 @@ public sealed class SceneBattleDevice : PieceController
         while (battle != null && battle.SpeedTurnsActive && (battle.HasCombatPresentation || battle.moveManager.IsMoving)) yield return null;
         if (battle != null && battle.SpeedTurnsActive && !GM.Ins.IsTransitioning && !GM.Ins.RestartBattleFromDeviceAlarm())
         { AlarmRaised = false; alarmBattles.Remove(battle); Debug.LogWarning("警戒塔无法重置：当前没有有效战斗会话。", this); }
+    }
+
+    /// <summary>保存本关装置访问与报警状态，恢复不重发进入、治疗或报警事件。</summary>
+    internal Action CaptureDeviceTurnState()
+    {
+        bool raised = AlarmRaised, dying = destroying;
+        var target = focusTarget; int life = focusLife, start = focusStart, end = focusEnd, order = focusSequence;
+        var savedVisits = visits.ToDictionary(p => p.Key, p => new Visit { Life = p.Value.Life, Inside = p.Value.Inside, Position = p.Value.Position });
+        return () =>
+        {
+            AlarmRaised = raised; destroying = dying; focusTarget = target; focusLife = life;
+            focusStart = start; focusEnd = end; focusSequence = order; visits.Clear();
+            foreach (var pair in savedVisits) visits.Add(pair.Key, new Visit { Life = pair.Value.Life, Inside = pair.Value.Inside, Position = pair.Value.Position });
+            if (isActiveAndEnabled) Active.Add(this);
+        };
     }
 
     public override void Hurt() => pieceDisplay?.ChangeDisplayState(PieceDisplayState.Hit, true);

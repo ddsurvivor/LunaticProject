@@ -53,6 +53,17 @@ public partial class AIController : PlayerController
 
     private int lastWaveRound = -1;
 
+    /// <summary>恢复世界轮记录并清理已放弃回合的决策缓存，由调度器重新开启行动。</summary>
+    internal Action CaptureTurnState()
+    {
+        int round = lastWaveRound;
+        return () =>
+        {
+            lastWaveRound = round; _timer = 0; isInTurn = false;
+            pendingAttacks.Clear(); retreatAfterShot.Clear(); previousPositions.Clear(); woundedAttackDone.Clear(); healedThisTurn.Clear();
+        };
+    }
+
     public override void TurnStart()
     {
         if (BattleScene.Ins.BM.ActivePiece is EnemyController enemy) BeginEnemyPieceTurn(enemy);
@@ -97,7 +108,7 @@ public partial class AIController : PlayerController
         if (BattleScene.Ins != null && BattleScene.Ins.TM != null && BattleScene.Ins.TM.IsPaused) return;
         var battle = BattleScene.Ins.BM;
         if (UpdateBehaviorControl(battle)) return;
-        if (battle.Training?.BlocksTurnAdvance == true || battle.BurstInputPending || !isInTurn || !battle.SpeedTurnsActive || battle.HasCombatPresentation || battle.moveManager.IsMoving) return;
+        if (battle.Training?.BlocksTurnAdvance == true || battle.AppleTraining?.AlarmPending == true || battle.BurstInputPending || !isInTurn || !battle.SpeedTurnsActive || battle.HasCombatPresentation || battle.moveManager.IsMoving) return;
         if (!(battle.ActivePiece is EnemyController enemy)) return;
         _timer += Time.deltaTime;
         if (_timer < _actionInterval) return;

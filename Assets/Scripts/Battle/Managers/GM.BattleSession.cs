@@ -30,6 +30,20 @@ public partial class GM
     public bool IsRestartedBattle => BattleAttempt > 1;
     public int PendingBattleAchievements => battleSession?.Achievements.Count ?? 0;
 
+    /// <summary>回合回退恢复尚未提交的成就与通关标记，不改变战前快照或尝试次数。</summary>
+    internal Action CaptureBattleTurnProgress()
+    {
+        var session = battleSession;
+        var achievements = session != null ? new HashSet<string>(session.Achievements) : new HashSet<string>();
+        bool finished = session != null && session.FinishedGame;
+        return () =>
+        {
+            if (session == null || !ReferenceEquals(session, battleSession)) return;
+            session.Achievements.Clear(); foreach (var achievement in achievements) session.Achievements.Add(achievement);
+            session.FinishedGame = finished;
+        };
+    }
+
     /// <summary>只在首次正式开战捕获已完成部署的位置，不保存途中位置或写入玩家档案。</summary>
     public void CaptureDeviceAlarmDeployment(BattleManager manager)
     {

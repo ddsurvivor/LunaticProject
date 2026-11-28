@@ -86,6 +86,13 @@ namespace BattleDialogue
         }
 
         private bool hasBursted = false; // 每场只播放一次聚能就绪提示。
+
+        /// <summary>恢复本场聚能提示标记，丢弃已经放弃的剧情完成回调。</summary>
+        internal Action CaptureTurnState()
+        {
+            bool burst = hasBursted;
+            return () => { hasBursted = burst; currentDialogueCompleteCallback = null; };
+        }
         public void TriggerBurstReady(Action onComplete = null)
         {
             if (hasBursted)

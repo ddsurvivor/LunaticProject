@@ -18,6 +18,22 @@ public sealed class SpeedTurnQueue<T> where T : class
     public int Ticks { get; private set; } // 已推进的离散时间步数，不等于棋子行动次数。
     /// <summary>清空参战者、进度及时间，供新战斗初始化使用。</summary>
     public void Clear() { entries.Clear(); nextOrder = 0; Ticks = 0; }
+
+    /// <summary>在普通回合边界保存完整队列；恢复不重新计算速度、满条时刻或注册顺序。</summary>
+    internal Action CaptureTurnState()
+    {
+        var saved = entries.ConvertAll(e => new Entry { Unit = e.Unit, Progress = e.Progress,
+            Arrival = e.Arrival, Speed = e.Speed, Order = e.Order });
+        int ticks = Ticks;
+        long order = nextOrder;
+        return () =>
+        {
+            entries.Clear();
+            entries.AddRange(saved.ConvertAll(e => new Entry { Unit = e.Unit, Progress = e.Progress,
+                Arrival = e.Arrival, Speed = e.Speed, Order = e.Order }));
+            Ticks = ticks; nextOrder = order;
+        };
+    }
     /// <summary>读取棋子累计进度；尚未注册时返回 0，已满条时可能超过 100。</summary>
     public double Progress(T unit) => FindEntry(unit)?.Progress ?? 0;
 

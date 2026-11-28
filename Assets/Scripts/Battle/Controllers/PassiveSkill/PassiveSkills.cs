@@ -15,6 +15,13 @@ namespace SkillSystem
         private readonly int[] armorBonuses = new int[3]; // 动能、热能、火种护甲各自持有加值。
         private UnitAttrCenter bonusUnit;
 
+        internal override System.Action CaptureTurnState()
+        {
+            bool savedActive = active; int attack = attackBonus; float move = moveRangeBonus;
+            var armor = (int[])armorBonuses.Clone(); var unit = bonusUnit;
+            return () => { active = savedActive; attackBonus = attack; moveRangeBonus = move; bonusUnit = unit; armor.CopyTo(armorBonuses, 0); };
+        }
+
         /// <summary>随宿主生命与上限变化切换低血量增益；死亡、恢复至40%或卸载时撤销。</summary>
         public override void OnHpChanged(GameObject instigator, float currentHp, float maxHp)
         {
@@ -153,6 +160,12 @@ namespace SkillSystem
         
         private bool _nextAttackEmpowered = false;
 
+        internal override System.Action CaptureTurnState()
+        {
+            bool empowered = _nextAttackEmpowered;
+            return () => _nextAttackEmpowered = empowered;
+        }
+
         public override float PreviewDamageMultiplier(GameObject target) => _nextAttackEmpowered ? DAMAGE_MULTIPLIER : 1f;
 
         public override void OnBeforeAttack(GameObject instigator, GameObject target, ref float damageMultiplier)
@@ -226,6 +239,18 @@ namespace SkillSystem
         private bool _isBuffActive = false;
         private PieceController bonusOwner;
         private Player bonusPlayer; // 卸载时撤销原持有者，避免复用棋子后误改新档案。
+
+        internal override System.Action CaptureTurnState()
+        {
+            int hits = _hitCounter, turns = _remainingTurns; bool active = _isBuffActive;
+            var piece = bonusOwner; var player = bonusPlayer;
+            return () =>
+            {
+                bonusPlayer?.RemoveTemporaryAttributeBonuses(this);
+                _hitCounter = hits; _remainingTurns = turns; _isBuffActive = active; bonusOwner = piece; bonusPlayer = player;
+                if (active) player?.SetTemporaryAttributeBonuses(this, new[] { ATTRIBUTE_BONUS, ATTRIBUTE_BONUS, ATTRIBUTE_BONUS, 0, 0 });
+            };
+        }
 
         public override void OnTakeDamage(GameObject instigator, GameObject attacker)
         {

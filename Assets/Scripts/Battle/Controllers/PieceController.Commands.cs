@@ -71,11 +71,13 @@ public partial class PieceController
         {
             if (!battle.moveManager.TryGetAIMoveDestination(gameObject, command.position, unitAttrCenter.MoveRange,
                 out var destination, out _, true) || Vector3.Distance(transform.position, destination) < 0.2f) return BattleCommandResult.Rejected;
-            float radius = GetComponent<NavMeshAgent>()?.radius ?? 0.5f;
+            var ownAgent = GetComponent<NavMeshAgent>();
+            float radius = ownAgent != null ? ownAgent.radius : 0.5f;
             foreach (var other in battle.SpeedParticipants())
             {
                 if (other == this || Mathf.Abs(other.transform.position.y - destination.y) > 1f) continue;
-                float clearance = radius + (other.GetComponent<NavMeshAgent>()?.radius ?? 0.5f);
+                var otherAgent = other.GetComponent<NavMeshAgent>();
+                float clearance = radius + (otherAgent != null ? otherAgent.radius : 0.5f);
                 if (Vector3.Distance(other.transform.position, destination) < clearance) return BattleCommandResult.Rejected;
             }
             if (battle.Training?.AllowsMoveDestination(this, destination) == false) return BattleCommandResult.Rejected;

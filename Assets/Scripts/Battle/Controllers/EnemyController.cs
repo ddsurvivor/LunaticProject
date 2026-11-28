@@ -60,13 +60,28 @@ public partial class EnemyController : PieceController
             unitAttrCenter.SetHealth(1);
             return;
         }
+        PrepareEnemyDeath();
+        if (DeferBurstDeath(CompleteEnemyDeath)) return;
+        CompleteEnemyDeath();
+    }
+
+    private void PrepareEnemyDeath()
+    {
         MemeState.ClearNetworkLinks();
         BattleScene.Ins?.BM?.timedMemeStatuses.ClearForPiece(this);
         CancelCombatAction();
         StopHitShake();
         isActived = false;
-        if (DeferBurstDeath(CompleteEnemyDeath)) return;
-        CompleteEnemyDeath();
+    }
+
+    /// <summary>供关卡在生命归零且死亡动画完成后仅调用一次，提交正式死亡事件与回收，不重播或延后。</summary>
+    internal void CompleteDeathAfterAnimation()
+    {
+        StopMovementAudio();
+        PrepareEnemyDeath();
+        OnDead?.Invoke();
+        enemyCanvas?.gameObject.SetActive(false);
+        FinishEnemyDeath();
     }
 
     private void CompleteEnemyDeath()
@@ -77,20 +92,16 @@ public partial class EnemyController : PieceController
         // 假死仍须获得自身普通回合，才能触发OnTurnStart绑定的复活事件。
         isActived = GetComponent<SelfRevive>()?.isFakeDead == true;
         enemyCanvas?.gameObject.SetActive(false);
-        pieceDisplay.ChangeDisplayState(PieceDisplayState.Death, false, -1, () =>
-        {
-            var revive = GetComponent<SelfRevive>();
-            if (revive != null && (revive.isFakeDead || revive.IsCompletingTrueDeath)) return;
-            CheckDrop();
-            if (!deadNotDelete)
-            {
-                BattleScene.Ins.BM.FadeDeadPiece(this);
-            }
-            else
-            {
-                BattleScene.Ins.BM.PlayerCheckWin();
-            }
-        });
+        pieceDisplay.ChangeDisplayState(PieceDisplayState.Death, false, -1, FinishEnemyDeath);
+    }
+
+    private void FinishEnemyDeath()
+    {
+        var revive = GetComponent<SelfRevive>();
+        if (revive != null && (revive.isFakeDead || revive.IsCompletingTrueDeath)) return;
+        CheckDrop();
+        if (!deadNotDelete) BattleScene.Ins.BM.FadeDeadPiece(this);
+        else BattleScene.Ins.BM.PlayerCheckWin();
     }
 
     #region 敌人攻击

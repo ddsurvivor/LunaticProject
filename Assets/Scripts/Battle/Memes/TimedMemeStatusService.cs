@@ -38,6 +38,21 @@ public sealed class TimedMemeStatusService
         internal bool Ticked;
     }
 
+    /// <summary>普通回合开始前保存精确状态，恢复后重新建立本回合计时，避免重复扣层。</summary>
+    internal Action CaptureTurnState()
+    {
+        TimedMemeStatus Copy(TimedMemeStatus s) => new TimedMemeStatus { MemeId = s.MemeId, HandlerId = s.HandlerId,
+            RemainingTurns = s.RemainingTurns, Magnitude = s.Magnitude, Actor = s.Actor, Sources = s.Sources,
+            ApplicationAction = s.ApplicationAction, Revision = s.Revision };
+        var saved = new Dictionary<PieceController, List<TimedMemeStatus>>();
+        foreach (var pair in states) saved.Add(pair.Key, pair.Value.ConvertAll(Copy));
+        return () =>
+        {
+            states.Clear(); turns.Clear(); resolvedTurnStarts.Clear();
+            foreach (var pair in saved) states.Add(pair.Key, pair.Value.ConvertAll(Copy));
+        };
+    }
+
     /// <summary>只读查询当前状态；返回列表副本，调用者不能修改服务持有的集合。</summary>
     public IReadOnlyList<TimedMemeStatus> GetStatuses(PieceController target) => target != null && states.TryGetValue(target, out var list)
         ? list.ToArray() : Array.Empty<TimedMemeStatus>();

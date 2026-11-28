@@ -16,6 +16,8 @@ public partial class BattleManager : MonoBehaviour
 {
     /// <summary>仅挂载于空间站训练副本的流程；其他战斗保持原规则。</summary>
     public SpaceStationTrainingController Training { get; private set; }
+    /// <summary>仅苹果树副本持有警戒及回合恢复规则。</summary>
+    public AppleTreeTrainingController AppleTraining { get; private set; }
     public AIController AIController;
     public PlayerController PlayerController;
     [FormerlySerializedAs("camera")] public CameraController cameraController;
@@ -83,6 +85,8 @@ public partial class BattleManager : MonoBehaviour
             ClearNetworkConnections();
             characterSkillManager.ClearAllRegistry();
             Training = GetComponent<SpaceStationTrainingController>();
+            AppleTraining = GetComponent<AppleTreeTrainingController>();
+            turnCheckpoints.Clear();
             Training?.PrepareBattle(this);
             PlayerController.Init();
             AIController.Init();
@@ -91,6 +95,7 @@ public partial class BattleManager : MonoBehaviour
             _delaySkillPack = null;
             delayAction = null;
             if(pieceActionManager!=null) pieceActionManager.ApplySettingsToPieces(PlayerController.pieces);
+            AppleTraining?.ConfigureActions();
             //StartBattle();
             //gray = Resources.Load<Material>("Materials/Gray");
             //grayEnemy = Resources.Load<Material>("Materials/GrayEnemy");
@@ -135,6 +140,7 @@ public partial class BattleManager : MonoBehaviour
     /// <summary>兼容旧交棒事件，标记结束当前棋子；实际切换由调度器等待动画与移动完成后执行。</summary>
     public void ChangeTurn()
     {
+        if (AppleTraining?.AlarmPending == true) return;
         if (Training != null && Training.RestrictsCommands && ActivePiece != null && ActivePiece.isPlayerPiece && !Training.AllowsAction(ActivePiece, ActionType.Wait)) return;
         if (SpeedTurnsActive && ActivePiece != null) finishPieceTurn = true;
     }
@@ -309,6 +315,7 @@ public partial class BattleManager : MonoBehaviour
 
     public void PlayerCheckWin()
     {
+        if (AppleTraining?.AlarmPending == true) return;
         if (BurstEffectsDeferred)
         {
             if (PlayerController.pieces.All(p => p == null || p.isDead) || AIController.pieces.All(p => p == null || p.isDead)) cancelBurst = true;
@@ -333,6 +340,7 @@ public partial class BattleManager : MonoBehaviour
 
         Debug.Log($"判定敌人棋子全灭：{allEnemyDead}");
         if (allEnemyDead && Training != null && Training.HoldVictory()) allEnemyDead = false;
+        if (allEnemyDead && AppleTraining?.HoldVictory == true) allEnemyDead = false;
         if (allEnemyDead)
         {
             PlayerWin();
@@ -365,6 +373,7 @@ public partial class BattleManager : MonoBehaviour
     /// <summary>记录一次胜利并显示结果；掉落和经验留待玩家离场时提交。</summary>
     public void PlayerWin()
     {
+        if (AppleTraining?.AlarmPending == true || AppleTraining?.HoldVictory == true) return;
         if (ObserveBattleOutcome(BattleOutcome.PlayerVictory)) return;
         PresentBattleOutcome(true);
     }
@@ -372,6 +381,7 @@ public partial class BattleManager : MonoBehaviour
     /// <summary>记录一次失败并停止调度，提供重试和主菜单出口。</summary>
     public void PlayerLoss()
     {
+        if (AppleTraining?.AlarmPending == true) return;
         if (ObserveBattleOutcome(BattleOutcome.PlayerDefeat)) return;
         PresentBattleOutcome(false);
     }
@@ -842,6 +852,7 @@ public partial class BattleManager : MonoBehaviour
 
     private void OnDisable()
     {
+        turnCheckpoints.Clear(); rollbackActor = null;
         CancelRecognitionSettlements();
         CancelBattleStartup();
         startupInitialized = false;

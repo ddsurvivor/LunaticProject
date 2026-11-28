@@ -64,4 +64,21 @@ public class BattleFinishPanel : MonoBehaviour
             rewardScroll.verticalNormalizedPosition = 1f;
         }
     }
+
+    /// <summary>复用结果模板显示阻塞提示，仅确认后由调用方恢复战斗，不提交胜负或奖励。</summary>
+    public void ShowConfirmation(string title, string description, UnityAction onConfirm)
+    {
+        BindActions(onConfirm, null);
+        titleText.text = title;
+        descriptionText.text = description;
+        continueButton.SetActive(true);
+        retryButton.SetActive(false);
+        var label = continueButton.GetComponentInChildren<UnityEngine.UI.Text>(true);
+        if (label != null) label.text = "确认";
+        gameObject.SetActive(true);
+        transform.SetAsLastSibling();
+        Canvas.ForceUpdateCanvases();
+        rewardScroll.StopMovement();
+        rewardScroll.verticalNormalizedPosition = 1f;
+    }
 }

@@ -14,6 +14,15 @@ public class OrderManager : MonoBehaviour
     private Vector3 previousMovePosition; // 同一移动的相邻采样线段，覆盖一帧穿越扇形。
     private BattleActionContext moveAction; // 一次移动中的所有警戒共享根行动。
 
+    /// <summary>回合边界保存警戒次数及朝向；恢复不重放确认事件或警戒反应。</summary>
+    internal Action CaptureTurnState()
+    {
+        UnitOrderState Copy(UnitOrderState s) => new UnitOrderState { guard = s.guard, profile = s.profile,
+            remainingTriggers = s.remainingTriggers, facingDir = s.facingDir };
+        var orders = activeOrders.ConvertAll(Copy);
+        return () => { CancelMovementTracking(); activeOrders = orders.ConvertAll(Copy); };
+    }
+
     /// <summary>
     /// 确认下达警戒指令
     /// </summary>

@@ -26,6 +26,24 @@ namespace SkillSystem
         /// <param name="piecesOnField">当前战场上存在的全量棋子 GameObject 列表</param>
         public bool IsInitialized { get; private set; }
 
+        /// <summary>保存现有被动实例及其计数，回退不卸载/重装，也不重复添加属性。</summary>
+        internal System.Action CaptureTurnState()
+        {
+            var registry = new Dictionary<GameObject, List<BasePassiveSkill>>();
+            var restores = new List<System.Action>();
+            foreach (var pair in _runtimeRegistry)
+            {
+                registry.Add(pair.Key, new List<BasePassiveSkill>(pair.Value));
+                foreach (var skill in pair.Value) restores.Add(skill.CaptureTurnState());
+            }
+            return () =>
+            {
+                _runtimeRegistry.Clear();
+                foreach (var pair in registry) _runtimeRegistry.Add(pair.Key, new List<BasePassiveSkill>(pair.Value));
+                foreach (var restore in restores) restore();
+            };
+        }
+
         public void Init(List<PieceController> piecesOnField)
         {
             if (skillConfigSO == null)

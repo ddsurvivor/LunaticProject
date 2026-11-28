@@ -34,6 +34,22 @@ public sealed class MemeUnitState
     private readonly Dictionary<int, int> resistance = new(); // 每种模因独立的豁免百分比。
     public int GetResistance(int memeId) => resistance.TryGetValue(memeId, out int value) ? value : 0;
 
+    /// <summary>保存本场模因状态及抗性，连接节点由管理器同时恢复。</summary>
+    internal Action CaptureTurnState()
+    {
+        bool linked = manualNetworkLinked, paralyzed = Paralyzed, violent = Violent, inverted = Inverted, forbidden = AttackForbidden;
+        float move = TimedMoveMultiplier;
+        var savedResistance = new Dictionary<int, int>(resistance);
+        var nodes = new List<MemeNetworkNode>(networkSources);
+        return () =>
+        {
+            manualNetworkLinked = linked; Paralyzed = paralyzed; Violent = violent; Inverted = inverted; AttackForbidden = forbidden;
+            TimedMoveMultiplier = move; resistance.Clear();
+            foreach (var pair in savedResistance) resistance.Add(pair.Key, pair.Value);
+            networkSources.Clear(); foreach (var node in nodes) networkSources.Add(node);
+        };
+    }
+
     /// <summary>设置本场词条抗性；自然到期或指定解除后的抗性由效果处理器明确调用。</summary>
     public void SetResistance(int memeId, int percent)
     {
